@@ -1,0 +1,25 @@
+{
+  "name": "food-up",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev:server": "npm run start:dev --workspace=apps/server",
+    "dev:web": "npm run dev --workspace=apps/web -- --host 0.0.0.0",
+    "start:dev": "concurrently \"npm run dev:server\" \"npm run dev:web\" -n server,web -c green,blue -p \"[{name}]\"",
+    "build:web": "npm run build --workspace=apps/web",
+    "build:server": "npm run build --workspace=apps/server",
+    "build": "npm run build:web && npm run build:server",
+    "start:prod": "npm run start:prod --workspace=apps/server"
+  },
+  "workspaces": [
+    "apps/*"
+  ],
+  "keywords": [],
+  "author": "Predrag Stojković",
+  "license": "ISC",
+  "description": "App for managing food supply in companies",
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

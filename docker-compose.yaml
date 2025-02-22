@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  app:
+    container_name: food-up-app
+    restart: unless-stopped
+    image: food-up-app-dev:1.0.0
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    build:
+      context: .
+      target: development
+      dockerfile: Dockerfile
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}
+      - ${WEB_PORT}:${WEB_PORT}
+    networks:
+      - shared-network
+    depends_on:
+      - postgres
+    environment:
+      DB_NAME: ${POSTGRES_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_PORT: ${POSTGRES_PORT}
+      DB_HOST: postgres
+      NODE_ENV: ${NODE_ENV}
+      PORT: ${SERVER_PORT}
+      ORM_SYNC: ${ORM_SYNC}
+    env_file:
+      - .env
+
+  postgres:
+    image: postgres:17.4-alpine
+    container_name: food-up-postgres
+    ports:
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    networks:
+      - shared-network
+    volumes:
+      - pg:/var/lib/postgresql/data
+    env_file:
+      - .env
+
+networks:
+  shared-network:
+
+volumes:
+  pg:
+    driver: local
