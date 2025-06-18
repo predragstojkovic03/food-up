@@ -1,6 +1,6 @@
 import { ulid } from 'ulid';
 import { Business } from '../../domain/business.entity';
-import { IBusinessesRepository } from '../../domain/businesses.repository';
+import { IBusinessesRepository } from '../../domain/businesses.repository.interface';
 import { CreateBusinessDto } from '../dto/create-business.dto';
 
 export class CreateBusinessUseCase {

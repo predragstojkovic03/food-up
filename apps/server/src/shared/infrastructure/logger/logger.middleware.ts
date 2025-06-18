@@ -10,7 +10,7 @@ export class LoggingMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: (error?: any) => void) {
     const now = performance.now();
 
-    this._logger.log(`Request ${req.method} ${req.url}`);
+    this._logger.log(`Request ${req.method} ${req.baseUrl}`);
 
     if (req.body && Object.keys(req.body).length > 0) {
       this._logger.verbose(`Request body: ${JSON.stringify(req.body)}`);

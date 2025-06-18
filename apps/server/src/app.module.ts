@@ -1,8 +1,8 @@
 import { Inject, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ServeStaticModule } from '@nestjs/serve-static';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
+import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CoreModule } from './core/core.module';
@@ -31,12 +31,13 @@ import { LoggerModule } from './shared/infrastructure/logger/logger.module';
         autoLoadEntities: true,
         synchronize: configService.get('ORM_SYNC'),
         entities: [join(__dirname, '**', '*.typeorm-entity.*')],
+        namingStrategy: new SnakeNamingStrategy(),
       }),
       inject: [ConfigService],
     }),
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '../..', 'client', 'dist'),
-    }),
+    // ServeStaticModule.forRoot({
+    //   rootPath: join(__dirname, '../..', 'client', 'dist'),
+    // }),
     LoggerModule,
     CoreModule,
   ],

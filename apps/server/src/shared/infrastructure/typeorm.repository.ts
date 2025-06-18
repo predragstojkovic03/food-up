@@ -3,7 +3,7 @@ import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity
 import { Entity } from '../domain/entity';
 import { Id } from '../domain/id.type';
 import { IRepository } from '../domain/repository.interface';
-import { ITypeOrmMapper } from './typeorm.mapper';
+import { TypeOrmMapper } from './typeorm.mapper';
 
 type PersistenceEntity<T extends Entity<Id>> = QueryDeepPartialEntity<T>;
 
@@ -12,7 +12,7 @@ export abstract class TypeOrmRepository<T extends Entity>
 {
   constructor(
     private readonly _repository: Repository<T>,
-    private readonly _mapper: ITypeOrmMapper<T, PersistenceEntity<T>>,
+    private readonly _mapper: TypeOrmMapper<T, PersistenceEntity<T>>,
   ) {}
 
   async delete(id: Entity['id']): Promise<void> {
@@ -51,7 +51,7 @@ export abstract class TypeOrmRepository<T extends Entity>
     });
   }
 
-  findOneByCriteria(criteria: Partial<T>): Promise<T> {
+  findOneByCriteria(criteria: Partial<T>): Promise<T | null> {
     return this._repository.findOne({
       where: this._mapper.toPersistencePartial(
         criteria,

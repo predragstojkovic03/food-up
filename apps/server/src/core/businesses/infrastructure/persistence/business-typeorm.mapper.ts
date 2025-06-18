@@ -1,8 +1,8 @@
-import { ITypeOrmMapper } from 'src/shared/infrastructure/typeorm.mapper';
+import { TypeOrmMapper } from 'src/shared/infrastructure/typeorm.mapper';
 import { Business } from '../../domain/business.entity';
-import { Business as BusinessPersistence } from '../persistence/business.typeorm-entity';
+import { Business as BusinessPersistence } from './business.typeorm-entity';
 
-export class BusinessMapper extends ITypeOrmMapper<
+export class BusinessTypeOrmMapper extends TypeOrmMapper<
   Business,
   BusinessPersistence
 > {

@@ -1,0 +1,50 @@
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { CreateMenuPeriodUseCase } from '../../application/use-cases/create-menu-period.use-case';
+import { FindAllMenuPeriodsUseCase } from '../../application/use-cases/find-all-menu-periods.use-case';
+import { FindMenuPeriodUseCase } from '../../application/use-cases/find-menu-period.use-case';
+import { UpdateMenuPeriodUseCase } from '../../application/use-cases/update-menu-period.use-case';
+import { DeleteMenuPeriodUseCase } from '../../application/use-cases/delete-menu-period.use-case';
+import { CreateMenuPeriodDto } from './dto/create-menu-period.dto';
+import { UpdateMenuPeriodDto } from './dto/update-menu-period.dto';
+import { MenuPeriodResponseDto } from './dto/menu-period-response.dto';
+import { plainToInstance } from 'class-transformer';
+
+@Controller('menu-periods')
+export class MenuPeriodsController {
+  constructor(
+    private readonly createMenuPeriod: CreateMenuPeriodUseCase,
+    private readonly findAllMenuPeriods: FindAllMenuPeriodsUseCase,
+    private readonly findMenuPeriod: FindMenuPeriodUseCase,
+    private readonly updateMenuPeriod: UpdateMenuPeriodUseCase,
+    private readonly deleteMenuPeriod: DeleteMenuPeriodUseCase,
+  ) {}
+
+  @Post()
+  async create(@Body() dto: CreateMenuPeriodDto): Promise<MenuPeriodResponseDto> {
+    const period = await this.createMenuPeriod.execute(dto);
+    return plainToInstance(MenuPeriodResponseDto, period);
+  }
+
+  @Get()
+  async findAll(): Promise<MenuPeriodResponseDto[]> {
+    const periods = await this.findAllMenuPeriods.execute();
+    return plainToInstance(MenuPeriodResponseDto, periods);
+  }
+
+  @Get(':id')
+  async findOne(@Param('id') id: string): Promise<MenuPeriodResponseDto> {
+    const period = await this.findMenuPeriod.execute(id);
+    return plainToInstance(MenuPeriodResponseDto, period);
+  }
+
+  @Patch(':id')
+  async update(@Param('id') id: string, @Body() dto: UpdateMenuPeriodDto): Promise<MenuPeriodResponseDto> {
+    const period = await this.updateMenuPeriod.execute(id, dto);
+    return plainToInstance(MenuPeriodResponseDto, period);
+  }
+
+  @Delete(':id')
+  async delete(@Param('id') id: string): Promise<void> {
+    return this.deleteMenuPeriod.execute(id);
+  }
+}

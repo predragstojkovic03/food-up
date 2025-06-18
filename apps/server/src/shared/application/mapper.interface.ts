@@ -1,18 +1,18 @@
-export abstract class Mapper<T, U> {
-  abstract toDomain(entity: U): T;
-  abstract toPersistence(domain: T): U;
+export abstract class Mapper<Domain, Persistence> {
+  abstract toDomain(entity: Persistence): Domain;
+  abstract toPersistence(domain: Domain): Persistence;
 
-  toPersistenceList(domainList: T[]): U[] {
+  toPersistenceList(domainList: Domain[]): Persistence[] {
     return domainList.map((domain) => this.toPersistence(domain));
   }
 
-  toDomainList(persistenceList: U[]): T[] {
+  toDomainList(persistenceList: Persistence[]): Domain[] {
     return persistenceList.map((entity) => this.toDomain(entity));
   }
 
-  toPersistencePartial(domain: Partial<T>): Partial<U> {
+  toPersistencePartial(domain: Partial<Domain>): Partial<Persistence> {
     // Default: map only defined fields
-    const result: Partial<U> = {};
+    const result: Partial<Persistence> = {};
     for (const key in domain) {
       if (domain[key] !== undefined) {
         // @ts-ignore
@@ -22,8 +22,8 @@ export abstract class Mapper<T, U> {
     return result;
   }
 
-  toDomainPartial(entity: Partial<U>): Partial<T> {
-    const result: Partial<T> = {};
+  toDomainPartial(entity: Partial<Persistence>): Partial<Domain> {
+    const result: Partial<Domain> = {};
     for (const key in entity) {
       if (entity[key] !== undefined) {
         // @ts-ignore
