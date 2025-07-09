@@ -1,13 +1,21 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import { CreateMenuPeriodUseCase } from '../../application/use-cases/create-menu-period.use-case';
+import { DeleteMenuPeriodUseCase } from '../../application/use-cases/delete-menu-period.use-case';
 import { FindAllMenuPeriodsUseCase } from '../../application/use-cases/find-all-menu-periods.use-case';
 import { FindMenuPeriodUseCase } from '../../application/use-cases/find-menu-period.use-case';
 import { UpdateMenuPeriodUseCase } from '../../application/use-cases/update-menu-period.use-case';
-import { DeleteMenuPeriodUseCase } from '../../application/use-cases/delete-menu-period.use-case';
 import { CreateMenuPeriodDto } from './dto/create-menu-period.dto';
-import { UpdateMenuPeriodDto } from './dto/update-menu-period.dto';
 import { MenuPeriodResponseDto } from './dto/menu-period-response.dto';
-import { plainToInstance } from 'class-transformer';
+import { UpdateMenuPeriodDto } from './dto/update-menu-period.dto';
 
 @Controller('menu-periods')
 export class MenuPeriodsController {
@@ -20,7 +28,9 @@ export class MenuPeriodsController {
   ) {}
 
   @Post()
-  async create(@Body() dto: CreateMenuPeriodDto): Promise<MenuPeriodResponseDto> {
+  async create(
+    @Body() dto: CreateMenuPeriodDto,
+  ): Promise<MenuPeriodResponseDto> {
     const period = await this.createMenuPeriod.execute(dto);
     return plainToInstance(MenuPeriodResponseDto, period);
   }
@@ -38,7 +48,10 @@ export class MenuPeriodsController {
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() dto: UpdateMenuPeriodDto): Promise<MenuPeriodResponseDto> {
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateMenuPeriodDto,
+  ): Promise<MenuPeriodResponseDto> {
     const period = await this.updateMenuPeriod.execute(id, dto);
     return plainToInstance(MenuPeriodResponseDto, period);
   }

@@ -1,14 +1,22 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 
-import { CreateReportItemDto } from './dto/create-report-item.dto';
-import { UpdateReportItemDto } from './dto/update-report-item.dto';
-import { ReportItemResponseDto } from './dto/report-item-response.dto';
 import { CreateReportItemUseCase } from '../../application/use-cases/create-report-item.use-case';
+import { DeleteReportItemUseCase } from '../../application/use-cases/delete-report-item.use-case';
 import { FindAllReportItemsUseCase } from '../../application/use-cases/find-all-report-items.use-case';
 import { FindReportItemUseCase } from '../../application/use-cases/find-report-item.use-case';
 import { UpdateReportItemUseCase } from '../../application/use-cases/update-report-item.use-case';
-import { DeleteReportItemUseCase } from '../../application/use-cases/delete-report-item.use-case';
+import { CreateReportItemDto } from './dto/create-report-item.dto';
+import { ReportItemResponseDto } from './dto/report-item-response.dto';
+import { UpdateReportItemDto } from './dto/update-report-item.dto';
 
 @Controller('report-items')
 export class ReportItemsController {
@@ -21,7 +29,9 @@ export class ReportItemsController {
   ) {}
 
   @Post()
-  async create(@Body() dto: CreateReportItemDto): Promise<ReportItemResponseDto> {
+  async create(
+    @Body() dto: CreateReportItemDto,
+  ): Promise<ReportItemResponseDto> {
     const item = await this.createReportItem.execute(dto);
     return plainToInstance(ReportItemResponseDto, item);
   }
@@ -39,7 +49,10 @@ export class ReportItemsController {
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() dto: UpdateReportItemDto): Promise<ReportItemResponseDto> {
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateReportItemDto,
+  ): Promise<ReportItemResponseDto> {
     const item = await this.updateReportItem.execute(id, dto);
     return plainToInstance(ReportItemResponseDto, item);
   }

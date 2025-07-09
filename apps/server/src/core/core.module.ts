@@ -3,6 +3,10 @@ import { BusinessSuppliersModule } from './business-suppliers/business-suppliers
 import { BusinessesModule } from './businesses/businesses.module';
 import { EmployeesModule } from './employees/employees.module';
 import { MealSelectionWindowsModule } from './meal-selection-windows/meal-selection-windows.module';
+import { MenuItemsModule } from './menu-items/menu-items.module';
+import { MenuPeriodsModule } from './menu-periods/menu-periods.module';
+import { ReportItemsModule } from './report-items/report-items.module';
+import { ReportsModule } from './reports/reports.module';
 import { SuppliersModule } from './suppliers/suppliers.module';
 
 @Module({
@@ -12,6 +16,10 @@ import { SuppliersModule } from './suppliers/suppliers.module';
     SuppliersModule,
     BusinessSuppliersModule,
     MealSelectionWindowsModule,
+    MenuItemsModule,
+    MenuPeriodsModule,
+    ReportItemsModule,
+    ReportsModule,
   ],
 })
 export class CoreModule {}

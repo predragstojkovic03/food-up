@@ -14,7 +14,10 @@ export interface UpdateChangeRequestDto {
 export class UpdateChangeRequestUseCase {
   constructor(private readonly repository: IChangeRequestsRepository) {}
 
-  async execute(id: string, dto: UpdateChangeRequestDto): Promise<ChangeRequest> {
+  async execute(
+    id: string,
+    dto: UpdateChangeRequestDto,
+  ): Promise<ChangeRequest> {
     const existing = await this.repository.findOneByCriteria({ id });
     if (!existing) throw new Error('ChangeRequest not found');
     const updated = new ChangeRequest(

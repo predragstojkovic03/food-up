@@ -1,14 +1,22 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 
-import { CreateReportDto } from './dto/create-report.dto';
-import { UpdateReportDto } from './dto/update-report.dto';
-import { ReportResponseDto } from './dto/report-response.dto';
 import { CreateReportUseCase } from '../../application/use-cases/create-report.use-case';
+import { DeleteReportUseCase } from '../../application/use-cases/delete-report.use-case';
 import { FindAllReportsUseCase } from '../../application/use-cases/find-all-reports.use-case';
 import { FindReportUseCase } from '../../application/use-cases/find-report.use-case';
 import { UpdateReportUseCase } from '../../application/use-cases/update-report.use-case';
-import { DeleteReportUseCase } from '../../application/use-cases/delete-report.use-case';
+import { CreateReportDto } from './dto/create-report.dto';
+import { ReportResponseDto } from './dto/report-response.dto';
+import { UpdateReportDto } from './dto/update-report.dto';
 
 @Controller('reports')
 export class ReportsController {
@@ -39,7 +47,10 @@ export class ReportsController {
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() dto: UpdateReportDto): Promise<ReportResponseDto> {
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateReportDto,
+  ): Promise<ReportResponseDto> {
     const report = await this.updateReport.execute(id, dto);
     return plainToInstance(ReportResponseDto, report);
   }

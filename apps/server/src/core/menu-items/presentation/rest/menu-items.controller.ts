@@ -1,13 +1,21 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import { CreateMenuItemUseCase } from '../../application/use-cases/create-menu-item.use-case';
+import { DeleteMenuItemUseCase } from '../../application/use-cases/delete-menu-item.use-case';
 import { FindAllMenuItemsUseCase } from '../../application/use-cases/find-all-menu-items.use-case';
 import { FindMenuItemUseCase } from '../../application/use-cases/find-menu-item.use-case';
 import { UpdateMenuItemUseCase } from '../../application/use-cases/update-menu-item.use-case';
-import { DeleteMenuItemUseCase } from '../../application/use-cases/delete-menu-item.use-case';
 import { CreateMenuItemDto } from './dto/create-menu-item.dto';
-import { UpdateMenuItemDto } from './dto/update-menu-item.dto';
 import { MenuItemResponseDto } from './dto/menu-item-response.dto';
-import { plainToInstance } from 'class-transformer';
+import { UpdateMenuItemDto } from './dto/update-menu-item.dto';
 
 @Controller('menu-items')
 export class MenuItemsController {
@@ -38,7 +46,10 @@ export class MenuItemsController {
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() dto: UpdateMenuItemDto): Promise<MenuItemResponseDto> {
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateMenuItemDto,
+  ): Promise<MenuItemResponseDto> {
     const item = await this.updateMenuItem.execute(id, dto);
     return plainToInstance(MenuItemResponseDto, item);
   }

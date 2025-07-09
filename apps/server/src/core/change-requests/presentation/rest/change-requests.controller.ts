@@ -1,14 +1,22 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 
-import { CreateChangeRequestDto } from './dto/create-change-request.dto';
-import { UpdateChangeRequestDto } from './dto/update-change-request.dto';
-import { ChangeRequestResponseDto } from './dto/change-request-response.dto';
 import { CreateChangeRequestUseCase } from '../../application/use-cases/create-change-request.use-case';
+import { DeleteChangeRequestUseCase } from '../../application/use-cases/delete-change-request.use-case';
 import { FindAllChangeRequestsUseCase } from '../../application/use-cases/find-all-change-requests.use-case';
 import { FindChangeRequestUseCase } from '../../application/use-cases/find-change-request.use-case';
 import { UpdateChangeRequestUseCase } from '../../application/use-cases/update-change-request.use-case';
-import { DeleteChangeRequestUseCase } from '../../application/use-cases/delete-change-request.use-case';
+import { ChangeRequestResponseDto } from './dto/change-request-response.dto';
+import { CreateChangeRequestDto } from './dto/create-change-request.dto';
+import { UpdateChangeRequestDto } from './dto/update-change-request.dto';
 
 @Controller('change-requests')
 export class ChangeRequestsController {
@@ -21,7 +29,9 @@ export class ChangeRequestsController {
   ) {}
 
   @Post()
-  async create(@Body() dto: CreateChangeRequestDto): Promise<ChangeRequestResponseDto> {
+  async create(
+    @Body() dto: CreateChangeRequestDto,
+  ): Promise<ChangeRequestResponseDto> {
     const cr = await this.createChangeRequest.execute(dto);
     return plainToInstance(ChangeRequestResponseDto, cr);
   }
@@ -39,7 +49,10 @@ export class ChangeRequestsController {
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() dto: UpdateChangeRequestDto): Promise<ChangeRequestResponseDto> {
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateChangeRequestDto,
+  ): Promise<ChangeRequestResponseDto> {
     const cr = await this.updateChangeRequest.execute(id, dto);
     return plainToInstance(ChangeRequestResponseDto, cr);
   }
