@@ -1,4 +1,5 @@
 import { Business } from 'src/core/businesses/infrastructure/persistence/business.typeorm-entity';
+import { Identity } from 'src/core/identity/infrastructure/persistence/identity.typeorm-entity';
 import { TypeOrmMapper } from 'src/shared/infrastructure/typeorm.mapper';
 import { Employee } from '../../domain/employee.entity';
 import { Employee as EmployeePersistence } from './employee.typeorm-entity';
@@ -15,9 +16,9 @@ export class EmployeeTypeOrmMapper extends TypeOrmMapper<
     const employee = new Employee(
       persistence.id,
       persistence.name,
-      persistence.email,
-      persistence.isAdmin,
+      persistence.role,
       persistence.business.id,
+      persistence.identity.id,
     );
 
     return employee;
@@ -27,9 +28,9 @@ export class EmployeeTypeOrmMapper extends TypeOrmMapper<
     const employeePersistence = new EmployeePersistence();
     employeePersistence.id = domain.id;
     employeePersistence.name = domain.name;
-    employeePersistence.email = domain.email;
-    employeePersistence.isAdmin = domain.isAdmin;
+    employeePersistence.role = domain.role;
     employeePersistence.business = { id: domain.businessId } as Business; // Assuming business is a relation and we only need the id
+    employeePersistence.identity = { id: domain.identityId } as Identity; // Assuming identity is a relation and we only need the id
 
     return employeePersistence;
   }

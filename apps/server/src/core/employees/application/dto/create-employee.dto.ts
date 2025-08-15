@@ -1,6 +1,9 @@
+import { Role } from 'src/shared/domain/role.enum';
+
 export type CreateEmployeeDto = {
   name: string;
   email: string;
-  isAdmin?: boolean;
+  role: Role;
   businessId: string;
+  password: string;
 };

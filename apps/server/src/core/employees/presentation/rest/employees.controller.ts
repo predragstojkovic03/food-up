@@ -1,7 +1,18 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { CreateEmployeeUseCase } from '../../application/use-cases/create-employee.use-case';
+import { DeleteEmployeeUseCase } from '../../application/use-cases/delete-employee.use-case';
 import { FindAllEmployeesByBusinessUseCase } from '../../application/use-cases/find-all-employees.use-case';
+import { FindEmployeeUseCase } from '../../application/use-cases/find-employee.use-case';
+import { UpdateEmployeeUseCase } from '../../application/use-cases/update-employee.use-case';
 import { CreateEmployeeRequestDto } from './dto/create-employee.dto';
 import { EmployeeResponseDto } from './dto/employee-response.dto';
 
@@ -10,6 +21,9 @@ export class EmployeesController {
   constructor(
     private readonly _createEmployeeUseCase: CreateEmployeeUseCase,
     private readonly _findAllEmployeesByBusiness: FindAllEmployeesByBusinessUseCase,
+    private readonly _findEmployeeUseCase: FindEmployeeUseCase,
+    private readonly _updateEmployeeUseCase: UpdateEmployeeUseCase,
+    private readonly _deleteEmployeeUseCase: DeleteEmployeeUseCase,
   ) {}
 
   @Post('')
@@ -30,5 +44,25 @@ export class EmployeesController {
       await this._findAllEmployeesByBusiness.execute(businessId);
 
     return plainToInstance(EmployeeResponseDto, employees);
+  }
+
+  @Get(':id')
+  async findOne(@Param('id') id: string): Promise<EmployeeResponseDto | null> {
+    const employee = await this._findEmployeeUseCase.execute(id);
+    return employee ? plainToInstance(EmployeeResponseDto, employee) : null;
+  }
+
+  @Put(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() updateDto: Partial<CreateEmployeeRequestDto>,
+  ): Promise<EmployeeResponseDto> {
+    const employee = await this._updateEmployeeUseCase.execute(id, updateDto);
+    return plainToInstance(EmployeeResponseDto, employee);
+  }
+
+  @Delete(':id')
+  async delete(@Param('id') id: string): Promise<void> {
+    await this._deleteEmployeeUseCase.execute(id);
   }
 }

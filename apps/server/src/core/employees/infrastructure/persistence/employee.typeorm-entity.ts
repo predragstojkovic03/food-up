@@ -1,5 +1,14 @@
 import { Business } from 'src/core/businesses/infrastructure/persistence/business.typeorm-entity';
-import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
+import { Identity } from 'src/core/identity/infrastructure/persistence/identity.typeorm-entity';
+import { Role } from 'src/shared/domain/role.enum';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToOne,
+  PrimaryColumn,
+} from 'typeorm';
 
 @Entity()
 export class Employee {
@@ -9,12 +18,13 @@ export class Employee {
   @Column('character varying', { length: 100 })
   name: string;
 
-  @Column('character varying', { length: 100, unique: true })
-  email: string;
+  @Column('enum', { enum: Role, default: Role.Basic })
+  role: Role;
 
-  @Column('boolean', { default: false })
-  isAdmin: boolean;
-
-  @OneToMany(() => Business, (business) => business.employees)
+  @ManyToOne(() => Business, (business) => business.employees)
   business?: Business;
+
+  @OneToOne(() => Identity, { nullable: false, cascade: true, eager: true })
+  @JoinColumn()
+  identity: Identity;
 }

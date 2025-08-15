@@ -1,15 +1,19 @@
-import { IsBoolean, IsString } from 'class-validator';
+import { IsEmail, IsEnum, IsString } from 'class-validator';
+import { Role } from 'src/shared/domain/role.enum';
 
 export class CreateEmployeeRequestDto {
   @IsString()
   name: string;
 
-  @IsString()
+  @IsEmail()
   email: string;
 
   @IsString()
   businessId: string;
 
-  @IsBoolean()
-  isAdmin?: boolean;
+  @IsEnum(Role)
+  role: Role;
+
+  @IsString()
+  password: string;
 }
