@@ -1,3 +1,4 @@
+import { BusinessSupplier } from 'src/core/business-suppliers/infrastructure/persistence/business-supplier.typeorm-entity';
 import { Employee } from 'src/core/employees/infrastructure/persistence/employee.typeorm-entity';
 import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
 
@@ -17,4 +18,10 @@ export class Business {
     onUpdate: 'CASCADE',
   })
   employees: Employee[]; // Changed to an array to reflect one-to-many relationship
+
+  @OneToMany(
+    () => BusinessSupplier,
+    (businessSupplier) => businessSupplier.business,
+  )
+  businessSuppliers: BusinessSupplier[];
 }

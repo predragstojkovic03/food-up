@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { AuthModule } from './auth/auth.module';
 import { BusinessSuppliersModule } from './business-suppliers/business-suppliers.module';
 import { BusinessesModule } from './businesses/businesses.module';
 import { EmployeesModule } from './employees/employees.module';
@@ -22,6 +23,7 @@ import { SuppliersModule } from './suppliers/suppliers.module';
     ReportItemsModule,
     ReportsModule,
     IdentityModule,
+    AuthModule,
   ],
 })
 export class CoreModule {}

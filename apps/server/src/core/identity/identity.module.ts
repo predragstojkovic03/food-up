@@ -4,7 +4,7 @@ import {
   IdentityRepositoryProvider,
   IdentityUseCaseProviders,
 } from './infrastructure/identity.providers';
-import { Identity } from './infrastructure/persistence/identity-typeorm.entity';
+import { Identity } from './infrastructure/persistence/identity.typeorm-entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Identity])],

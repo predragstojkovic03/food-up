@@ -4,11 +4,12 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
-  Put,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
+import { Role } from 'src/shared/domain/role.enum';
 import { CreateEmployeeUseCase } from '../../application/use-cases/create-employee.use-case';
 import { DeleteEmployeeUseCase } from '../../application/use-cases/delete-employee.use-case';
 import { FindAllEmployeesByBusinessUseCase } from '../../application/use-cases/find-all-employees.use-case';
@@ -16,6 +17,7 @@ import { FindEmployeeUseCase } from '../../application/use-cases/find-employee.u
 import { UpdateEmployeeUseCase } from '../../application/use-cases/update-employee.use-case';
 import { CreateEmployeeRequestDto } from './dto/create-employee.dto';
 import { EmployeeResponseDto } from './dto/employee-response.dto';
+import { UpdateEmployeeRequestDto } from './dto/update-employee.dto';
 
 @ApiTags('Employees')
 @Controller('employees')
@@ -34,8 +36,10 @@ export class EmployeesController {
   async create(
     @Body() createEmployeeDto: CreateEmployeeRequestDto,
   ): Promise<EmployeeResponseDto> {
-    const employee =
-      await this._createEmployeeUseCase.execute(createEmployeeDto);
+    const employee = await this._createEmployeeUseCase.execute({
+      ...createEmployeeDto,
+      role: Role.Basic,
+    });
 
     return plainToInstance(EmployeeResponseDto, employee);
   }
@@ -56,10 +60,10 @@ export class EmployeesController {
     return employee ? plainToInstance(EmployeeResponseDto, employee) : null;
   }
 
-  @Put(':id')
+  @Patch(':id')
   async update(
     @Param('id') id: string,
-    @Body() updateDto: Partial<CreateEmployeeRequestDto>,
+    @Body() updateDto: UpdateEmployeeRequestDto,
   ): Promise<EmployeeResponseDto> {
     const employee = await this._updateEmployeeUseCase.execute(id, updateDto);
     return plainToInstance(EmployeeResponseDto, employee);

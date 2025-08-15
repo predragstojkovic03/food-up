@@ -3,6 +3,7 @@ import { CreateIdentityUseCase } from 'src/core/identity/application/use-cases/c
 import { CreateEmployeeUseCase } from '../application/use-cases/create-employee.use-case';
 import { DeleteEmployeeUseCase } from '../application/use-cases/delete-employee.use-case';
 import { FindAllEmployeesByBusinessUseCase } from '../application/use-cases/find-all-employees.use-case';
+import { FindEmployeeByIdentityUseCase } from '../application/use-cases/find-employee-by-identity.user-case';
 import { FindEmployeeUseCase } from '../application/use-cases/find-employee.use-case';
 import { UpdateEmployeeUseCase } from '../application/use-cases/update-employee.use-case';
 import {
@@ -47,6 +48,12 @@ export const EmployeesUseCaseProviders: Provider[] = [
     provide: DeleteEmployeeUseCase,
     useFactory: (employeesRepository: IEmployeeRepository) =>
       new DeleteEmployeeUseCase(employeesRepository),
+    inject: [I_EMPLOYEES_REPOSITORY],
+  },
+  {
+    provide: FindEmployeeByIdentityUseCase,
+    useFactory: (employeesRepository: IEmployeeRepository) =>
+      new FindEmployeeByIdentityUseCase(employeesRepository),
     inject: [I_EMPLOYEES_REPOSITORY],
   },
 ];

@@ -1,23 +1,20 @@
 import { Employee } from 'src/core/employees/infrastructure/persistence/employee.typeorm-entity';
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToOne, PrimaryColumn } from 'typeorm';
 import { IdentityType } from '../../domain/identity.entity';
 
 @Entity()
 export class Identity {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn('character varying', { length: 26 })
   id: string;
 
-  @Column({ unique: true })
+  @Column('varchar', { unique: true, length: 255 })
   email: string;
 
-  @Column()
+  @Column('varchar', { length: 255 })
   passwordHash: string;
 
   @Column('enum', { enum: ['employee', 'supplier', 'business'] })
   type: IdentityType;
-
-  @Column()
-  role: string;
 
   @Column({ default: true })
   isActive: boolean;

@@ -12,8 +12,7 @@ export class SupplierTypeOrmMapper extends TypeOrmMapper<
       persistence.name,
       persistence.type,
       persistence.contactInfo,
-      persistence.businessId,
-      persistence.userId,
+      persistence?.businessSuppliers?.map((bs) => bs.business?.id) ?? [],
     );
   }
 
@@ -23,8 +22,6 @@ export class SupplierTypeOrmMapper extends TypeOrmMapper<
     persistence.name = domain.name;
     persistence.type = domain.type;
     persistence.contactInfo = domain.contactInfo;
-    persistence.businessId = domain.businessId;
-    persistence.userId = domain.userId;
     return persistence;
   }
 }

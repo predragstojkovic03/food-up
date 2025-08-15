@@ -1,5 +1,7 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { MenuItemsModule } from '../menu-items/menu-items.module';
+import { ReportsModule } from '../reports/reports.module';
 import { ReportItem } from './infrastructure/persistence/report-item.typeorm-entity';
 import {
   ReportItemsRepositoryProvide,
@@ -8,7 +10,11 @@ import {
 import { ReportItemsController } from './presentation/rest/report-items.controller';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ReportItem])],
+  imports: [
+    TypeOrmModule.forFeature([ReportItem]),
+    MenuItemsModule,
+    forwardRef(() => ReportsModule),
+  ],
   controllers: [ReportItemsController],
   providers: [ReportItemsRepositoryProvide, ...ReportItemsUseCaseProviders],
 })

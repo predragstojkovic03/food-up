@@ -1,3 +1,5 @@
+import { FindBusinessUseCase } from 'src/core/businesses/application/use-cases/find-business.use-case';
+import { EntityInstanceNotFoundException } from 'src/shared/domain/exceptions/entity-instance-not-found.exception';
 import { Supplier } from '../../domain/supplier.entity';
 import { ISuppliersRepository } from '../../domain/suppliers.repository.interface';
 
@@ -5,24 +7,38 @@ export interface UpdateSupplierDto {
   name?: string;
   type?: 'registered' | 'external';
   contactInfo?: string;
-  businessId?: string | null;
+  businessIds?: string[];
   userId?: string | null;
 }
 
 export class UpdateSupplierUseCase {
-  constructor(private readonly repository: ISuppliersRepository) {}
+  constructor(
+    private readonly _repository: ISuppliersRepository,
+    private readonly _findBusinessUseCase: FindBusinessUseCase,
+  ) {}
 
   async execute(id: string, dto: UpdateSupplierDto): Promise<Supplier> {
-    const existing = await this.repository.findOneByCriteria({ id });
-    if (!existing) throw new Error('Supplier not found');
+    const existing = await this._repository.findOneByCriteria({ id });
+
+    if (!existing)
+      throw new EntityInstanceNotFoundException('Supplier not found');
+
+    if (dto.businessIds) {
+      for (const businessId of dto.businessIds) {
+        const business = await this._findBusinessUseCase.execute(businessId);
+        if (!business) {
+          throw new EntityInstanceNotFoundException('Business not found');
+        }
+      }
+    }
+
     const updated = new Supplier(
       id,
       dto.name ?? existing.name,
       dto.type ?? existing.type,
       dto.contactInfo ?? existing.contactInfo,
-      dto.businessId ?? existing.businessId,
-      dto.userId ?? existing.userId,
+      dto.businessIds ?? existing.businessIds,
     );
-    return this.repository.update(id, updated);
+    return this._repository.update(id, updated);
   }
 }

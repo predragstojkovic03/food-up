@@ -11,5 +11,6 @@ import { BusinessesController } from './presentation/rest/businesses.controller'
   imports: [TypeOrmModule.forFeature([Business])],
   controllers: [BusinessesController],
   providers: [...BusinessUseCases, BusinessRepositoryProvider],
+  exports: [...BusinessUseCases],
 })
 export class BusinessesModule {}

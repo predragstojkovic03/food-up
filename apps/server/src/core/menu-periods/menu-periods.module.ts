@@ -11,6 +11,6 @@ import { MenuPeriodsController } from './presentation/rest/menu-periods.controll
   imports: [TypeOrmModule.forFeature([MenuPeriod])],
   controllers: [MenuPeriodsController],
   providers: [MenuPeriodsRepositoryProvider, ...MenuPeriodsUseCaseProviders],
-  exports: [MenuPeriodsRepositoryProvider, ...MenuPeriodsUseCaseProviders],
+  exports: [...MenuPeriodsUseCaseProviders],
 })
 export class MenuPeriodsModule {}

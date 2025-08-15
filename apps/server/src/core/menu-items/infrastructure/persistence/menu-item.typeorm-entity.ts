@@ -5,12 +5,6 @@ export class MenuItem {
   @PrimaryColumn('character varying', { length: 26 })
   id: string;
 
-  @Column('character varying', { length: 100 })
-  name: string;
-
-  @Column('character varying', { length: 255 })
-  description: string;
-
   @Column('decimal', { nullable: true })
   price: number | null;
 
@@ -20,6 +14,6 @@ export class MenuItem {
   @Column('date')
   day: Date;
 
-  @Column('enum', { enum: ['breakfast', 'lunch', 'dinner'] })
-  mealType: 'breakfast' | 'lunch' | 'dinner';
+  @Column('character varying', { length: 26 })
+  mealId: string;
 }

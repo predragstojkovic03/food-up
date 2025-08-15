@@ -6,22 +6,19 @@ export class Supplier extends Entity {
     name: string,
     type: 'registered' | 'external',
     contactInfo: string,
-    businessId?: string | null,
-    userId?: string | null,
+    businessIds: string[] = [],
   ) {
     super();
     this.id = id;
     this.name = name;
     this.type = type;
     this.contactInfo = contactInfo;
-    this.businessId = businessId ?? null;
-    this.userId = userId ?? null;
+    this.businessIds = businessIds;
   }
 
   readonly id: string;
   name: string;
   type: 'registered' | 'external';
   contactInfo: string;
-  businessId: string | null;
-  userId: string | null;
+  businessIds: string[];
 }

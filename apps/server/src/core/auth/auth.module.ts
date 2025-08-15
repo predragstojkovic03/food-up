@@ -1,9 +1,7 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { ValidateCredentialsUseCase } from 'src/core/identity/application/use-cases/validate-credentials.use-case';
 import { EmployeesModule } from '../employees/employees.module';
 import { IdentityModule } from '../identity/identity.module';
-import { CurrentIdentity } from './infrastructure/current-identity.decorator';
 import { JwtAuthGuard } from './infrastructure/jwt-auth.guard';
 import { JwtStrategy } from './infrastructure/jwt.strategy';
 import { AuthController } from './presentation/rest/auth.controller';
@@ -18,7 +16,7 @@ import { AuthController } from './presentation/rest/auth.controller';
     IdentityModule,
   ],
   controllers: [AuthController],
-  providers: [ValidateCredentialsUseCase, JwtStrategy, JwtAuthGuard],
-  exports: [JwtAuthGuard, CurrentIdentity],
+  providers: [JwtStrategy, JwtAuthGuard],
+  exports: [],
 })
 export class AuthModule {}

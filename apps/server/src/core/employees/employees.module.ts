@@ -12,5 +12,6 @@ import { EmployeesController } from './presentation/rest/employees.controller';
   imports: [TypeOrmModule.forFeature([Employee]), IdentityModule],
   controllers: [EmployeesController],
   providers: [EmployeesRepositoryProvider, ...EmployeesUseCaseProviders],
+  exports: [...EmployeesUseCaseProviders],
 })
 export class EmployeesModule {}

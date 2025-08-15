@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { BusinessSupplier } from 'src/core/business-suppliers/infrastructure/persistence/business-supplier.typeorm-entity';
+import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class Supplier {
@@ -14,9 +15,9 @@ export class Supplier {
   @Column('character varying', { length: 255 })
   contactInfo: string;
 
-  @Column('character varying', { length: 26, nullable: true })
-  businessId: string | null;
-
-  @Column('character varying', { length: 26, nullable: true })
-  userId: string | null;
+  @OneToMany(
+    () => BusinessSupplier,
+    (businessSupplier) => businessSupplier.supplier,
+  )
+  businessSuppliers: BusinessSupplier[];
 }

@@ -9,8 +9,8 @@ export class BusinessSupplierTypeOrmMapper extends TypeOrmMapper<
   toDomain(persistence: BusinessSupplierPersistence): BusinessSupplier {
     return new BusinessSupplier(
       persistence.id,
-      persistence.businessId,
-      persistence.supplierId,
+      persistence.business.id,
+      persistence.supplier.id,
       persistence.isManaged,
     );
   }
@@ -18,8 +18,8 @@ export class BusinessSupplierTypeOrmMapper extends TypeOrmMapper<
   toPersistence(domain: BusinessSupplier): BusinessSupplierPersistence {
     const persistence = new BusinessSupplierPersistence();
     persistence.id = domain.id;
-    persistence.businessId = domain.businessId;
-    persistence.supplierId = domain.supplierId;
+    persistence.business = { id: domain.businessId } as any; // Assuming businessId is sufficient for persistence
+    persistence.supplier = { id: domain.supplierId } as any; // Assuming supplierId is sufficient for persistence
     persistence.isManaged = domain.isManaged;
     return persistence;
   }

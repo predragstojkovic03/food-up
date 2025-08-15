@@ -10,7 +10,7 @@ import { BusinessSupplier as BusinessSupplierPersistence } from './business-supp
 export class BusinessSuppliersTypeOrmRepository extends TypeOrmRepository<BusinessSupplier> {
   constructor(
     @InjectRepository(BusinessSupplierPersistence)
-    repository: Repository<BusinessSupplierPersistence>,
+    repository: Repository<BusinessSupplier>,
   ) {
     super(repository, new BusinessSupplierTypeOrmMapper());
   }

@@ -5,18 +5,6 @@ export class MenuItemResponseDto {
   id: string;
 
   @ApiProperty({
-    example: 'Chicken Sandwich',
-    description: 'Name of the menu item',
-  })
-  name: string;
-
-  @ApiProperty({
-    example: 'Grilled chicken with lettuce',
-    description: 'Description of the menu item',
-  })
-  description: string;
-
-  @ApiProperty({
     example: 9.99,
     description: 'Price of the menu item',
     nullable: true,
@@ -33,10 +21,6 @@ export class MenuItemResponseDto {
   })
   day: Date;
 
-  @ApiProperty({
-    example: 'lunch',
-    enum: ['breakfast', 'lunch', 'dinner'],
-    description: 'Meal type',
-  })
-  mealType: 'breakfast' | 'lunch' | 'dinner';
+  @ApiProperty({ example: 'meal-uuid', description: 'Meal ID' })
+  mealId: string;
 }

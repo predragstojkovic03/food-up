@@ -10,7 +10,7 @@ import { Supplier as SupplierPersistence } from './supplier.typeorm-entity';
 export class SuppliersTypeOrmRepository extends TypeOrmRepository<Supplier> {
   constructor(
     @InjectRepository(SupplierPersistence)
-    repository: Repository<SupplierPersistence>,
+    repository: Repository<Supplier>,
   ) {
     super(repository, new SupplierTypeOrmMapper());
   }

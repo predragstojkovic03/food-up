@@ -9,24 +9,20 @@ export class MenuItemTypeOrmMapper extends TypeOrmMapper<
   toDomain(persistence: MenuItemPersistence): MenuItem {
     return new MenuItem(
       persistence.id,
-      persistence.name,
-      persistence.description,
       persistence.price,
       persistence.menuPeriodId,
       persistence.day,
-      persistence.mealType,
+      persistence.mealId,
     );
   }
 
   toPersistence(domain: MenuItem): MenuItemPersistence {
     const persistence = new MenuItemPersistence();
     persistence.id = domain.id;
-    persistence.name = domain.name;
-    persistence.description = domain.description;
     persistence.price = domain.price;
     persistence.menuPeriodId = domain.menuPeriodId;
     persistence.day = domain.day;
-    persistence.mealType = domain.mealType;
+    persistence.mealId = domain.mealId;
     return persistence;
   }
 }

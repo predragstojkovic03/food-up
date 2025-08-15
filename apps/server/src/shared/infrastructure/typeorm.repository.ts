@@ -11,8 +11,8 @@ export abstract class TypeOrmRepository<T extends Entity>
   implements IRepository<T>
 {
   constructor(
-    private readonly _repository: Repository<T>,
-    private readonly _mapper: TypeOrmMapper<T, PersistenceEntity<T>>,
+    protected readonly _repository: Repository<T>,
+    protected readonly _mapper: TypeOrmMapper<T, PersistenceEntity<T>>,
   ) {}
 
   async delete(id: Entity['id']): Promise<void> {
