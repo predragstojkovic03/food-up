@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 import { CreateMenuPeriodUseCase } from '../../application/use-cases/create-menu-period.use-case';
 import { DeleteMenuPeriodUseCase } from '../../application/use-cases/delete-menu-period.use-case';
@@ -17,6 +18,7 @@ import { CreateMenuPeriodDto } from './dto/create-menu-period.dto';
 import { MenuPeriodResponseDto } from './dto/menu-period-response.dto';
 import { UpdateMenuPeriodDto } from './dto/update-menu-period.dto';
 
+@ApiTags('MenuPeriods')
 @Controller('menu-periods')
 export class MenuPeriodsController {
   constructor(
@@ -28,6 +30,8 @@ export class MenuPeriodsController {
   ) {}
 
   @Post()
+  @ApiOperation({ summary: 'Create a new menu period' })
+  @ApiResponse({ status: 201, type: MenuPeriodResponseDto })
   async create(
     @Body() dto: CreateMenuPeriodDto,
   ): Promise<MenuPeriodResponseDto> {
@@ -36,6 +40,8 @@ export class MenuPeriodsController {
   }
 
   @Get()
+  @ApiOperation({ summary: 'Get all menu periods' })
+  @ApiResponse({ status: 200, type: [MenuPeriodResponseDto] })
   async findAll(): Promise<MenuPeriodResponseDto[]> {
     const periods = await this.findAllMenuPeriods.execute();
     return plainToInstance(MenuPeriodResponseDto, periods);

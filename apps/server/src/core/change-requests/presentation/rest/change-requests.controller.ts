@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 
 import { CreateChangeRequestUseCase } from '../../application/use-cases/create-change-request.use-case';
@@ -18,6 +19,7 @@ import { ChangeRequestResponseDto } from './dto/change-request-response.dto';
 import { CreateChangeRequestDto } from './dto/create-change-request.dto';
 import { UpdateChangeRequestDto } from './dto/update-change-request.dto';
 
+@ApiTags('ChangeRequests')
 @Controller('change-requests')
 export class ChangeRequestsController {
   constructor(
@@ -29,6 +31,8 @@ export class ChangeRequestsController {
   ) {}
 
   @Post()
+  @ApiOperation({ summary: 'Create a new change request' })
+  @ApiResponse({ status: 201, type: ChangeRequestResponseDto })
   async create(
     @Body() dto: CreateChangeRequestDto,
   ): Promise<ChangeRequestResponseDto> {
@@ -37,6 +41,8 @@ export class ChangeRequestsController {
   }
 
   @Get()
+  @ApiOperation({ summary: 'Get all change requests' })
+  @ApiResponse({ status: 200, type: [ChangeRequestResponseDto] })
   async findAll(): Promise<ChangeRequestResponseDto[]> {
     const crs = await this.findAllChangeRequests.execute();
     return plainToInstance(ChangeRequestResponseDto, crs);

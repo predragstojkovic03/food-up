@@ -7,6 +7,7 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 import { CreateEmployeeUseCase } from '../../application/use-cases/create-employee.use-case';
 import { DeleteEmployeeUseCase } from '../../application/use-cases/delete-employee.use-case';
@@ -16,6 +17,7 @@ import { UpdateEmployeeUseCase } from '../../application/use-cases/update-employ
 import { CreateEmployeeRequestDto } from './dto/create-employee.dto';
 import { EmployeeResponseDto } from './dto/employee-response.dto';
 
+@ApiTags('Employees')
 @Controller('employees')
 export class EmployeesController {
   constructor(
@@ -27,6 +29,8 @@ export class EmployeesController {
   ) {}
 
   @Post('')
+  @ApiOperation({ summary: 'Create a new employee' })
+  @ApiResponse({ status: 201, type: EmployeeResponseDto })
   async create(
     @Body() createEmployeeDto: CreateEmployeeRequestDto,
   ): Promise<EmployeeResponseDto> {

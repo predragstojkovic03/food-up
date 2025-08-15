@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 
 import { CreateReportUseCase } from '../../application/use-cases/create-report.use-case';
@@ -18,6 +19,7 @@ import { CreateReportDto } from './dto/create-report.dto';
 import { ReportResponseDto } from './dto/report-response.dto';
 import { UpdateReportDto } from './dto/update-report.dto';
 
+@ApiTags('Reports')
 @Controller('reports')
 export class ReportsController {
   constructor(
@@ -29,12 +31,16 @@ export class ReportsController {
   ) {}
 
   @Post()
+  @ApiOperation({ summary: 'Create a new report' })
+  @ApiResponse({ status: 201, type: ReportResponseDto })
   async create(@Body() dto: CreateReportDto): Promise<ReportResponseDto> {
     const report = await this.createReport.execute(dto);
     return plainToInstance(ReportResponseDto, report);
   }
 
   @Get()
+  @ApiOperation({ summary: 'Get all reports' })
+  @ApiResponse({ status: 200, type: [ReportResponseDto] })
   async findAll(): Promise<ReportResponseDto[]> {
     const reports = await this.findAllReports.execute();
     return plainToInstance(ReportResponseDto, reports);
