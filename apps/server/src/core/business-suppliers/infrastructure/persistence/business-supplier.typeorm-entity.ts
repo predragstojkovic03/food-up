@@ -1,6 +1,6 @@
 import { Business } from 'src/core/businesses/infrastructure/persistence/business.typeorm-entity';
 import { Supplier } from 'src/core/suppliers/infrastructure/persistence/supplier.typeorm-entity';
-import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
+import { Entity, ManyToOne, PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class BusinessSupplier {
@@ -16,7 +16,4 @@ export class BusinessSupplier {
     eager: true,
   })
   supplier: Supplier;
-
-  @Column('boolean')
-  isManaged: boolean;
 }

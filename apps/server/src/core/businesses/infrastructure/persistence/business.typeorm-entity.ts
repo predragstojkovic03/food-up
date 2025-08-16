@@ -1,5 +1,6 @@
 import { BusinessSupplier } from 'src/core/business-suppliers/infrastructure/persistence/business-supplier.typeorm-entity';
 import { Employee } from 'src/core/employees/infrastructure/persistence/employee.typeorm-entity';
+import { Supplier } from 'src/core/suppliers/infrastructure/persistence/supplier.typeorm-entity';
 import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
 
 @Entity()
@@ -24,4 +25,9 @@ export class Business {
     (businessSupplier) => businessSupplier.business,
   )
   businessSuppliers: BusinessSupplier[];
+
+  @OneToMany(() => Supplier, (supplier) => supplier.managingBusiness, {
+    eager: true,
+  })
+  managedSuppliers: Supplier[];
 }

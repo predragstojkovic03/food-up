@@ -20,7 +20,6 @@ export class UpdateBusinessSupplierUseCase {
       id,
       dto.businessId ?? existing.businessId,
       dto.supplierId ?? existing.supplierId,
-      dto.isManaged ?? existing.isManaged,
     );
     return this.repository.update(id, updated);
   }

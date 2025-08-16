@@ -6,19 +6,19 @@ export class MealSelectionWindow extends Entity {
     startTime: Date,
     endTime: Date,
     businessId: string,
-    menuPeriodId?: string | null,
+    menuPeriodId: string,
   ) {
     super();
     this.id = id;
     this.startTime = startTime;
     this.endTime = endTime;
     this.businessId = businessId;
-    this.menuPeriodId = menuPeriodId ?? null;
+    this.menuPeriodId = menuPeriodId;
   }
 
   readonly id: string;
   startTime: Date;
   endTime: Date;
   businessId: string;
-  menuPeriodId: string | null;
+  menuPeriodId: string;
 }

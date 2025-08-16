@@ -11,7 +11,6 @@ export class BusinessSupplierTypeOrmMapper extends TypeOrmMapper<
       persistence.id,
       persistence.business.id,
       persistence.supplier.id,
-      persistence.isManaged,
     );
   }
 
@@ -20,7 +19,7 @@ export class BusinessSupplierTypeOrmMapper extends TypeOrmMapper<
     persistence.id = domain.id;
     persistence.business = { id: domain.businessId } as any; // Assuming businessId is sufficient for persistence
     persistence.supplier = { id: domain.supplierId } as any; // Assuming supplierId is sufficient for persistence
-    persistence.isManaged = domain.isManaged;
+
     return persistence;
   }
 }

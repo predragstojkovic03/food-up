@@ -21,12 +21,7 @@ export class CreateBusinessSupplierUseCase {
     if (!supplier) {
       throw new EntityInstanceNotFoundException('Supplier not found');
     }
-    const entity = new BusinessSupplier(
-      ulid(),
-      dto.businessId,
-      dto.supplierId,
-      dto.isManaged,
-    );
+    const entity = new BusinessSupplier(ulid(), dto.businessId, dto.supplierId);
     return this._repository.insert(entity);
   }
 }

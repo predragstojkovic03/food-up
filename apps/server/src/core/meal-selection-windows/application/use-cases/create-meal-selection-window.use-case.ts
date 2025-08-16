@@ -8,7 +8,7 @@ export interface CreateMealSelectionWindowDto {
   startTime: Date;
   endTime: Date;
   businessId: string;
-  menuPeriodId?: string | null;
+  menuPeriodId: string;
 }
 
 export class CreateMealSelectionWindowUseCase {

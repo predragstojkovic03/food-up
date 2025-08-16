@@ -13,7 +13,9 @@ import { DeleteMealSelectionUseCase } from '../../application/use-cases/delete-m
 import { FindAllMealSelectionsUseCase } from '../../application/use-cases/find-all-meal-selections.use-case';
 import { FindMealSelectionUseCase } from '../../application/use-cases/find-meal-selection.use-case';
 import { UpdateMealSelectionUseCase } from '../../application/use-cases/update-meal-selection.use-case';
-// TODO: Import DTOs when available
+import { CreateMealSelectionDto } from './dto/create-meal-selection.dto';
+import { MealSelectionResponseDto } from './dto/meal-selection-response.dto';
+import { UpdateMealSelectionDto } from './dto/update-meal-selection.dto';
 
 @ApiTags('MealSelections')
 @Controller('meal-selections')
@@ -28,33 +30,60 @@ export class MealSelectionsController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new meal selection' })
-  @ApiResponse({ status: 201, description: 'Meal selection created' })
-  async create(@Body() dto: any) {
+  @ApiResponse({
+    status: 201,
+    description: 'Meal selection created',
+    type: MealSelectionResponseDto,
+  })
+  async create(
+    @Body() dto: CreateMealSelectionDto,
+  ): Promise<MealSelectionResponseDto> {
     return this.createUseCase.execute(dto);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get all meal selections' })
-  @ApiResponse({ status: 200, description: 'List of meal selections' })
-  async findAll() {
+  @ApiResponse({
+    status: 200,
+    description: 'List of meal selections',
+    type: [MealSelectionResponseDto],
+  })
+  async findAll(): Promise<MealSelectionResponseDto[]> {
     return this.findAllUseCase.execute();
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a meal selection by ID' })
-  @ApiResponse({ status: 200, description: 'Meal selection found' })
+  @ApiResponse({
+    status: 200,
+    description: 'Meal selection found',
+    type: MealSelectionResponseDto,
+  })
   @ApiResponse({ status: 404, description: 'Meal selection not found' })
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string): Promise<MealSelectionResponseDto> {
     return this.findOneUseCase.execute(id);
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() dto: any) {
+  @ApiOperation({ summary: 'Update a meal selection' })
+  @ApiResponse({
+    status: 200,
+    description: 'Meal selection updated',
+    type: MealSelectionResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Meal selection not found' })
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateMealSelectionDto,
+  ): Promise<MealSelectionResponseDto> {
     return this.updateUseCase.execute(id, dto);
   }
 
   @Delete(':id')
-  async delete(@Param('id') id: string) {
+  @ApiOperation({ summary: 'Delete a meal selection' })
+  @ApiResponse({ status: 200, description: 'Meal selection deleted' })
+  @ApiResponse({ status: 404, description: 'Meal selection not found' })
+  async delete(@Param('id') id: string): Promise<void> {
     return this.deleteUseCase.execute(id);
   }
 }

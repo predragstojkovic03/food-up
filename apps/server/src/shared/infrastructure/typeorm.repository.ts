@@ -1,4 +1,4 @@
-import { FindOptionsWhere, Repository } from 'typeorm';
+import { FindOptionsWhere, In, Repository } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { Entity } from '../domain/entity';
 import { Id } from '../domain/id.type';
@@ -25,6 +25,14 @@ export abstract class TypeOrmRepository<T extends Entity>
     return entity;
   }
 
+  async insertMany(entities: T[]): Promise<T[]> {
+    const mappedEntities = entities.map((entity) =>
+      this._mapper.toPersistence(entity),
+    );
+    await this._repository.insert(mappedEntities);
+    return entities;
+  }
+
   async update(id: Entity['id'], entity: T): Promise<T> {
     await this._repository.update(
       { id } as any,
@@ -44,22 +52,42 @@ export abstract class TypeOrmRepository<T extends Entity>
   }
 
   findByCriteria(criteria: Partial<T>): Promise<T[]> {
-    return this._repository.find({
-      where: this._mapper.toPersistencePartial(
-        criteria,
-      ) as FindOptionsWhere<any>,
-    });
+    return this._repository
+      .find({
+        where: this._mapper.toPersistencePartial(
+          criteria,
+        ) as FindOptionsWhere<any>,
+      })
+      .then((entities) => {
+        return entities.map((entity) => this._mapper.toDomain(entity as any));
+      });
   }
 
   findOneByCriteria(criteria: Partial<T>): Promise<T | null> {
-    return this._repository.findOne({
-      where: this._mapper.toPersistencePartial(
-        criteria,
-      ) as FindOptionsWhere<any>,
-    });
+    return this._repository
+      .findOne({
+        where: this._mapper.toPersistencePartial(
+          criteria,
+        ) as FindOptionsWhere<any>,
+      })
+      .then((entity) => {
+        return entity ? this._mapper.toDomain(entity as any) : null;
+      });
   }
 
   findAll(): Promise<T[]> {
-    return this._repository.find();
+    return this._repository.find().then((entities) => {
+      return entities.map((entity) => this._mapper.toDomain(entity as any));
+    });
+  }
+
+  findBulkByIds(ids: T['id'][]): Promise<T[]> {
+    return this._repository
+      .find({
+        where: { id: In(ids) } as FindOptionsWhere<T>,
+      })
+      .then((entities) => {
+        return entities.map((entity) => this._mapper.toDomain(entity as any));
+      });
   }
 }

@@ -1,11 +1,12 @@
 import { FindBusinessUseCase } from 'src/core/businesses/application/use-cases/find-business.use-case';
 import { EntityInstanceNotFoundException } from 'src/shared/domain/exceptions/entity-instance-not-found.exception';
+import { SupplierType } from '../../domain/supplier-type.enum';
 import { Supplier } from '../../domain/supplier.entity';
 import { ISuppliersRepository } from '../../domain/suppliers.repository.interface';
 
 export interface UpdateSupplierDto {
   name?: string;
-  type?: 'registered' | 'external';
+  type?: SupplierType;
   contactInfo?: string;
   businessIds?: string[];
   userId?: string | null;

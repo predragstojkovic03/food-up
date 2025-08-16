@@ -1,5 +1,6 @@
 import { Provider } from '@nestjs/common';
 import { FindSupplierUseCase } from 'src/core/suppliers/application/use-cases/find-supplier.use-case';
+import { ConnectBusinessesToSupplierUseCase } from '../application/use-cases/connect-businesses-to-supplier.use-case';
 import { CreateBusinessSupplierUseCase } from '../application/use-cases/create-business-supplier.use-case';
 import { DeleteBusinessSupplierUseCase } from '../application/use-cases/delete-business-supplier.use-case';
 import { FindAllBusinessSuppliersUseCase } from '../application/use-cases/find-all-business-suppliers.use-case';
@@ -48,5 +49,10 @@ export const BusinessSuppliersUseCaseProviders: Provider[] = [
     useFactory: (repo: IBusinessSuppliersRepository) =>
       new DeleteBusinessSupplierUseCase(repo),
     inject: [I_BUSINESS_SUPPLIERS_REPOSITORY],
+  },
+  {
+    provide: ConnectBusinessesToSupplierUseCase,
+    useFactory: (repo: IBusinessSuppliersRepository) =>
+      new ConnectBusinessesToSupplierUseCase(repo),
   },
 ];

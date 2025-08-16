@@ -14,6 +14,6 @@ export class MealSelectionWindow {
   @Column('character varying', { length: 26 })
   businessId: string;
 
-  @Column('character varying', { length: 26, nullable: true })
-  menuPeriodId: string | null;
+  @Column('character varying', { length: 26, nullable: false })
+  menuPeriodId: string;
 }

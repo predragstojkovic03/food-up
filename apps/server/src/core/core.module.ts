@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AuthModule } from './auth/auth.module';
 import { BusinessSuppliersModule } from './business-suppliers/business-suppliers.module';
 import { BusinessesModule } from './businesses/businesses.module';
+import { ChangeRequestsModule } from './change-requests/change-requests.module';
 import { EmployeesModule } from './employees/employees.module';
 import { IdentityModule } from './identity/identity.module';
 import { MealSelectionWindowsModule } from './meal-selection-windows/meal-selection-windows.module';
@@ -24,6 +25,8 @@ import { SuppliersModule } from './suppliers/suppliers.module';
     ReportsModule,
     IdentityModule,
     AuthModule,
+    SuppliersModule,
+    ChangeRequestsModule,
   ],
 })
 export class CoreModule {}

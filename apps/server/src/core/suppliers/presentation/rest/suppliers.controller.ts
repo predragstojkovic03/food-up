@@ -13,6 +13,9 @@ import { DeleteSupplierUseCase } from '../../application/use-cases/delete-suppli
 import { FindAllSuppliersUseCase } from '../../application/use-cases/find-all-suppliers.use-case';
 import { FindSupplierUseCase } from '../../application/use-cases/find-supplier.use-case';
 import { UpdateSupplierUseCase } from '../../application/use-cases/update-supplier.use-case';
+import { CreateSupplierDto } from './dto/create-supplier.dto';
+import { SupplierResponseDto } from './dto/supplier-response.dto';
+import { UpdateSupplierDto } from './dto/update-supplier.dto';
 
 @ApiTags('Suppliers')
 @Controller('suppliers')
@@ -27,33 +30,58 @@ export class SuppliersController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new supplier' })
-  @ApiResponse({ status: 201, description: 'Supplier created' })
-  async create(@Body() dto: any) {
+  @ApiResponse({
+    status: 201,
+    description: 'Supplier created',
+    type: SupplierResponseDto,
+  })
+  async create(@Body() dto: CreateSupplierDto): Promise<SupplierResponseDto> {
     return this.createSupplier.execute(dto);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get all suppliers' })
-  @ApiResponse({ status: 200, description: 'List of suppliers' })
-  async findAll() {
+  @ApiResponse({
+    status: 200,
+    description: 'List of suppliers',
+    type: [SupplierResponseDto],
+  })
+  async findAll(): Promise<SupplierResponseDto[]> {
     return this.findAllSuppliers.execute();
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a supplier by ID' })
-  @ApiResponse({ status: 200, description: 'Supplier found' })
+  @ApiResponse({
+    status: 200,
+    description: 'Supplier found',
+    type: SupplierResponseDto,
+  })
   @ApiResponse({ status: 404, description: 'Supplier not found' })
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string): Promise<SupplierResponseDto> {
     return this.findSupplier.execute(id);
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() dto: any) {
+  @ApiOperation({ summary: 'Update a supplier' })
+  @ApiResponse({
+    status: 200,
+    description: 'Supplier updated',
+    type: SupplierResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Supplier not found' })
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateSupplierDto,
+  ): Promise<SupplierResponseDto> {
     return this.updateSupplier.execute(id, dto);
   }
 
   @Delete(':id')
-  async delete(@Param('id') id: string) {
+  @ApiOperation({ summary: 'Delete a supplier' })
+  @ApiResponse({ status: 200, description: 'Supplier deleted' })
+  @ApiResponse({ status: 404, description: 'Supplier not found' })
+  async delete(@Param('id') id: string): Promise<void> {
     return this.deleteSupplier.execute(id);
   }
 }

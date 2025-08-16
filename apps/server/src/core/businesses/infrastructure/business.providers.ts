@@ -1,4 +1,5 @@
 import { Provider } from '@nestjs/common';
+import { FindBusinessesBulkUseCase } from 'src/core/business-suppliers/application/use-cases/find-businesses-bulk.use-case';
 import { CreateBusinessUseCase } from '../application/use-cases/create-business.use-case';
 import { DeleteBusinessUseCase } from '../application/use-cases/delete-business.use-case';
 import { FindAllBusinessesUseCase } from '../application/use-cases/find-all-businesses.use-case';
@@ -44,6 +45,12 @@ export const BusinessUseCases: Array<Provider> = [
     provide: UpdateBusinessUseCase,
     useFactory: (repository: IBusinessesRepository) =>
       new UpdateBusinessUseCase(repository),
+    inject: [I_BUSINESSES_REPOSITORY],
+  },
+  {
+    provide: FindBusinessesBulkUseCase,
+    useFactory: (repository: IBusinessesRepository) =>
+      new FindBusinessesBulkUseCase(repository),
     inject: [I_BUSINESSES_REPOSITORY],
   },
 ];

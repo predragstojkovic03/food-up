@@ -6,6 +6,7 @@ export class Meal {
     public name: string,
     public description: string,
     public type: MealType,
+    public readonly supplierId: string,
     public price?: number,
   ) {}
 }
