@@ -8,7 +8,7 @@ export interface CreateMealSelectionWindowDto {
   startTime: Date;
   endTime: Date;
   businessId: string;
-  menuPeriodId: string;
+  menuPeriodIds: string[];
 }
 
 export class CreateMealSelectionWindowUseCase {
@@ -20,11 +20,12 @@ export class CreateMealSelectionWindowUseCase {
   async execute(
     dto: CreateMealSelectionWindowDto,
   ): Promise<MealSelectionWindow> {
-    let menuPeriodId = dto.menuPeriodId ?? null;
-    if (menuPeriodId) {
-      const menuPeriod =
-        await this._findMenuPeriodUseCase.execute(menuPeriodId);
-      if (!menuPeriod) {
+    const menuPeriodIds = dto.menuPeriodIds ?? [];
+    if (menuPeriodIds.length > 0) {
+      const menuPeriods = await Promise.all(
+        menuPeriodIds.map((id) => this._findMenuPeriodUseCase.execute(id)),
+      );
+      if (menuPeriods.includes(null)) {
         throw new EntityInstanceNotFoundException('MenuPeriod not found');
       }
     }
@@ -33,7 +34,7 @@ export class CreateMealSelectionWindowUseCase {
       dto.startTime,
       dto.endTime,
       dto.businessId,
-      menuPeriodId,
+      menuPeriodIds,
     );
     return this._repository.insert(entity);
   }

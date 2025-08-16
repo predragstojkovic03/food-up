@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { MenuPeriod } from 'src/core/menu-periods/infrastructure/persistence/menu-period.typeorm-entity';
+import { Column, Entity, JoinTable, ManyToMany, PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class MealSelectionWindow {
@@ -14,6 +15,7 @@ export class MealSelectionWindow {
   @Column('character varying', { length: 26 })
   businessId: string;
 
-  @Column('character varying', { length: 26, nullable: false })
-  menuPeriodId: string;
+  @ManyToMany(() => MenuPeriod, (menuPeriod) => menuPeriod.menuSelectionWindows)
+  @JoinTable()
+  menuPeriods: MenuPeriod[];
 }

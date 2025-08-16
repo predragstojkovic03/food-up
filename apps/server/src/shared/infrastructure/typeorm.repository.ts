@@ -1,4 +1,4 @@
-import { FindOptionsWhere, In, Repository } from 'typeorm';
+import { FindOptionsWhere, In, ObjectLiteral, Repository } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { Entity } from '../domain/entity';
 import { Id } from '../domain/id.type';
@@ -11,7 +11,7 @@ export abstract class TypeOrmRepository<T extends Entity>
   implements IRepository<T>
 {
   constructor(
-    protected readonly _repository: Repository<T>,
+    protected readonly _repository: Repository<ObjectLiteral>,
     protected readonly _mapper: TypeOrmMapper<T, PersistenceEntity<T>>,
   ) {}
 

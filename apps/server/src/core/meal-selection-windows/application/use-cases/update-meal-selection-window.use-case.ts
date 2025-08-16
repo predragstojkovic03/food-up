@@ -7,7 +7,7 @@ export interface UpdateMealSelectionWindowDto {
   startTime?: Date;
   endTime?: Date;
   businessId?: string;
-  menuPeriodId?: string | null;
+  menuPeriodIds?: string[];
 }
 
 export class UpdateMealSelectionWindowUseCase {
@@ -25,20 +25,22 @@ export class UpdateMealSelectionWindowUseCase {
       throw new EntityInstanceNotFoundException(
         'MealSelectionWindow not found',
       );
-    let menuPeriodIdToCheck = dto.menuPeriodId ?? existing.menuPeriodId;
-    if (menuPeriodIdToCheck && menuPeriodIdToCheck !== existing.menuPeriodId) {
-      const menuPeriod =
-        await this._findMenuPeriodUseCase.execute(menuPeriodIdToCheck);
-      if (!menuPeriod) {
+
+    if (dto.menuPeriodIds) {
+      const menuPeriods = await Promise.all(
+        dto.menuPeriodIds.map((id) => this._findMenuPeriodUseCase.execute(id)),
+      );
+      if (menuPeriods.includes(null)) {
         throw new EntityInstanceNotFoundException('MenuPeriod not found');
       }
     }
+
     const updated = new MealSelectionWindow(
       id,
       dto.startTime ?? existing.startTime,
       dto.endTime ?? existing.endTime,
       dto.businessId ?? existing.businessId,
-      menuPeriodIdToCheck,
+      [...existing.menuPeriodIds, ...(dto.menuPeriodIds ?? [])], // Merging existing and new menu period IDs
     );
     return this._repository.update(id, updated);
   }

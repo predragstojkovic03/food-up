@@ -5,7 +5,7 @@ export class MealSelectionWindowResponseDto {
   id: string;
 
   @ApiProperty()
-  menuPeriodId: string;
+  menuPeriodIds: string[];
 
   @ApiProperty()
   startTime: Date;

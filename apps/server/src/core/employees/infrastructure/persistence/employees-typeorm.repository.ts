@@ -3,9 +3,13 @@ import { TypeOrmRepository } from 'src/shared/infrastructure/typeorm.repository'
 import { Repository } from 'typeorm';
 import { Employee } from '../../domain/employee.entity';
 import { EmployeeTypeOrmMapper } from './employee-typeorm.mapper';
+import { Employee as EmployeePersistence } from './employee.typeorm-entity';
 
 export class EmployeesTypeOrmRepository extends TypeOrmRepository<Employee> {
-  constructor(@InjectRepository(Employee) repository: Repository<Employee>) {
+  constructor(
+    @InjectRepository(EmployeePersistence)
+    repository: Repository<EmployeePersistence>,
+  ) {
     super(repository, new EmployeeTypeOrmMapper());
   }
 
@@ -18,7 +22,9 @@ export class EmployeesTypeOrmRepository extends TypeOrmRepository<Employee> {
       delete where.businessId;
     }
 
-    return await this._repository.find({ where });
+    return (await this._repository.find({ where })).map((entity) =>
+      this._mapper.toDomain(entity as EmployeePersistence),
+    );
   }
 
   override async findOneByCriteria(
@@ -30,8 +36,12 @@ export class EmployeesTypeOrmRepository extends TypeOrmRepository<Employee> {
       delete where.businessId;
     }
 
-    return await this._repository.findOne({
-      where,
-    });
+    return await this._repository
+      .findOne({
+        where,
+      })
+      .then((entity) =>
+        entity ? this._mapper.toDomain(entity as EmployeePersistence) : null,
+      );
   }
 }

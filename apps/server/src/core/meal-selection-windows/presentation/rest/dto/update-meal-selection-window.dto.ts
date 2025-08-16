@@ -1,11 +1,12 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDateString, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsDateString, IsOptional, IsString } from 'class-validator';
 
 export class UpdateMealSelectionWindowDto {
   @ApiPropertyOptional()
-  @IsString()
+  @IsArray()
+  @IsString({ each: true })
   @IsOptional()
-  menuPeriodId?: string;
+  menuPeriodIds?: string[];
 
   @ApiPropertyOptional()
   @IsDateString()

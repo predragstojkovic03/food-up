@@ -12,7 +12,7 @@ export class MealSelectionWindowTypeOrmMapper extends TypeOrmMapper<
       persistence.startTime,
       persistence.endTime,
       persistence.businessId,
-      persistence.menuPeriodId,
+      persistence.menuPeriods?.map((mp) => mp.id) ?? [], // Assuming menuPeriods is an array of objects with at least an id property
     );
   }
 
@@ -22,7 +22,7 @@ export class MealSelectionWindowTypeOrmMapper extends TypeOrmMapper<
     persistence.startTime = domain.startTime;
     persistence.endTime = domain.endTime;
     persistence.businessId = domain.businessId;
-    persistence.menuPeriodId = domain.menuPeriodId;
+    persistence.menuPeriods = domain.menuPeriodIds.map((id) => ({ id }) as any); // Assuming menuPeriods is an array of objects with at least an id property
     return persistence;
   }
 }
