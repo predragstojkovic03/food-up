@@ -1,14 +1,12 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import {
-  IdentityRepositoryProvider,
-  IdentityUseCaseProviders,
-} from './infrastructure/identity.providers';
+import { IdentityService } from './application/identity.service';
+import { IdentityRepositoryProvider } from './infrastructure/identity.providers';
 import { Identity } from './infrastructure/persistence/identity.typeorm-entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Identity])],
-  providers: [IdentityRepositoryProvider, ...IdentityUseCaseProviders],
-  exports: [IdentityRepositoryProvider, ...IdentityUseCaseProviders],
+  providers: [IdentityRepositoryProvider, IdentityService],
+  exports: [IdentityRepositoryProvider, IdentityService],
 })
 export class IdentityModule {}

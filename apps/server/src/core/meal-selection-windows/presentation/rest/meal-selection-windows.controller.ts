@@ -8,11 +8,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { CreateMealSelectionWindowUseCase } from '../../application/use-cases/create-meal-selection-window.use-case';
-import { DeleteMealSelectionWindowUseCase } from '../../application/use-cases/delete-meal-selection-window.use-case';
-import { FindAllMealSelectionWindowsUseCase } from '../../application/use-cases/find-all-meal-selection-windows.use-case';
-import { FindMealSelectionWindowUseCase } from '../../application/use-cases/find-meal-selection-window.use-case';
-import { UpdateMealSelectionWindowUseCase } from '../../application/use-cases/update-meal-selection-window.use-case';
+import { MealSelectionWindowService } from '../../application/meal-selection-window.service';
 import { CreateMealSelectionWindowDto } from './dto/create-meal-selection-window.dto';
 import { MealSelectionWindowResponseDto } from './dto/meal-selection-window-response.dto';
 import { UpdateMealSelectionWindowDto } from './dto/update-meal-selection-window.dto';
@@ -21,11 +17,7 @@ import { UpdateMealSelectionWindowDto } from './dto/update-meal-selection-window
 @Controller('meal-selection-windows')
 export class MealSelectionWindowsController {
   constructor(
-    private readonly createMealSelectionWindow: CreateMealSelectionWindowUseCase,
-    private readonly findAllMealSelectionWindows: FindAllMealSelectionWindowsUseCase,
-    private readonly findMealSelectionWindow: FindMealSelectionWindowUseCase,
-    private readonly updateMealSelectionWindow: UpdateMealSelectionWindowUseCase,
-    private readonly deleteMealSelectionWindow: DeleteMealSelectionWindowUseCase,
+    private readonly _mealSelectionWindowService: MealSelectionWindowService,
   ) {}
 
   @Post()
@@ -38,7 +30,8 @@ export class MealSelectionWindowsController {
   async create(
     @Body() dto: CreateMealSelectionWindowDto,
   ): Promise<MealSelectionWindowResponseDto> {
-    return this.createMealSelectionWindow.execute(dto);
+    const result = await this._mealSelectionWindowService.create(dto);
+    return this.toResponseDto(result);
   }
 
   @Get()
@@ -49,7 +42,8 @@ export class MealSelectionWindowsController {
     type: [MealSelectionWindowResponseDto],
   })
   async findAll(): Promise<MealSelectionWindowResponseDto[]> {
-    return this.findAllMealSelectionWindows.execute();
+    const result = await this._mealSelectionWindowService.findAll();
+    return result.map(this.toResponseDto);
   }
 
   @Get(':id')
@@ -63,7 +57,8 @@ export class MealSelectionWindowsController {
   async findOne(
     @Param('id') id: string,
   ): Promise<MealSelectionWindowResponseDto> {
-    return this.findMealSelectionWindow.execute(id);
+    const result = await this._mealSelectionWindowService.findOne(id);
+    return this.toResponseDto(result);
   }
 
   @Patch(':id')
@@ -78,7 +73,8 @@ export class MealSelectionWindowsController {
     @Param('id') id: string,
     @Body() dto: UpdateMealSelectionWindowDto,
   ): Promise<MealSelectionWindowResponseDto> {
-    return this.updateMealSelectionWindow.execute(id, dto);
+    const result = await this._mealSelectionWindowService.update(id, dto);
+    return this.toResponseDto(result);
   }
 
   @Delete(':id')
@@ -86,6 +82,16 @@ export class MealSelectionWindowsController {
   @ApiResponse({ status: 200, description: 'Meal selection window deleted' })
   @ApiResponse({ status: 404, description: 'Meal selection window not found' })
   async delete(@Param('id') id: string): Promise<void> {
-    return this.deleteMealSelectionWindow.execute(id);
+    return this._mealSelectionWindowService.delete(id);
+  }
+
+  private toResponseDto(entity: any): MealSelectionWindowResponseDto {
+    return {
+      id: entity.id,
+      menuPeriodIds: entity.menuPeriodIds,
+      startTime: entity.startTime,
+      endTime: entity.endTime,
+      description: entity.description ?? '',
+    };
   }
 }

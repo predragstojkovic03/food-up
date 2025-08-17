@@ -9,11 +9,7 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
-import { CreateMenuPeriodUseCase } from '../../application/use-cases/create-menu-period.use-case';
-import { DeleteMenuPeriodUseCase } from '../../application/use-cases/delete-menu-period.use-case';
-import { FindAllMenuPeriodsUseCase } from '../../application/use-cases/find-all-menu-periods.use-case';
-import { FindMenuPeriodUseCase } from '../../application/use-cases/find-menu-period.use-case';
-import { UpdateMenuPeriodUseCase } from '../../application/use-cases/update-menu-period.use-case';
+import { MenuPeriodsService } from '../../application/menu-periods.service';
 import { CreateMenuPeriodDto } from './dto/create-menu-period.dto';
 import { MenuPeriodResponseDto } from './dto/menu-period-response.dto';
 import { UpdateMenuPeriodDto } from './dto/update-menu-period.dto';
@@ -21,13 +17,7 @@ import { UpdateMenuPeriodDto } from './dto/update-menu-period.dto';
 @ApiTags('MenuPeriods')
 @Controller('menu-periods')
 export class MenuPeriodsController {
-  constructor(
-    private readonly createMenuPeriod: CreateMenuPeriodUseCase,
-    private readonly findAllMenuPeriods: FindAllMenuPeriodsUseCase,
-    private readonly findMenuPeriod: FindMenuPeriodUseCase,
-    private readonly updateMenuPeriod: UpdateMenuPeriodUseCase,
-    private readonly deleteMenuPeriod: DeleteMenuPeriodUseCase,
-  ) {}
+  constructor(private readonly _menuPeriodsService: MenuPeriodsService) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new menu period' })
@@ -35,7 +25,7 @@ export class MenuPeriodsController {
   async create(
     @Body() dto: CreateMenuPeriodDto,
   ): Promise<MenuPeriodResponseDto> {
-    const period = await this.createMenuPeriod.execute(dto);
+    const period = await this._menuPeriodsService.create(dto);
     return plainToInstance(MenuPeriodResponseDto, period);
   }
 
@@ -43,13 +33,13 @@ export class MenuPeriodsController {
   @ApiOperation({ summary: 'Get all menu periods' })
   @ApiResponse({ status: 200, type: [MenuPeriodResponseDto] })
   async findAll(): Promise<MenuPeriodResponseDto[]> {
-    const periods = await this.findAllMenuPeriods.execute();
+    const periods = await this._menuPeriodsService.findAll();
     return plainToInstance(MenuPeriodResponseDto, periods);
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<MenuPeriodResponseDto> {
-    const period = await this.findMenuPeriod.execute(id);
+    const period = await this._menuPeriodsService.findOne(id);
     return plainToInstance(MenuPeriodResponseDto, period);
   }
 
@@ -58,12 +48,12 @@ export class MenuPeriodsController {
     @Param('id') id: string,
     @Body() dto: UpdateMenuPeriodDto,
   ): Promise<MenuPeriodResponseDto> {
-    const period = await this.updateMenuPeriod.execute(id, dto);
+    const period = await this._menuPeriodsService.update(id, dto);
     return plainToInstance(MenuPeriodResponseDto, period);
   }
 
   @Delete(':id')
   async delete(@Param('id') id: string): Promise<void> {
-    return this.deleteMenuPeriod.execute(id);
+    return this._menuPeriodsService.delete(id);
   }
 }

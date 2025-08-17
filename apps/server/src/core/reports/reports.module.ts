@@ -5,11 +5,9 @@ import { MealSelectionsModule } from '../meal-selections/meal-selections.module'
 import { MenuItemsModule } from '../menu-items/menu-items.module';
 import { ReportItemsModule } from '../report-items/report-items.module';
 import { SuppliersModule } from '../suppliers/suppliers.module';
+import { ReportsService } from './application/reports.service';
 import { Report } from './infrastructure/persistence/report.typeorm-entity';
-import {
-  ReportsRepositoryProvide,
-  ReportsUseCaseProviders,
-} from './infrastructure/reports.providers';
+import { ReportsRepositoryProvide } from './infrastructure/reports.providers';
 import { ReportsController } from './presentation/rest/reports.controller';
 
 @Module({
@@ -22,7 +20,7 @@ import { ReportsController } from './presentation/rest/reports.controller';
     MealSelectionWindowsModule,
   ],
   controllers: [ReportsController],
-  providers: [ReportsRepositoryProvide, ...ReportsUseCaseProviders],
-  exports: [...ReportsUseCaseProviders],
+  providers: [ReportsRepositoryProvide, ReportsService],
+  exports: [ReportsService],
 })
 export class ReportsModule {}

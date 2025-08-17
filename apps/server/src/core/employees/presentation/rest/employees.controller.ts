@@ -10,11 +10,7 @@ import {
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 import { Role } from 'src/shared/domain/role.enum';
-import { CreateEmployeeUseCase } from '../../application/use-cases/create-employee.use-case';
-import { DeleteEmployeeUseCase } from '../../application/use-cases/delete-employee.use-case';
-import { FindAllEmployeesByBusinessUseCase } from '../../application/use-cases/find-all-employees.use-case';
-import { FindEmployeeUseCase } from '../../application/use-cases/find-employee.use-case';
-import { UpdateEmployeeUseCase } from '../../application/use-cases/update-employee.use-case';
+import { EmployeesService } from '../../application/employees.service';
 import { CreateEmployeeRequestDto } from './dto/create-employee.dto';
 import { EmployeeResponseDto } from './dto/employee-response.dto';
 import { UpdateEmployeeRequestDto } from './dto/update-employee.dto';
@@ -22,13 +18,7 @@ import { UpdateEmployeeRequestDto } from './dto/update-employee.dto';
 @ApiTags('Employees')
 @Controller('employees')
 export class EmployeesController {
-  constructor(
-    private readonly _createEmployeeUseCase: CreateEmployeeUseCase,
-    private readonly _findAllEmployeesByBusiness: FindAllEmployeesByBusinessUseCase,
-    private readonly _findEmployeeUseCase: FindEmployeeUseCase,
-    private readonly _updateEmployeeUseCase: UpdateEmployeeUseCase,
-    private readonly _deleteEmployeeUseCase: DeleteEmployeeUseCase,
-  ) {}
+  constructor(private readonly _employeesService: EmployeesService) {}
 
   @Post('')
   @ApiOperation({ summary: 'Create a new employee' })
@@ -36,11 +26,10 @@ export class EmployeesController {
   async create(
     @Body() createEmployeeDto: CreateEmployeeRequestDto,
   ): Promise<EmployeeResponseDto> {
-    const employee = await this._createEmployeeUseCase.execute({
+    const employee = await this._employeesService.create({
       ...createEmployeeDto,
       role: Role.Basic,
     });
-
     return plainToInstance(EmployeeResponseDto, employee);
   }
 
@@ -49,14 +38,13 @@ export class EmployeesController {
     @Param('businessId') businessId: string,
   ): Promise<EmployeeResponseDto[]> {
     const employees =
-      await this._findAllEmployeesByBusiness.execute(businessId);
-
+      await this._employeesService.findAllByBusiness(businessId);
     return plainToInstance(EmployeeResponseDto, employees);
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<EmployeeResponseDto | null> {
-    const employee = await this._findEmployeeUseCase.execute(id);
+    const employee = await this._employeesService.findOne(id);
     return employee ? plainToInstance(EmployeeResponseDto, employee) : null;
   }
 
@@ -65,12 +53,12 @@ export class EmployeesController {
     @Param('id') id: string,
     @Body() updateDto: UpdateEmployeeRequestDto,
   ): Promise<EmployeeResponseDto> {
-    const employee = await this._updateEmployeeUseCase.execute(id, updateDto);
+    const employee = await this._employeesService.update(id, updateDto);
     return plainToInstance(EmployeeResponseDto, employee);
   }
 
   @Delete(':id')
   async delete(@Param('id') id: string): Promise<void> {
-    await this._deleteEmployeeUseCase.execute(id);
+    await this._employeesService.delete(id);
   }
 }

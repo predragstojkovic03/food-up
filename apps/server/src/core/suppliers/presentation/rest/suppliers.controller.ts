@@ -8,11 +8,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { CreateSupplierUseCase } from '../../application/use-cases/create-supplier.use-case';
-import { DeleteSupplierUseCase } from '../../application/use-cases/delete-supplier.use-case';
-import { FindAllSuppliersUseCase } from '../../application/use-cases/find-all-suppliers.use-case';
-import { FindSupplierUseCase } from '../../application/use-cases/find-supplier.use-case';
-import { UpdateSupplierUseCase } from '../../application/use-cases/update-supplier.use-case';
+import { SuppliersService } from '../../application/suppliers.service';
 import { CreateSupplierDto } from './dto/create-supplier.dto';
 import { SupplierResponseDto } from './dto/supplier-response.dto';
 import { UpdateSupplierDto } from './dto/update-supplier.dto';
@@ -20,13 +16,7 @@ import { UpdateSupplierDto } from './dto/update-supplier.dto';
 @ApiTags('Suppliers')
 @Controller('suppliers')
 export class SuppliersController {
-  constructor(
-    private readonly createSupplier: CreateSupplierUseCase,
-    private readonly findAllSuppliers: FindAllSuppliersUseCase,
-    private readonly findSupplier: FindSupplierUseCase,
-    private readonly updateSupplier: UpdateSupplierUseCase,
-    private readonly deleteSupplier: DeleteSupplierUseCase,
-  ) {}
+  constructor(private readonly _suppliersService: SuppliersService) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new supplier' })
@@ -36,7 +26,8 @@ export class SuppliersController {
     type: SupplierResponseDto,
   })
   async create(@Body() dto: CreateSupplierDto): Promise<SupplierResponseDto> {
-    return this.createSupplier.execute(dto);
+    const result = await this._suppliersService.create(dto);
+    return this.toResponseDto(result);
   }
 
   @Get()
@@ -47,7 +38,8 @@ export class SuppliersController {
     type: [SupplierResponseDto],
   })
   async findAll(): Promise<SupplierResponseDto[]> {
-    return this.findAllSuppliers.execute();
+    const result = await this._suppliersService.findAll();
+    return result.map(this.toResponseDto);
   }
 
   @Get(':id')
@@ -59,7 +51,8 @@ export class SuppliersController {
   })
   @ApiResponse({ status: 404, description: 'Supplier not found' })
   async findOne(@Param('id') id: string): Promise<SupplierResponseDto> {
-    return this.findSupplier.execute(id);
+    const result = await this._suppliersService.findOne(id);
+    return this.toResponseDto(result);
   }
 
   @Patch(':id')
@@ -74,7 +67,8 @@ export class SuppliersController {
     @Param('id') id: string,
     @Body() dto: UpdateSupplierDto,
   ): Promise<SupplierResponseDto> {
-    return this.updateSupplier.execute(id, dto);
+    const result = await this._suppliersService.update(id, dto);
+    return this.toResponseDto(result);
   }
 
   @Delete(':id')
@@ -82,6 +76,16 @@ export class SuppliersController {
   @ApiResponse({ status: 200, description: 'Supplier deleted' })
   @ApiResponse({ status: 404, description: 'Supplier not found' })
   async delete(@Param('id') id: string): Promise<void> {
-    return this.deleteSupplier.execute(id);
+    return this._suppliersService.delete(id);
+  }
+
+  private toResponseDto(entity: any): SupplierResponseDto {
+    return {
+      id: entity.id,
+      name: entity.name,
+      type: entity.type,
+      contactInfo: entity.contactInfo,
+      businessIds: entity.businessIds ?? [],
+    };
   }
 }

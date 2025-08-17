@@ -10,11 +10,7 @@ import {
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 
-import { CreateChangeRequestUseCase } from '../../application/use-cases/create-change-request.use-case';
-import { DeleteChangeRequestUseCase } from '../../application/use-cases/delete-change-request.use-case';
-import { FindAllChangeRequestsUseCase } from '../../application/use-cases/find-all-change-requests.use-case';
-import { FindChangeRequestUseCase } from '../../application/use-cases/find-change-request.use-case';
-import { UpdateChangeRequestUseCase } from '../../application/use-cases/update-change-request.use-case';
+import { ChangeRequestsService } from '../../application/change-requests.service';
 import { ChangeRequestResponseDto } from './dto/change-request-response.dto';
 import { CreateChangeRequestDto } from './dto/create-change-request.dto';
 import { UpdateChangeRequestDto } from './dto/update-change-request.dto';
@@ -22,13 +18,7 @@ import { UpdateChangeRequestDto } from './dto/update-change-request.dto';
 @ApiTags('ChangeRequests')
 @Controller('change-requests')
 export class ChangeRequestsController {
-  constructor(
-    private readonly createChangeRequest: CreateChangeRequestUseCase,
-    private readonly findAllChangeRequests: FindAllChangeRequestsUseCase,
-    private readonly findChangeRequest: FindChangeRequestUseCase,
-    private readonly updateChangeRequest: UpdateChangeRequestUseCase,
-    private readonly deleteChangeRequest: DeleteChangeRequestUseCase,
-  ) {}
+  constructor(private readonly _changeRequestsService: ChangeRequestsService) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new change request' })
@@ -36,7 +26,7 @@ export class ChangeRequestsController {
   async create(
     @Body() dto: CreateChangeRequestDto,
   ): Promise<ChangeRequestResponseDto> {
-    const cr = await this.createChangeRequest.execute(dto);
+    const cr = await this._changeRequestsService.create(dto);
     return plainToInstance(ChangeRequestResponseDto, cr);
   }
 
@@ -44,13 +34,13 @@ export class ChangeRequestsController {
   @ApiOperation({ summary: 'Get all change requests' })
   @ApiResponse({ status: 200, type: [ChangeRequestResponseDto] })
   async findAll(): Promise<ChangeRequestResponseDto[]> {
-    const crs = await this.findAllChangeRequests.execute();
+    const crs = await this._changeRequestsService.findAll();
     return plainToInstance(ChangeRequestResponseDto, crs);
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<ChangeRequestResponseDto> {
-    const cr = await this.findChangeRequest.execute(id);
+    const cr = await this._changeRequestsService.findOne(id);
     return plainToInstance(ChangeRequestResponseDto, cr);
   }
 
@@ -59,12 +49,12 @@ export class ChangeRequestsController {
     @Param('id') id: string,
     @Body() dto: UpdateChangeRequestDto,
   ): Promise<ChangeRequestResponseDto> {
-    const cr = await this.updateChangeRequest.execute(id, dto);
+    const cr = await this._changeRequestsService.update(id, dto);
     return plainToInstance(ChangeRequestResponseDto, cr);
   }
 
   @Delete(':id')
   async delete(@Param('id') id: string): Promise<void> {
-    return this.deleteChangeRequest.execute(id);
+    return this._changeRequestsService.delete(id);
   }
 }

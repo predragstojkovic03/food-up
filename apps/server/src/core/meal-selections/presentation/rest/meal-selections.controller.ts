@@ -8,11 +8,7 @@ import {
   Put,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { CreateMealSelectionUseCase } from '../../application/use-cases/create-meal-selection.use-case';
-import { DeleteMealSelectionUseCase } from '../../application/use-cases/delete-meal-selection.use-case';
-import { FindAllMealSelectionsUseCase } from '../../application/use-cases/find-all-meal-selections.use-case';
-import { FindMealSelectionUseCase } from '../../application/use-cases/find-meal-selection.use-case';
-import { UpdateMealSelectionUseCase } from '../../application/use-cases/update-meal-selection.use-case';
+import { MealSelectionsService } from '../../application/meal-selections.service';
 import { CreateMealSelectionDto } from './dto/create-meal-selection.dto';
 import { MealSelectionResponseDto } from './dto/meal-selection-response.dto';
 import { UpdateMealSelectionDto } from './dto/update-meal-selection.dto';
@@ -20,13 +16,7 @@ import { UpdateMealSelectionDto } from './dto/update-meal-selection.dto';
 @ApiTags('MealSelections')
 @Controller('meal-selections')
 export class MealSelectionsController {
-  constructor(
-    private readonly createUseCase: CreateMealSelectionUseCase,
-    private readonly findAllUseCase: FindAllMealSelectionsUseCase,
-    private readonly findOneUseCase: FindMealSelectionUseCase,
-    private readonly updateUseCase: UpdateMealSelectionUseCase,
-    private readonly deleteUseCase: DeleteMealSelectionUseCase,
-  ) {}
+  constructor(private readonly _mealSelectionsService: MealSelectionsService) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new meal selection' })
@@ -38,7 +28,8 @@ export class MealSelectionsController {
   async create(
     @Body() dto: CreateMealSelectionDto,
   ): Promise<MealSelectionResponseDto> {
-    return this.createUseCase.execute(dto);
+    const result = await this._mealSelectionsService.create(dto);
+    return this.toResponseDto(result);
   }
 
   @Get()
@@ -49,7 +40,8 @@ export class MealSelectionsController {
     type: [MealSelectionResponseDto],
   })
   async findAll(): Promise<MealSelectionResponseDto[]> {
-    return this.findAllUseCase.execute();
+    const result = await this._mealSelectionsService.findAll();
+    return result.map(this.toResponseDto);
   }
 
   @Get(':id')
@@ -61,7 +53,8 @@ export class MealSelectionsController {
   })
   @ApiResponse({ status: 404, description: 'Meal selection not found' })
   async findOne(@Param('id') id: string): Promise<MealSelectionResponseDto> {
-    return this.findOneUseCase.execute(id);
+    const result = await this._mealSelectionsService.findOne(id);
+    return this.toResponseDto(result);
   }
 
   @Put(':id')
@@ -76,7 +69,8 @@ export class MealSelectionsController {
     @Param('id') id: string,
     @Body() dto: UpdateMealSelectionDto,
   ): Promise<MealSelectionResponseDto> {
-    return this.updateUseCase.execute(id, dto);
+    const result = await this._mealSelectionsService.update(id, dto);
+    return this.toResponseDto(result);
   }
 
   @Delete(':id')
@@ -84,6 +78,16 @@ export class MealSelectionsController {
   @ApiResponse({ status: 200, description: 'Meal selection deleted' })
   @ApiResponse({ status: 404, description: 'Meal selection not found' })
   async delete(@Param('id') id: string): Promise<void> {
-    return this.deleteUseCase.execute(id);
+    return this._mealSelectionsService.delete(id);
+  }
+
+  private toResponseDto(entity: any): MealSelectionResponseDto {
+    return {
+      id: entity.id,
+      employeeId: entity.employeeId,
+      menuItemId: entity.menuItemId,
+      mealSelectionWindowId: entity.mealSelectionWindowId,
+      quantity: entity.quantity,
+    };
   }
 }

@@ -10,11 +10,7 @@ import {
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 
-import { CreateReportUseCase } from '../../application/use-cases/create-report.use-case';
-import { DeleteReportUseCase } from '../../application/use-cases/delete-report.use-case';
-import { FindAllReportsUseCase } from '../../application/use-cases/find-all-reports.use-case';
-import { FindReportUseCase } from '../../application/use-cases/find-report.use-case';
-import { UpdateReportUseCase } from '../../application/use-cases/update-report.use-case';
+import { ReportsService } from '../../application/reports.service';
 import { CreateReportDto } from './dto/create-report.dto';
 import { ReportResponseDto } from './dto/report-response.dto';
 import { UpdateReportDto } from './dto/update-report.dto';
@@ -22,19 +18,13 @@ import { UpdateReportDto } from './dto/update-report.dto';
 @ApiTags('Reports')
 @Controller('reports')
 export class ReportsController {
-  constructor(
-    private readonly createReport: CreateReportUseCase,
-    private readonly findAllReports: FindAllReportsUseCase,
-    private readonly findReport: FindReportUseCase,
-    private readonly updateReport: UpdateReportUseCase,
-    private readonly deleteReport: DeleteReportUseCase,
-  ) {}
+  constructor(private readonly _reportsService: ReportsService) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new report' })
   @ApiResponse({ status: 201, type: ReportResponseDto })
   async create(@Body() dto: CreateReportDto): Promise<ReportResponseDto> {
-    const report = await this.createReport.execute(dto);
+    const report = await this._reportsService.create(dto);
     return plainToInstance(ReportResponseDto, report);
   }
 
@@ -42,13 +32,13 @@ export class ReportsController {
   @ApiOperation({ summary: 'Get all reports' })
   @ApiResponse({ status: 200, type: [ReportResponseDto] })
   async findAll(): Promise<ReportResponseDto[]> {
-    const reports = await this.findAllReports.execute();
+    const reports = await this._reportsService.findAll();
     return plainToInstance(ReportResponseDto, reports);
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<ReportResponseDto> {
-    const report = await this.findReport.execute(id);
+    const report = await this._reportsService.findOne(id);
     return plainToInstance(ReportResponseDto, report);
   }
 
@@ -57,12 +47,12 @@ export class ReportsController {
     @Param('id') id: string,
     @Body() dto: UpdateReportDto,
   ): Promise<ReportResponseDto> {
-    const report = await this.updateReport.execute(id, dto);
+    const report = await this._reportsService.update(id, dto);
     return plainToInstance(ReportResponseDto, report);
   }
 
   @Delete(':id')
   async delete(@Param('id') id: string): Promise<void> {
-    return this.deleteReport.execute(id);
+    return this._reportsService.delete(id);
   }
 }
