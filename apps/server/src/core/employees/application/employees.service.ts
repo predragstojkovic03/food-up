@@ -1,11 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Role } from 'src/shared/domain/role.enum';
 import { Employee } from '../domain/employee.entity';
-import { IEmployeeRepository } from '../domain/employee.repository.interface';
+import {
+  I_EMPLOYEES_REPOSITORY,
+  IEmployeeRepository,
+} from '../domain/employee.repository.interface';
 
 @Injectable()
 export class EmployeesService {
-  constructor(private readonly repo: IEmployeeRepository) {}
+  constructor(
+    @Inject(I_EMPLOYEES_REPOSITORY)
+    private readonly repo: IEmployeeRepository,
+  ) {}
 
   async create(dto: any): Promise<Employee> {
     // Map DTO to entity
@@ -25,6 +31,10 @@ export class EmployeesService {
 
   async findOne(id: string): Promise<Employee | null> {
     return this.repo.findOneByCriteria({ id });
+  }
+
+  async findByIdentity(identityId: string): Promise<Employee | null> {
+    return this.repo.findOneByCriteria({ identityId });
   }
 
   async update(id: string, dto: any): Promise<Employee> {

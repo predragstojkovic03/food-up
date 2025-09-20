@@ -1,10 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { MenuItem } from '../domain/menu-item.entity';
-import { IMenuItemsRepository } from '../domain/menu-items.repository.interface';
+import {
+  I_MENU_ITEMS_REPOSITORY,
+  IMenuItemsRepository,
+} from '../domain/menu-items.repository.interface';
 
 @Injectable()
 export class MenuItemsService {
-  constructor(private readonly repo: IMenuItemsRepository) {}
+  constructor(
+    @Inject(I_MENU_ITEMS_REPOSITORY)
+    private readonly repo: IMenuItemsRepository,
+  ) {}
 
   async create(dto: any): Promise<MenuItem> {
     // Map DTO to entity

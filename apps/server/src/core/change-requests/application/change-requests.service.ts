@@ -1,10 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ChangeRequest } from '../domain/change-request.entity';
-import { IChangeRequestsRepository } from '../domain/change-requests.repository.interface';
+import {
+  I_CHANGE_REQUESTS_REPOSITORY,
+  IChangeRequestsRepository,
+} from '../domain/change-requests.repository.interface';
 
 @Injectable()
 export class ChangeRequestsService {
-  constructor(private readonly repo: IChangeRequestsRepository) {}
+  constructor(
+    @Inject(I_CHANGE_REQUESTS_REPOSITORY)
+    private readonly repo: IChangeRequestsRepository,
+  ) {}
 
   async create(dto: any): Promise<ChangeRequest> {
     // Map DTO to entity

@@ -1,16 +1,16 @@
 import { Body, Controller, Post, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { FindEmployeeByIdentityUseCase } from 'src/core/employees/application/use-cases/find-employee-by-identity.user-case';
-import { ValidateCredentialsUseCase } from 'src/core/identity/application/use-cases/validate-credentials.use-case';
+import { EmployeesService } from 'src/core/employees/application/employees.service';
+import { IdentityService } from 'src/core/identity/application/identity.service';
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(
-    private readonly validateCredentials: ValidateCredentialsUseCase,
-    private readonly jwtService: JwtService,
-    private readonly findEmployeeByIdentityUseCase: FindEmployeeByIdentityUseCase,
+    private readonly _jwtService: JwtService,
+    private readonly _identityService: IdentityService,
+    private readonly _employeesService: EmployeesService,
   ) {}
 
   @Post('login')
@@ -20,13 +20,15 @@ export class AuthController {
   async login(
     @Body() { email, password }: { email: string; password: string },
   ) {
-    const identity = await this.validateCredentials.execute(email, password);
+    const identity = await this._identityService.validateCredentials(
+      email,
+      password,
+    );
     if (!identity) throw new UnauthorizedException('Invalid credentials');
 
     if (identity.type === 'employee') {
-      const employee = await this.findEmployeeByIdentityUseCase.execute(
-        identity.id,
-      );
+      const employee = await this._employeesService.findByIdentity(identity.id);
+
       if (!employee) throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -34,6 +36,6 @@ export class AuthController {
       sub: identity.id,
       type: identity.type,
     };
-    return { access_token: this.jwtService.sign(payload) };
+    return { access_token: this._jwtService.sign(payload) };
   }
 }

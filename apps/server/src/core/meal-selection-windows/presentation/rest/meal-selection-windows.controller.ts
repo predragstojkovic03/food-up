@@ -8,7 +8,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { MealSelectionWindowService } from '../../application/meal-selection-window.service';
+import { MealSelectionWindowsService } from '../../application/meal-selection-windows.service';
 import { CreateMealSelectionWindowDto } from './dto/create-meal-selection-window.dto';
 import { MealSelectionWindowResponseDto } from './dto/meal-selection-window-response.dto';
 import { UpdateMealSelectionWindowDto } from './dto/update-meal-selection-window.dto';
@@ -17,7 +17,7 @@ import { UpdateMealSelectionWindowDto } from './dto/update-meal-selection-window
 @Controller('meal-selection-windows')
 export class MealSelectionWindowsController {
   constructor(
-    private readonly _mealSelectionWindowService: MealSelectionWindowService,
+    private readonly _mealSelectionWindowService: MealSelectionWindowsService,
   ) {}
 
   @Post()

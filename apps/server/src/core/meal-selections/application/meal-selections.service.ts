@@ -1,13 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { EntityInstanceNotFoundException } from 'src/shared/domain/exceptions/entity-instance-not-found.exception';
 import { MealSelection } from '../domain/meal-selection.entity';
-import { IMealSelectionsRepository } from '../domain/meal-selections.repository.interface';
+import {
+  I_MEAL_SELECTIONS_REPOSITORY,
+  IMealSelectionsRepository,
+} from '../domain/meal-selections.repository.interface';
 import { CreateMealSelectionDto } from '../presentation/rest/dto/create-meal-selection.dto';
 import { UpdateMealSelectionDto } from '../presentation/rest/dto/update-meal-selection.dto';
 
 @Injectable()
 export class MealSelectionsService {
-  constructor(private readonly _repository: IMealSelectionsRepository) {}
+  constructor(
+    @Inject(I_MEAL_SELECTIONS_REPOSITORY)
+    private readonly _repository: IMealSelectionsRepository,
+  ) {}
 
   async create(dto: CreateMealSelectionDto): Promise<MealSelection> {
     // Add any business logic/validation here

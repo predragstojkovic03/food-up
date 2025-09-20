@@ -1,8 +1,11 @@
-import { Injectable } from '@nestjs/common';
-import { FindMenuPeriodUseCase } from 'src/core/menu-periods/application/use-cases/find-menu-period.use-case';
+import { Inject, Injectable } from '@nestjs/common';
+import { MenuPeriodsService } from 'src/core/menu-periods/application/menu-periods.service';
 import { EntityInstanceNotFoundException } from 'src/shared/domain/exceptions/entity-instance-not-found.exception';
 import { MealSelectionWindow } from '../domain/meal-selection-window.entity';
-import { IMealSelectionWindowsRepository } from '../domain/meal-selection-windows.repository.interface';
+import {
+  I_MEAL_SELECTION_WINDOWS_REPOSITORY,
+  IMealSelectionWindowsRepository,
+} from '../domain/meal-selection-windows.repository.interface';
 
 export interface CreateMealSelectionWindowDto {
   startTime: Date;
@@ -19,10 +22,11 @@ export interface UpdateMealSelectionWindowDto {
 }
 
 @Injectable()
-export class MealSelectionWindowService {
+export class MealSelectionWindowsService {
   constructor(
+    @Inject(I_MEAL_SELECTION_WINDOWS_REPOSITORY)
     private readonly _repository: IMealSelectionWindowsRepository,
-    private readonly _findMenuPeriodUseCase: FindMenuPeriodUseCase,
+    private readonly _menuPeriodsService: MenuPeriodsService,
   ) {}
 
   async create(
@@ -31,7 +35,7 @@ export class MealSelectionWindowService {
     // Validate menu periods
     if (dto.menuPeriodIds) {
       const menuPeriods = await Promise.all(
-        dto.menuPeriodIds.map((id) => this._findMenuPeriodUseCase.execute(id)),
+        dto.menuPeriodIds.map((id) => this._menuPeriodsService.findOne(id)),
       );
       if (menuPeriods.includes(null)) {
         throw new EntityInstanceNotFoundException('MenuPeriod not found');
@@ -66,7 +70,7 @@ export class MealSelectionWindowService {
       );
     if (dto.menuPeriodIds) {
       const menuPeriods = await Promise.all(
-        dto.menuPeriodIds.map((id) => this._findMenuPeriodUseCase.execute(id)),
+        dto.menuPeriodIds.map((id) => this._menuPeriodsService.findOne(id)),
       );
       if (menuPeriods.includes(null)) {
         throw new EntityInstanceNotFoundException('MenuPeriod not found');

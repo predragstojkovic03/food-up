@@ -1,13 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { EntityInstanceNotFoundException } from 'src/shared/domain/exceptions/entity-instance-not-found.exception';
 import { Supplier } from '../domain/supplier.entity';
-import { ISuppliersRepository } from '../domain/suppliers.repository.interface';
+import {
+  I_SUPPLIERS_REPOSITORY,
+  ISuppliersRepository,
+} from '../domain/suppliers.repository.interface';
 import { CreateSupplierDto } from '../presentation/rest/dto/create-supplier.dto';
 import { UpdateSupplierDto } from '../presentation/rest/dto/update-supplier.dto';
 
 @Injectable()
 export class SuppliersService {
-  constructor(private readonly _repository: ISuppliersRepository) {}
+  constructor(
+    @Inject(I_SUPPLIERS_REPOSITORY)
+    private readonly _repository: ISuppliersRepository,
+  ) {}
 
   async create(dto: CreateSupplierDto): Promise<Supplier> {
     // Add any business logic/validation here

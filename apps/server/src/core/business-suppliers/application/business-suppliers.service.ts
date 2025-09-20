@@ -1,10 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { BusinessSupplier } from '../domain/business-supplier.entity';
-import { IBusinessSuppliersRepository } from '../domain/business-suppliers.repository.interface';
+import {
+  I_BUSINESS_SUPPLIERS_REPOSITORY,
+  IBusinessSuppliersRepository,
+} from '../domain/business-suppliers.repository.interface';
 
 @Injectable()
 export class BusinessSuppliersService {
-  constructor(private readonly repo: IBusinessSuppliersRepository) {}
+  constructor(
+    @Inject(I_BUSINESS_SUPPLIERS_REPOSITORY)
+    private readonly repo: IBusinessSuppliersRepository,
+  ) {}
 
   async create(dto: any): Promise<BusinessSupplier> {
     // Map DTO to entity
