@@ -1,26 +1,25 @@
 import { Inject, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CoreModule } from './core/core.module';
-import { EnvironmentVariables, validate } from './env.validation';
-import { I_LOGGER, ILogger } from './shared/domain/logger.interface';
+import { EnvironmentVariables } from './env.validation';
+import { IConfigService } from './shared/application/config-service.interface';
+import { I_LOGGER, ILogger } from './shared/application/logger.interface';
+import { ConfigModule } from './shared/infrastructure/config/config.module';
 import { LoggingMiddleware } from './shared/infrastructure/logger/logger.middleware';
 import { LoggerModule } from './shared/infrastructure/logger/logger.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      validate: validate,
-    }),
+    ConfigModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (
-        configService: ConfigService<EnvironmentVariables, true>,
+        configService: IConfigService<EnvironmentVariables, true>,
       ) => ({
         type: 'postgres',
         host: configService.get('DB_HOST'),
@@ -40,6 +39,7 @@ import { LoggerModule } from './shared/infrastructure/logger/logger.module';
     // }),
     LoggerModule,
     CoreModule,
+    ConfigModule,
   ],
   controllers: [AppController],
   providers: [AppService],

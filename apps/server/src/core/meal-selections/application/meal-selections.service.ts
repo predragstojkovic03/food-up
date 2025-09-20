@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { EntityInstanceNotFoundException } from 'src/shared/domain/exceptions/entity-instance-not-found.exception';
+import { ulid } from 'ulid';
 import { MealSelection } from '../domain/meal-selection.entity';
 import {
   I_MEAL_SELECTIONS_REPOSITORY,
@@ -17,15 +18,29 @@ export class MealSelectionsService {
 
   async create(dto: CreateMealSelectionDto): Promise<MealSelection> {
     // Add any business logic/validation here
-    return this._repository.insert(dto as any);
+    const mealSelection = new MealSelection(
+      ulid(),
+      dto.employeeId,
+      dto.menuItemId,
+      dto.mealSelectionWindowId,
+      dto.date,
+      dto.quantity,
+    );
+
+    return this._repository.insert(mealSelection);
   }
 
   async findAll(): Promise<MealSelection[]> {
     return this._repository.findAll();
   }
 
-  async findOne(id: string): Promise<MealSelection | null> {
-    return this._repository.findOneByCriteria({ id });
+  async findOne(id: string): Promise<MealSelection> {
+    const result = await this._repository.findOneByCriteria({ id });
+
+    if (!result)
+      throw new EntityInstanceNotFoundException('MealSelection not found');
+
+    return result;
   }
 
   async update(
@@ -33,8 +48,10 @@ export class MealSelectionsService {
     dto: UpdateMealSelectionDto,
   ): Promise<MealSelection> {
     const existing = await this._repository.findOneByCriteria({ id });
+
     if (!existing)
       throw new EntityInstanceNotFoundException('MealSelection not found');
+
     return this._repository.update(id, { ...existing, ...dto } as any);
   }
 

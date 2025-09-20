@@ -1,7 +1,7 @@
 import { Inject, Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { performance } from 'node:perf_hooks';
-import { I_LOGGER, ILogger } from 'src/shared/domain/logger.interface';
+import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
 
 @Injectable()
 export class LoggingMiddleware implements NestMiddleware {

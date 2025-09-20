@@ -1,6 +1,6 @@
 import { Business } from 'src/core/businesses/infrastructure/persistence/business.typeorm-entity';
 import { Identity } from 'src/core/identity/infrastructure/persistence/identity.typeorm-entity';
-import { Role } from 'src/shared/domain/role.enum';
+import { EmployeeRole } from 'src/shared/domain/role.enum';
 import {
   Column,
   Entity,
@@ -18,10 +18,13 @@ export class Employee {
   @Column('character varying', { length: 100 })
   name: string;
 
-  @Column('enum', { enum: Role, default: Role.Basic })
-  role: Role;
+  @Column('enum', { enum: EmployeeRole, default: EmployeeRole.Basic })
+  role: EmployeeRole;
 
-  @ManyToOne(() => Business, (business) => business.employees)
+  @ManyToOne(() => Business, (business) => business.employees, {
+    nullable: false,
+    eager: true,
+  })
   business?: Business;
 
   @OneToOne(() => Identity, { nullable: false, cascade: true, eager: true })

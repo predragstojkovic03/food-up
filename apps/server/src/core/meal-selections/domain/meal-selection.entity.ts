@@ -6,6 +6,7 @@ export class MealSelection extends Entity {
     employeeId: string,
     menuItemId: string,
     mealSelectionWindowId: string,
+    date: Date,
     quantity?: number | null,
   ) {
     super();
@@ -14,6 +15,7 @@ export class MealSelection extends Entity {
     this.menuItemId = menuItemId;
     this.mealSelectionWindowId = mealSelectionWindowId;
     this.quantity = quantity ?? null;
+    this.date = date;
   }
 
   readonly id: string;
@@ -21,4 +23,5 @@ export class MealSelection extends Entity {
   menuItemId: string;
   mealSelectionWindowId: string;
   quantity: number | null;
+  date: Date;
 }

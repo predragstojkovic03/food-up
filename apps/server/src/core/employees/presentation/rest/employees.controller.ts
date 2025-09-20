@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
-import { Role } from 'src/shared/domain/role.enum';
+import { EmployeeRole } from 'src/shared/domain/role.enum';
 import { EmployeesService } from '../../application/employees.service';
 import { CreateEmployeeRequestDto } from './dto/create-employee.dto';
 import { EmployeeResponseDto } from './dto/employee-response.dto';
@@ -28,7 +28,7 @@ export class EmployeesController {
   ): Promise<EmployeeResponseDto> {
     const employee = await this._employeesService.create({
       ...createEmployeeDto,
-      role: Role.Basic,
+      role: EmployeeRole.Basic,
     });
     return plainToInstance(EmployeeResponseDto, employee);
   }

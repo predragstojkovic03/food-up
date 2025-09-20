@@ -1,4 +1,8 @@
-export type IdentityType = 'employee' | 'supplier' | 'business';
+export enum IdentityType {
+  Employee = 'employee',
+  Supplier = 'supplier',
+  Business = 'business',
+}
 
 export class Identity {
   constructor(
@@ -13,6 +17,7 @@ export class Identity {
     password: string,
     hashComparer: (password: string, hash: string) => Promise<boolean>,
   ): Promise<boolean> {
+    console.log('Comparing password with hash:', this.passwordHash, password);
     return hashComparer(password, this.passwordHash);
   }
 }

@@ -1,27 +1,40 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Role } from 'src/shared/domain/role.enum';
+import { IdentityService } from 'src/core/identity/application/identity.service';
+import { IdentityType } from 'src/core/identity/domain/identity.entity';
+import { EmployeeRole } from 'src/shared/domain/role.enum';
+import { ulid } from 'ulid';
 import { Employee } from '../domain/employee.entity';
 import {
   I_EMPLOYEES_REPOSITORY,
   IEmployeeRepository,
 } from '../domain/employee.repository.interface';
+import { CreateEmployeeDto } from './dto/create-employee.dto';
 
 @Injectable()
 export class EmployeesService {
   constructor(
     @Inject(I_EMPLOYEES_REPOSITORY)
     private readonly repo: IEmployeeRepository,
+    private readonly _identityService: IdentityService,
   ) {}
 
-  async create(dto: any): Promise<Employee> {
+  async create(dto: CreateEmployeeDto): Promise<Employee> {
+    const identity = await this._identityService.create({
+      email: dto.email,
+      password: dto.password,
+      type: IdentityType.Employee,
+      isActive: true,
+    });
+
     // Map DTO to entity
     const entity = new Employee(
-      dto.id,
+      ulid(),
       dto.name,
-      dto.role ?? Role.Basic,
+      dto.role ?? EmployeeRole.Basic,
       dto.businessId,
-      dto.identityId,
+      identity.id,
     );
+
     return this.repo.insert(entity);
   }
 
@@ -42,7 +55,7 @@ export class EmployeesService {
     const entity = new Employee(
       id,
       dto.name,
-      dto.role ?? Role.Basic,
+      dto.role ?? EmployeeRole.Basic,
       dto.businessId,
       dto.identityId,
     );

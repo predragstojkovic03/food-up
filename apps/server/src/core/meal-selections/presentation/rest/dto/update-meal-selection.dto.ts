@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { IsDate, IsOptional, IsString } from 'class-validator';
 
 export class UpdateMealSelectionDto {
   @ApiPropertyOptional()
@@ -15,4 +15,9 @@ export class UpdateMealSelectionDto {
   @ApiPropertyOptional()
   @IsOptional()
   quantity?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsDate()
+  date?: Date;
 }

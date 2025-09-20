@@ -6,10 +6,10 @@ export class MealSelectionWindow {
   @PrimaryColumn('character varying', { length: 26 })
   id: string;
 
-  @Column('timestamp')
+  @Column('timestamp with time zone')
   startTime: Date;
 
-  @Column('timestamp')
+  @Column('timestamp with time zone')
   endTime: Date;
 
   @Column('character varying', { length: 26 })

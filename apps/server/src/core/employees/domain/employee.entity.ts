@@ -1,13 +1,13 @@
 import { Business } from 'src/core/businesses/domain/business.entity';
 import { Identity } from 'src/core/identity/domain/identity.entity';
 import { Entity } from 'src/shared/domain/entity';
-import { Role } from 'src/shared/domain/role.enum';
+import { EmployeeRole } from 'src/shared/domain/role.enum';
 
 export class Employee extends Entity {
   constructor(
     id: string,
     name: string,
-    role: Role = Role.Basic,
+    role: EmployeeRole = EmployeeRole.Basic,
     businessId: string,
     identityId: Identity['id'],
   ) {
@@ -22,7 +22,7 @@ export class Employee extends Entity {
 
   readonly id: string;
   name: string;
-  role: Role;
+  role: EmployeeRole;
   businessId: Business['id'];
   identityId: Identity['id'];
 }

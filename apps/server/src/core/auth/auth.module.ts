@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
 import { EmployeesModule } from '../employees/employees.module';
 import { IdentityModule } from '../identity/identity.module';
 import { JwtAuthGuard } from './infrastructure/jwt-auth.guard';
@@ -8,6 +9,7 @@ import { AuthController } from './presentation/rest/auth.controller';
 
 @Module({
   imports: [
+    PassportModule,
     JwtModule.register({
       secret: 'yourSecret',
       signOptions: { expiresIn: '2 days' },

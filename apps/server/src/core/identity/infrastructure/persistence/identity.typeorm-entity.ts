@@ -13,7 +13,7 @@ export class Identity {
   @Column('varchar', { length: 255 })
   passwordHash: string;
 
-  @Column('enum', { enum: ['employee', 'supplier', 'business'] })
+  @Column('enum', { enum: IdentityType })
   type: IdentityType;
 
   @Column({ default: true })

@@ -8,7 +8,9 @@ import {
   Put,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { plainToInstance } from 'class-transformer';
 import { MealSelectionsService } from '../../application/meal-selections.service';
+import { MealSelection } from '../../domain/meal-selection.entity';
 import { CreateMealSelectionDto } from './dto/create-meal-selection.dto';
 import { MealSelectionResponseDto } from './dto/meal-selection-response.dto';
 import { UpdateMealSelectionDto } from './dto/update-meal-selection.dto';
@@ -81,13 +83,7 @@ export class MealSelectionsController {
     return this._mealSelectionsService.delete(id);
   }
 
-  private toResponseDto(entity: any): MealSelectionResponseDto {
-    return {
-      id: entity.id,
-      employeeId: entity.employeeId,
-      menuItemId: entity.menuItemId,
-      mealSelectionWindowId: entity.mealSelectionWindowId,
-      quantity: entity.quantity,
-    };
+  private toResponseDto(entity: MealSelection): MealSelectionResponseDto {
+    return plainToInstance(MealSelectionResponseDto, entity);
   }
 }

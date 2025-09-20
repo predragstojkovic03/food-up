@@ -22,6 +22,11 @@ export class EmployeesTypeOrmRepository extends TypeOrmRepository<Employee> {
       delete where.businessId;
     }
 
+    if (criteria.identityId) {
+      where.identity = { id: criteria.identityId };
+      delete where.identityId;
+    }
+
     return (await this._repository.find({ where })).map((entity) =>
       this._mapper.toDomain(entity as EmployeePersistence),
     );
@@ -34,6 +39,11 @@ export class EmployeesTypeOrmRepository extends TypeOrmRepository<Employee> {
     if (criteria.businessId) {
       where.business = { id: criteria.businessId };
       delete where.businessId;
+    }
+
+    if (criteria.identityId) {
+      where.identity = { id: criteria.identityId };
+      delete where.identityId;
     }
 
     return await this._repository
