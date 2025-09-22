@@ -1,4 +1,5 @@
 import { Entity } from './entity';
+import { EntityInstanceNotFoundException } from './exceptions/entity-instance-not-found.exception';
 import { Id } from './id.type';
 
 export interface IRepository<T extends Entity<Id>> {
@@ -12,4 +13,10 @@ export interface IRepository<T extends Entity<Id>> {
   findByCriteria(criteria: Partial<T>): Promise<T[]>;
   findOneByCriteria(criteria: Partial<T>): Promise<T | null>;
   findBulkByIds(ids: T['id'][]): Promise<T[]>;
+
+  /**
+   *
+   * @throws {EntityInstanceNotFoundException} if no entity instance matches the criteria
+   */
+  findOneByCriteriaOrThrow(criteria: Partial<T>): Promise<T>;
 }

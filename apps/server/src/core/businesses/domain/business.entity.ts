@@ -5,6 +5,7 @@ export class Business extends Entity {
     id: string,
     name: string,
     contactEmail: string,
+    contactPhone?: string,
     employeeIds: string[] = [],
     supplierIds: string[] = [],
     managedSupplierIds: string[] = [],
@@ -16,11 +17,13 @@ export class Business extends Entity {
     this.employeeIds = employeeIds;
     this.supplierIds = supplierIds;
     this.managedSupplierIds = managedSupplierIds;
+    this.contactPhone = contactPhone;
   }
 
   readonly id: string;
   name: string;
   contactEmail: string;
+  contactPhone?: string;
   employeeIds: string[];
   supplierIds: string[];
   managedSupplierIds: string[];

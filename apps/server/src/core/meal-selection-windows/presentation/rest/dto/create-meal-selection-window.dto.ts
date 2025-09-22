@@ -29,8 +29,4 @@ export class CreateMealSelectionWindowDto {
   @IsString()
   @IsOptional()
   description?: string;
-
-  @ApiProperty({ required: true })
-  @IsString()
-  businessId: string;
 }

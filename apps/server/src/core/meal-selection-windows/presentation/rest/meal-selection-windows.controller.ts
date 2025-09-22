@@ -6,8 +6,18 @@ import {
   Param,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { CurrentIdentity } from 'src/core/auth/infrastructure/current-identity.decorator';
+import { JwtAuthGuard } from 'src/core/auth/infrastructure/jwt-auth.guard';
+import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
+import { RequiredEmployeeRole } from 'src/core/employees/presentation/rest/employee-role.decorator';
+import { EmployeeRoleGuard } from 'src/core/employees/presentation/rest/employee-role.guard';
+import { IdentityType } from 'src/core/identity/domain/identity.entity';
+import { RequiredIdentityType } from 'src/core/identity/presentation/rest/identity-type.decorator';
+import { IdentityTypeGuard } from 'src/core/identity/presentation/rest/identity-type.guard';
+import { EmployeeRole } from 'src/shared/domain/role.enum';
 import { MealSelectionWindowsService } from '../../application/meal-selection-windows.service';
 import { CreateMealSelectionWindowDto } from './dto/create-meal-selection-window.dto';
 import { MealSelectionWindowResponseDto } from './dto/meal-selection-window-response.dto';
@@ -20,17 +30,21 @@ export class MealSelectionWindowsController {
     private readonly _mealSelectionWindowService: MealSelectionWindowsService,
   ) {}
 
-  @Post()
   @ApiOperation({ summary: 'Create a new meal selection window' })
   @ApiResponse({
     status: 201,
     description: 'Meal selection window created',
     type: MealSelectionWindowResponseDto,
   })
+  @UseGuards(JwtAuthGuard, IdentityTypeGuard, EmployeeRoleGuard)
+  @RequiredIdentityType(IdentityType.Employee)
+  @RequiredEmployeeRole(EmployeeRole.Manager)
+  @Post()
   async create(
     @Body() dto: CreateMealSelectionWindowDto,
+    @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<MealSelectionWindowResponseDto> {
-    const result = await this._mealSelectionWindowService.create(dto);
+    const result = await this._mealSelectionWindowService.create(sub, dto);
     return this.toResponseDto(result);
   }
 

@@ -1,6 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { MenuPeriodsService } from 'src/core/menu-periods/application/menu-periods.service';
+import { DispatchDomainEvents } from 'src/shared/application/domain-events/dispatch-events.decorator';
 import { EntityInstanceNotFoundException } from 'src/shared/domain/exceptions/entity-instance-not-found.exception';
+import { ulid } from 'ulid';
 import { MealSelectionWindow } from '../domain/meal-selection-window.entity';
 import {
   I_MEAL_SELECTION_WINDOWS_REPOSITORY,
@@ -10,7 +13,6 @@ import {
 export interface CreateMealSelectionWindowDto {
   startTime: Date;
   endTime: Date;
-  businessId: string;
   menuPeriodIds: string[];
 }
 
@@ -27,12 +29,16 @@ export class MealSelectionWindowsService {
     @Inject(I_MEAL_SELECTION_WINDOWS_REPOSITORY)
     private readonly _repository: IMealSelectionWindowsRepository,
     private readonly _menuPeriodsService: MenuPeriodsService,
+    private readonly _employeesService: EmployeesService,
   ) {}
 
+  @DispatchDomainEvents()
   async create(
+    identityId: string,
     dto: CreateMealSelectionWindowDto,
   ): Promise<MealSelectionWindow> {
-    // Validate menu periods
+    const employee = await this._employeesService.findByIdentity(identityId);
+
     if (dto.menuPeriodIds) {
       const menuPeriods = await Promise.all(
         dto.menuPeriodIds.map((id) => this._menuPeriodsService.findOne(id)),
@@ -42,10 +48,10 @@ export class MealSelectionWindowsService {
       }
     }
     const window = new MealSelectionWindow(
-      '', // id will be set by persistence layer
+      ulid(),
       dto.startTime,
       dto.endTime,
-      dto.businessId,
+      employee.businessId,
       dto.menuPeriodIds,
     );
     return this._repository.insert(window);
@@ -55,19 +61,16 @@ export class MealSelectionWindowsService {
     return this._repository.findAll();
   }
 
-  async findOne(id: string): Promise<MealSelectionWindow | null> {
-    return this._repository.findOneByCriteria({ id });
+  async findOne(id: string): Promise<MealSelectionWindow> {
+    return this._repository.findOneByCriteriaOrThrow({ id });
   }
 
   async update(
     id: string,
     dto: UpdateMealSelectionWindowDto,
   ): Promise<MealSelectionWindow> {
-    const existing = await this._repository.findOneByCriteria({ id });
-    if (!existing)
-      throw new EntityInstanceNotFoundException(
-        'MealSelectionWindow not found',
-      );
+    const existing = await this._repository.findOneByCriteriaOrThrow({ id });
+
     if (dto.menuPeriodIds) {
       const menuPeriods = await Promise.all(
         dto.menuPeriodIds.map((id) => this._menuPeriodsService.findOne(id)),
@@ -76,14 +79,16 @@ export class MealSelectionWindowsService {
         throw new EntityInstanceNotFoundException('MenuPeriod not found');
       }
     }
-    const updated = new MealSelectionWindow(
-      id,
-      dto.startTime ?? existing.startTime,
-      dto.endTime ?? existing.endTime,
-      dto.businessId ?? existing.businessId,
-      [...existing.menuPeriodIds, ...(dto.menuPeriodIds ?? [])],
+
+    const updated = existing.update(
+      dto.startTime,
+      dto.endTime,
+      dto.businessId,
+      dto.menuPeriodIds,
     );
-    return this._repository.update(id, updated);
+
+    await this._repository.update(id, updated);
+    return updated;
   }
 
   async delete(id: string): Promise<void> {

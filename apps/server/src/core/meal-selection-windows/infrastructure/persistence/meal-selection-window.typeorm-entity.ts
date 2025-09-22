@@ -1,5 +1,13 @@
+import { MealSelection } from 'src/core/meal-selections/infrastructure/persistence/meal-selection.typeorm-entity';
 import { MenuPeriod } from 'src/core/menu-periods/infrastructure/persistence/menu-period.typeorm-entity';
-import { Column, Entity, JoinTable, ManyToMany, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  OneToMany,
+  PrimaryColumn,
+} from 'typeorm';
 
 @Entity()
 export class MealSelectionWindow {
@@ -18,4 +26,10 @@ export class MealSelectionWindow {
   @ManyToMany(() => MenuPeriod, (menuPeriod) => menuPeriod.menuSelectionWindows)
   @JoinTable()
   menuPeriods: MenuPeriod[];
+
+  @OneToMany(
+    () => MealSelection,
+    (mealSelection) => mealSelection.mealSelectionWindow,
+  )
+  mealSelections: MealSelection[];
 }

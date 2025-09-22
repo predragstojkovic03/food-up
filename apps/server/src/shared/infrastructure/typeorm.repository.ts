@@ -1,6 +1,7 @@
 import { FindOptionsWhere, In, ObjectLiteral, Repository } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { Entity } from '../domain/entity';
+import { EntityInstanceNotFoundException } from '../domain/exceptions/entity-instance-not-found.exception';
 import { Id } from '../domain/id.type';
 import { IRepository } from '../domain/repository.interface';
 import { TypeOrmMapper } from './typeorm.mapper';
@@ -89,5 +90,17 @@ export abstract class TypeOrmRepository<T extends Entity>
       .then((entities) => {
         return entities.map((entity) => this._mapper.toDomain(entity as any));
       });
+  }
+
+  async findOneByCriteriaOrThrow(criteria: Partial<T>): Promise<T> {
+    const entity = await this.findOneByCriteria(criteria);
+
+    if (!entity) {
+      throw new EntityInstanceNotFoundException(
+        `Instance of entity {${this._repository.metadata.name}} not found`,
+      );
+    }
+
+    return entity;
   }
 }

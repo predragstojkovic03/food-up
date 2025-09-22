@@ -1,17 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateChangeRequestDto {
-  @ApiProperty({ example: 'employee-uuid', description: 'Employee ID' })
-  employeeId: string;
-
   @ApiProperty({
     example: 'meal-selection-uuid',
     description: 'Meal selection ID',
   })
+  @IsString()
   mealSelectionId: string;
 
   @ApiProperty({ example: 'menu-item-uuid', description: 'New menu item ID' })
-  newMenuItemId: string;
+  @IsOptional()
+  @IsString()
+  newMenuItemId?: string;
 
   @ApiProperty({
     example: 2,
@@ -19,29 +20,17 @@ export class CreateChangeRequestDto {
     required: false,
     nullable: true,
   })
-  newQuantity?: number | null;
+  @IsOptional()
+  @IsNumber()
+  newQuantity?: number;
 
   @ApiProperty({
-    example: 'pending',
-    enum: ['pending', 'approved', 'rejected'],
-    description: 'Status of the change request',
-  })
-  status: 'pending' | 'approved' | 'rejected';
-
-  @ApiProperty({
-    example: 'manager-uuid',
-    description: 'Approved by',
+    example: true,
+    description: 'Whether to clear the current selection',
     required: false,
     nullable: true,
   })
-  approvedBy?: string | null;
-
-  @ApiProperty({
-    example: '2025-08-15T12:00:00Z',
-    description: 'Approval date',
-    required: false,
-    nullable: true,
-    type: String,
-  })
-  approvedAt?: Date | null;
+  @IsBoolean()
+  @IsOptional()
+  clearSelection?: boolean;
 }

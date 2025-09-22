@@ -12,7 +12,7 @@ export class MenuItemTypeOrmMapper extends TypeOrmMapper<
       persistence.price,
       persistence.menuPeriodId,
       persistence.day,
-      persistence.mealId,
+      persistence.meal.id,
     );
   }
 
@@ -22,7 +22,7 @@ export class MenuItemTypeOrmMapper extends TypeOrmMapper<
     persistence.price = domain.price;
     persistence.menuPeriodId = domain.menuPeriodId;
     persistence.day = domain.day;
-    persistence.mealId = domain.mealId;
+    persistence.meal = { id: domain.mealId } as any;
     return persistence;
   }
 }

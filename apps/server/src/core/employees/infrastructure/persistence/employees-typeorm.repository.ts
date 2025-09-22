@@ -16,16 +16,7 @@ export class EmployeesTypeOrmRepository extends TypeOrmRepository<Employee> {
   override async findByCriteria(
     criteria: Partial<Employee>,
   ): Promise<Employee[]> {
-    const where = { ...criteria } as any;
-    if (criteria.businessId) {
-      where.business = { id: criteria.businessId };
-      delete where.businessId;
-    }
-
-    if (criteria.identityId) {
-      where.identity = { id: criteria.identityId };
-      delete where.identityId;
-    }
+    const where = this.getWhereClause(criteria);
 
     return (await this._repository.find({ where })).map((entity) =>
       this._mapper.toDomain(entity as EmployeePersistence),
@@ -35,7 +26,20 @@ export class EmployeesTypeOrmRepository extends TypeOrmRepository<Employee> {
   override async findOneByCriteria(
     criteria: Partial<Employee>,
   ): Promise<Employee | null> {
+    const where: any = this.getWhereClause(criteria);
+
+    return await this._repository
+      .findOne({
+        where,
+      })
+      .then((entity) =>
+        entity ? this._mapper.toDomain(entity as EmployeePersistence) : null,
+      );
+  }
+
+  private getWhereClause(criteria: Partial<Employee>) {
     const where: any = { ...criteria };
+
     if (criteria.businessId) {
       where.business = { id: criteria.businessId };
       delete where.businessId;
@@ -46,12 +50,6 @@ export class EmployeesTypeOrmRepository extends TypeOrmRepository<Employee> {
       delete where.identityId;
     }
 
-    return await this._repository
-      .findOne({
-        where,
-      })
-      .then((entity) =>
-        entity ? this._mapper.toDomain(entity as EmployeePersistence) : null,
-      );
+    return where;
   }
 }

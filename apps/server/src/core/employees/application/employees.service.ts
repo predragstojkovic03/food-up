@@ -42,12 +42,12 @@ export class EmployeesService {
     return this.repo.findByCriteria({ businessId });
   }
 
-  async findOne(id: string): Promise<Employee | null> {
-    return this.repo.findOneByCriteria({ id });
+  async findOne(id: string): Promise<Employee> {
+    return this.repo.findOneByCriteriaOrThrow({ id });
   }
 
-  async findByIdentity(identityId: string): Promise<Employee | null> {
-    return this.repo.findOneByCriteria({ identityId });
+  async findByIdentity(identityId: string): Promise<Employee> {
+    return this.repo.findOneByCriteriaOrThrow({ identityId });
   }
 
   async update(id: string, dto: any): Promise<Employee> {

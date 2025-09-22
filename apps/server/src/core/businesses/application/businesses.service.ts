@@ -1,24 +1,34 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Business } from '../infrastructure/persistence/business.typeorm-entity';
+import { Inject, Injectable } from '@nestjs/common';
+import { Business } from '../domain/business.entity';
+import {
+  I_BUSINESSES_REPOSITORY,
+  IBusinessesRepository,
+} from '../domain/businesses.repository.interface';
 import { CreateBusinessDto } from './dto/create-business.dto';
 
 @Injectable()
 export class BusinessesService {
   constructor(
-    @InjectRepository(Business)
-    private readonly businessRepository: Repository<Business>,
+    @Inject(I_BUSINESSES_REPOSITORY)
+    private readonly businessRepository: IBusinessesRepository,
   ) {}
 
   async create(createBusinessDto: CreateBusinessDto): Promise<Business> {
-    const business = this.businessRepository.create(createBusinessDto);
-    return this.businessRepository.save(business);
+    const business = new Business(
+      createBusinessDto.name,
+      createBusinessDto.name,
+      createBusinessDto.contactEmail,
+      createBusinessDto.contactPhone,
+    );
+
+    return this.businessRepository.insert(business);
   }
 
   async findAll(): Promise<Business[]> {
-    return this.businessRepository.find();
+    return this.businessRepository.findAll();
   }
 
-  // Add other CRUD/business logic methods as needed
+  findOne(businessId: string): Promise<Business> {
+    return this.businessRepository.findOneByCriteriaOrThrow({ id: businessId });
+  }
 }

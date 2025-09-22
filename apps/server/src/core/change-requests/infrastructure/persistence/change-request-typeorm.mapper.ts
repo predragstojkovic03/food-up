@@ -11,9 +11,10 @@ export class ChangeRequestTypeOrmMapper extends TypeOrmMapper<
       persistence.id,
       persistence.employeeId,
       persistence.mealSelectionId,
-      persistence.newMenuItemId,
+      persistence.newMenuItem.id,
       persistence.newQuantity,
       persistence.status,
+      persistence.clearSelection,
       persistence.approvedBy,
       persistence.approvedAt,
     );
@@ -24,7 +25,7 @@ export class ChangeRequestTypeOrmMapper extends TypeOrmMapper<
     persistence.id = domain.id;
     persistence.employeeId = domain.employeeId;
     persistence.mealSelectionId = domain.mealSelectionId;
-    persistence.newMenuItemId = domain.newMenuItemId;
+    persistence.newMenuItem = { id: domain.newMenuItemId } as any;
     persistence.newQuantity = domain.newQuantity;
     persistence.status = domain.status;
     persistence.approvedBy = domain.approvedBy;

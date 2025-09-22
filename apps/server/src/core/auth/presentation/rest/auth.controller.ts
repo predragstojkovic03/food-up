@@ -77,7 +77,7 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     description: 'Current user information',
-    type: JwtPayload,
+    type: MeResponseDto,
   })
   @UseGuards(JwtAuthGuard)
   getMe(@User() user: JwtPayload): MeResponseDto {

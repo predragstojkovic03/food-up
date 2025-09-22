@@ -1,4 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { BusinessesService } from 'src/core/businesses/application/businesses.service';
+import { EmployeesService } from 'src/core/employees/application/employees.service';
+import { IdentityService } from 'src/core/identity/application/identity.service';
+import { IdentityType } from 'src/core/identity/domain/identity.entity';
+import { AuthenticationException } from 'src/shared/domain/exceptions/authentication.exception';
+import { UnauthorizedException } from 'src/shared/domain/exceptions/unauthorized.exception';
+import { ulid } from 'ulid';
 import { MenuPeriod } from '../domain/menu-period.entity';
 import {
   I_MENU_PERIODS_REPOSITORY,
@@ -10,17 +17,30 @@ export class MenuPeriodsService {
   constructor(
     @Inject(I_MENU_PERIODS_REPOSITORY)
     private readonly repo: IMenuPeriodsRepository,
+    private readonly _identityService: IdentityService,
+    private readonly _businessesService: BusinessesService,
+    private readonly _employeesService: EmployeesService,
   ) {}
 
-  async create(dto: any): Promise<MenuPeriod> {
-    // Map DTO to entity
+  async create(
+    identityId: string,
+    dto: {
+      startDate: Date;
+      endDate: Date;
+      supplierId: string;
+    },
+  ): Promise<MenuPeriod> {
+    await this.authorizeAccess(identityId, dto.supplierId);
+
     const entity = new MenuPeriod(
-      dto.id,
+      ulid(),
       dto.startDate,
       dto.endDate,
       dto.supplierId,
     );
-    return this.repo.insert(entity);
+
+    await this.repo.insert(entity);
+    return entity;
   }
 
   async findAll(): Promise<MenuPeriod[]> {
@@ -31,18 +51,68 @@ export class MenuPeriodsService {
     return this.repo.findOneByCriteria({ id });
   }
 
-  async update(id: string, dto: any): Promise<MenuPeriod> {
-    // Map DTO to entity
+  async update(
+    id: string,
+    identityId: string,
+    dto: { startDate?: Date; endDate?: Date },
+  ): Promise<MenuPeriod> {
+    const existing = await this.repo.findOneByCriteriaOrThrow({ id });
+
+    await this.authorizeAccess(identityId, existing.supplierId);
+
     const entity = new MenuPeriod(
       id,
-      dto.startDate,
-      dto.endDate,
-      dto.supplierId,
+      dto.startDate ?? existing.startDate,
+      dto.endDate ?? existing.endDate,
+      existing.supplierId,
     );
+
     return this.repo.update(id, entity);
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string, identityId: string): Promise<void> {
+    const existing = await this.repo.findOneByCriteriaOrThrow({ id });
+
+    await this.authorizeAccess(identityId, existing.supplierId);
+
     return this.repo.delete(id);
+  }
+
+  /**
+   * Authorizes access for the user based on their identity and the requested menu period.
+   * @param identityId The ID of the user making the request.
+   * @param supplierId The ID of the supplier associated with the menu period.
+   * @throws {AuthenticationException} if the identity is invalid.
+   * @throws {UnauthorizedException} if the user is not authorized to create or modify the menu period.
+   */
+  private async authorizeAccess(identityId: string, supplierId: string) {
+    const identity = await this._identityService.findById(identityId);
+
+    if (!identity) {
+      throw new AuthenticationException('Invalid identity');
+    }
+
+    if (identity.type === IdentityType.Employee) {
+      const employee = await this._employeesService.findByIdentity(identity.id);
+      const business = await this._businessesService.findOne(
+        employee.businessId,
+      );
+
+      if (
+        business.managedSupplierIds.length === 0 ||
+        !business.managedSupplierIds.includes(supplierId)
+      ) {
+        throw new UnauthorizedException(
+          'The business does not manage the specified supplier',
+        );
+      }
+    } else if (
+      identity.type === IdentityType.Supplier &&
+      identity.id !== supplierId
+    ) {
+      throw new UnauthorizedException(
+        'Supplier can only manage menu periods for themselves',
+      );
+    }
   }
 }

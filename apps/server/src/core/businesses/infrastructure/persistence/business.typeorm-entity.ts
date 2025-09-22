@@ -14,6 +14,9 @@ export class Business {
   @Column('character varying', { length: 100, unique: true })
   contactEmail: string;
 
+  @Column('character varying', { length: 20, nullable: true })
+  contactPhone?: string | null;
+
   @OneToMany(() => Employee, (employee) => employee.business, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',

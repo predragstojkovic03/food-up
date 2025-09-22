@@ -28,8 +28,8 @@ export class MenuItemsService {
     return this.repo.findAll();
   }
 
-  async findOne(id: string): Promise<MenuItem | null> {
-    return this.repo.findOneByCriteria({ id });
+  async findOne(id: string): Promise<MenuItem> {
+    return this.repo.findOneByCriteriaOrThrow({ id });
   }
 
   async update(id: string, dto: any): Promise<MenuItem> {

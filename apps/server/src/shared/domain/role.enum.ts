@@ -1,4 +1,4 @@
 export enum EmployeeRole {
-  Admin = 'admin',
+  Manager = 'manager',
   Basic = 'basic',
 }
