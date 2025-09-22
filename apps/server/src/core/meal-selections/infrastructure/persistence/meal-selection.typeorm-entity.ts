@@ -26,6 +26,6 @@ export class MealSelection {
   @Column('int', { nullable: true })
   quantity: number | null;
 
-  @Column('timestamp with time zone')
+  @Column('date')
   date: Date;
 }

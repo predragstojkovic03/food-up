@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDate, IsOptional, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsDateString, IsOptional, IsString } from 'class-validator';
 
 export class CreateMealSelectionDto {
   @ApiProperty()
@@ -19,6 +20,7 @@ export class CreateMealSelectionDto {
   quantity?: number;
 
   @ApiProperty()
-  @IsDate()
-  date: Date;
+  @IsDateString({ strict: true })
+  @Transform(({ value }) => value.split('T')[0])
+  date: string;
 }

@@ -17,10 +17,28 @@ export class MealSelectionWindow extends Entity {
     id: string,
     startTime: Date,
     endTime: Date,
+    targetDates: Set<string>,
     businessId: string,
     menuPeriodIds: string[],
   ) {
     super();
+    this.verifyMealSelectionInputs(menuPeriodIds, startTime, endTime);
+
+    this.id = id;
+    this.startTime = startTime;
+    this.endTime = endTime;
+    this.businessId = businessId;
+    this.menuPeriodIds = menuPeriodIds;
+    this.targetDates = targetDates;
+
+    this.addDomainEvent(new MealSelectionWindowCreatedEvent(this.id));
+  }
+
+  private verifyMealSelectionInputs(
+    menuPeriodIds: string[],
+    startTime: Date,
+    endTime: Date,
+  ) {
     if (menuPeriodIds.length === 0) {
       throw new InvalidInputDataException(
         'MealSelectionWindow must have at least one menu period ID.',
@@ -32,14 +50,6 @@ export class MealSelectionWindow extends Entity {
         'MealSelectionWindow startTime must be before endTime.',
       );
     }
-
-    this.id = id;
-    this.startTime = startTime;
-    this.endTime = endTime;
-    this.businessId = businessId;
-    this.menuPeriodIds = menuPeriodIds;
-
-    this.addDomainEvent(new MealSelectionWindowCreatedEvent(this.id));
   }
 
   isDateWithinWindow(date: Date): boolean {
@@ -51,23 +61,19 @@ export class MealSelectionWindow extends Entity {
     endTime?: Date,
     businessId?: string,
     menuPeriodIds?: string[],
+    targetDates?: Set<string>,
   ): this {
-    if (menuPeriodIds && menuPeriodIds.length === 0) {
-      throw new InvalidInputDataException(
-        'MealSelectionWindow must have at least one menu period ID.',
-      );
-    }
-
-    if (startTime && endTime && startTime >= endTime) {
-      throw new InvalidInputDataException(
-        'MealSelectionWindow startTime must be before endTime.',
-      );
-    }
+    this.verifyMealSelectionInputs(
+      menuPeriodIds ?? this.menuPeriodIds,
+      startTime ?? this.startTime,
+      endTime ?? this.endTime,
+    );
 
     this.startTime = startTime ?? this.startTime;
     this.endTime = endTime ?? this.endTime;
     this.businessId = businessId ?? this.businessId;
     this.menuPeriodIds = menuPeriodIds ?? this.menuPeriodIds;
+    this.targetDates = targetDates ?? this.targetDates;
 
     this.addDomainEvent(new MealSelectionWindowUpdatedEvent(this.id));
     return this;
@@ -76,6 +82,8 @@ export class MealSelectionWindow extends Entity {
   readonly id: string;
   startTime: Date;
   endTime: Date;
+
+  targetDates: Set<string>;
   businessId: string;
   menuPeriodIds: string[];
 }

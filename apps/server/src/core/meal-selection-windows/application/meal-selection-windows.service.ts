@@ -14,6 +14,7 @@ export interface CreateMealSelectionWindowDto {
   startTime: Date;
   endTime: Date;
   menuPeriodIds: string[];
+  targetDates: Set<string>;
 }
 
 export interface UpdateMealSelectionWindowDto {
@@ -21,6 +22,7 @@ export interface UpdateMealSelectionWindowDto {
   endTime?: Date;
   businessId?: string;
   menuPeriodIds?: string[];
+  targetDates?: Set<string>;
 }
 
 @Injectable()
@@ -51,6 +53,7 @@ export class MealSelectionWindowsService {
       ulid(),
       dto.startTime,
       dto.endTime,
+      dto.targetDates,
       employee.businessId,
       dto.menuPeriodIds,
     );
@@ -85,6 +88,7 @@ export class MealSelectionWindowsService {
       dto.endTime,
       dto.businessId,
       dto.menuPeriodIds,
+      dto.targetDates,
     );
 
     await this._repository.update(id, updated);

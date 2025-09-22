@@ -1,4 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import { IsArray, IsDateString, IsOptional, IsString } from 'class-validator';
 
 export class UpdateMealSelectionWindowDto {
@@ -18,8 +19,12 @@ export class UpdateMealSelectionWindowDto {
   @IsOptional()
   end?: string;
 
-  @ApiPropertyOptional()
-  @IsString()
+  @ApiPropertyOptional({ type: [String] })
+  @IsArray()
+  @IsDateString({ strict: true }, { each: true })
+  @Transform(
+    ({ value }) => new Set(value.map((date: string) => date.split('T')[0])),
+  )
   @IsOptional()
-  description?: string;
+  targetDates?: Set<string>;
 }

@@ -23,6 +23,9 @@ export class MealSelectionWindow {
   @Column('character varying', { length: 26 })
   businessId: string;
 
+  @Column('date', { array: true })
+  targetDates: Date[];
+
   @ManyToMany(() => MenuPeriod, (menuPeriod) => menuPeriod.menuSelectionWindows)
   @JoinTable()
   menuPeriods: MenuPeriod[];

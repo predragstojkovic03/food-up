@@ -17,7 +17,7 @@ export class MealSelection extends Entity {
     employeeId: string,
     menuItemId: string,
     mealSelectionWindowId: string,
-    date: Date,
+    date: string,
     quantity?: number | null,
   ) {
     super();
@@ -35,7 +35,7 @@ export class MealSelection extends Entity {
   menuItemId: string;
   mealSelectionWindowId: string;
   quantity: number | null;
-  date: Date;
+  date: string;
 
   /**
    * Factory method to create a valid MealSelection instance. Should be used instead of the constructor.
@@ -53,7 +53,7 @@ export class MealSelection extends Entity {
     employeeId: string,
     menuItemId: string,
     mealSelectionWindow: MealSelectionWindow,
-    date: Date,
+    date: string,
     quantity?: number | null,
   ) {
     const mealSelection = new MealSelection(
@@ -65,9 +65,15 @@ export class MealSelection extends Entity {
       quantity,
     );
 
-    if (!mealSelectionWindow.isDateWithinWindow(date)) {
+    if (!mealSelectionWindow.isDateWithinWindow(new Date())) {
       throw new InvalidInputDataException(
-        `The meal selection date ${date.toISOString()} is outside the selection window (${mealSelectionWindow.startTime.toISOString()} - ${mealSelectionWindow.endTime.toISOString()}).`,
+        `The meal selection date ${new Date().toISOString()} is outside the selection window (${mealSelectionWindow.startTime.toISOString()} - ${mealSelectionWindow.endTime.toISOString()}).`,
+      );
+    }
+
+    if (!mealSelectionWindow.targetDates.has(date)) {
+      throw new InvalidInputDataException(
+        `The meal selection date ${date} is not a valid target date for the selection window.`,
       );
     }
 

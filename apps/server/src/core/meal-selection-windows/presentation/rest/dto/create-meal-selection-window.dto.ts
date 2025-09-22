@@ -3,7 +3,7 @@ import { Transform } from 'class-transformer';
 import {
   IsArray,
   IsDate,
-  IsOptional,
+  IsDateString,
   IsString,
   MinLength,
 } from 'class-validator';
@@ -25,8 +25,11 @@ export class CreateMealSelectionWindowDto {
   @Transform(({ value }) => new Date(value))
   endTime: Date;
 
-  @ApiProperty({ required: false })
-  @IsString()
-  @IsOptional()
-  description?: string;
+  @ApiProperty({ type: [String] })
+  @IsArray()
+  @IsDateString({ strict: true }, { each: true })
+  @Transform(
+    ({ value }) => new Set(value.map((date: string) => date.split('T')[0])),
+  )
+  targetDates: Set<string>;
 }
