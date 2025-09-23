@@ -1,6 +1,7 @@
 import { Entity } from 'src/shared/domain/entity';
 import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
 import { ManagedSupplierCreatedEvent } from './events/managed-supplier-created.even';
+import { SupplierInfoUpdatedEvent } from './events/supplier-info-updated.event';
 import { SupplierRegisteredEvent } from './events/supplier-registered.event';
 import { SupplierType } from './supplier-type.enum';
 
@@ -50,4 +51,11 @@ export class Supplier extends Entity {
   businessIds: string[];
   managingBusinessId?: string;
   identityId?: string;
+
+  updateInfo(name?: string, contactInfo?: string) {
+    this.name = name ?? this.name;
+    this.contactInfo = contactInfo ?? this.contactInfo;
+
+    this.addDomainEvent(new SupplierInfoUpdatedEvent(this.id));
+  }
 }

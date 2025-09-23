@@ -1,8 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { IdentityService } from 'src/core/identity/application/identity.service';
 import { IdentityType } from 'src/core/identity/domain/identity.entity';
 import { DomainEvents } from 'src/shared/application/domain-events/domain-events.decorator';
-import { EntityInstanceNotFoundException } from 'src/shared/domain/exceptions/entity-instance-not-found.exception';
+import { UnauthorizedException } from 'src/shared/domain/exceptions/unauthorized.exception';
 import { ulid } from 'ulid';
 import { SupplierType } from '../domain/supplier-type.enum';
 import { Supplier } from '../domain/supplier.entity';
@@ -10,8 +11,8 @@ import {
   I_SUPPLIERS_REPOSITORY,
   ISuppliersRepository,
 } from '../domain/suppliers.repository.interface';
-import { RegisterSupplierDto } from '../presentation/rest/dto/create-supplier.dto';
-import { UpdateSupplierDto } from '../presentation/rest/dto/update-supplier.dto';
+import { RegisterSupplierDto } from './dto/register-supplier.dto';
+import { UpdateSupplierDto } from './dto/update-supplier.dto';
 
 @Injectable()
 export class SuppliersService {
@@ -19,6 +20,7 @@ export class SuppliersService {
     @Inject(I_SUPPLIERS_REPOSITORY)
     private readonly _repository: ISuppliersRepository,
     private readonly _identityService: IdentityService,
+    private readonly _employeesService: EmployeesService,
   ) {}
 
   @DomainEvents
@@ -52,11 +54,33 @@ export class SuppliersService {
     return this._repository.findOneByCriteria({ id });
   }
 
-  async update(id: string, dto: UpdateSupplierDto): Promise<Supplier> {
-    const existing = await this._repository.findOneByCriteria({ id });
-    if (!existing)
-      throw new EntityInstanceNotFoundException('Supplier not found');
-    return this._repository.update(id, { ...existing, ...dto } as any);
+  @DomainEvents
+  async update(
+    id: string,
+    identityId: string,
+    dto: UpdateSupplierDto,
+  ): Promise<Supplier> {
+    const supplier = await this._repository.findOneByCriteriaOrThrow({ id });
+
+    if (supplier.type === SupplierType.Standalone) {
+      if (supplier.identityId !== identityId) {
+        throw new UnauthorizedException(
+          'Not authorized to update this supplier.',
+        );
+      }
+    } else {
+      const employee = await this._employeesService.findByIdentity(identityId);
+      if (employee.businessId !== supplier.managingBusinessId) {
+        throw new UnauthorizedException(
+          'Not authorized to update this supplier.',
+        );
+      }
+    }
+
+    supplier.updateInfo(dto.name, dto.contactInfo);
+    await this._repository.update(id, supplier);
+
+    return supplier;
   }
 
   async delete(id: string): Promise<void> {
