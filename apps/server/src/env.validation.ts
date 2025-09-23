@@ -1,5 +1,16 @@
 import { plainToInstance, Transform } from 'class-transformer';
-import { IsBoolean, IsNumber, IsString, validateSync } from 'class-validator';
+import {
+  IsBoolean,
+  IsEnum,
+  IsNumber,
+  IsString,
+  validateSync,
+} from 'class-validator';
+
+export enum NodeEnv {
+  Development = 'development',
+  Production = 'production',
+}
 
 export class EnvironmentVariables {
   @IsString()
@@ -18,8 +29,8 @@ export class EnvironmentVariables {
   @IsString()
   DB_NAME: string;
 
-  @IsString()
-  NODE_ENV: string;
+  @IsEnum(NodeEnv)
+  NODE_ENV: NodeEnv;
 
   @IsBoolean()
   @Transform(({ value }) => value === 'true')

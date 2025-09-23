@@ -1,6 +1,7 @@
-export class AuthenticationException extends Error {
-  constructor(message?: string) {
-    super(message ?? 'Authentication failed');
-    this.name = 'AuthenticationException';
+import { DomainException } from './domain.exception';
+
+export class AuthenticationException extends DomainException {
+  constructor(message: string = 'Authentication failed') {
+    super(message);
   }
 }

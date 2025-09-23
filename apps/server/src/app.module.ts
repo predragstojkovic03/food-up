@@ -1,5 +1,6 @@
 import { Inject, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { APP_FILTER } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
@@ -11,6 +12,7 @@ import { IConfigService } from './shared/application/config-service.interface';
 import { DomainEventsModule } from './shared/application/domain-events/domain-events.module';
 import { I_LOGGER, ILogger } from './shared/application/logger.interface';
 import { ConfigModule } from './shared/infrastructure/config/config.module';
+import { DomainExceptionFilter } from './shared/infrastructure/domain-exception-filter';
 import { LoggingMiddleware } from './shared/infrastructure/logger/logger.middleware';
 import { LoggerModule } from './shared/infrastructure/logger/logger.module';
 
@@ -45,7 +47,13 @@ import { LoggerModule } from './shared/infrastructure/logger/logger.module';
     DomainEventsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_FILTER,
+      useClass: DomainExceptionFilter,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   constructor(@Inject(I_LOGGER) private readonly logger: ILogger) {}
