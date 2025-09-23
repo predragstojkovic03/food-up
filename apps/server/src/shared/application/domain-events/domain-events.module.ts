@@ -1,9 +1,10 @@
-import { Global, Module } from '@nestjs/common';
-import { DispatchDomainEventsAspect } from './dispatch-domain-events.aspect';
+import { Module } from '@nestjs/common';
+import { DiscoveryModule } from '@nestjs/core';
+import { DomainEventsProvider } from './domain-events-provider';
+import { DomainEventsExplorer } from './domain-events.explorer';
 
-@Global()
 @Module({
-  providers: [DispatchDomainEventsAspect],
-  exports: [DispatchDomainEventsAspect],
+  imports: [DiscoveryModule],
+  providers: [DomainEventsExplorer, DomainEventsProvider],
 })
 export class DomainEventsModule {}

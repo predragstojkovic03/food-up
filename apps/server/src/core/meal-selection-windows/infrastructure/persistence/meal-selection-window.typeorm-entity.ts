@@ -24,7 +24,7 @@ export class MealSelectionWindow {
   businessId: string;
 
   @Column('date', { array: true })
-  targetDates: Date[];
+  targetDates: string[];
 
   @ManyToMany(() => MenuPeriod, (menuPeriod) => menuPeriod.menuSelectionWindows)
   @JoinTable()

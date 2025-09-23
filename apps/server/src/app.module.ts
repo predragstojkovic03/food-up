@@ -1,7 +1,6 @@
 import { Inject, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AopModule } from '@toss/nestjs-aop';
 import { join } from 'path';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { AppController } from './app.controller';
@@ -17,7 +16,6 @@ import { LoggerModule } from './shared/infrastructure/logger/logger.module';
 
 @Module({
   imports: [
-    AopModule,
     DomainEventsModule,
     ConfigModule,
     TypeOrmModule.forRootAsync({
@@ -44,6 +42,7 @@ import { LoggerModule } from './shared/infrastructure/logger/logger.module';
     LoggerModule,
     CoreModule,
     ConfigModule,
+    DomainEventsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

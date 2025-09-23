@@ -1,6 +1,8 @@
+import { Entity } from 'src/shared/domain/entity';
+
 export type MealType = 'breakfast' | 'lunch' | 'dinner';
 
-export class Meal {
+export class Meal extends Entity {
   constructor(
     public readonly id: string,
     public name: string,
@@ -8,5 +10,7 @@ export class Meal {
     public type: MealType,
     public readonly supplierId: string,
     public price?: number,
-  ) {}
+  ) {
+    super();
+  }
 }

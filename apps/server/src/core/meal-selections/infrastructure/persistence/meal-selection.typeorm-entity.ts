@@ -27,5 +27,5 @@ export class MealSelection {
   quantity: number | null;
 
   @Column('date')
-  date: Date;
+  date: string;
 }

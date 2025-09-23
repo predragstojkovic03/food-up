@@ -3,6 +3,7 @@ import { BusinessesService } from 'src/core/businesses/application/businesses.se
 import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { IdentityService } from 'src/core/identity/application/identity.service';
 import { IdentityType } from 'src/core/identity/domain/identity.entity';
+import { DomainEvents } from 'src/shared/application/domain-events/domain-events.decorator';
 import { AuthenticationException } from 'src/shared/domain/exceptions/authentication.exception';
 import { UnauthorizedException } from 'src/shared/domain/exceptions/unauthorized.exception';
 import { ulid } from 'ulid';
@@ -22,6 +23,7 @@ export class MenuPeriodsService {
     private readonly _employeesService: EmployeesService,
   ) {}
 
+  @DomainEvents
   async create(
     identityId: string,
     dto: {
@@ -51,6 +53,7 @@ export class MenuPeriodsService {
     return this.repo.findOneByCriteria({ id });
   }
 
+  @DomainEvents
   async update(
     id: string,
     identityId: string,

@@ -5,7 +5,7 @@ export class Business extends Entity {
     id: string,
     name: string,
     contactEmail: string,
-    contactPhone?: string,
+    contactPhone?: string | null,
     employeeIds: string[] = [],
     supplierIds: string[] = [],
     managedSupplierIds: string[] = [],
@@ -23,7 +23,7 @@ export class Business extends Entity {
   readonly id: string;
   name: string;
   contactEmail: string;
-  contactPhone?: string;
+  contactPhone?: string | null;
   employeeIds: string[];
   supplierIds: string[];
   managedSupplierIds: string[];

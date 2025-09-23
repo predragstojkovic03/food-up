@@ -1,7 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { MenuPeriodsService } from 'src/core/menu-periods/application/menu-periods.service';
-import { DispatchDomainEvents } from 'src/shared/application/domain-events/dispatch-events.decorator';
 import { EntityInstanceNotFoundException } from 'src/shared/domain/exceptions/entity-instance-not-found.exception';
 import { ulid } from 'ulid';
 import { MealSelectionWindow } from '../domain/meal-selection-window.entity';
@@ -34,7 +33,6 @@ export class MealSelectionWindowsService {
     private readonly _employeesService: EmployeesService,
   ) {}
 
-  @DispatchDomainEvents()
   async create(
     identityId: string,
     dto: CreateMealSelectionWindowDto,
