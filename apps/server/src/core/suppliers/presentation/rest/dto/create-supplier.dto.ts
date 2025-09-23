@@ -1,21 +1,10 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsArray,
-  IsEnum,
-  IsOptional,
-  IsString,
-  ValidateIf,
-} from 'class-validator';
-import { SupplierType } from 'src/core/suppliers/domain/supplier-type.enum';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsArray, IsEmail, IsOptional, IsString } from 'class-validator';
 
-export class CreateSupplierDto {
+export class RegisterSupplierDto {
   @ApiProperty()
   @IsString()
   name: string;
-
-  @ApiProperty({ enum: SupplierType })
-  @IsEnum(SupplierType)
-  type: SupplierType;
 
   @ApiProperty()
   @IsString()
@@ -27,8 +16,11 @@ export class CreateSupplierDto {
   @IsString({ each: true })
   businessIds?: string[];
 
-  @ApiPropertyOptional()
+  @ApiProperty({ type: String, required: true })
   @IsString()
-  @ValidateIf((o) => o.type === SupplierType.External)
-  managingBusinessId?: string;
+  password: string;
+
+  @ApiProperty({ type: String, required: true })
+  @IsEmail()
+  email: string;
 }

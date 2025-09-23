@@ -8,8 +8,9 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { plainToInstance } from 'class-transformer';
 import { SuppliersService } from '../../application/suppliers.service';
-import { CreateSupplierDto } from './dto/create-supplier.dto';
+import { RegisterSupplierDto } from './dto/create-supplier.dto';
 import { SupplierResponseDto } from './dto/supplier-response.dto';
 import { UpdateSupplierDto } from './dto/update-supplier.dto';
 
@@ -25,8 +26,8 @@ export class SuppliersController {
     description: 'Supplier created',
     type: SupplierResponseDto,
   })
-  async create(@Body() dto: CreateSupplierDto): Promise<SupplierResponseDto> {
-    const result = await this._suppliersService.create(dto);
+  async create(@Body() dto: RegisterSupplierDto): Promise<SupplierResponseDto> {
+    const result = await this._suppliersService.register(dto);
     return this.toResponseDto(result);
   }
 
@@ -80,12 +81,16 @@ export class SuppliersController {
   }
 
   private toResponseDto(entity: any): SupplierResponseDto {
-    return {
+    const response: SupplierResponseDto = {
       id: entity.id,
       name: entity.name,
       type: entity.type,
       contactInfo: entity.contactInfo,
       businessIds: entity.businessIds ?? [],
     };
+
+    return plainToInstance(SupplierResponseDto, response, {
+      excludeExtraneousValues: true,
+    });
   }
 }

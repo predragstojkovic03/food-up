@@ -1,4 +1,4 @@
 export enum SupplierType {
-  External = 'external',
-  Registered = 'registered',
+  Managed = 'managed',
+  Standalone = 'standalone',
 }
