@@ -1,6 +1,6 @@
 # Food-Up Server
 
-A modular, scalable server-side application built with [NestJS](https://nestjs.com/) and TypeScript, following Domain-Driven Design (DDD) principles.
+A modular, scalable server-side application built with [NestJS](https://nestjs.com/) and TypeScript, following Domain-Driven Design (DDD) principles. The application is persistence-agnostic. The application layer includes framework dependencies to reduce development friction and leverage [NestJS](https://nestjs.com/) for dependency injection, while the domain layer remains completely pure.
 
 ---
 
@@ -18,7 +18,7 @@ graph TD
   Handles HTTP requests and responses. Contains controllers (e.g., [`BusinessesController`](src/core/businesses/presentation/rest/businesses.controller.ts)).
 
 - **Application Layer:**  
-  Contains business use cases (e.g., [`CreateBusinessUseCase`](src/core/businesses/application/use-cases/create-business.use-case.ts)), orchestrating domain logic and coordinating repositories.
+  Contains use cases (e.g., [`BusinessService`](src/core/businesses/application/businesses.service.ts)), orchestrating domain logic and coordinating repositories.
 
 - **Domain Layer:**  
   Defines core business entities (e.g., [`Business`](src/core/businesses/domain/business.entity.ts)), repository interfaces ([`IBusinessesRepository`](src/core/businesses/domain/businesses.repository.ts)), and business rules.
@@ -75,7 +75,7 @@ npm run test:cov
 ## Project Structure
 
 - `src/core/` — Feature modules (businesses, employees, etc.)
-- `src/shared/` — Shared abstractions and infrastructure (logger, repository, etc.)
+- `src/shared/` — Shared abstractions and infrastructure (logger, repository, etc.) - Cross cutting concerns
 - `src/app.module.ts` — Root application module
 - `src/env.validation.ts` — Environment variable validation
 
