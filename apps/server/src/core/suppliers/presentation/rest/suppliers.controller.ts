@@ -6,11 +6,21 @@ import {
   Param,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
+import { CurrentIdentity } from 'src/core/auth/infrastructure/current-identity.decorator';
+import { JwtAuthGuard } from 'src/core/auth/infrastructure/jwt-auth.guard';
+import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
+import { RequiredEmployeeRole } from 'src/core/employees/presentation/rest/employee-role.decorator';
+import { IdentityType } from 'src/core/identity/domain/identity.entity';
+import { RequiredIdentityType } from 'src/core/identity/presentation/rest/identity-type.decorator';
+import { EmployeeRole } from 'src/shared/domain/role.enum';
 import { SuppliersService } from '../../application/suppliers.service';
-import { RegisterSupplierDto } from './dto/create-supplier.dto';
+import { Supplier } from '../../domain/supplier.entity';
+import { CreateManagedSupplierDto } from './dto/create-managed-supplier.dto';
+import { RegisterSupplierDto } from './dto/register-supplier.dto';
 import { SupplierResponseDto } from './dto/supplier-response.dto';
 import { UpdateSupplierDto } from './dto/update-supplier.dto';
 
@@ -19,15 +29,40 @@ import { UpdateSupplierDto } from './dto/update-supplier.dto';
 export class SuppliersController {
   constructor(private readonly _suppliersService: SuppliersService) {}
 
-  @Post()
   @ApiOperation({ summary: 'Create a new supplier' })
   @ApiResponse({
     status: 201,
     description: 'Supplier created',
     type: SupplierResponseDto,
   })
-  async create(@Body() dto: RegisterSupplierDto): Promise<SupplierResponseDto> {
+  @UseGuards(JwtAuthGuard)
+  @Post('register')
+  async register(
+    @Body() dto: RegisterSupplierDto,
+  ): Promise<SupplierResponseDto> {
     const result = await this._suppliersService.register(dto);
+    return this.toResponseDto(result);
+  }
+
+  @ApiOperation({ summary: 'Create a new managed supplier' })
+  @ApiResponse({
+    status: 201,
+    description: 'Managed supplier created',
+    type: SupplierResponseDto,
+  })
+  @UseGuards(JwtAuthGuard)
+  @RequiredIdentityType(IdentityType.Employee)
+  @RequiredEmployeeRole(EmployeeRole.Manager)
+  @Post('managed')
+  async createManagedSupplier(
+    @Body() { contactInfo, name }: CreateManagedSupplierDto,
+    @CurrentIdentity() { sub }: JwtPayload,
+  ): Promise<SupplierResponseDto> {
+    const result = await this._suppliersService.createManagedSupplier(sub, {
+      contactInfo,
+      name,
+    });
+
     return this.toResponseDto(result);
   }
 
@@ -56,7 +91,6 @@ export class SuppliersController {
     return this.toResponseDto(result);
   }
 
-  @Patch(':id')
   @ApiOperation({ summary: 'Update a supplier' })
   @ApiResponse({
     status: 200,
@@ -64,11 +98,14 @@ export class SuppliersController {
     type: SupplierResponseDto,
   })
   @ApiResponse({ status: 404, description: 'Supplier not found' })
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id')
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateSupplierDto,
+    @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<SupplierResponseDto> {
-    const result = await this._suppliersService.update(id, dto);
+    const result = await this._suppliersService.update(id, sub, dto);
     return this.toResponseDto(result);
   }
 
@@ -80,7 +117,7 @@ export class SuppliersController {
     return this._suppliersService.delete(id);
   }
 
-  private toResponseDto(entity: any): SupplierResponseDto {
+  private toResponseDto(entity: Supplier): SupplierResponseDto {
     const response: SupplierResponseDto = {
       id: entity.id,
       name: entity.name,

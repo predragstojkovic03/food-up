@@ -1,6 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsArray, IsEnum, IsOptional, IsString } from 'class-validator';
-import { SupplierType } from 'src/core/suppliers/domain/supplier-type.enum';
+import { IsOptional, IsString } from 'class-validator';
 
 export class UpdateSupplierDto {
   @ApiPropertyOptional()
@@ -8,18 +7,8 @@ export class UpdateSupplierDto {
   @IsOptional()
   name?: string;
 
-  @ApiPropertyOptional({ enum: SupplierType })
-  @IsEnum(SupplierType)
-  @IsOptional()
-  type?: SupplierType;
-
   @ApiPropertyOptional()
   @IsString()
   @IsOptional()
   contactInfo?: string;
-
-  @ApiPropertyOptional({ type: [String] })
-  @IsArray()
-  @IsOptional()
-  businessIds?: string[];
 }

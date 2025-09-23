@@ -18,7 +18,7 @@ export class EmployeesService {
     private readonly _identityService: IdentityService,
   ) {}
 
-  async create(dto: CreateEmployeeDto): Promise<Employee> {
+  async register(dto: CreateEmployeeDto): Promise<Employee> {
     const identity = await this._identityService.create({
       email: dto.email,
       password: dto.password,

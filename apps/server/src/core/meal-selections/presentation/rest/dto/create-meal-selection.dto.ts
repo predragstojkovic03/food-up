@@ -5,10 +5,6 @@ import { IsDateString, IsOptional, IsString } from 'class-validator';
 export class CreateMealSelectionDto {
   @ApiProperty()
   @IsString()
-  employeeId: string;
-
-  @ApiProperty()
-  @IsString()
   menuItemId: string;
 
   @ApiProperty()

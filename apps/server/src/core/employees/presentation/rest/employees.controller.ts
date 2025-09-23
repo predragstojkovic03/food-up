@@ -20,16 +20,17 @@ import { UpdateEmployeeRequestDto } from './dto/update-employee.dto';
 export class EmployeesController {
   constructor(private readonly _employeesService: EmployeesService) {}
 
-  @Post('')
   @ApiOperation({ summary: 'Create a new employee' })
   @ApiResponse({ status: 201, type: EmployeeResponseDto })
-  async create(
+  @Post('register')
+  async register(
     @Body() createEmployeeDto: CreateEmployeeRequestDto,
   ): Promise<EmployeeResponseDto> {
-    const employee = await this._employeesService.create({
+    const employee = await this._employeesService.register({
       ...createEmployeeDto,
       role: EmployeeRole.Basic,
     });
+
     return plainToInstance(EmployeeResponseDto, employee);
   }
 

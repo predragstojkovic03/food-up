@@ -53,6 +53,10 @@ export class MenuPeriodsService {
     return this.repo.findOneByCriteria({ id });
   }
 
+  async findBulkByIds(ids: string[]): Promise<MenuPeriod[]> {
+    return this.repo.findBulkByIds(ids);
+  }
+
   @DomainEvents
   async update(
     id: string,

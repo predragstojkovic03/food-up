@@ -1,5 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { MealSelectionWindowsService } from 'src/core/meal-selection-windows/application/meal-selection-windows.service';
+import { MenuPeriodsService } from 'src/core/menu-periods/application/menu-periods.service';
 import { ulid } from 'ulid';
 import { MealSelection } from '../domain/meal-selection.entity';
 import {
@@ -14,17 +16,28 @@ export class MealSelectionsService {
   constructor(
     @Inject(I_MEAL_SELECTIONS_REPOSITORY)
     private readonly _repository: IMealSelectionsRepository,
-    private readonly mealSelectionWindowsService: MealSelectionWindowsService,
+    private readonly _mealSelectionWindowsService: MealSelectionWindowsService,
+    private readonly _employeesService: EmployeesService,
+    private readonly _menuPeriodsService: MenuPeriodsService,
   ) {}
 
-  async create(dto: CreateMealSelectionDto): Promise<MealSelection> {
-    const mealSelectionWindow = await this.mealSelectionWindowsService.findOne(
+  async create(
+    identityId: string,
+    dto: CreateMealSelectionDto,
+  ): Promise<MealSelection> {
+    const employee = await this._employeesService.findByIdentity(identityId);
+
+    const mealSelectionWindow = await this._mealSelectionWindowsService.findOne(
       dto.mealSelectionWindowId,
+    );
+
+    const menuPeriods = await this._menuPeriodsService.findBulkByIds(
+      mealSelectionWindow.menuPeriodIds,
     );
 
     const mealSelection = MealSelection.create(
       ulid(),
-      dto.employeeId,
+      employee.id,
       dto.menuItemId,
       mealSelectionWindow,
       dto.date,
@@ -48,7 +61,7 @@ export class MealSelectionsService {
   ): Promise<MealSelection> {
     const existing = await this._repository.findOneByCriteriaOrThrow({ id });
 
-    const mealSelectionWindow = await this.mealSelectionWindowsService.findOne(
+    const mealSelectionWindow = await this._mealSelectionWindowsService.findOne(
       dto.mealSelectionWindowId ?? existing.mealSelectionWindowId,
     );
 

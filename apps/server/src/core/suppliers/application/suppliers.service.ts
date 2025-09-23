@@ -4,6 +4,7 @@ import { IdentityService } from 'src/core/identity/application/identity.service'
 import { IdentityType } from 'src/core/identity/domain/identity.entity';
 import { DomainEvents } from 'src/shared/application/domain-events/domain-events.decorator';
 import { UnauthorizedException } from 'src/shared/domain/exceptions/unauthorized.exception';
+import { EmployeeRole } from 'src/shared/domain/role.enum';
 import { ulid } from 'ulid';
 import { SupplierType } from '../domain/supplier-type.enum';
 import { Supplier } from '../domain/supplier.entity';
@@ -46,12 +47,36 @@ export class SuppliersService {
     return supplier;
   }
 
+  @DomainEvents
+  async createManagedSupplier(
+    sub: string,
+    dto: { contactInfo: string; name: string },
+  ) {
+    const employee = await this._employeesService.findByIdentity(sub);
+
+    if (employee.role !== EmployeeRole.Manager) {
+      throw new UnauthorizedException('Only managers can manage suppliers.');
+    }
+
+    const supplier = new Supplier(
+      ulid(),
+      dto.name,
+      SupplierType.Managed,
+      dto.contactInfo,
+      [employee.businessId],
+      employee.businessId,
+    );
+
+    await this._repository.insert(supplier);
+    return supplier;
+  }
+
   async findAll(): Promise<Supplier[]> {
     return this._repository.findAll();
   }
 
-  async findOne(id: string): Promise<Supplier | null> {
-    return this._repository.findOneByCriteria({ id });
+  async findOne(id: string): Promise<Supplier> {
+    return this._repository.findOneByCriteriaOrThrow({ id });
   }
 
   @DomainEvents
@@ -70,7 +95,10 @@ export class SuppliersService {
       }
     } else {
       const employee = await this._employeesService.findByIdentity(identityId);
-      if (employee.businessId !== supplier.managingBusinessId) {
+      if (
+        employee.businessId !== supplier.managingBusinessId ||
+        employee.role !== EmployeeRole.Manager
+      ) {
         throw new UnauthorizedException(
           'Not authorized to update this supplier.',
         );
