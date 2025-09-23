@@ -80,12 +80,12 @@ export class ChangeRequestsController {
   @RequiredEmployeeRole(EmployeeRole.Manager)
   @RequiredIdentityType(IdentityTypeEnum.Employee)
   @Patch(':id/status')
-  async changeStatus(
+  async updateStatus(
     @Param('id') id: string,
     @Body() { status }: UpdateChangeRequestStatusDto,
     @User() user: JwtPayload,
   ) {
-    await this._changeRequestsService.changeStatus(id, status, user.sub);
+    await this._changeRequestsService.updateStatus(id, status, user.sub);
   }
 
   @ApiOperation({ summary: 'Delete a change request' })

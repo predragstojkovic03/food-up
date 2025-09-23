@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { MealSelectionsService } from 'src/core/meal-selections/application/meal-selections.service';
 import { MenuItemsService } from 'src/core/menu-items/application/menu-items.service';
+import { DomainEvents } from 'src/shared/application/domain-events/domain-events.decorator';
 import { UnauthorizedException } from 'src/shared/domain/exceptions/unauthorized.exception';
 import { EmployeeRole } from 'src/shared/domain/role.enum';
 import { ulid } from 'ulid';
@@ -11,9 +12,8 @@ import {
   I_CHANGE_REQUESTS_REPOSITORY,
   IChangeRequestsRepository,
 } from '../domain/change-requests.repository.interface';
-import { CreateChangeRequestDto } from '../presentation/rest/dto/create-change-request.dto';
-import { UpdateChangeRequestDto } from '../presentation/rest/dto/update-change-request.dto';
-
+import { CreateChangeRequestDto } from './dto/create-change-request.dto';
+import { UpdateChangeRequestDto } from './dto/update-change-request.dto';
 @Injectable()
 export class ChangeRequestsService {
   constructor(
@@ -24,17 +24,30 @@ export class ChangeRequestsService {
     private readonly employeesService: EmployeesService,
   ) {}
 
+  @DomainEvents
   async create(
-    employeeId: string,
+    identityId: string,
     dto: CreateChangeRequestDto,
   ): Promise<ChangeRequest> {
+    const employee = await this.employeesService.findByIdentity(identityId);
+
     const mealSelection = await this.mealSelectionsService.findOne(
       dto.mealSelectionId,
     );
 
-    const entity = new ChangeRequest(
+    if (mealSelection.employeeId !== employee.id) {
+      throw new UnauthorizedException(
+        'Employee can only create change requests for his own meal selections.',
+      );
+    }
+
+    if (dto.newMenuItemId) {
+      await this.menuItemsService.findOne(dto.newMenuItemId);
+    }
+
+    const changeRequest = new ChangeRequest(
       ulid(),
-      employeeId,
+      employee.id,
       dto.mealSelectionId,
       dto.newMenuItemId ?? null,
       dto.newQuantity ?? null,
@@ -43,7 +56,10 @@ export class ChangeRequestsService {
       null,
       null,
     );
-    return this.repo.insert(entity);
+
+    await this.repo.insert(changeRequest);
+
+    return changeRequest;
   }
 
   async findAll(): Promise<ChangeRequest[]> {
@@ -54,12 +70,13 @@ export class ChangeRequestsService {
     return this.repo.findOneByCriteria({ id });
   }
 
+  @DomainEvents
   async update(
     id: string,
     employeeId: string,
     dto: UpdateChangeRequestDto,
   ): Promise<ChangeRequest> {
-    const existing = await this.repo.findOneByCriteriaOrThrow({ id });
+    const changeRequest = await this.repo.findOneByCriteriaOrThrow({ id });
 
     const menuItemId =
       (await (async () => {
@@ -69,30 +86,41 @@ export class ChangeRequestsService {
             .then((ms) => ms.id);
         }
 
-        return existing.newMenuItemId;
+        return changeRequest.newMenuItemId;
       })()) ?? undefined;
 
-    existing.updateSelection(menuItemId, dto.newQuantity, dto.clearSelection);
+    changeRequest.updateSelection(
+      menuItemId,
+      dto.newQuantity,
+      dto.clearSelection,
+    );
 
-    return this.repo.update(id, existing);
+    await this.repo.update(id, changeRequest);
+
+    return changeRequest;
   }
 
-  async changeStatus(
+  @DomainEvents
+  async updateStatus(
     id: string,
+    performedByIdentityId: string,
     status: ChangeRequestStatus,
-    employeeId: string,
   ): Promise<ChangeRequest> {
-    const existing = await this.repo.findOneByCriteriaOrThrow({ id });
-    const employee = await this.employeesService.findOne(employeeId);
+    const changeRequest = await this.repo.findOneByCriteriaOrThrow({ id });
+    const performer = await this.employeesService.findByIdentity(
+      performedByIdentityId,
+    );
 
-    if (employee.role !== EmployeeRole.Manager) {
+    if (performer.role !== EmployeeRole.Manager) {
       throw new UnauthorizedException(
         'Only managers can change the status of a change request',
       );
     }
 
-    existing.changeStatus(status, employee.id, new Date());
-    return this.repo.update(id, existing);
+    changeRequest.changeStatus(status, performer.id, new Date());
+    await this.repo.update(id, changeRequest);
+
+    return changeRequest;
   }
 
   async delete(id: string): Promise<void> {

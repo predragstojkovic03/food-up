@@ -2,6 +2,9 @@ import { Entity } from 'src/shared/domain/entity';
 import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
 import { InvalidOperationException } from 'src/shared/domain/exceptions/invalid-operation.exception';
 import { ChangeRequestStatus } from './change-request-status.enum';
+import { ChangeRequestCreatedEvent } from './events/change-request-created.event';
+import { ChangeRequestSelectionUpdatedEvent } from './events/change-request-selection-updated.event';
+import { ChangeRequestStatusUpdatedEvent } from './events/change-request-status-updated.event';
 
 export class ChangeRequest extends Entity {
   constructor(
@@ -25,6 +28,14 @@ export class ChangeRequest extends Entity {
     this.approvedBy = approvedBy ?? null;
     this.approvedAt = approvedAt ?? null;
     this.clearSelection = clearSelection;
+
+    if (newQuantity !== null && newQuantity <= 0) {
+      throw new InvalidInputDataException(
+        'Quantity must be a positive integer.',
+      );
+    }
+
+    this.addDomainEvent(new ChangeRequestCreatedEvent(this.id));
   }
 
   public updateSelection(
@@ -32,9 +43,9 @@ export class ChangeRequest extends Entity {
     newQuantity?: number,
     clearSelection?: boolean,
   ) {
-    if (this.status !== 'pending') {
+    if (this.status !== ChangeRequestStatus.Pending) {
       throw new InvalidOperationException(
-        'Only change requests with status "pending" can be updated.',
+        `Only change requests with status "${ChangeRequestStatus.Pending}" can be updated.`,
       );
     }
 
@@ -47,22 +58,26 @@ export class ChangeRequest extends Entity {
     this.newMenuItemId = newMenuItemId ?? this.newMenuItemId;
     this.newQuantity = newQuantity ?? this.newQuantity;
     this.clearSelection = clearSelection ?? this.clearSelection;
+
+    this.addDomainEvent(new ChangeRequestSelectionUpdatedEvent(this.id));
   }
 
   public changeStatus(
     status: ChangeRequestStatus,
-    employeeId: string,
+    approvedBy: string,
     date: Date,
   ) {
-    if (this.status !== 'pending') {
+    if (this.status !== ChangeRequestStatus.Pending) {
       throw new InvalidOperationException(
-        'Only change requests with status "pending" can have their status changed.',
+        `Only change requests with status "${ChangeRequestStatus.Pending}" can have their status changed.`,
       );
     }
 
     this.status = status;
-    this.approvedBy = employeeId;
+    this.approvedBy = approvedBy;
     this.approvedAt = date;
+
+    this.addDomainEvent(new ChangeRequestStatusUpdatedEvent(this.id));
   }
 
   readonly id: string;
