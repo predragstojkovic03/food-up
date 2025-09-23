@@ -1,5 +1,4 @@
 import { Inject, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { APP_FILTER } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
@@ -8,7 +7,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CoreModule } from './core/core.module';
 import { EnvironmentVariables } from './env.validation';
-import { IConfigService } from './shared/application/config-service.interface';
+import {
+  I_CONFIG_SERVICE,
+  IConfigService,
+} from './shared/application/config-service.interface';
 import { DomainEventsModule } from './shared/application/domain-events/domain-events.module';
 import { I_LOGGER, ILogger } from './shared/application/logger.interface';
 import { ConfigModule } from './shared/infrastructure/config/config.module';
@@ -36,7 +38,7 @@ import { LoggerModule } from './shared/infrastructure/logger/logger.module';
         entities: [join(__dirname, '**', '*.typeorm-entity.*')],
         namingStrategy: new SnakeNamingStrategy(),
       }),
-      inject: [ConfigService],
+      inject: [I_CONFIG_SERVICE],
     }),
     // ServeStaticModule.forRoot({
     //   rootPath: join(__dirname, '../..', 'client', 'dist'),

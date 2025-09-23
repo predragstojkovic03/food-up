@@ -85,7 +85,7 @@ export class ChangeRequestsController {
     @Body() { status }: UpdateChangeRequestStatusDto,
     @User() user: JwtPayload,
   ) {
-    await this._changeRequestsService.updateStatus(id, status, user.sub);
+    await this._changeRequestsService.updateStatus(id, user.sub, status);
   }
 
   @ApiOperation({ summary: 'Delete a change request' })

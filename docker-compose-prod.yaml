@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  app:
+    container_name: food-up-app
+    image: food-up-app-prod:1.0.0
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+      target: production
+    environment:
+      DB_NAME: ${POSTGRES_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_PORT: ${POSTGRES_PORT}
+      DB_HOST: postgres
+      NODE_ENV: production
+      PORT: ${SERVER_PORT}
+      ORM_SYNC: false
+      VIRTUAL_HOST: yourdomain.com
+      LETSENCRYPT_HOST: yourdomain.com
+      LETSENCRYPT_EMAIL: your@email.com
+    networks:
+      - shared-network
+    depends_on:
+      - postgres
+    volumes:
+      - pg:/var/lib/postgresql/data
+
+  postgres:
+    image: postgres:17.4-alpine
+    container_name: food-up-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    networks:
+      - shared-network
+    volumes:
+      - pg:/var/lib/postgresql/data
+
+  nginx-proxy:
+    image: nginxproxy/nginx-proxy:alpine
+    container_name: nginx-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /etc/nginx/certs
+      - /etc/nginx/vhost.d
+      - /usr/share/nginx/html
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    networks:
+      - shared-network
+
+  nginx-proxy-acme:
+    image: nginxproxy/acme-companion
+    container_name: nginx-proxy-acme
+    restart: unless-stopped
+    environment:
+      NGINX_PROXY_CONTAINER: nginx-proxy
+      DEFAULT_EMAIL: your@email.com
+    volumes:
+      - /etc/nginx/certs
+      - /etc/nginx/vhost.d
+      - /usr/share/nginx/html
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - shared-network
+    depends_on:
+      - nginx-proxy
+
+networks:
+  shared-network:
+
+volumes:
+  pg:
+    driver: local

@@ -20,5 +20,6 @@ import { I_CONFIG_SERVICE } from 'src/shared/application/config-service.interfac
       useClass: ConfigService,
     },
   ],
+  exports: [I_CONFIG_SERVICE],
 })
 export class ConfigModule {}
