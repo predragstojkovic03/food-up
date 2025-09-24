@@ -64,25 +64,25 @@ export class SuppliersController {
     return this.toResponseDto(result);
   }
 
-  @Get()
   @ApiOperation({ summary: 'Get all suppliers' })
   @ApiResponse({
     status: 200,
     description: 'List of suppliers',
     type: [SupplierResponseDto],
   })
+  @Get()
   async findAll(): Promise<SupplierResponseDto[]> {
     const result = await this._suppliersService.findAll();
     return result.map(this.toResponseDto);
   }
 
-  @Get(':id')
   @ApiOperation({ summary: 'Get a supplier by ID' })
   @ApiResponse({
     status: 200,
     description: 'Supplier found',
     type: SupplierResponseDto,
   })
+  @Get(':id')
   @ApiResponse({ status: 404, description: 'Supplier not found' })
   async findOne(@Param('id') id: string): Promise<SupplierResponseDto> {
     const result = await this._suppliersService.findOne(id);

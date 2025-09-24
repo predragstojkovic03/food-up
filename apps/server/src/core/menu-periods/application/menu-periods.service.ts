@@ -49,8 +49,8 @@ export class MenuPeriodsService {
     return this.repo.findAll();
   }
 
-  async findOne(id: string): Promise<MenuPeriod | null> {
-    return this.repo.findOneByCriteria({ id });
+  async findOne(id: string): Promise<MenuPeriod> {
+    return this.repo.findOneByCriteriaOrThrow({ id });
   }
 
   async findBulkByIds(ids: string[]): Promise<MenuPeriod[]> {

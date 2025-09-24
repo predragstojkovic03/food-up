@@ -6,4 +6,6 @@ export const I_MEAL_SELECTION_WINDOWS_REPOSITORY = Symbol(
 );
 
 export interface IMealSelectionWindowsRepository
-  extends IRepository<MealSelectionWindow> {}
+  extends IRepository<MealSelectionWindow> {
+  findLatestActiveByBusiness(businessId: string): Promise<MealSelectionWindow>;
+}

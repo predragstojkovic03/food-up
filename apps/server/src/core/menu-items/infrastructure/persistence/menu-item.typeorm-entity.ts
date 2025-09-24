@@ -1,5 +1,6 @@
 import { MealSelection } from 'src/core/meal-selections/infrastructure/persistence/meal-selection.typeorm-entity';
 import { Meal } from 'src/core/meals/infrastructure/persistence/meal.typeorm-entity';
+import { MenuPeriod } from 'src/core/menu-periods/infrastructure/persistence/menu-period.typeorm-entity';
 import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
 
 @Entity()
@@ -10,8 +11,8 @@ export class MenuItem {
   @Column('decimal', { nullable: true })
   price: number | null;
 
-  @Column('character varying', { length: 26 })
-  menuPeriodId: string;
+  @ManyToOne(() => MenuPeriod, { eager: true })
+  menuPeriod: MenuPeriod;
 
   @Column('date')
   day: string;

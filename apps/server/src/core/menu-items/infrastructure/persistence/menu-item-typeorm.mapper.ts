@@ -10,7 +10,7 @@ export class MenuItemTypeOrmMapper extends TypeOrmMapper<
     return new MenuItem(
       persistence.id,
       persistence.price,
-      persistence.menuPeriodId,
+      persistence.menuPeriod.id,
       persistence.day,
       persistence.meal.id,
     );
@@ -20,7 +20,7 @@ export class MenuItemTypeOrmMapper extends TypeOrmMapper<
     const persistence = new MenuItemPersistence();
     persistence.id = domain.id;
     persistence.price = domain.price;
-    persistence.menuPeriodId = domain.menuPeriodId;
+    persistence.menuPeriod = { id: domain.menuPeriodId } as any;
     persistence.day = domain.day;
     persistence.meal = { id: domain.mealId } as any;
     return persistence;

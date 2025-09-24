@@ -1,5 +1,6 @@
 import { MealSelectionWindow } from 'src/core/meal-selection-windows/infrastructure/persistence/meal-selection-window.typeorm-entity';
-import { Column, Entity, ManyToMany, PrimaryColumn } from 'typeorm';
+import { MenuItem } from 'src/core/menu-items/infrastructure/persistence/menu-item.typeorm-entity';
+import { Column, Entity, ManyToMany, OneToMany, PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class MenuPeriod {
@@ -14,6 +15,9 @@ export class MenuPeriod {
 
   @Column('character varying', { length: 26 })
   supplierId: string;
+
+  @OneToMany(() => MenuItem, (menuItem) => menuItem.menuPeriod)
+  menuItems: MenuItem[];
 
   @ManyToMany(
     () => MealSelectionWindow,

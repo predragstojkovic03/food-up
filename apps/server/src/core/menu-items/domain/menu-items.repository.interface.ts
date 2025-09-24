@@ -3,4 +3,6 @@ import { MenuItem } from './menu-item.entity';
 
 export const I_MENU_ITEMS_REPOSITORY = Symbol('IMenuItemsRepository');
 
-export interface IMenuItemsRepository extends IRepository<MenuItem> {}
+export interface IMenuItemsRepository extends IRepository<MenuItem> {
+  findBulkByMenuPeriodIdsWithMeal(menuPeriodIds: string[]): Promise<MenuItem[]>;
+}

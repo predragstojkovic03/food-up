@@ -4,12 +4,18 @@ import {
   I_MENU_ITEMS_REPOSITORY,
   IMenuItemsRepository,
 } from '../domain/menu-items.repository.interface';
+import {
+  I_MENU_ITEMS_QUERY_REPOSITORY,
+  IMenuItemsQueryRepository,
+} from './queries/menu-items-query-repository.interface';
 
 @Injectable()
 export class MenuItemsService {
   constructor(
     @Inject(I_MENU_ITEMS_REPOSITORY)
-    private readonly repo: IMenuItemsRepository,
+    private readonly _repository: IMenuItemsRepository,
+    @Inject(I_MENU_ITEMS_QUERY_REPOSITORY)
+    private readonly _queryRepository: IMenuItemsQueryRepository,
   ) {}
 
   async create(dto: any): Promise<MenuItem> {
@@ -21,15 +27,15 @@ export class MenuItemsService {
       dto.day,
       dto.mealId,
     );
-    return this.repo.insert(entity);
+    return this._repository.insert(entity);
   }
 
   async findAll(): Promise<MenuItem[]> {
-    return this.repo.findAll();
+    return this._repository.findAll();
   }
 
   async findOne(id: string): Promise<MenuItem> {
-    return this.repo.findOneByCriteriaOrThrow({ id });
+    return this._repository.findOneByCriteriaOrThrow({ id });
   }
 
   async update(id: string, dto: any): Promise<MenuItem> {
@@ -41,10 +47,22 @@ export class MenuItemsService {
       dto.day,
       dto.mealId,
     );
-    return this.repo.update(id, entity);
+    return this._repository.update(id, entity);
+  }
+
+  findMenuItemsWithMealsByMenuPeriodIds(
+    menuPeriodIds: string[],
+  ): Promise<MenuItemWithMealDto[]> {
+    return this._queryRepository.findMenuItemsWithMealsByMenuPeriodIds(
+      menuPeriodIds,
+    );
+  }
+
+  findBulkByMenuPeriodIds(menuPeriodIds: string[]): Promise<MenuItem[]> {
+    return this._repository.findBulkByMenuPeriodIdsWithMeal(menuPeriodIds);
   }
 
   async delete(id: string): Promise<void> {
-    return this.repo.delete(id);
+    return this._repository.delete(id);
   }
 }

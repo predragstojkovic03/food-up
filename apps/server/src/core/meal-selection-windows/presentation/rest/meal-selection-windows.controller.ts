@@ -8,6 +8,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { plainToInstance } from 'class-transformer';
 import { CurrentIdentity } from 'src/core/auth/infrastructure/current-identity.decorator';
 import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
 import { RequiredEmployeeRole } from 'src/core/employees/presentation/rest/employee-role.decorator';
@@ -16,6 +17,7 @@ import { RequiredIdentityType } from 'src/core/identity/presentation/rest/identi
 import { EmployeeRole } from 'src/shared/domain/role.enum';
 import { MealSelectionWindowsService } from '../../application/meal-selection-windows.service';
 import { CreateMealSelectionWindowDto } from './dto/create-meal-selection-window.dto';
+import { GetCurrentMealSelectionWindowResponseDto } from './dto/get-current-meal-selection-window-response.dto';
 import { MealSelectionWindowResponseDto } from './dto/meal-selection-window-response.dto';
 import { UpdateMealSelectionWindowDto } from './dto/update-meal-selection-window.dto';
 
@@ -87,12 +89,23 @@ export class MealSelectionWindowsController {
     return this.toResponseDto(result);
   }
 
-  @Delete(':id')
   @ApiOperation({ summary: 'Delete a meal selection window' })
   @ApiResponse({ status: 200, description: 'Meal selection window deleted' })
   @ApiResponse({ status: 404, description: 'Meal selection window not found' })
+  @Delete(':id')
   async delete(@Param('id') id: string): Promise<void> {
     return this._mealSelectionWindowService.delete(id);
+  }
+
+  @RequiredIdentityType(IdentityType.Employee)
+  @Get('current')
+  async getCurrent(
+    @CurrentIdentity() { sub }: JwtPayload,
+  ): Promise<GetCurrentMealSelectionWindowResponseDto> {
+    const result = await this._mealSelectionWindowService.findCurrent(sub);
+    return plainToInstance(GetCurrentMealSelectionWindowResponseDto, result, {
+      excludeExtraneousValues: true,
+    });
   }
 
   private toResponseDto(entity: any): MealSelectionWindowResponseDto {
