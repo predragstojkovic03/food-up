@@ -3,6 +3,7 @@ import {
   ExecutionContext,
   ForbiddenException,
   Injectable,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
@@ -28,7 +29,7 @@ export class EmployeeRoleGuard implements CanActivate {
     }
 
     if (!requiredRoles.includes(user.role)) {
-      throw new ForbiddenException('Access denied for employee role');
+      throw new UnauthorizedException('Access denied for employee role');
     }
 
     return true;

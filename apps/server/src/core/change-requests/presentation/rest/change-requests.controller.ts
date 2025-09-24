@@ -10,12 +10,12 @@ import {
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 
+import { CurrentIdentity } from 'src/core/auth/infrastructure/current-identity.decorator';
 import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
 import { RequiredEmployeeRole } from 'src/core/employees/presentation/rest/employee-role.decorator';
 import { IdentityType as IdentityTypeEnum } from 'src/core/identity/domain/identity.entity';
 import { RequiredIdentityType } from 'src/core/identity/presentation/rest/identity-type.decorator';
 import { EmployeeRole } from 'src/shared/domain/role.enum';
-import { User } from 'src/shared/infrastructure/user/user.decorator';
 import { ChangeRequestsService } from '../../application/change-requests.service';
 import { ChangeRequestResponseDto } from './dto/change-request-response.dto';
 import { CreateChangeRequestDto } from './dto/create-change-request.dto';
@@ -34,7 +34,7 @@ export class ChangeRequestsController {
   @Post()
   async create(
     @Body() dto: CreateChangeRequestDto,
-    @User() user: JwtPayload,
+    @CurrentIdentity() user: JwtPayload,
   ): Promise<ChangeRequestResponseDto> {
     const cr = await this._changeRequestsService.create(user.sub, dto);
     return plainToInstance(ChangeRequestResponseDto, cr);
@@ -64,7 +64,7 @@ export class ChangeRequestsController {
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateChangeRequestDto,
-    @User() user: JwtPayload,
+    @CurrentIdentity() user: JwtPayload,
   ): Promise<ChangeRequestResponseDto> {
     const cr = await this._changeRequestsService.update(id, user.sub, dto);
     return plainToInstance(ChangeRequestResponseDto, cr);
@@ -79,7 +79,7 @@ export class ChangeRequestsController {
   async updateStatus(
     @Param('id') id: string,
     @Body() { status }: UpdateChangeRequestStatusDto,
-    @User() user: JwtPayload,
+    @CurrentIdentity() user: JwtPayload,
   ) {
     await this._changeRequestsService.updateStatus(id, user.sub, status);
   }

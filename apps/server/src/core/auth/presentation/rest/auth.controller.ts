@@ -17,7 +17,7 @@ import { EmployeesService } from 'src/core/employees/application/employees.servi
 import { IdentityService } from 'src/core/identity/application/identity.service';
 import { IdentityType } from 'src/core/identity/domain/identity.entity';
 import { EmployeeRole } from 'src/shared/domain/role.enum';
-import { User } from 'src/shared/infrastructure/user/user.decorator';
+import { CurrentIdentity } from '../../infrastructure/current-identity.decorator';
 import { JwtPayload } from '../../infrastructure/jwt-payload';
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { LoginDto } from './dto/login.dto';
@@ -77,7 +77,7 @@ export class AuthController {
     description: 'Current user information',
     type: MeResponseDto,
   })
-  getMe(@User() user: JwtPayload): MeResponseDto {
+  getMe(@CurrentIdentity() user: JwtPayload): MeResponseDto {
     return plainToInstance(
       MeResponseDto,
       {

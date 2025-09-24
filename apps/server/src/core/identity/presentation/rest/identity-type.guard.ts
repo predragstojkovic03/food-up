@@ -3,6 +3,7 @@ import {
   ExecutionContext,
   ForbiddenException,
   Injectable,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { IDENTITY_TYPE_KEY } from './identity-type.decorator';
@@ -26,7 +27,7 @@ export class IdentityTypeGuard implements CanActivate {
     }
 
     if (!requiredTypes.includes(user.identityType)) {
-      throw new ForbiddenException('Access denied for identity type');
+      throw new UnauthorizedException('Access denied for identity type');
     }
 
     return true;
