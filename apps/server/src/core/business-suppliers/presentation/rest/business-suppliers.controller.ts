@@ -8,9 +8,11 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Disabled } from 'src/shared/infrastructure/decorators/disabled.decorator';
 import { BusinessSuppliersService } from '../../application/business-suppliers.service';
 
 @ApiTags('BusinessSuppliers')
+@Disabled
 @Controller('business-suppliers')
 export class BusinessSuppliersController {
   constructor(

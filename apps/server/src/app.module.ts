@@ -1,4 +1,4 @@
-import { Inject, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
@@ -15,9 +15,9 @@ import {
   IConfigService,
 } from './shared/application/config-service.interface';
 import { DomainEventsModule } from './shared/application/domain-events/domain-events.module';
-import { I_LOGGER, ILogger } from './shared/application/logger.interface';
 import { ConfigModule } from './shared/infrastructure/config/config.module';
 import { DomainExceptionFilter } from './shared/infrastructure/domain-exception-filter';
+import { DisabledEndpointGuard } from './shared/infrastructure/guards/disabled-endpoint.guard';
 import { LoggingMiddleware } from './shared/infrastructure/logger/logger.middleware';
 import { LoggerModule } from './shared/infrastructure/logger/logger.module';
 
@@ -70,11 +70,13 @@ import { LoggerModule } from './shared/infrastructure/logger/logger.module';
       provide: APP_GUARD,
       useClass: IdentityTypeGuard,
     },
+    {
+      provide: APP_GUARD,
+      useClass: DisabledEndpointGuard,
+    },
   ],
 })
 export class AppModule implements NestModule {
-  constructor(@Inject(I_LOGGER) private readonly logger: ILogger) {}
-
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(LoggingMiddleware).forRoutes('*');
   }
