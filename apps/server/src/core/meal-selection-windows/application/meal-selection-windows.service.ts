@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { MenuItemsService } from 'src/core/menu-items/application/menu-items.service';
+import { MenuItemsQueryService } from 'src/core/menu-items/application/queries/menu-items-query.service';
 import { MenuPeriodsService } from 'src/core/menu-periods/application/menu-periods.service';
 import { ulid } from 'ulid';
 import { MealSelectionWindow } from '../domain/meal-selection-window.entity';
@@ -33,6 +34,7 @@ export class MealSelectionWindowsService {
     private readonly _menuPeriodsService: MenuPeriodsService,
     private readonly _employeesService: EmployeesService,
     private readonly _menuItemsService: MenuItemsService,
+    private readonly _menuItemsQueryService: MenuItemsQueryService,
   ) {}
 
   async create(
@@ -89,7 +91,6 @@ export class MealSelectionWindowsService {
     return updated;
   }
 
-  // TODO: refactor for performance
   async findCurrent(
     sub: string,
   ): Promise<GetCurrentMealSelectionWindowResponseDto> {
@@ -99,7 +100,7 @@ export class MealSelectionWindowsService {
       await this._repository.findLatestActiveByBusiness(employee.businessId);
 
     const menuItems =
-      await this._menuItemsService.findMenuItemsWithMealsByMenuPeriodIds(
+      await this._menuItemsQueryService.findMenuItemsWithMealsByMenuPeriodIds(
         mealSelectionWindow.menuPeriodIds,
       );
 
