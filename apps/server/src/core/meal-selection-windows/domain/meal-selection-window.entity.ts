@@ -34,28 +34,6 @@ export class MealSelectionWindow extends Entity {
     this.addDomainEvent(new MealSelectionWindowCreatedEvent(this.id));
   }
 
-  private verifyMealSelectionInputs(
-    menuPeriodIds: string[],
-    startTime: Date,
-    endTime: Date,
-  ) {
-    if (menuPeriodIds.length === 0) {
-      throw new InvalidInputDataException(
-        'MealSelectionWindow must have at least one menu period ID.',
-      );
-    }
-
-    if (startTime >= endTime) {
-      throw new InvalidInputDataException(
-        'MealSelectionWindow startTime must be before endTime.',
-      );
-    }
-  }
-
-  isDateWithinWindow(date: Date): boolean {
-    return date >= this.startTime && date <= this.endTime;
-  }
-
   update(
     startTime?: Date,
     endTime?: Date,
@@ -79,6 +57,11 @@ export class MealSelectionWindow extends Entity {
     return this;
   }
 
+  public get isActive(): boolean {
+    const now = new Date();
+    return now >= this.startTime && now <= this.endTime;
+  }
+
   readonly id: string;
   startTime: Date;
   endTime: Date;
@@ -86,4 +69,22 @@ export class MealSelectionWindow extends Entity {
   targetDates: Set<string>;
   businessId: string;
   menuPeriodIds: string[];
+
+  private verifyMealSelectionInputs(
+    menuPeriodIds: string[],
+    startTime: Date,
+    endTime: Date,
+  ) {
+    if (menuPeriodIds.length === 0) {
+      throw new InvalidInputDataException(
+        'MealSelectionWindow must have at least one menu period ID.',
+      );
+    }
+
+    if (startTime >= endTime) {
+      throw new InvalidInputDataException(
+        'MealSelectionWindow startTime must be before endTime.',
+      );
+    }
+  }
 }

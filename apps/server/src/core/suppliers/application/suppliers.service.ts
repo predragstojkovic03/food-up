@@ -79,6 +79,10 @@ export class SuppliersService {
     return this._repository.findOneByCriteriaOrThrow({ id });
   }
 
+  findByIdentityId(id: string): Promise<Supplier> {
+    return this._repository.findOneByCriteriaOrThrow({ identityId: id });
+  }
+
   @DomainEvents
   async update(
     id: string,

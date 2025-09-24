@@ -74,7 +74,8 @@ export class MenuPeriodsService {
       existing.supplierId,
     );
 
-    return this.repo.update(id, entity);
+    await this.repo.update(id, entity);
+    return entity;
   }
 
   async delete(id: string, identityId: string): Promise<void> {

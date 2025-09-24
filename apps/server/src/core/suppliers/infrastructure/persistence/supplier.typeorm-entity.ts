@@ -1,7 +1,16 @@
 import { BusinessSupplier } from 'src/core/business-suppliers/infrastructure/persistence/business-supplier.typeorm-entity';
 import { Business } from 'src/core/businesses/infrastructure/persistence/business.typeorm-entity';
+import { Identity } from 'src/core/identity/infrastructure/persistence/identity.typeorm-entity';
 import { Meal } from 'src/core/meals/infrastructure/persistence/meal.typeorm-entity';
-import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  PrimaryColumn,
+} from 'typeorm';
 import { SupplierType } from '../../domain/supplier-type.enum';
 
 @Entity()
@@ -23,6 +32,10 @@ export class Supplier {
     (businessSupplier) => businessSupplier.supplier,
   )
   businessSuppliers: BusinessSupplier[];
+
+  @OneToOne(() => Identity, { nullable: true, cascade: true, eager: true })
+  @JoinColumn()
+  identity: Identity;
 
   @ManyToOne(() => Business, (business) => business.managedSuppliers, {
     nullable: true,

@@ -14,7 +14,7 @@ export class Meal {
   @Column()
   description: string;
 
-  @Column('enum', { enum: ['breakfast', 'lunch', 'dinner'] })
+  @Column('enum', { enum: MealType })
   type: MealType;
 
   @ManyToOne(() => Supplier, (supplier) => supplier.meals)

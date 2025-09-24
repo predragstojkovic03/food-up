@@ -14,7 +14,7 @@ export class MenuItem {
   menuPeriodId: string;
 
   @Column('date')
-  day: Date;
+  day: string;
 
   @ManyToOne(() => Meal, (meal) => meal.menuItems, { eager: true })
   meal: Meal;

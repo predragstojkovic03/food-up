@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { MealType } from 'src/core/meals/domain/meal.entity';
 
 export class MealResponseDto {
   @ApiProperty({ example: 'meal-uuid', description: 'Meal ID' })
@@ -14,9 +15,9 @@ export class MealResponseDto {
   description: string;
 
   @ApiProperty({
-    example: 'lunch',
-    enum: ['breakfast', 'lunch', 'dinner'],
+    example: MealType.Lunch,
+    enum: MealType,
     description: 'Meal type',
   })
-  type: 'breakfast' | 'lunch' | 'dinner';
+  type: MealType;
 }

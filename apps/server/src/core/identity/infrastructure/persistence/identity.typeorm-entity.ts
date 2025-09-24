@@ -1,4 +1,5 @@
 import { Employee } from 'src/core/employees/infrastructure/persistence/employee.typeorm-entity';
+import { Supplier } from 'src/core/suppliers/infrastructure/persistence/supplier.typeorm-entity';
 import { Column, Entity, OneToOne, PrimaryColumn } from 'typeorm';
 import { IdentityType } from '../../domain/identity.entity';
 
@@ -21,4 +22,7 @@ export class Identity {
 
   @OneToOne(() => Employee)
   employee?: Employee;
+
+  @OneToOne(() => Supplier)
+  supplier?: Supplier;
 }

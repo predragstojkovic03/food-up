@@ -6,9 +6,14 @@ import {
   Param,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { CurrentIdentity } from 'src/core/auth/infrastructure/current-identity.decorator';
+import { JwtAuthGuard } from 'src/core/auth/infrastructure/jwt-auth.guard';
+import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
 import { MealsService } from '../../application/meals.service';
+import { Meal } from '../../domain/meal.entity';
 import { CreateMealDto } from './dto/create-meal.dto';
 import { MealResponseDto } from './dto/meal-response.dto';
 import { UpdateMealDto } from './dto/update-meal.dto';
@@ -18,11 +23,15 @@ import { UpdateMealDto } from './dto/update-meal.dto';
 export class MealsController {
   constructor(private readonly _mealsService: MealsService) {}
 
-  @Post()
   @ApiOperation({ summary: 'Create a new meal' })
   @ApiResponse({ status: 201, type: MealResponseDto })
-  async create(@Body() dto: CreateMealDto): Promise<MealResponseDto> {
-    const meal = await this._mealsService.create(dto);
+  @UseGuards(JwtAuthGuard)
+  @Post()
+  async create(
+    @Body() dto: CreateMealDto,
+    @CurrentIdentity() { sub }: JwtPayload,
+  ): Promise<MealResponseDto> {
+    const meal = await this._mealsService.create(sub, dto);
     return this.toResponseDto(meal);
   }
 
@@ -63,7 +72,7 @@ export class MealsController {
     await this._mealsService.delete(id);
   }
 
-  private toResponseDto(entity: any): MealResponseDto {
+  private toResponseDto(entity: Meal): MealResponseDto {
     return {
       id: entity.id,
       name: entity.name,

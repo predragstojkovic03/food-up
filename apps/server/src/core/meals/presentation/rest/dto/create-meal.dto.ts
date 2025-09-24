@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsString } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { MealType } from 'src/core/meals/domain/meal.entity';
 
 export class CreateMealDto {
   @ApiProperty({ example: 'Chicken Sandwich', description: 'Name of the meal' })
@@ -14,17 +15,27 @@ export class CreateMealDto {
   description: string;
 
   @ApiProperty({
-    example: 'lunch',
-    enum: ['breakfast', 'lunch', 'dinner'],
+    example: MealType.Lunch,
+    enum: MealType,
     description: 'Meal type',
   })
-  @IsEnum(['breakfast', 'lunch', 'dinner'])
-  type: 'breakfast' | 'lunch' | 'dinner';
+  @IsEnum(MealType)
+  type: MealType;
+
+  @ApiProperty({
+    example: 9.99,
+    description: 'Price of the meal',
+    required: false,
+  })
+  @IsNumber()
+  @IsOptional()
+  price?: number;
 
   @ApiProperty({
     example: '12345678901234567890123456',
     description: 'ID of the supplier providing the meal',
   })
   @IsString()
-  supplierId: string;
+  @IsOptional()
+  supplierId?: string;
 }

@@ -1,6 +1,6 @@
-import { MealSelectionWindow } from 'src/core/meal-selection-windows/domain/meal-selection-window.entity';
 import { Entity } from 'src/shared/domain/entity';
-import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
+import { MealSelectionCreatedEvent } from './events/meal-selection-created.event';
+import { MealSelectionUpdatedEvent } from './events/meal-selection-updated.event';
 
 export class MealSelection extends Entity {
   /**
@@ -28,6 +28,15 @@ export class MealSelection extends Entity {
     this.mealSelectionWindowId = mealSelectionWindowId;
     this.quantity = quantity ?? null;
     this.date = date;
+
+    this.addDomainEvent(new MealSelectionCreatedEvent(this.id));
+  }
+
+  update(menuItemId?: string, quantity?: number | null) {
+    this.menuItemId = menuItemId ?? this.menuItemId;
+    this.quantity = quantity ?? this.quantity;
+
+    this.addDomainEvent(new MealSelectionUpdatedEvent(this.id));
   }
 
   readonly id: string;
@@ -36,47 +45,4 @@ export class MealSelection extends Entity {
   mealSelectionWindowId: string;
   quantity: number | null;
   date: string;
-
-  /**
-   * Factory method to create a valid MealSelection instance. Should be used instead of the constructor.
-   * @param id
-   * @param employeeId
-   * @param menuItemId
-   * @param mealSelectionWindow
-   * @param date
-   * @param quantity
-   * @returns Valid {@link MealSelection} instance.
-   * @throws {InvalidInputDataException} if the meal selection date is outside the selection window.
-   */
-  public static create(
-    id: string,
-    employeeId: string,
-    menuItemId: string,
-    mealSelectionWindow: MealSelectionWindow,
-    date: string,
-    quantity?: number | null,
-  ) {
-    const mealSelection = new MealSelection(
-      id,
-      employeeId,
-      menuItemId,
-      mealSelectionWindow.id,
-      date,
-      quantity,
-    );
-
-    if (!mealSelectionWindow.isDateWithinWindow(new Date())) {
-      throw new InvalidInputDataException(
-        `The meal selection date ${new Date().toISOString()} is outside the selection window (${mealSelectionWindow.startTime.toISOString()} - ${mealSelectionWindow.endTime.toISOString()}).`,
-      );
-    }
-
-    if (!mealSelectionWindow.targetDates.has(date)) {
-      throw new InvalidInputDataException(
-        `The meal selection date ${date} is not a valid target date for the selection window.`,
-      );
-    }
-
-    return mealSelection;
-  }
 }

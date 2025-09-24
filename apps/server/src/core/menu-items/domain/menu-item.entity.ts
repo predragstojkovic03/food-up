@@ -5,7 +5,7 @@ export class MenuItem extends Entity {
     id: string,
     price: number | null,
     menuPeriodId: string,
-    day: Date,
+    day: string,
     mealId: string,
   ) {
     super();
@@ -19,6 +19,6 @@ export class MenuItem extends Entity {
   readonly id: string;
   price: number | null;
   menuPeriodId: string;
-  day: Date;
+  day: string;
   mealId: string;
 }

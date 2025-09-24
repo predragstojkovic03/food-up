@@ -4,11 +4,17 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
-  Put,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
+import { CurrentIdentity } from 'src/core/auth/infrastructure/current-identity.decorator';
+import { JwtAuthGuard } from 'src/core/auth/infrastructure/jwt-auth.guard';
+import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
+import { IdentityType } from 'src/core/identity/domain/identity.entity';
+import { RequiredIdentityType } from 'src/core/identity/presentation/rest/identity-type.decorator';
 import { MealSelectionsService } from '../../application/meal-selections.service';
 import { MealSelection } from '../../domain/meal-selection.entity';
 import { CreateMealSelectionDto } from './dto/create-meal-selection.dto';
@@ -20,17 +26,20 @@ import { UpdateMealSelectionDto } from './dto/update-meal-selection.dto';
 export class MealSelectionsController {
   constructor(private readonly _mealSelectionsService: MealSelectionsService) {}
 
-  @Post()
   @ApiOperation({ summary: 'Create a new meal selection' })
   @ApiResponse({
     status: 201,
     description: 'Meal selection created',
     type: MealSelectionResponseDto,
   })
+  @UseGuards(JwtAuthGuard)
+  @RequiredIdentityType(IdentityType.Employee)
+  @Post()
   async create(
     @Body() dto: CreateMealSelectionDto,
+    @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<MealSelectionResponseDto> {
-    const result = await this._mealSelectionsService.create(dto);
+    const result = await this._mealSelectionsService.create(sub, dto);
     return this.toResponseDto(result);
   }
 
@@ -59,7 +68,6 @@ export class MealSelectionsController {
     return this.toResponseDto(result);
   }
 
-  @Put(':id')
   @ApiOperation({ summary: 'Update a meal selection' })
   @ApiResponse({
     status: 200,
@@ -67,11 +75,15 @@ export class MealSelectionsController {
     type: MealSelectionResponseDto,
   })
   @ApiResponse({ status: 404, description: 'Meal selection not found' })
+  @UseGuards(JwtAuthGuard)
+  @RequiredIdentityType(IdentityType.Employee)
+  @Patch(':id')
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateMealSelectionDto,
+    @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<MealSelectionResponseDto> {
-    const result = await this._mealSelectionsService.update(id, dto);
+    const result = await this._mealSelectionsService.update(id, sub, dto);
     return this.toResponseDto(result);
   }
 

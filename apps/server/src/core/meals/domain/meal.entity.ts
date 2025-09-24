@@ -1,6 +1,13 @@
 import { Entity } from 'src/shared/domain/entity';
 
-export type MealType = 'breakfast' | 'lunch' | 'dinner';
+export enum MealType {
+  Breakfast = 'breakfast',
+  Lunch = 'lunch',
+  Dinner = 'dinner',
+  Soup = 'soup',
+  Salad = 'salad',
+  Dessert = 'dessert',
+}
 
 export class Meal extends Entity {
   constructor(
