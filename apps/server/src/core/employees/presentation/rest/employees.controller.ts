@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
+import { Public } from 'src/core/auth/infrastructure/public.decorator';
 import { EmployeeRole } from 'src/shared/domain/role.enum';
 import { EmployeesService } from '../../application/employees.service';
 import { CreateEmployeeRequestDto } from './dto/create-employee.dto';
@@ -22,6 +23,7 @@ export class EmployeesController {
 
   @ApiOperation({ summary: 'Create a new employee' })
   @ApiResponse({ status: 201, type: EmployeeResponseDto })
+  @Public
   @Post('register')
   async register(
     @Body() createEmployeeDto: CreateEmployeeRequestDto,

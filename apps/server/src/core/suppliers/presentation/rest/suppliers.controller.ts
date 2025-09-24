@@ -11,6 +11,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 import { CurrentIdentity } from 'src/core/auth/infrastructure/current-identity.decorator';
 import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
+import { Public } from 'src/core/auth/infrastructure/public.decorator';
 import { RequiredEmployeeRole } from 'src/core/employees/presentation/rest/employee-role.decorator';
 import { IdentityType } from 'src/core/identity/domain/identity.entity';
 import { RequiredIdentityType } from 'src/core/identity/presentation/rest/identity-type.decorator';
@@ -33,7 +34,7 @@ export class SuppliersController {
     description: 'Supplier created',
     type: SupplierResponseDto,
   })
-  // ...removed global guard...
+  @Public
   @Post('register')
   async register(
     @Body() dto: RegisterSupplierDto,
@@ -48,7 +49,6 @@ export class SuppliersController {
     description: 'Managed supplier created',
     type: SupplierResponseDto,
   })
-  // ...removed global guard...
   @RequiredIdentityType(IdentityType.Employee)
   @RequiredEmployeeRole(EmployeeRole.Manager)
   @Post('managed')
@@ -96,7 +96,6 @@ export class SuppliersController {
     type: SupplierResponseDto,
   })
   @ApiResponse({ status: 404, description: 'Supplier not found' })
-  // ...removed global guard...
   @Patch(':id')
   async update(
     @Param('id') id: string,

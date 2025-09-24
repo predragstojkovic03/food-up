@@ -19,6 +19,7 @@ import { IdentityType } from 'src/core/identity/domain/identity.entity';
 import { EmployeeRole } from 'src/shared/domain/role.enum';
 import { CurrentIdentity } from '../../infrastructure/current-identity.decorator';
 import { JwtPayload } from '../../infrastructure/jwt-payload';
+import { Public } from '../../infrastructure/public.decorator';
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { LoginDto } from './dto/login.dto';
 import { MeResponseDto } from './dto/me-response.dto';
@@ -32,7 +33,6 @@ export class AuthController {
     private readonly _employeesService: EmployeesService,
   ) {}
 
-  @Post('login')
   @ApiOperation({ summary: 'Login and get JWT token' })
   @ApiResponse({
     status: 200,
@@ -40,6 +40,8 @@ export class AuthController {
     type: AuthResponseDto,
   })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
+  @Public
+  @Post('login')
   async login(@Body() { email, password }: LoginDto): Promise<AuthResponseDto> {
     const identity = await this._identityService.validateCredentials(
       email,
