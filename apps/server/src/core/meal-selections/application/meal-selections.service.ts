@@ -57,7 +57,9 @@ export class MealSelectionsService {
       dto.quantity,
     );
 
-    return this._repository.insert(mealSelection);
+    await this._repository.insert(mealSelection);
+
+    return mealSelection;
   }
 
   async findAll(): Promise<MealSelection[]> {

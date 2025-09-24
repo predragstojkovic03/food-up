@@ -6,18 +6,14 @@ import {
   Param,
   Patch,
   Post,
-  UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 
-import { JwtAuthGuard } from 'src/core/auth/infrastructure/jwt-auth.guard';
 import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
 import { RequiredEmployeeRole } from 'src/core/employees/presentation/rest/employee-role.decorator';
-import { EmployeeRoleGuard } from 'src/core/employees/presentation/rest/employee-role.guard';
 import { IdentityType as IdentityTypeEnum } from 'src/core/identity/domain/identity.entity';
 import { RequiredIdentityType } from 'src/core/identity/presentation/rest/identity-type.decorator';
-import { IdentityTypeGuard } from 'src/core/identity/presentation/rest/identity-type.guard';
 import { EmployeeRole } from 'src/shared/domain/role.enum';
 import { User } from 'src/shared/infrastructure/user/user.decorator';
 import { ChangeRequestsService } from '../../application/change-requests.service';
@@ -33,7 +29,7 @@ export class ChangeRequestsController {
 
   @ApiOperation({ summary: 'Create a new change request' })
   @ApiResponse({ status: 201, type: ChangeRequestResponseDto })
-  @UseGuards(JwtAuthGuard, IdentityTypeGuard)
+  // ...removed global guard...
   @RequiredIdentityType(IdentityTypeEnum.Employee)
   @Post()
   async create(
@@ -62,7 +58,7 @@ export class ChangeRequestsController {
 
   @ApiOperation({ summary: 'Update a change request' })
   @ApiResponse({ status: 200, type: ChangeRequestResponseDto })
-  @UseGuards(JwtAuthGuard, IdentityTypeGuard)
+  // ...removed global guard...
   @RequiredIdentityType(IdentityTypeEnum.Employee)
   @Patch(':id')
   async update(
@@ -76,7 +72,7 @@ export class ChangeRequestsController {
 
   @ApiOperation({ summary: 'Change status of a change request' })
   @ApiResponse({ status: 200 })
-  @UseGuards(JwtAuthGuard, IdentityTypeGuard, EmployeeRoleGuard)
+  // ...removed global guard...
   @RequiredEmployeeRole(EmployeeRole.Manager)
   @RequiredIdentityType(IdentityTypeEnum.Employee)
   @Patch(':id/status')
@@ -90,7 +86,7 @@ export class ChangeRequestsController {
 
   @ApiOperation({ summary: 'Delete a change request' })
   @ApiResponse({ status: 204 })
-  @UseGuards(JwtAuthGuard, IdentityTypeGuard, EmployeeRoleGuard)
+  // ...removed global guard...
   @RequiredEmployeeRole(EmployeeRole.Manager)
   @RequiredIdentityType(IdentityTypeEnum.Employee)
   @Delete(':id')

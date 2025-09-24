@@ -1,11 +1,14 @@
 import { Inject, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { APP_FILTER } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { JwtAuthGuard } from './core/auth/infrastructure/jwt-auth.guard';
 import { CoreModule } from './core/core.module';
+import { EmployeeRoleGuard } from './core/employees/presentation/rest/employee-role.guard';
+import { IdentityTypeGuard } from './core/identity/presentation/rest/identity-type.guard';
 import { EnvironmentVariables } from './env.validation';
 import {
   I_CONFIG_SERVICE,
@@ -54,6 +57,18 @@ import { LoggerModule } from './shared/infrastructure/logger/logger.module';
     {
       provide: APP_FILTER,
       useClass: DomainExceptionFilter,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: EmployeeRoleGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: IdentityTypeGuard,
     },
   ],
 })

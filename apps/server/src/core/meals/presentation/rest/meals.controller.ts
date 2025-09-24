@@ -6,11 +6,9 @@ import {
   Param,
   Patch,
   Post,
-  UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CurrentIdentity } from 'src/core/auth/infrastructure/current-identity.decorator';
-import { JwtAuthGuard } from 'src/core/auth/infrastructure/jwt-auth.guard';
 import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
 import { MealsService } from '../../application/meals.service';
 import { Meal } from '../../domain/meal.entity';
@@ -25,7 +23,7 @@ export class MealsController {
 
   @ApiOperation({ summary: 'Create a new meal' })
   @ApiResponse({ status: 201, type: MealResponseDto })
-  @UseGuards(JwtAuthGuard)
+  // ...removed global guard...
   @Post()
   async create(
     @Body() dto: CreateMealDto,

@@ -4,7 +4,6 @@ import {
   Get,
   Post,
   UnauthorizedException,
-  UseGuards,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import {
@@ -19,7 +18,6 @@ import { IdentityService } from 'src/core/identity/application/identity.service'
 import { IdentityType } from 'src/core/identity/domain/identity.entity';
 import { EmployeeRole } from 'src/shared/domain/role.enum';
 import { User } from 'src/shared/infrastructure/user/user.decorator';
-import { JwtAuthGuard } from '../../infrastructure/jwt-auth.guard';
 import { JwtPayload } from '../../infrastructure/jwt-payload';
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { LoginDto } from './dto/login.dto';
@@ -79,7 +77,6 @@ export class AuthController {
     description: 'Current user information',
     type: MeResponseDto,
   })
-  @UseGuards(JwtAuthGuard)
   getMe(@User() user: JwtPayload): MeResponseDto {
     return plainToInstance(
       MeResponseDto,

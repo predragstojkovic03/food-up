@@ -6,12 +6,10 @@ import {
   Param,
   Patch,
   Post,
-  UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 import { CurrentIdentity } from 'src/core/auth/infrastructure/current-identity.decorator';
-import { JwtAuthGuard } from 'src/core/auth/infrastructure/jwt-auth.guard';
 import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
 import { IdentityType } from 'src/core/identity/domain/identity.entity';
 import { RequiredIdentityType } from 'src/core/identity/presentation/rest/identity-type.decorator';
@@ -32,7 +30,7 @@ export class MealSelectionsController {
     description: 'Meal selection created',
     type: MealSelectionResponseDto,
   })
-  @UseGuards(JwtAuthGuard)
+  // ...removed global guard...
   @RequiredIdentityType(IdentityType.Employee)
   @Post()
   async create(
@@ -75,7 +73,7 @@ export class MealSelectionsController {
     type: MealSelectionResponseDto,
   })
   @ApiResponse({ status: 404, description: 'Meal selection not found' })
-  @UseGuards(JwtAuthGuard)
+  // ...removed global guard...
   @RequiredIdentityType(IdentityType.Employee)
   @Patch(':id')
   async update(

@@ -6,16 +6,12 @@ import {
   Param,
   Patch,
   Post,
-  UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
-import { JwtAuthGuard } from 'src/core/auth/infrastructure/jwt-auth.guard';
 import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
-import { EmployeeRoleGuard } from 'src/core/employees/presentation/rest/employee-role.guard';
 import { IdentityType } from 'src/core/identity/domain/identity.entity';
 import { RequiredIdentityType } from 'src/core/identity/presentation/rest/identity-type.decorator';
-import { IdentityTypeGuard } from 'src/core/identity/presentation/rest/identity-type.guard';
 import { User } from 'src/shared/infrastructure/user/user.decorator';
 import { MenuPeriodsService } from '../../application/menu-periods.service';
 import { CreateMenuPeriodDto } from './dto/create-menu-period.dto';
@@ -29,7 +25,7 @@ export class MenuPeriodsController {
 
   @ApiOperation({ summary: 'Create a new menu period' })
   @ApiResponse({ status: 201, type: MenuPeriodResponseDto })
-  @UseGuards(JwtAuthGuard, IdentityTypeGuard, EmployeeRoleGuard)
+  // ...removed global guard...
   @RequiredIdentityType(IdentityType.Employee, IdentityType.Supplier)
   @Post()
   async create(
@@ -58,7 +54,7 @@ export class MenuPeriodsController {
 
   @ApiOperation({ summary: 'Update a menu period' })
   @ApiResponse({ status: 200, type: MenuPeriodResponseDto })
-  @UseGuards(JwtAuthGuard, IdentityTypeGuard, EmployeeRoleGuard)
+  // ...removed global guard...
   @RequiredIdentityType(IdentityType.Employee, IdentityType.Supplier)
   @Patch(':id')
   async update(
@@ -72,7 +68,7 @@ export class MenuPeriodsController {
 
   @ApiOperation({ summary: 'Delete a menu period' })
   @ApiResponse({ status: 204 })
-  @UseGuards(JwtAuthGuard, IdentityTypeGuard, EmployeeRoleGuard)
+  // ...removed global guard...
   @RequiredIdentityType(IdentityType.Employee, IdentityType.Supplier)
   @Delete(':id')
   async delete(
