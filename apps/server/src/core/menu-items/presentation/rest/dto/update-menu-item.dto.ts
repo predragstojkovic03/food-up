@@ -1,4 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
+import { IsDateString, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class UpdateMenuItemDto {
   @ApiProperty({
@@ -7,6 +9,8 @@ export class UpdateMenuItemDto {
     required: false,
     nullable: true,
   })
+  @IsOptional()
+  @IsNumber()
   price?: number | null;
 
   @ApiProperty({
@@ -14,6 +18,8 @@ export class UpdateMenuItemDto {
     description: 'Menu period ID',
     required: false,
   })
+  @IsString()
+  @IsOptional()
   menuPeriodId?: string;
 
   @ApiProperty({
@@ -22,12 +28,16 @@ export class UpdateMenuItemDto {
     type: String,
     required: false,
   })
-  day?: Date;
+  @IsDateString()
+  @Transform(({ value }) => value.split('T')[0])
+  day?: string;
 
   @ApiProperty({
     example: 'meal-uuid',
     description: 'Meal ID',
     required: false,
   })
+  @IsString()
+  @IsOptional()
   mealId?: string;
 }

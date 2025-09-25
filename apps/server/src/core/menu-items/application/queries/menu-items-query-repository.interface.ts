@@ -3,7 +3,7 @@ export const I_MENU_ITEMS_QUERY_REPOSITORY = Symbol(
 );
 
 export interface IMenuItemsQueryRepository {
-  findMenuItemsWithMealsByMenuPeriodIds(
+  findWithMealsByMenuPeriodIds(
     menuPeriodIds: string[],
   ): Promise<MenuItemWithMealDto[]>;
 }

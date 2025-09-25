@@ -42,7 +42,7 @@ export class MealSelectionsService {
 
     const menuItem = await this._menuItemsService.findOne(dto.menuItemId);
 
-    if (dto.date != menuItem.day) {
+    if (dto.date !== menuItem.day) {
       throw new InvalidInputDataException(
         'Menu item is not available on the selected date',
       );

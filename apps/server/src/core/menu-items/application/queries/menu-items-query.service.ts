@@ -10,11 +10,9 @@ export class MenuItemsQueryService {
     private readonly _repository: IMenuItemsQueryRepository,
   ) {}
 
-  findMenuItemsWithMealsByMenuPeriodIds(
+  findWithMealsByMenuPeriodIds(
     menuPeriodIds: string[],
   ): Promise<MenuItemWithMealDto[]> {
-    return this._repository.findMenuItemsWithMealsByMenuPeriodIds(
-      menuPeriodIds,
-    );
+    return this._repository.findWithMealsByMenuPeriodIds(menuPeriodIds);
   }
 }

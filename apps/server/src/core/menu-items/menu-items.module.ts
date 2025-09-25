@@ -21,6 +21,6 @@ import { MenuItemsController } from './presentation/rest/menu-items.controller';
       useClass: MenuItemsQueryTypeOrmRepository,
     },
   ],
-  exports: [MenuItemsService, MenuItemsQueryService],
+  exports: [MenuItemsService],
 })
 export class MenuItemsModule {}

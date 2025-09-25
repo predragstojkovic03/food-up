@@ -10,7 +10,7 @@ export class MenuItemsQueryTypeOrmRepository
     @InjectRepository(MenuItem) private readonly repo: Repository<MenuItem>,
   ) {}
 
-  async findMenuItemsWithMealsByMenuPeriodIds(
+  async findWithMealsByMenuPeriodIds(
     menuPeriodIds: string[],
   ): Promise<MenuItemWithMealDto[]> {
     const menuItems = await this.repo
