@@ -8,7 +8,6 @@ export class SupplierTypeOrmMapper extends TypeOrmMapper<
   SupplierPersistence
 > {
   toDomain(persistence: SupplierPersistence): Supplier {
-    console.log(persistence);
     return new Supplier(
       persistence.id,
       persistence.name,
@@ -16,6 +15,7 @@ export class SupplierTypeOrmMapper extends TypeOrmMapper<
       persistence.contactInfo,
       persistence?.businessSuppliers?.map((bs) => bs.business?.id) ?? [],
       persistence.managingBusiness?.id,
+      persistence.identity?.id,
     );
   }
 
@@ -28,6 +28,7 @@ export class SupplierTypeOrmMapper extends TypeOrmMapper<
     persistence.managingBusiness = domain.managingBusinessId
       ? ({ id: domain.managingBusinessId } as Business)
       : undefined;
+    persistence.identity = { id: domain.identityId } as any;
     return persistence;
   }
 }

@@ -24,7 +24,7 @@ export class MealSelectionsTypeOrmRepository
   ): Promise<MealSelection | null> {
     const where = this.buildWhere(criteria);
 
-    return this.findOneByCriteria(where);
+    return super.findOneByCriteria(where);
   }
 
   override findOneByCriteriaOrThrow(
@@ -32,7 +32,7 @@ export class MealSelectionsTypeOrmRepository
   ): Promise<MealSelection> {
     const where = this.buildWhere(criteria);
 
-    return this.findOneByCriteriaOrThrow(where);
+    return super.findOneByCriteriaOrThrow(where);
   }
 
   private buildWhere(criteria: Partial<MealSelection>) {

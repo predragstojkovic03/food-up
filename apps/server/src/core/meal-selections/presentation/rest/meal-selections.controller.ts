@@ -7,7 +7,12 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 import { CurrentIdentity } from 'src/core/auth/infrastructure/current-identity.decorator';
 import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
@@ -32,6 +37,7 @@ export class MealSelectionsController {
   })
   // ...removed global guard...
   @RequiredIdentityType(IdentityType.Employee)
+  @ApiBearerAuth()
   @Post()
   async create(
     @Body() dto: CreateMealSelectionDto,
@@ -48,6 +54,7 @@ export class MealSelectionsController {
     description: 'List of meal selections',
     type: [MealSelectionResponseDto],
   })
+  @ApiBearerAuth()
   async findAll(): Promise<MealSelectionResponseDto[]> {
     const result = await this._mealSelectionsService.findAll();
     return result.map(this.toResponseDto);
@@ -61,6 +68,7 @@ export class MealSelectionsController {
     type: MealSelectionResponseDto,
   })
   @ApiResponse({ status: 404, description: 'Meal selection not found' })
+  @ApiBearerAuth()
   async findOne(@Param('id') id: string): Promise<MealSelectionResponseDto> {
     const result = await this._mealSelectionsService.findOne(id);
     return this.toResponseDto(result);
@@ -75,6 +83,7 @@ export class MealSelectionsController {
   @ApiResponse({ status: 404, description: 'Meal selection not found' })
   // ...removed global guard...
   @RequiredIdentityType(IdentityType.Employee)
+  @ApiBearerAuth()
   @Patch(':id')
   async update(
     @Param('id') id: string,
@@ -89,6 +98,7 @@ export class MealSelectionsController {
   @ApiOperation({ summary: 'Delete a meal selection' })
   @ApiResponse({ status: 200, description: 'Meal selection deleted' })
   @ApiResponse({ status: 404, description: 'Meal selection not found' })
+  @ApiBearerAuth()
   async delete(@Param('id') id: string): Promise<void> {
     return this._mealSelectionsService.delete(id);
   }

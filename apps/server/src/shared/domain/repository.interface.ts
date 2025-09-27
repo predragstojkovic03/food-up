@@ -3,6 +3,7 @@ import { EntityInstanceNotFoundException } from './exceptions/entity-instance-no
 import { Id } from './id.type';
 
 export interface IRepository<T extends Entity<Id>> {
+  save(entity: T): Promise<T>;
   findAll(): Promise<T[]>;
   insert(entity: T): Promise<T>;
   insertMany(entities: T[]): Promise<T[]>;

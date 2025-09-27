@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Expose } from 'class-transformer';
 
+@Expose()
 export class MenuItemResponseDto {
   @ApiProperty({ example: 'menu-item-uuid', description: 'Menu item ID' })
   id: string;
@@ -19,7 +21,7 @@ export class MenuItemResponseDto {
     description: 'Day for the menu item',
     type: String,
   })
-  day: Date;
+  day: string;
 
   @ApiProperty({ example: 'meal-uuid', description: 'Meal ID' })
   mealId: string;

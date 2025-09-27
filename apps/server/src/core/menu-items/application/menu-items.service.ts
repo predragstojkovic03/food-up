@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { MealsService } from 'src/core/meals/application/meals.service';
+import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
 import { ulid } from 'ulid';
 import { MenuItem } from '../domain/menu-item.entity';
 import {
@@ -24,6 +25,18 @@ export class MenuItemsService {
     mealId: string;
   }): Promise<MenuItem> {
     const meal = await this._mealsService.findOne(dto.mealId);
+
+    const existingMealOnSameDay = await this._repository.findOneByCriteria({
+      menuPeriodId: dto.menuPeriodId,
+      day: dto.day,
+      mealId: meal.id,
+    });
+
+    if (existingMealOnSameDay) {
+      throw new InvalidInputDataException(
+        `Meal with ID ${meal.id} is already assigned to menu period ${dto.menuPeriodId} on day ${dto.day}`,
+      );
+    }
 
     const menuItem = new MenuItem(
       ulid(),

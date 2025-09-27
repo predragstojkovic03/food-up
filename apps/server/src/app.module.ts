@@ -40,6 +40,8 @@ import { LoggerModule } from './shared/infrastructure/logger/logger.module';
         synchronize: configService.get('ORM_SYNC'),
         entities: [join(__dirname, '**', '*.typeorm-entity.*')],
         namingStrategy: new SnakeNamingStrategy(),
+        logger: 'advanced-console',
+        logging: true,
       }),
       inject: [I_CONFIG_SERVICE],
     }),

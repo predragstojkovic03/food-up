@@ -2,7 +2,10 @@ import { BusinessSupplier } from 'src/core/business-suppliers/infrastructure/per
 import { Business } from 'src/core/businesses/infrastructure/persistence/business.typeorm-entity';
 import { Identity } from 'src/core/identity/infrastructure/persistence/identity.typeorm-entity';
 import { Meal } from 'src/core/meals/infrastructure/persistence/meal.typeorm-entity';
+import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
 import {
+  BeforeInsert,
+  BeforeUpdate,
   Column,
   Entity,
   JoinColumn,
@@ -44,4 +47,12 @@ export class Supplier {
 
   @OneToMany(() => Meal, (meal) => meal.supplier, { eager: true })
   meals: Meal[];
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  validateIdentity() {
+    if (this.type === SupplierType.Standalone && !this.identity) {
+      throw new InvalidInputDataException('Identity type must be Supplier');
+    }
+  }
 }

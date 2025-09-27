@@ -28,7 +28,7 @@ export class LoggingMiddleware implements NestMiddleware {
     try {
       if (req.body && Object.keys(req.body).length > 0) {
         this._logger.verbose(
-          `Request body: ${(JSON.stringify(req.body), null, this._minify ? null : 2)}`,
+          `Request body: ${JSON.stringify(req.body, null, this._minify ? undefined : 2)}`,
         );
       }
     } catch (error) {

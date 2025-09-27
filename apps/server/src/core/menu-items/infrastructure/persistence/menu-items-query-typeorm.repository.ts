@@ -15,8 +15,9 @@ export class MenuItemsQueryTypeOrmRepository
   ): Promise<MenuItemWithMealDto[]> {
     const menuItems = await this.repo
       .createQueryBuilder('menuItem')
-      .leftJoinAndSelect('menuItem.meals', 'meal')
-      .where('menuItem.menuPeriodId IN (:...menuPeriodIds)', { menuPeriodIds })
+      .leftJoinAndSelect('menuItem.meal', 'meal')
+      .leftJoin('menuItem.menuPeriod', 'menuPeriod')
+      .where('menuPeriod.id IN (:...menuPeriodIds)', { menuPeriodIds })
       .getMany();
 
     return menuItems.map((menuItem) => ({

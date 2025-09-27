@@ -7,7 +7,12 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 import { CurrentIdentity } from 'src/core/auth/infrastructure/current-identity.decorator';
 import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
@@ -51,6 +56,7 @@ export class SuppliersController {
   })
   @RequiredIdentityType(IdentityType.Employee)
   @RequiredEmployeeRole(EmployeeRole.Manager)
+  @ApiBearerAuth()
   @Post('managed')
   async createManagedSupplier(
     @Body() { contactInfo, name }: CreateManagedSupplierDto,
@@ -70,6 +76,7 @@ export class SuppliersController {
     description: 'List of suppliers',
     type: [SupplierResponseDto],
   })
+  @ApiBearerAuth()
   @Get()
   async findAll(): Promise<SupplierResponseDto[]> {
     const result = await this._suppliersService.findAll();
@@ -82,6 +89,7 @@ export class SuppliersController {
     description: 'Supplier found',
     type: SupplierResponseDto,
   })
+  @ApiBearerAuth()
   @Get(':id')
   @ApiResponse({ status: 404, description: 'Supplier not found' })
   async findOne(@Param('id') id: string): Promise<SupplierResponseDto> {
@@ -96,6 +104,7 @@ export class SuppliersController {
     type: SupplierResponseDto,
   })
   @ApiResponse({ status: 404, description: 'Supplier not found' })
+  @ApiBearerAuth()
   @Patch(':id')
   async update(
     @Param('id') id: string,
@@ -110,6 +119,7 @@ export class SuppliersController {
   @ApiOperation({ summary: 'Delete a supplier' })
   @ApiResponse({ status: 200, description: 'Supplier deleted' })
   @ApiResponse({ status: 404, description: 'Supplier not found' })
+  @ApiBearerAuth()
   async delete(@Param('id') id: string): Promise<void> {
     return this._suppliersService.delete(id);
   }

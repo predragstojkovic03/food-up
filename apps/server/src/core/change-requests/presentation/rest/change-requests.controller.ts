@@ -7,7 +7,12 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 
 import { CurrentIdentity } from 'src/core/auth/infrastructure/current-identity.decorator';
@@ -31,6 +36,7 @@ export class ChangeRequestsController {
   @ApiResponse({ status: 201, type: ChangeRequestResponseDto })
   // ...removed global guard...
   @RequiredIdentityType(IdentityTypeEnum.Employee)
+  @ApiBearerAuth()
   @Post()
   async create(
     @Body() dto: CreateChangeRequestDto,
@@ -42,6 +48,7 @@ export class ChangeRequestsController {
 
   @ApiOperation({ summary: 'Get all change requests' })
   @ApiResponse({ status: 200, type: [ChangeRequestResponseDto] })
+  @ApiBearerAuth()
   @Get()
   async findAll(): Promise<ChangeRequestResponseDto[]> {
     const crs = await this._changeRequestsService.findAll();
@@ -50,6 +57,7 @@ export class ChangeRequestsController {
 
   @ApiOperation({ summary: 'Get a change request by ID' })
   @ApiResponse({ status: 200, type: ChangeRequestResponseDto })
+  @ApiBearerAuth()
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<ChangeRequestResponseDto> {
     const cr = await this._changeRequestsService.findOne(id);
@@ -60,6 +68,7 @@ export class ChangeRequestsController {
   @ApiResponse({ status: 200, type: ChangeRequestResponseDto })
   // ...removed global guard...
   @RequiredIdentityType(IdentityTypeEnum.Employee)
+  @ApiBearerAuth()
   @Patch(':id')
   async update(
     @Param('id') id: string,
@@ -75,6 +84,7 @@ export class ChangeRequestsController {
   // ...removed global guard...
   @RequiredEmployeeRole(EmployeeRole.Manager)
   @RequiredIdentityType(IdentityTypeEnum.Employee)
+  @ApiBearerAuth()
   @Patch(':id/status')
   async updateStatus(
     @Param('id') id: string,
@@ -89,6 +99,7 @@ export class ChangeRequestsController {
   // ...removed global guard...
   @RequiredEmployeeRole(EmployeeRole.Manager)
   @RequiredIdentityType(IdentityTypeEnum.Employee)
+  @ApiBearerAuth()
   @Delete(':id')
   async delete(@Param('id') id: string): Promise<void> {
     return this._changeRequestsService.delete(id);

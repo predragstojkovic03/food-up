@@ -7,7 +7,12 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 
 import { ReportsService } from '../../application/reports.service';
@@ -23,6 +28,7 @@ export class ReportsController {
   @Post()
   @ApiOperation({ summary: 'Create a new report' })
   @ApiResponse({ status: 201, type: ReportResponseDto })
+  @ApiBearerAuth()
   async create(@Body() dto: CreateReportDto): Promise<ReportResponseDto> {
     const report = await this._reportsService.create(dto);
     return plainToInstance(ReportResponseDto, report);
@@ -31,18 +37,21 @@ export class ReportsController {
   @Get()
   @ApiOperation({ summary: 'Get all reports' })
   @ApiResponse({ status: 200, type: [ReportResponseDto] })
+  @ApiBearerAuth()
   async findAll(): Promise<ReportResponseDto[]> {
     const reports = await this._reportsService.findAll();
     return plainToInstance(ReportResponseDto, reports);
   }
 
   @Get(':id')
+  @ApiBearerAuth()
   async findOne(@Param('id') id: string): Promise<ReportResponseDto> {
     const report = await this._reportsService.findOne(id);
     return plainToInstance(ReportResponseDto, report);
   }
 
   @Patch(':id')
+  @ApiBearerAuth()
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateReportDto,
@@ -52,6 +61,7 @@ export class ReportsController {
   }
 
   @Delete(':id')
+  @ApiBearerAuth()
   async delete(@Param('id') id: string): Promise<void> {
     return this._reportsService.delete(id);
   }

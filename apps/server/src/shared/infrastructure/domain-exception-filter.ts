@@ -11,6 +11,7 @@ import {
   I_CONFIG_SERVICE,
   IConfigService,
 } from '../application/config-service.interface';
+import { I_LOGGER, ILogger } from '../application/logger.interface';
 import { AuthenticationException } from '../domain/exceptions/authentication.exception';
 import { DomainException } from '../domain/exceptions/domain.exception';
 import { EntityInstanceAlreadyExistsException } from '../domain/exceptions/entity-instance-already-exists.exception';
@@ -26,6 +27,8 @@ export class DomainExceptionFilter implements ExceptionFilter {
   constructor(
     @Inject(I_CONFIG_SERVICE)
     private configService: IConfigService<EnvironmentVariables, true>,
+    @Inject(I_LOGGER)
+    private logger: ILogger,
   ) {
     this._environment = this.configService.get('NODE_ENV');
   }
@@ -34,6 +37,8 @@ export class DomainExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const status = this.getStatus(exception);
+
+    this.logger.error(JSON.stringify(exception));
 
     response.status(status).json({
       statusCode: status,

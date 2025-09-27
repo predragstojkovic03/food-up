@@ -7,7 +7,12 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CurrentIdentity } from 'src/core/auth/infrastructure/current-identity.decorator';
 import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
 import { MealsService } from '../../application/meals.service';
@@ -23,6 +28,7 @@ export class MealsController {
 
   @ApiOperation({ summary: 'Create a new meal' })
   @ApiResponse({ status: 201, type: MealResponseDto })
+  @ApiBearerAuth()
   // ...removed global guard...
   @Post()
   async create(
@@ -36,6 +42,7 @@ export class MealsController {
   @Get()
   @ApiOperation({ summary: 'Get all meals' })
   @ApiResponse({ status: 200, type: [MealResponseDto] })
+  @ApiBearerAuth()
   async findAll(): Promise<MealResponseDto[]> {
     const meals = await this._mealsService.findAll();
     return meals.map(this.toResponseDto);
@@ -45,6 +52,7 @@ export class MealsController {
   @ApiOperation({ summary: 'Get a meal by ID' })
   @ApiResponse({ status: 200, type: MealResponseDto })
   @ApiResponse({ status: 404, description: 'Meal not found' })
+  @ApiBearerAuth()
   async findOne(@Param('id') id: string): Promise<MealResponseDto> {
     const meal = await this._mealsService.findOne(id);
     return this.toResponseDto(meal);
@@ -54,6 +62,7 @@ export class MealsController {
   @ApiOperation({ summary: 'Update a meal by ID' })
   @ApiResponse({ status: 200, type: MealResponseDto })
   @ApiResponse({ status: 404, description: 'Meal not found' })
+  @ApiBearerAuth()
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateMealDto,
@@ -66,6 +75,7 @@ export class MealsController {
   @ApiOperation({ summary: 'Delete a meal by ID' })
   @ApiResponse({ status: 204, description: 'Meal deleted' })
   @ApiResponse({ status: 404, description: 'Meal not found' })
+  @ApiBearerAuth()
   async delete(@Param('id') id: string): Promise<void> {
     await this._mealsService.delete(id);
   }

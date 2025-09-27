@@ -22,9 +22,7 @@ export class UpdateMealSelectionWindowDto {
   @ApiPropertyOptional({ type: [String] })
   @IsArray()
   @IsDateString({ strict: true }, { each: true })
-  @Transform(
-    ({ value }) => new Set(value.map((date: string) => date.split('T')[0])),
-  )
+  @Transform(({ value }) => value.map((date: string) => date.split('T')[0]))
   @IsOptional()
-  targetDates?: Set<string>;
+  targetDates?: string[];
 }

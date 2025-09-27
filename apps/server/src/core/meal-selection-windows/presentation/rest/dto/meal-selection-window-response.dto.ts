@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Expose } from 'class-transformer';
 
+@Expose()
 export class MealSelectionWindowResponseDto {
   @ApiProperty()
   id: string;
@@ -13,6 +15,6 @@ export class MealSelectionWindowResponseDto {
   @ApiProperty()
   endTime: Date;
 
-  @ApiProperty({ required: false })
-  description?: string;
+  @ApiProperty({ type: [String] })
+  targetDates: string[];
 }

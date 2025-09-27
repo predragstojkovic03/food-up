@@ -22,7 +22,7 @@ async function bootstrap() {
 
   app.useGlobalInterceptors(
     new ClassSerializerInterceptor(app.get(Reflector), {
-      strategy: 'exposeAll',
+      strategy: 'excludeAll',
     }),
   );
 

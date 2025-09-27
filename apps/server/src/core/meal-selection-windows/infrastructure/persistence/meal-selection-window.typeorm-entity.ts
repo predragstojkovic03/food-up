@@ -1,3 +1,4 @@
+import { Business } from 'src/core/businesses/infrastructure/persistence/business.typeorm-entity';
 import { MealSelection } from 'src/core/meal-selections/infrastructure/persistence/meal-selection.typeorm-entity';
 import { MenuPeriod } from 'src/core/menu-periods/infrastructure/persistence/menu-period.typeorm-entity';
 import {
@@ -5,6 +6,7 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
+  ManyToOne,
   OneToMany,
   PrimaryColumn,
 } from 'typeorm';
@@ -20,8 +22,11 @@ export class MealSelectionWindow {
   @Column('timestamp with time zone')
   endTime: Date;
 
-  @Column('character varying', { length: 26 })
-  businessId: string;
+  @ManyToOne(() => Business, (business) => business.mealSelectionWindows, {
+    onDelete: 'CASCADE',
+    eager: true,
+  })
+  business: Business;
 
   @Column('date', { array: true })
   targetDates: string[];

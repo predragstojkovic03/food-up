@@ -59,7 +59,6 @@ export class Identity extends Entity {
     password: string,
     hashComparer: (password: string, hash: string) => Promise<boolean>,
   ): Promise<boolean> {
-    console.log('Comparing password with hash:', this.passwordHash, password);
     return hashComparer(password, this.passwordHash);
   }
 }

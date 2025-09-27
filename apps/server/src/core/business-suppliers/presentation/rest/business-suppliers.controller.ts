@@ -7,7 +7,12 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Disabled } from 'src/shared/infrastructure/decorators/disabled.decorator';
 import { BusinessSuppliersService } from '../../application/business-suppliers.service';
 
@@ -22,6 +27,7 @@ export class BusinessSuppliersController {
   @Post()
   @ApiOperation({ summary: 'Create a new business supplier' })
   @ApiResponse({ status: 201, description: 'Business supplier created' })
+  @ApiBearerAuth()
   async create(@Body() dto: any) {
     return this._businessSuppliersService.create(dto);
   }
@@ -29,6 +35,7 @@ export class BusinessSuppliersController {
   @Get()
   @ApiOperation({ summary: 'Get all business suppliers' })
   @ApiResponse({ status: 200, description: 'List of business suppliers' })
+  @ApiBearerAuth()
   async findAll() {
     return this._businessSuppliersService.findAll();
   }
@@ -37,16 +44,19 @@ export class BusinessSuppliersController {
   @ApiOperation({ summary: 'Get a business supplier by ID' })
   @ApiResponse({ status: 200, description: 'Business supplier found' })
   @ApiResponse({ status: 404, description: 'Business supplier not found' })
+  @ApiBearerAuth()
   async findOne(@Param('id') id: string) {
     return this._businessSuppliersService.findOne(id);
   }
 
   @Patch(':id')
+  @ApiBearerAuth()
   async update(@Param('id') id: string, @Body() dto: any) {
     return this._businessSuppliersService.update(id, dto);
   }
 
   @Delete(':id')
+  @ApiBearerAuth()
   async delete(@Param('id') id: string) {
     return this._businessSuppliersService.delete(id);
   }

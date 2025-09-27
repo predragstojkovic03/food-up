@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Expose } from 'class-transformer';
 
+@Expose()
 export class MenuPeriodResponseDto {
   @ApiProperty({ example: 'menu-period-uuid', description: 'Menu period ID' })
   id: string;

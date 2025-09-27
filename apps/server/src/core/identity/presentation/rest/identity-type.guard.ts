@@ -6,6 +6,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
 import { IDENTITY_TYPE_KEY } from './identity-type.decorator';
 
 @Injectable()
@@ -20,13 +21,13 @@ export class IdentityTypeGuard implements CanActivate {
     if (!requiredTypes) return true;
 
     const request = context.switchToHttp().getRequest();
-    const user = request.user; // Populated by JwtAuthGuard
+    const user: JwtPayload = request.user as JwtPayload; // Populated by JwtAuthGuard
 
-    if (!user || !user.identityType) {
+    if (!user || !user.type) {
       throw new ForbiddenException('No identity type found in JWT payload');
     }
 
-    if (!requiredTypes.includes(user.identityType)) {
+    if (!requiredTypes.includes(user.type)) {
       throw new UnauthorizedException('Access denied for identity type');
     }
 

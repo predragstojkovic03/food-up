@@ -14,7 +14,7 @@ export interface CreateMealSelectionWindowDto {
   startTime: Date;
   endTime: Date;
   menuPeriodIds: string[];
-  targetDates: Set<string>;
+  targetDates: string[];
 }
 
 export interface UpdateMealSelectionWindowDto {
@@ -22,7 +22,7 @@ export interface UpdateMealSelectionWindowDto {
   endTime?: Date;
   businessId?: string;
   menuPeriodIds?: string[];
-  targetDates?: Set<string>;
+  targetDates?: string[];
 }
 
 @Injectable()
@@ -50,11 +50,11 @@ export class MealSelectionWindowsService {
       ulid(),
       dto.startTime,
       dto.endTime,
-      dto.targetDates,
+      new Set(dto.targetDates),
       employee.businessId,
       dto.menuPeriodIds,
     );
-    return this._repository.insert(window);
+    return this._repository.save(window);
   }
 
   async findAll(): Promise<MealSelectionWindow[]> {
@@ -82,7 +82,7 @@ export class MealSelectionWindowsService {
       dto.endTime,
       dto.businessId,
       dto.menuPeriodIds,
-      dto.targetDates,
+      new Set(dto.targetDates),
     );
 
     await this._repository.update(id, updated);
@@ -93,9 +93,11 @@ export class MealSelectionWindowsService {
     sub: string,
   ): Promise<GetCurrentMealSelectionWindowResponseDto> {
     const employee = await this._employeesService.findByIdentity(sub);
+    console.log('Employee:', employee);
 
     const mealSelectionWindow =
       await this._repository.findLatestActiveByBusiness(employee.businessId);
+    console.log('Meal Selection Window:', mealSelectionWindow);
 
     const menuItems = await this._menuItemsService.findWithMealsByMenuPeriods(
       mealSelectionWindow.menuPeriodIds,

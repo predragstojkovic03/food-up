@@ -16,6 +16,12 @@ export abstract class TypeOrmRepository<T extends Entity>
     protected readonly _mapper: TypeOrmMapper<T, PersistenceEntity<T>>,
   ) {}
 
+  async save(entity: T): Promise<T> {
+    const mappedEntity = this._mapper.toPersistence(entity);
+    await this._repository.save(mappedEntity);
+    return entity;
+  }
+
   async delete(id: Entity['id']): Promise<void> {
     await this._repository.delete({ id } as any);
   }

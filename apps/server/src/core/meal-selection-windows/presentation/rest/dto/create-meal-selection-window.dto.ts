@@ -1,17 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
+  ArrayNotEmpty,
   IsArray,
   IsDate,
   IsDateString,
   IsString,
-  MinLength,
 } from 'class-validator';
 
 export class CreateMealSelectionWindowDto {
   @ApiProperty()
   @IsArray()
-  @MinLength(1)
+  @ArrayNotEmpty()
   @IsString({ each: true })
   menuPeriodIds: string[];
 
@@ -28,8 +28,6 @@ export class CreateMealSelectionWindowDto {
   @ApiProperty({ type: [String] })
   @IsArray()
   @IsDateString({ strict: true }, { each: true })
-  @Transform(
-    ({ value }) => new Set(value.map((date: string) => date.split('T')[0])),
-  )
-  targetDates: Set<string>;
+  @Transform(({ value }) => value.map((date: string) => date.split('T')[0]))
+  targetDates: string[];
 }

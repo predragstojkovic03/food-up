@@ -7,7 +7,12 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 import { CurrentIdentity } from 'src/core/auth/infrastructure/current-identity.decorator';
 import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
@@ -16,6 +21,7 @@ import { IdentityType } from 'src/core/identity/domain/identity.entity';
 import { RequiredIdentityType } from 'src/core/identity/presentation/rest/identity-type.decorator';
 import { EmployeeRole } from 'src/shared/domain/role.enum';
 import { MealSelectionWindowsService } from '../../application/meal-selection-windows.service';
+import { MealSelectionWindow } from '../../domain/meal-selection-window.entity';
 import { CreateMealSelectionWindowDto } from './dto/create-meal-selection-window.dto';
 import { GetCurrentMealSelectionWindowResponseDto } from './dto/get-current-meal-selection-window-response.dto';
 import { MealSelectionWindowResponseDto } from './dto/meal-selection-window-response.dto';
@@ -37,6 +43,7 @@ export class MealSelectionWindowsController {
   // ...removed global guard...
   @RequiredIdentityType(IdentityType.Employee)
   @RequiredEmployeeRole(EmployeeRole.Manager)
+  @ApiBearerAuth()
   @Post()
   async create(
     @Body() dto: CreateMealSelectionWindowDto,
@@ -53,9 +60,22 @@ export class MealSelectionWindowsController {
     description: 'List of meal selection windows',
     type: [MealSelectionWindowResponseDto],
   })
+  @ApiBearerAuth()
   async findAll(): Promise<MealSelectionWindowResponseDto[]> {
     const result = await this._mealSelectionWindowService.findAll();
     return result.map(this.toResponseDto);
+  }
+
+  @RequiredIdentityType(IdentityType.Employee)
+  @ApiBearerAuth()
+  @Get('current')
+  async getCurrent(
+    @CurrentIdentity() { sub }: JwtPayload,
+  ): Promise<GetCurrentMealSelectionWindowResponseDto> {
+    const result = await this._mealSelectionWindowService.findCurrent(sub);
+    return plainToInstance(GetCurrentMealSelectionWindowResponseDto, result, {
+      strategy: 'excludeAll',
+    });
   }
 
   @Get(':id')
@@ -66,6 +86,7 @@ export class MealSelectionWindowsController {
     type: MealSelectionWindowResponseDto,
   })
   @ApiResponse({ status: 404, description: 'Meal selection window not found' })
+  @ApiBearerAuth()
   async findOne(
     @Param('id') id: string,
   ): Promise<MealSelectionWindowResponseDto> {
@@ -81,6 +102,7 @@ export class MealSelectionWindowsController {
     type: MealSelectionWindowResponseDto,
   })
   @ApiResponse({ status: 404, description: 'Meal selection window not found' })
+  @ApiBearerAuth()
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateMealSelectionWindowDto,
@@ -92,29 +114,24 @@ export class MealSelectionWindowsController {
   @ApiOperation({ summary: 'Delete a meal selection window' })
   @ApiResponse({ status: 200, description: 'Meal selection window deleted' })
   @ApiResponse({ status: 404, description: 'Meal selection window not found' })
+  @ApiBearerAuth()
   @Delete(':id')
   async delete(@Param('id') id: string): Promise<void> {
     return this._mealSelectionWindowService.delete(id);
   }
 
-  @RequiredIdentityType(IdentityType.Employee)
-  @Get('current')
-  async getCurrent(
-    @CurrentIdentity() { sub }: JwtPayload,
-  ): Promise<GetCurrentMealSelectionWindowResponseDto> {
-    const result = await this._mealSelectionWindowService.findCurrent(sub);
-    return plainToInstance(GetCurrentMealSelectionWindowResponseDto, result, {
-      excludeExtraneousValues: true,
-    });
-  }
-
-  private toResponseDto(entity: any): MealSelectionWindowResponseDto {
-    return {
+  private toResponseDto(
+    entity: MealSelectionWindow,
+  ): MealSelectionWindowResponseDto {
+    const dto: MealSelectionWindowResponseDto = {
       id: entity.id,
-      menuPeriodIds: entity.menuPeriodIds,
       startTime: entity.startTime,
       endTime: entity.endTime,
-      description: entity.description ?? '',
+      menuPeriodIds: entity.menuPeriodIds,
+      targetDates: Array.from(entity.targetDates),
     };
+    return plainToInstance(MealSelectionWindowResponseDto, dto, {
+      strategy: 'excludeAll',
+    });
   }
 }

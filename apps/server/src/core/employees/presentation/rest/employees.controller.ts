@@ -7,7 +7,12 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 import { Public } from 'src/core/auth/infrastructure/public.decorator';
 import { EmployeeRole } from 'src/shared/domain/role.enum';
@@ -37,6 +42,7 @@ export class EmployeesController {
   }
 
   @Get('business/:businessId')
+  @ApiBearerAuth()
   async findAllByBusiness(
     @Param('businessId') businessId: string,
   ): Promise<EmployeeResponseDto[]> {
@@ -46,12 +52,14 @@ export class EmployeesController {
   }
 
   @Get(':id')
+  @ApiBearerAuth()
   async findOne(@Param('id') id: string): Promise<EmployeeResponseDto | null> {
     const employee = await this._employeesService.findOne(id);
     return employee ? plainToInstance(EmployeeResponseDto, employee) : null;
   }
 
   @Patch(':id')
+  @ApiBearerAuth()
   async update(
     @Param('id') id: string,
     @Body() updateDto: UpdateEmployeeRequestDto,
@@ -61,6 +69,7 @@ export class EmployeesController {
   }
 
   @Delete(':id')
+  @ApiBearerAuth()
   async delete(@Param('id') id: string): Promise<void> {
     await this._employeesService.delete(id);
   }

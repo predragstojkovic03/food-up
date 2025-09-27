@@ -76,6 +76,7 @@ export class MealsService {
       dto.description,
       dto.type,
       supplierId,
+      dto.price,
     );
 
     return this._repository.insert(meal);

@@ -24,15 +24,16 @@ export class SuppliersTypeOrmRepository
   ): Promise<Supplier | null> {
     const where = this.buildWhere(criteria);
 
-    return await this.findOneByCriteria(where);
+    return await super.findOneByCriteria(where);
   }
 
   public override async findOneByCriteriaOrThrow(
     criteria: Partial<Supplier>,
   ): Promise<Supplier> {
     const where = this.buildWhere(criteria);
+    console.log(where);
 
-    return await this.findOneByCriteriaOrThrow(where);
+    return await super.findOneByCriteriaOrThrow(where);
   }
 
   private buildWhere(
