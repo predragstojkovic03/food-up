@@ -1,8 +1,9 @@
+import { IUpdateMenuItem } from '@food-up/shared/src/interfaces/menu-item';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsDateString, IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class UpdateMenuItemDto {
+export class UpdateMenuItemDto implements IUpdateMenuItem {
   @ApiProperty({
     example: 9.99,
     description: 'Price of the menu item',

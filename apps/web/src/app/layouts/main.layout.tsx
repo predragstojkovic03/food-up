@@ -10,7 +10,7 @@ export default function MainLayout() {
         <Outlet />
       </main>
       <footer className='bg-gray-800 text-white p-4 text-center'>
-        © 2023 My Application
+        &copy; {new Date().getFullYear()} FoodUp
       </footer>
     </div>
   );

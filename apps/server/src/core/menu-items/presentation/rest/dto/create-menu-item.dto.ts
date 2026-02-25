@@ -1,8 +1,9 @@
+import { ICreateMenuItem } from '@food-up/shared';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsDateString, IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class CreateMenuItemDto {
+export class CreateMenuItemDto implements ICreateMenuItem {
   @ApiProperty({
     example: 9.99,
     description: 'Price of the menu item',

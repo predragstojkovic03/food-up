@@ -1,8 +1,9 @@
+import { IMenuItemResponse } from '@food-up/shared/src/interfaces/menu-item';
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 
 @Expose()
-export class MenuItemResponseDto {
+export class MenuItemResponseDto implements IMenuItemResponse {
   @ApiProperty({ example: 'menu-item-uuid', description: 'Menu item ID' })
   id: string;
 

@@ -13,7 +13,8 @@
     "start:prod": "npm run start:prod --workspace=apps/server"
   },
   "workspaces": [
-    "apps/*"
+    "apps/*",
+    "shared"
   ],
   "keywords": [],
   "author": "Predrag Stojković",

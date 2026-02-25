@@ -1,4 +1,4 @@
-import { User } from '@/shared/types/user.type';
+import { User } from '@/features/users/domain/user.entity';
 import { create } from 'zustand';
 
 type AuthState = {

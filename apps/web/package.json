@@ -1,5 +1,5 @@
 {
-  "name": "web",
+  "name": "@food-up/web",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@food-up/shared": "*",
     "@tanstack/react-query": "^5.79.0",
     "@tanstack/react-query-devtools": "^5.79.0",
     "react": "^19.0.0",
