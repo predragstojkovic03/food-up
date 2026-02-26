@@ -18,10 +18,10 @@ import { UpdateChangeRequestDto } from './dto/update-change-request.dto';
 export class ChangeRequestsService {
   constructor(
     @Inject(I_CHANGE_REQUESTS_REPOSITORY)
-    private readonly repo: IChangeRequestsRepository,
-    private readonly mealSelectionsService: MealSelectionsService,
-    private readonly menuItemsService: MenuItemsService,
-    private readonly employeesService: EmployeesService,
+    private readonly _repository: IChangeRequestsRepository,
+    private readonly _mealSelectionsService: MealSelectionsService,
+    private readonly _menuItemsService: MenuItemsService,
+    private readonly _employeesService: EmployeesService,
   ) {}
 
   @DomainEvents
@@ -29,9 +29,9 @@ export class ChangeRequestsService {
     identityId: string,
     dto: CreateChangeRequestDto,
   ): Promise<ChangeRequest> {
-    const employee = await this.employeesService.findByIdentity(identityId);
+    const employee = await this._employeesService.findByIdentity(identityId);
 
-    const mealSelection = await this.mealSelectionsService.findOne(
+    const mealSelection = await this._mealSelectionsService.findOne(
       dto.mealSelectionId,
     );
 
@@ -42,7 +42,7 @@ export class ChangeRequestsService {
     }
 
     if (dto.newMenuItemId) {
-      await this.menuItemsService.findOne(dto.newMenuItemId);
+      await this._menuItemsService.findOne(dto.newMenuItemId);
     }
 
     const changeRequest = new ChangeRequest(
@@ -57,17 +57,17 @@ export class ChangeRequestsService {
       null,
     );
 
-    await this.repo.insert(changeRequest);
+    await this._repository.insert(changeRequest);
 
     return changeRequest;
   }
 
   async findAll(): Promise<ChangeRequest[]> {
-    return this.repo.findAll();
+    return this._repository.findAll();
   }
 
   async findOne(id: string): Promise<ChangeRequest | null> {
-    return this.repo.findOneByCriteria({ id });
+    return this._repository.findOneByCriteria({ id });
   }
 
   @DomainEvents
@@ -76,12 +76,14 @@ export class ChangeRequestsService {
     employeeId: string,
     dto: UpdateChangeRequestDto,
   ): Promise<ChangeRequest> {
-    const changeRequest = await this.repo.findOneByCriteriaOrThrow({ id });
+    const changeRequest = await this._repository.findOneByCriteriaOrThrow({
+      id,
+    });
 
     const menuItemId =
       (await (async () => {
         if (dto.mealSelectionId) {
-          return this.menuItemsService
+          return this._menuItemsService
             .findOne(dto.mealSelectionId)
             .then((ms) => ms.id);
         }
@@ -95,7 +97,7 @@ export class ChangeRequestsService {
       dto.clearSelection,
     );
 
-    await this.repo.update(id, changeRequest);
+    await this._repository.update(id, changeRequest);
 
     return changeRequest;
   }
@@ -106,8 +108,10 @@ export class ChangeRequestsService {
     performedByIdentityId: string,
     status: ChangeRequestStatus,
   ): Promise<ChangeRequest> {
-    const changeRequest = await this.repo.findOneByCriteriaOrThrow({ id });
-    const performer = await this.employeesService.findByIdentity(
+    const changeRequest = await this._repository.findOneByCriteriaOrThrow({
+      id,
+    });
+    const performer = await this._employeesService.findByIdentity(
       performedByIdentityId,
     );
 
@@ -118,12 +122,12 @@ export class ChangeRequestsService {
     }
 
     changeRequest.changeStatus(status, performer.id, new Date());
-    await this.repo.update(id, changeRequest);
+    await this._repository.update(id, changeRequest);
 
     return changeRequest;
   }
 
   async delete(id: string): Promise<void> {
-    return this.repo.delete(id);
+    return this._repository.delete(id);
   }
 }

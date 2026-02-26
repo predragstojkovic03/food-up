@@ -4,7 +4,6 @@ import { MealSelectionWindowsService } from 'src/core/meal-selection-windows/app
 import { MenuItemsService } from 'src/core/menu-items/application/menu-items.service';
 import { MenuPeriodsService } from 'src/core/menu-periods/application/menu-periods.service';
 import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
-import { ulid } from 'ulid';
 import { MealSelection } from '../domain/meal-selection.entity';
 import {
   I_MEAL_SELECTIONS_REPOSITORY,
@@ -48,8 +47,7 @@ export class MealSelectionsService {
       );
     }
 
-    const mealSelection = new MealSelection(
-      ulid(),
+    const mealSelection = MealSelection.create(
       employee.id,
       dto.menuItemId,
       mealSelectionWindow.id,

@@ -20,7 +20,7 @@ import {
 export class MenuPeriodsService {
   constructor(
     @Inject(I_MENU_PERIODS_REPOSITORY)
-    private readonly repo: IMenuPeriodsRepository,
+    private readonly _repository: IMenuPeriodsRepository,
     private readonly _identityService: IdentityService,
     private readonly _businessesService: BusinessesService,
     private readonly _employeesService: EmployeesService,
@@ -48,20 +48,20 @@ export class MenuPeriodsService {
       supplier.id,
     );
 
-    await this.repo.insert(entity);
+    await this._repository.insert(entity);
     return entity;
   }
 
   async findAll(): Promise<MenuPeriod[]> {
-    return this.repo.findAll();
+    return this._repository.findAll();
   }
 
   async findOne(id: string): Promise<MenuPeriod> {
-    return this.repo.findOneByCriteriaOrThrow({ id });
+    return this._repository.findOneByCriteriaOrThrow({ id });
   }
 
   async findBulkByIds(ids: string[]): Promise<MenuPeriod[]> {
-    return this.repo.findBulkByIds(ids);
+    return this._repository.findBulkByIds(ids);
   }
 
   @DomainEvents
@@ -70,22 +70,22 @@ export class MenuPeriodsService {
     identityId: string,
     dto: { startDate?: Date; endDate?: Date },
   ): Promise<MenuPeriod> {
-    const menuPeriod = await this.repo.findOneByCriteriaOrThrow({ id });
+    const menuPeriod = await this._repository.findOneByCriteriaOrThrow({ id });
 
     await this.validateOrGetSupplier(identityId, menuPeriod.supplierId);
 
     menuPeriod.updateDetails(dto.startDate, dto.endDate);
 
-    await this.repo.update(id, menuPeriod);
+    await this._repository.update(id, menuPeriod);
     return menuPeriod;
   }
 
   async delete(id: string, identityId: string): Promise<void> {
-    const existing = await this.repo.findOneByCriteriaOrThrow({ id });
+    const existing = await this._repository.findOneByCriteriaOrThrow({ id });
 
     await this.validateOrGetSupplier(identityId, existing.supplierId);
 
-    return this.repo.delete(id);
+    return this._repository.delete(id);
   }
 
   /**

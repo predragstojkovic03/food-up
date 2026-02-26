@@ -13,7 +13,8 @@ import { CreateIdentityDto } from './dto/create-identity.dto';
 @Injectable()
 export class IdentityService {
   constructor(
-    @Inject(I_IDENTITY_REPOSITORY) private readonly repo: IIdentityRepository,
+    @Inject(I_IDENTITY_REPOSITORY)
+    private readonly _repository: IIdentityRepository,
     @Inject(I_LOGGER) private readonly _logger: ILogger,
   ) {}
 
@@ -28,7 +29,7 @@ export class IdentityService {
       dto.isActive ?? true,
     );
 
-    return this.repo.create(entity);
+    return this._repository.create(entity);
   }
 
   async validateCredentials(
@@ -49,18 +50,18 @@ export class IdentityService {
   }
 
   async findByEmail(email: string): Promise<Identity | null> {
-    return this.repo.findByEmail(email);
+    return this._repository.findByEmail(email);
   }
 
   async findById(id: string): Promise<Identity | null> {
-    return this.repo.findById(id);
+    return this._repository.findById(id);
   }
 
   async update(id: string, update: Partial<Identity>): Promise<Identity> {
-    return this.repo.update(id, update);
+    return this._repository.update(id, update);
   }
 
   async delete(id: string): Promise<void> {
-    return this.repo.delete(id);
+    return this._repository.delete(id);
   }
 }

@@ -9,7 +9,7 @@ import {
 export class ReportItemsService {
   constructor(
     @Inject(I_REPORT_ITEMS_REPOSITORY)
-    private readonly repo: IReportItemsRepository,
+    private readonly _repository: IReportItemsRepository,
   ) {}
 
   async create(dto: any): Promise<ReportItem> {
@@ -21,15 +21,15 @@ export class ReportItemsService {
       dto.date,
       dto.quantity,
     );
-    return this.repo.insert(entity);
+    return this._repository.insert(entity);
   }
 
   async findAll(): Promise<ReportItem[]> {
-    return this.repo.findAll();
+    return this._repository.findAll();
   }
 
   async findOne(id: string): Promise<ReportItem | null> {
-    return this.repo.findOneByCriteria({ id });
+    return this._repository.findOneByCriteria({ id });
   }
 
   async update(id: string, dto: any): Promise<ReportItem> {
@@ -41,10 +41,10 @@ export class ReportItemsService {
       dto.date,
       dto.quantity,
     );
-    return this.repo.update(id, entity);
+    return this._repository.update(id, entity);
   }
 
   async delete(id: string): Promise<void> {
-    return this.repo.delete(id);
+    return this._repository.delete(id);
   }
 }

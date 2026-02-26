@@ -17,7 +17,7 @@ import { CreateEmployeeDto } from './dto/create-employee.dto';
 export class EmployeesService {
   constructor(
     @Inject(I_EMPLOYEES_REPOSITORY)
-    private readonly repo: IEmployeeRepository,
+    private readonly _repository: IEmployeeRepository,
     private readonly _identityService: IdentityService,
     @Inject(I_TRANSACTION_RUNNER)
     private readonly _transactionRunner: ITransactionRunner,
@@ -39,20 +39,20 @@ export class EmployeesService {
         identity.id,
       );
 
-      return this.repo.insert(entity);
+      return this._repository.insert(entity);
     });
   }
 
   async findAllByBusiness(businessId: string): Promise<Employee[]> {
-    return this.repo.findByCriteria({ businessId });
+    return this._repository.findByCriteria({ businessId });
   }
 
   async findOne(id: string): Promise<Employee> {
-    return this.repo.findOneByCriteriaOrThrow({ id });
+    return this._repository.findOneByCriteriaOrThrow({ id });
   }
 
   async findByIdentity(identityId: string): Promise<Employee> {
-    return this.repo.findOneByCriteriaOrThrow({ identityId });
+    return this._repository.findOneByCriteriaOrThrow({ identityId });
   }
 
   async update(id: string, dto: any): Promise<Employee> {
@@ -66,10 +66,10 @@ export class EmployeesService {
       employee.role = dto.role;
     }
 
-    return this.repo.update(id, employee);
+    return this._repository.update(id, employee);
   }
 
   async delete(id: string): Promise<void> {
-    return this.repo.delete(id);
+    return this._repository.delete(id);
   }
 }

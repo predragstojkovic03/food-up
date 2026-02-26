@@ -14,7 +14,7 @@ export class MenuItemsQueryTypeOrmRepository
     private readonly _transactionContext: TransactionContext,
   ) {}
 
-  private get _repo(): Repository<MenuItem> {
+  private get _repository(): Repository<MenuItem> {
     const manager = this._transactionContext.getManager();
     return manager
       ? manager.getRepository(MenuItem)
@@ -24,7 +24,7 @@ export class MenuItemsQueryTypeOrmRepository
   async findWithMealsByMenuPeriodIds(
     menuPeriodIds: string[],
   ): Promise<MenuItemWithMealDto[]> {
-    const menuItems = await this._repo
+    const menuItems = await this._repository
       .createQueryBuilder('menuItem')
       .leftJoinAndSelect('menuItem.meal', 'meal')
       .leftJoin('menuItem.menuPeriod', 'menuPeriod')

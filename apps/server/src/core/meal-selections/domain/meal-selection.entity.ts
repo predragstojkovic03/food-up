@@ -1,10 +1,34 @@
 import { Entity } from 'src/shared/domain/entity';
+import { ulid } from 'ulid';
 import { MealSelectionCreatedEvent } from './events/meal-selection-created.event';
 import { MealSelectionMenuItemChangedEvent } from './events/meal-selection-menu-item-changed.event';
 import { MealSelectionQuantityChangedEvent } from './events/meal-selection-quantity-changed.event';
 import { MealSelectionUpdatedEvent } from './events/meal-selection-updated.event';
 
 export class MealSelection extends Entity {
+  static create(
+    employeeId: string,
+    menuItemId: string,
+    mealSelectionWindowId: string,
+    date: string,
+    quantity?: number,
+  ) {
+    const mealSelection = new MealSelection(
+      ulid(),
+      employeeId,
+      menuItemId,
+      mealSelectionWindowId,
+      date,
+      quantity,
+    );
+
+    mealSelection.addDomainEvent(
+      new MealSelectionCreatedEvent(mealSelection.id),
+    );
+
+    return mealSelection;
+  }
+
   /**
    * Should not be used directly, use the factory method {@link create} instead.
    * @param id
@@ -30,8 +54,6 @@ export class MealSelection extends Entity {
     this._mealSelectionWindowId = mealSelectionWindowId;
     this._quantity = quantity ?? null;
     this._date = date;
-
-    this.addDomainEvent(new MealSelectionCreatedEvent(this._id));
   }
 
   private readonly _id: string;

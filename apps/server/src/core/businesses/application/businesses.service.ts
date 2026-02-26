@@ -11,7 +11,7 @@ import { CreateBusinessDto } from './dto/create-business.dto';
 export class BusinessesService {
   constructor(
     @Inject(I_BUSINESSES_REPOSITORY)
-    private readonly businessRepository: IBusinessesRepository,
+    private readonly _repository: IBusinessesRepository,
   ) {}
 
   async create(createBusinessDto: CreateBusinessDto): Promise<Business> {
@@ -22,14 +22,14 @@ export class BusinessesService {
       createBusinessDto.contactPhone,
     );
 
-    return this.businessRepository.insert(business);
+    return this._repository.insert(business);
   }
 
   async findAll(): Promise<Business[]> {
-    return this.businessRepository.findAll();
+    return this._repository.findAll();
   }
 
   findOne(businessId: string): Promise<Business> {
-    return this.businessRepository.findOneByCriteriaOrThrow({ id: businessId });
+    return this._repository.findOneByCriteriaOrThrow({ id: businessId });
   }
 }
