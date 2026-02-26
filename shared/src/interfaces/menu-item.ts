@@ -1,5 +1,3 @@
-// Shared interfaces for Menu Item DTOs
-
 export interface ICreateMenuItem {
   price?: number | null;
   menuPeriodId: string;
