@@ -8,7 +8,7 @@ import { ReportItemTypeOrmMapper } from './report-item-typeorm.mapper';
 import { ReportItem as ReportItemPersistence } from './report-item.typeorm-entity';
 
 @Injectable()
-export class ReportItemsTypeOrmRepository extends TypeOrmRepository<ReportItem> {
+export class ReportItemsTypeOrmRepository extends TypeOrmRepository<ReportItem, ReportItemPersistence> {
   constructor(
     @InjectDataSource() dataSource: DataSource,
     transactionContext: TransactionContext,

@@ -10,7 +10,7 @@ import { Meal as MealPersistence } from './meal.typeorm-entity';
 
 @Injectable()
 export class MealsTypeOrmRepository
-  extends TypeOrmRepository<Meal>
+  extends TypeOrmRepository<Meal, MealPersistence>
   implements IMealsRepository
 {
   constructor(

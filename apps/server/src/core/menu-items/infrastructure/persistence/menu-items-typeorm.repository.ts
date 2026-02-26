@@ -10,7 +10,7 @@ import { MenuItem as MenuItemPersistence } from './menu-item.typeorm-entity';
 
 @Injectable()
 export class MenuItemsTypeOrmRepository
-  extends TypeOrmRepository<MenuItem>
+  extends TypeOrmRepository<MenuItem, MenuItemPersistence>
   implements IMenuItemsRepository
 {
   constructor(
@@ -30,7 +30,7 @@ export class MenuItemsTypeOrmRepository
         },
       })
       .then((entities) =>
-        entities.map((entity) => this._mapper.toDomain(entity as MenuItemPersistence)),
+        entities.map((entity) => this._mapper.toDomain(entity)),
       );
   }
 }

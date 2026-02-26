@@ -8,7 +8,7 @@ import { EmployeeTypeOrmMapper } from './employee-typeorm.mapper';
 import { Employee as EmployeePersistence } from './employee.typeorm-entity';
 
 @Injectable()
-export class EmployeesTypeOrmRepository extends TypeOrmRepository<Employee> {
+export class EmployeesTypeOrmRepository extends TypeOrmRepository<Employee, EmployeePersistence> {
   constructor(
     @InjectDataSource() dataSource: DataSource,
     transactionContext: TransactionContext,
@@ -22,7 +22,7 @@ export class EmployeesTypeOrmRepository extends TypeOrmRepository<Employee> {
     const where = this.getWhereClause(criteria);
 
     return (await this._repository.find({ where })).map((entity) =>
-      this._mapper.toDomain(entity as EmployeePersistence),
+      this._mapper.toDomain(entity),
     );
   }
 
@@ -36,7 +36,7 @@ export class EmployeesTypeOrmRepository extends TypeOrmRepository<Employee> {
         where,
       })
       .then((entity) =>
-        entity ? this._mapper.toDomain(entity as EmployeePersistence) : null,
+        entity ? this._mapper.toDomain(entity) : null,
       );
   }
 

@@ -1,7 +1,7 @@
-import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
-import { Mapper } from '../application/mapper.interface';
+import { ObjectLiteral } from 'typeorm';
+import { Mapper } from '../application/mapper.abstract';
 
 export abstract class TypeOrmMapper<
   Domain,
-  Persistence extends QueryDeepPartialEntity<Domain>,
+  Persistence extends ObjectLiteral,
 > extends Mapper<Domain, Persistence> {}

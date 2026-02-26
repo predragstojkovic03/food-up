@@ -10,7 +10,7 @@ import { MealSelectionWindow as MealSelectionWindowPersistence } from './meal-se
 
 @Injectable()
 export class MealSelectionWindowsTypeOrmRepository
-  extends TypeOrmRepository<MealSelectionWindow>
+  extends TypeOrmRepository<MealSelectionWindow, MealSelectionWindowPersistence>
   implements IMealSelectionWindowsRepository
 {
   constructor(
@@ -33,7 +33,7 @@ export class MealSelectionWindowsTypeOrmRepository
       })
       .then((entity) => {
         console.log('Found entity:', entity);
-        return this._mapper.toDomain(entity as MealSelectionWindowPersistence);
+        return this._mapper.toDomain(entity);
       });
   }
 }

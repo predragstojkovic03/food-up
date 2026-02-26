@@ -8,7 +8,7 @@ import { BusinessSupplierTypeOrmMapper } from './business-supplier-typeorm.mappe
 import { BusinessSupplier as BusinessSupplierPersistence } from './business-supplier.typeorm-entity';
 
 @Injectable()
-export class BusinessSuppliersTypeOrmRepository extends TypeOrmRepository<BusinessSupplier> {
+export class BusinessSuppliersTypeOrmRepository extends TypeOrmRepository<BusinessSupplier, BusinessSupplierPersistence> {
   constructor(
     @InjectDataSource() dataSource: DataSource,
     transactionContext: TransactionContext,

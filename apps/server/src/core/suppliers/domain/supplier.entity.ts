@@ -39,11 +39,13 @@ export class Supplier extends Entity {
     this._managingBusinessId = managingBusinessId;
     this._identityId = identityId;
 
-    this.addDomainEvent(
-      type === SupplierType.Managed
-        ? new ManagedSupplierCreatedEvent(id, managingBusinessId as string)
-        : new SupplierRegisteredEvent(id, identityId as string),
-    );
+    if (this.isStandalone()) {
+      this.addDomainEvent(new SupplierRegisteredEvent(id, this.identityId));
+    } else if (this.isManaged()) {
+      this.addDomainEvent(
+        new ManagedSupplierCreatedEvent(id, this.managingBusinessId),
+      );
+    }
   }
 
   private readonly _id: string;
@@ -69,6 +71,20 @@ export class Supplier extends Entity {
 
   get type(): SupplierType {
     return this._type;
+  }
+
+  isStandalone(): this is this & {
+    identityId: string;
+    managingBusinessId: undefined;
+  } {
+    return this._type === SupplierType.Standalone;
+  }
+
+  isManaged(): this is this & {
+    identityId: undefined;
+    managingBusinessId: string;
+  } {
+    return this._type === SupplierType.Managed;
   }
 
   get contactInfo(): string {

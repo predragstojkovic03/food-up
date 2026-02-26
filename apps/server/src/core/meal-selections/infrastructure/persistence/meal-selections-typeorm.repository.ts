@@ -10,7 +10,7 @@ import { MealSelection as MealSelectionPersistence } from './meal-selection.type
 
 @Injectable()
 export class MealSelectionsTypeOrmRepository
-  extends TypeOrmRepository<MealSelection>
+  extends TypeOrmRepository<MealSelection, MealSelectionPersistence>
   implements IMealSelectionsRepository
 {
   constructor(
