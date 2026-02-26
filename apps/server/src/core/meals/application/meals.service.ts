@@ -4,6 +4,7 @@ import { EmployeesService } from 'src/core/employees/application/employees.servi
 import { IdentityService } from 'src/core/identity/application/identity.service';
 import { IdentityType } from 'src/core/identity/domain/identity.entity';
 import { SuppliersService } from 'src/core/suppliers/application/suppliers.service';
+import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
 import { AuthenticationException } from 'src/shared/domain/exceptions/authentication.exception';
 import { EntityInstanceNotFoundException } from 'src/shared/domain/exceptions/entity-instance-not-found.exception';
 import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
@@ -26,6 +27,7 @@ export class MealsService {
     private readonly _suppliersService: SuppliersService,
     private readonly _employeesService: EmployeesService,
     private readonly _businessesService: BusinessesService,
+    @Inject(I_LOGGER) private readonly _logger: ILogger,
   ) {}
 
   async create(identityId: string, dto: CreateMealDto): Promise<Meal> {
@@ -60,6 +62,11 @@ export class MealsService {
       );
 
       if (!business.managedSupplierIds.includes(dto.supplierId)) {
+        this._logger.debug(
+          `Managed supplier IDs: ${business.managedSupplierIds.join(', ')}`,
+        );
+        this._logger.debug(`Provided supplier ID: ${dto.supplierId}`);
+
         throw new UnauthorizedException(
           'You can only create meals for suppliers managed by your business.',
         );

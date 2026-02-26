@@ -6,6 +6,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
+import { Public } from 'src/core/auth/infrastructure/public.decorator';
 import { BusinessesService } from '../../application/businesses.service';
 import { BusinessResponseDto } from './dto/business-response.dto';
 import { CreateBusinessRequestDto } from './dto/create-business.dto';
@@ -19,6 +20,7 @@ export class BusinessesController {
   @ApiOperation({ summary: 'Create a new business' })
   @ApiResponse({ status: 201, type: BusinessResponseDto })
   @ApiBearerAuth()
+  @Public
   async create(
     @Body() createBusinessDto: CreateBusinessRequestDto,
   ): Promise<BusinessResponseDto> {

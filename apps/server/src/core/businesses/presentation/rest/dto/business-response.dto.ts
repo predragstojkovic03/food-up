@@ -1,8 +1,7 @@
 import { Expose } from 'class-transformer';
 
-@Expose()
 export class BusinessResponseDto {
-  id: string;
-  name: string;
-  contactEmail: string;
+  @Expose() id: string;
+  @Expose() name: string;
+  @Expose() contactEmail: string;
 }

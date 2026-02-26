@@ -26,6 +26,7 @@ export class MealSelectionTypeOrmMapper extends TypeOrmMapper<
     persistence.mealSelectionWindow = {
       id: domain.mealSelectionWindowId,
     } as any;
+    persistence.date = domain.date;
     persistence.quantity = domain.quantity;
     return persistence;
   }

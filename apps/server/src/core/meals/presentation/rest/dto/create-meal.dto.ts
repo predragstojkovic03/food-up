@@ -33,7 +33,9 @@ export class CreateMealDto {
 
   @ApiProperty({
     example: '12345678901234567890123456',
-    description: 'ID of the supplier providing the meal',
+    description:
+      'ID of the supplier providing the meal. It should be provided only for managed suppliers.',
+    required: false,
   })
   @IsString()
   @IsOptional()
