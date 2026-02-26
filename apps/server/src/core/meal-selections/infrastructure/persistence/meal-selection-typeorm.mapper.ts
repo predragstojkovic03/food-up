@@ -29,4 +29,15 @@ export class MealSelectionTypeOrmMapper extends TypeOrmMapper<
     persistence.quantity = domain.quantity;
     return persistence;
   }
+
+  toPersistencePartial(domain: Partial<MealSelection>): Partial<MealSelectionPersistence> {
+    const persistence: Partial<MealSelectionPersistence> = {};
+    if (domain.id !== undefined) persistence.id = domain.id;
+    if (domain.employeeId !== undefined) persistence.employeeId = domain.employeeId;
+    if (domain.date !== undefined) persistence.date = domain.date;
+    if (domain.quantity !== undefined) persistence.quantity = domain.quantity;
+    if (domain.menuItemId !== undefined) persistence.menuItem = { id: domain.menuItemId } as any;
+    if (domain.mealSelectionWindowId !== undefined) persistence.mealSelectionWindow = { id: domain.mealSelectionWindowId } as any;
+    return persistence;
+  }
 }

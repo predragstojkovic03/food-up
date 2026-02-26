@@ -3,6 +3,10 @@ import { EmployeesService } from 'src/core/employees/application/employees.servi
 import { IdentityService } from 'src/core/identity/application/identity.service';
 import { IdentityType } from 'src/core/identity/domain/identity.entity';
 import { DomainEvents } from 'src/shared/application/domain-events/domain-events.decorator';
+import {
+  I_TRANSACTION_RUNNER,
+  ITransactionRunner,
+} from 'src/shared/application/transaction.runner';
 import { UnauthorizedException } from 'src/shared/domain/exceptions/unauthorized.exception';
 import { EmployeeRole } from 'src/shared/domain/role.enum';
 import { ulid } from 'ulid';
@@ -22,29 +26,33 @@ export class SuppliersService {
     private readonly _repository: ISuppliersRepository,
     private readonly _identityService: IdentityService,
     private readonly _employeesService: EmployeesService,
+    @Inject(I_TRANSACTION_RUNNER)
+    private readonly _transactionRunner: ITransactionRunner,
   ) {}
 
   @DomainEvents
   async register(dto: RegisterSupplierDto): Promise<Supplier> {
-    const identity = await this._identityService.create({
-      email: dto.email,
-      password: dto.password,
-      type: IdentityType.Supplier,
-      isActive: false,
+    return this._transactionRunner.run(async () => {
+      const identity = await this._identityService.create({
+        email: dto.email,
+        password: dto.password,
+        type: IdentityType.Supplier,
+        isActive: false,
+      });
+
+      const supplier = new Supplier(
+        ulid(),
+        dto.name,
+        SupplierType.Standalone,
+        dto.contactInfo,
+        undefined,
+        undefined,
+        identity.id,
+      );
+
+      await this._repository.insert(supplier);
+      return supplier;
     });
-
-    const supplier = new Supplier(
-      ulid(),
-      dto.name,
-      SupplierType.Standalone,
-      dto.contactInfo,
-      undefined,
-      undefined,
-      identity.id,
-    );
-
-    await this._repository.insert(supplier);
-    return supplier;
   }
 
   @DomainEvents

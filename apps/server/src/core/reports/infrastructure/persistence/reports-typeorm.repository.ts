@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { TransactionContext } from 'src/shared/infrastructure/transaction-context';
 import { TypeOrmRepository } from 'src/shared/infrastructure/typeorm.repository';
-import { Repository } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { Report } from '../../domain/report.entity';
 import { ReportTypeOrmMapper } from './report-typeorm.mapper';
 import { Report as ReportPersistence } from './report.typeorm-entity';
@@ -9,9 +10,9 @@ import { Report as ReportPersistence } from './report.typeorm-entity';
 @Injectable()
 export class ReportsTypeOrmRepository extends TypeOrmRepository<Report> {
   constructor(
-    @InjectRepository(ReportPersistence)
-    repository: Repository<ReportPersistence>,
+    @InjectDataSource() dataSource: DataSource,
+    transactionContext: TransactionContext,
   ) {
-    super(repository, new ReportTypeOrmMapper());
+    super(dataSource, ReportPersistence, new ReportTypeOrmMapper(), transactionContext);
   }
 }

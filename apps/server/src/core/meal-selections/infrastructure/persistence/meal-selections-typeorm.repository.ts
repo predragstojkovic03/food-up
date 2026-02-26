@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { TransactionContext } from 'src/shared/infrastructure/transaction-context';
 import { TypeOrmRepository } from 'src/shared/infrastructure/typeorm.repository';
-import { Repository } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { MealSelection } from '../../domain/meal-selection.entity';
 import { IMealSelectionsRepository } from '../../domain/meal-selections.repository.interface';
 import { MealSelectionTypeOrmMapper } from './meal-selection-typeorm.mapper';
@@ -13,46 +14,10 @@ export class MealSelectionsTypeOrmRepository
   implements IMealSelectionsRepository
 {
   constructor(
-    @InjectRepository(MealSelectionPersistence)
-    repository: Repository<MealSelectionPersistence>,
+    @InjectDataSource() dataSource: DataSource,
+    transactionContext: TransactionContext,
   ) {
-    super(repository, new MealSelectionTypeOrmMapper());
+    super(dataSource, MealSelectionPersistence, new MealSelectionTypeOrmMapper(), transactionContext);
   }
 
-  override findOneByCriteria(
-    criteria: Partial<MealSelection>,
-  ): Promise<MealSelection | null> {
-    const where = this.buildWhere(criteria);
-
-    return super.findOneByCriteria(where);
-  }
-
-  override findOneByCriteriaOrThrow(
-    criteria: Partial<MealSelection>,
-  ): Promise<MealSelection> {
-    const where = this.buildWhere(criteria);
-
-    return super.findOneByCriteriaOrThrow(where);
-  }
-
-  private buildWhere(criteria: Partial<MealSelection>) {
-    const where: any = { ...criteria };
-
-    if (criteria.employeeId) {
-      where.employee = { id: criteria.employeeId };
-      delete where.employeeId;
-    }
-
-    if (criteria.menuItemId) {
-      where.menuItem = { id: criteria.menuItemId };
-      delete where.menuItemId;
-    }
-
-    if (criteria.mealSelectionWindowId) {
-      where.mealSelectionWindow = { id: criteria.mealSelectionWindowId };
-      delete where.mealSelectionWindowId;
-    }
-
-    return where;
-  }
 }

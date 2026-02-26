@@ -22,4 +22,12 @@ export class BusinessSupplierTypeOrmMapper extends TypeOrmMapper<
 
     return persistence;
   }
+
+  toPersistencePartial(domain: Partial<BusinessSupplier>): Partial<BusinessSupplierPersistence> {
+    const persistence: Partial<BusinessSupplierPersistence> = {};
+    if (domain.id !== undefined) persistence.id = domain.id;
+    if (domain.businessId !== undefined) persistence.business = { id: domain.businessId } as any;
+    if (domain.supplierId !== undefined) persistence.supplier = { id: domain.supplierId } as any;
+    return persistence;
+  }
 }

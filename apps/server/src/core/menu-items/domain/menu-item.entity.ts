@@ -1,4 +1,5 @@
 import { Entity } from 'src/shared/domain/entity';
+import { ulid } from 'ulid';
 import { MenuItemCreatedEvent } from './events/menu-item-created.event';
 import { MenuItemDayUpdatedEvent } from './events/menu-item-day-updated.event';
 import { MenuItemPriceUpdatedEvent } from './events/menu-item-price-updated.event';
@@ -17,8 +18,18 @@ export class MenuItem extends Entity {
     this._menuPeriodId = menuPeriodId;
     this._day = day;
     this._mealId = mealId;
+  }
 
-    this.addDomainEvent(new MenuItemCreatedEvent(this.id));
+  static create(
+    price: number | null | undefined,
+    menuPeriodId: string,
+    day: string,
+    mealId: string,
+  ): MenuItem {
+    const menuItem = new MenuItem(ulid(), price, menuPeriodId, day, mealId);
+    menuItem.addDomainEvent(new MenuItemCreatedEvent(menuItem.id));
+
+    return menuItem;
   }
 
   readonly id: string;

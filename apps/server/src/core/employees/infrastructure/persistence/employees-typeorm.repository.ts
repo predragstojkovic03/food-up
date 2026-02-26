@@ -1,16 +1,19 @@
-import { InjectRepository } from '@nestjs/typeorm';
+import { Injectable } from '@nestjs/common';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { TransactionContext } from 'src/shared/infrastructure/transaction-context';
 import { TypeOrmRepository } from 'src/shared/infrastructure/typeorm.repository';
-import { Repository } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { Employee } from '../../domain/employee.entity';
 import { EmployeeTypeOrmMapper } from './employee-typeorm.mapper';
 import { Employee as EmployeePersistence } from './employee.typeorm-entity';
 
+@Injectable()
 export class EmployeesTypeOrmRepository extends TypeOrmRepository<Employee> {
   constructor(
-    @InjectRepository(EmployeePersistence)
-    repository: Repository<EmployeePersistence>,
+    @InjectDataSource() dataSource: DataSource,
+    transactionContext: TransactionContext,
   ) {
-    super(repository, new EmployeeTypeOrmMapper());
+    super(dataSource, EmployeePersistence, new EmployeeTypeOrmMapper(), transactionContext);
   }
 
   override async findByCriteria(

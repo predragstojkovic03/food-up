@@ -1,7 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { MealsService } from 'src/core/meals/application/meals.service';
 import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
-import { ulid } from 'ulid';
 import { MenuItem } from '../domain/menu-item.entity';
 import {
   I_MENU_ITEMS_REPOSITORY,
@@ -38,8 +37,7 @@ export class MenuItemsService {
       );
     }
 
-    const menuItem = new MenuItem(
-      ulid(),
+    const menuItem = MenuItem.create(
       dto.price,
       dto.menuPeriodId,
       dto.day,

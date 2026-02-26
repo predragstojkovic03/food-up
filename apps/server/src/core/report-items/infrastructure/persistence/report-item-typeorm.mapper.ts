@@ -25,4 +25,14 @@ export class ReportItemTypeOrmMapper extends TypeOrmMapper<
     persistence.quantity = domain.quantity;
     return persistence;
   }
+
+  toPersistencePartial(domain: Partial<ReportItem>): Partial<ReportItemPersistence> {
+    const persistence: Partial<ReportItemPersistence> = {};
+    if (domain.id !== undefined) persistence.id = domain.id;
+    if (domain.reportId !== undefined) persistence.reportId = domain.reportId;
+    if (domain.menuItemId !== undefined) persistence.menuItemId = domain.menuItemId;
+    if (domain.date !== undefined) persistence.date = domain.date;
+    if (domain.quantity !== undefined) persistence.quantity = domain.quantity;
+    return persistence;
+  }
 }

@@ -23,4 +23,13 @@ export class MenuPeriodTypeOrmMapper extends TypeOrmMapper<
     persistence.supplierId = domain.supplierId;
     return persistence;
   }
+
+  toPersistencePartial(domain: Partial<MenuPeriod>): Partial<MenuPeriodPersistence> {
+    const persistence: Partial<MenuPeriodPersistence> = {};
+    if (domain.id !== undefined) persistence.id = domain.id;
+    if (domain.startDate !== undefined) persistence.startDate = domain.startDate;
+    if (domain.endDate !== undefined) persistence.endDate = domain.endDate;
+    if (domain.supplierId !== undefined) persistence.supplierId = domain.supplierId;
+    return persistence;
+  }
 }

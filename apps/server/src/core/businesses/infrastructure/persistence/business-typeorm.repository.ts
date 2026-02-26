@@ -1,15 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { TransactionContext } from 'src/shared/infrastructure/transaction-context';
 import { TypeOrmRepository } from 'src/shared/infrastructure/typeorm.repository';
-import { Repository } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { Business } from '../../domain/business.entity';
 import { BusinessTypeOrmMapper } from './business-typeorm.mapper';
+import { Business as BusinessTypeormEntity } from './business.typeorm-entity';
 
 @Injectable()
 export class BusinessTypeormRepository extends TypeOrmRepository<Business> {
   constructor(
-    @InjectRepository(Business) businessRepository: Repository<Business>,
+    @InjectDataSource() dataSource: DataSource,
+    transactionContext: TransactionContext,
   ) {
-    super(businessRepository, new BusinessTypeOrmMapper());
+    super(dataSource, BusinessTypeormEntity, new BusinessTypeOrmMapper(), transactionContext);
   }
 }

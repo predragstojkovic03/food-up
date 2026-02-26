@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { TransactionContext } from 'src/shared/infrastructure/transaction-context';
 import { TypeOrmRepository } from 'src/shared/infrastructure/typeorm.repository';
-import { Repository } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { BusinessSupplier } from '../../domain/business-supplier.entity';
 import { BusinessSupplierTypeOrmMapper } from './business-supplier-typeorm.mapper';
 import { BusinessSupplier as BusinessSupplierPersistence } from './business-supplier.typeorm-entity';
@@ -9,9 +10,9 @@ import { BusinessSupplier as BusinessSupplierPersistence } from './business-supp
 @Injectable()
 export class BusinessSuppliersTypeOrmRepository extends TypeOrmRepository<BusinessSupplier> {
   constructor(
-    @InjectRepository(BusinessSupplierPersistence)
-    repository: Repository<BusinessSupplier>,
+    @InjectDataSource() dataSource: DataSource,
+    transactionContext: TransactionContext,
   ) {
-    super(repository, new BusinessSupplierTypeOrmMapper());
+    super(dataSource, BusinessSupplierPersistence, new BusinessSupplierTypeOrmMapper(), transactionContext);
   }
 }

@@ -1,19 +1,30 @@
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Injectable } from '@nestjs/common';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { TransactionContext } from 'src/shared/infrastructure/transaction-context';
+import { DataSource, Repository } from 'typeorm';
 import { IMenuItemsQueryRepository } from '../../application/queries/menu-items-query-repository.interface';
 import { MenuItem } from './menu-item.typeorm-entity';
 
+@Injectable()
 export class MenuItemsQueryTypeOrmRepository
   implements IMenuItemsQueryRepository
 {
   constructor(
-    @InjectRepository(MenuItem) private readonly repo: Repository<MenuItem>,
+    @InjectDataSource() private readonly _dataSource: DataSource,
+    private readonly _transactionContext: TransactionContext,
   ) {}
+
+  private get _repo(): Repository<MenuItem> {
+    const manager = this._transactionContext.getManager();
+    return manager
+      ? manager.getRepository(MenuItem)
+      : this._dataSource.getRepository(MenuItem);
+  }
 
   async findWithMealsByMenuPeriodIds(
     menuPeriodIds: string[],
   ): Promise<MenuItemWithMealDto[]> {
-    const menuItems = await this.repo
+    const menuItems = await this._repo
       .createQueryBuilder('menuItem')
       .leftJoinAndSelect('menuItem.meal', 'meal')
       .leftJoin('menuItem.menuPeriod', 'menuPeriod')

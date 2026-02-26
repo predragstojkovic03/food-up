@@ -24,4 +24,13 @@ export class BusinessTypeOrmMapper extends TypeOrmMapper<
 
     return businessPersistence;
   }
+
+  toPersistencePartial(domain: Partial<Business>): Partial<BusinessPersistence> {
+    const persistence: Partial<BusinessPersistence> = {};
+    if (domain.id !== undefined) persistence.id = domain.id;
+    if (domain.name !== undefined) persistence.name = domain.name;
+    if (domain.contactEmail !== undefined) persistence.contactEmail = domain.contactEmail;
+    if (domain.contactPhone !== undefined) persistence.contactPhone = domain.contactPhone;
+    return persistence;
+  }
 }

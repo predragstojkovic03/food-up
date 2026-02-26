@@ -1,22 +1,26 @@
-import { InjectRepository } from '@nestjs/typeorm';
+import { Injectable } from '@nestjs/common';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { TransactionContext } from 'src/shared/infrastructure/transaction-context';
 import { TypeOrmRepository } from 'src/shared/infrastructure/typeorm.repository';
-import { Repository } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { Meal } from '../../domain/meal.entity';
 import { IMealsRepository } from '../../domain/meals.repository.interface';
 import { MealTypeOrmMapper } from './meal-typeorm.mapper';
 import { Meal as MealPersistence } from './meal.typeorm-entity';
 
+@Injectable()
 export class MealsTypeOrmRepository
   extends TypeOrmRepository<Meal>
   implements IMealsRepository
 {
   constructor(
-    @InjectRepository(MealPersistence)
-    readonly _repository: Repository<Meal>,
+    @InjectDataSource() dataSource: DataSource,
+    transactionContext: TransactionContext,
   ) {
-    super(_repository, new MealTypeOrmMapper());
+    super(dataSource, MealPersistence, new MealTypeOrmMapper(), transactionContext);
   }
+
   findById(id: string): Promise<Meal | null> {
-    throw new Error('Method not implemented.');
+    return this.findOneByCriteria({ id });
   }
 }

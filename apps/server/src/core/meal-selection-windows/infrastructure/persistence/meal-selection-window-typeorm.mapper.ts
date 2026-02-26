@@ -28,4 +28,13 @@ export class MealSelectionWindowTypeOrmMapper extends TypeOrmMapper<
     persistence.menuPeriods = domain.menuPeriodIds.map((id) => ({ id }) as any); // Assuming menuPeriods is an array of objects with at least an id property
     return persistence;
   }
+
+  toPersistencePartial(domain: Partial<MealSelectionWindow>): Partial<MealSelectionWindowPersistence> {
+    const persistence: Partial<MealSelectionWindowPersistence> = {};
+    if (domain.id !== undefined) persistence.id = domain.id;
+    if (domain.startTime !== undefined) persistence.startTime = domain.startTime;
+    if (domain.endTime !== undefined) persistence.endTime = domain.endTime;
+    if (domain.businessId !== undefined) persistence.business = { id: domain.businessId } as any;
+    return persistence;
+  }
 }

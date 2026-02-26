@@ -1,9 +1,18 @@
-import { FindOptionsWhere, In, ObjectLiteral, Repository } from 'typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
+import {
+  DataSource,
+  EntityTarget,
+  FindOptionsWhere,
+  In,
+  ObjectLiteral,
+  Repository,
+} from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { Entity } from '../domain/entity';
 import { EntityInstanceNotFoundException } from '../domain/exceptions/entity-instance-not-found.exception';
 import { Id } from '../domain/id.type';
 import { IRepository } from '../domain/repository.interface';
+import { TransactionContext } from './transaction-context';
 import { TypeOrmMapper } from './typeorm.mapper';
 
 type PersistenceEntity<T extends Entity<Id>> = QueryDeepPartialEntity<T>;
@@ -12,9 +21,18 @@ export abstract class TypeOrmRepository<T extends Entity>
   implements IRepository<T>
 {
   constructor(
-    protected readonly _repository: Repository<ObjectLiteral>,
+    @InjectDataSource() private readonly _dataSource: DataSource,
+    private readonly _entityTarget: EntityTarget<ObjectLiteral>,
     protected readonly _mapper: TypeOrmMapper<T, PersistenceEntity<T>>,
+    private readonly _transactionContext: TransactionContext,
   ) {}
+
+  protected get _repository(): Repository<ObjectLiteral> {
+    const manager = this._transactionContext.getManager();
+    return manager
+      ? manager.getRepository(this._entityTarget)
+      : this._dataSource.getRepository(this._entityTarget);
+  }
 
   async save(entity: T): Promise<T> {
     const mappedEntity = this._mapper.toPersistence(entity);
@@ -49,9 +67,7 @@ export abstract class TypeOrmRepository<T extends Entity>
   }
 
   exists(id: Entity['id']): Promise<boolean> {
-    return this._repository.exist({
-      where: { id } as any,
-    });
+    return this._repository.existsBy({ id } as any);
   }
 
   count(): Promise<number> {
@@ -60,11 +76,7 @@ export abstract class TypeOrmRepository<T extends Entity>
 
   findByCriteria(criteria: Partial<T>): Promise<T[]> {
     return this._repository
-      .find({
-        where: this._mapper.toPersistencePartial(
-          criteria,
-        ) as FindOptionsWhere<any>,
-      })
+      .find({ where: this.buildWhere(criteria) })
       .then((entities) => {
         return entities.map((entity) => this._mapper.toDomain(entity as any));
       });
@@ -72,11 +84,7 @@ export abstract class TypeOrmRepository<T extends Entity>
 
   findOneByCriteria(criteria: Partial<T>): Promise<T | null> {
     return this._repository
-      .findOne({
-        where: this._mapper.toPersistencePartial(
-          criteria,
-        ) as FindOptionsWhere<any>,
-      })
+      .findOne({ where: this.buildWhere(criteria) })
       .then((entity) => {
         return entity ? this._mapper.toDomain(entity as any) : null;
       });
@@ -103,10 +111,14 @@ export abstract class TypeOrmRepository<T extends Entity>
 
     if (!entity) {
       throw new EntityInstanceNotFoundException(
-        `Instance of entity {${this._repository.metadata.name}} not found`,
+        `Instance of entity {${this._entityTarget}} not found`,
       );
     }
 
     return entity;
+  }
+
+  protected buildWhere(criteria: Partial<T>): FindOptionsWhere<any> {
+    return this._mapper.toPersistencePartial(criteria) as FindOptionsWhere<any>;
   }
 }

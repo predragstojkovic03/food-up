@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { TransactionContext } from 'src/shared/infrastructure/transaction-context';
 import { TypeOrmRepository } from 'src/shared/infrastructure/typeorm.repository';
-import { MoreThanOrEqual, Repository } from 'typeorm';
+import { DataSource, MoreThanOrEqual } from 'typeorm';
 import { MealSelectionWindow } from '../../domain/meal-selection-window.entity';
 import { IMealSelectionWindowsRepository } from '../../domain/meal-selection-windows.repository.interface';
 import { MealSelectionWindowTypeOrmMapper } from './meal-selection-window-typeorm.mapper';
@@ -13,10 +14,10 @@ export class MealSelectionWindowsTypeOrmRepository
   implements IMealSelectionWindowsRepository
 {
   constructor(
-    @InjectRepository(MealSelectionWindowPersistence)
-    protected readonly _repository: Repository<MealSelectionWindowPersistence>,
+    @InjectDataSource() dataSource: DataSource,
+    transactionContext: TransactionContext,
   ) {
-    super(_repository, new MealSelectionWindowTypeOrmMapper());
+    super(dataSource, MealSelectionWindowPersistence, new MealSelectionWindowTypeOrmMapper(), transactionContext);
   }
 
   async findLatestActiveByBusiness(
@@ -32,7 +33,7 @@ export class MealSelectionWindowsTypeOrmRepository
       })
       .then((entity) => {
         console.log('Found entity:', entity);
-        return this._mapper.toDomain(entity);
+        return this._mapper.toDomain(entity as MealSelectionWindowPersistence);
       });
   }
 }

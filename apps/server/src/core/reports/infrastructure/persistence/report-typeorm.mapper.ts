@@ -29,4 +29,16 @@ export class ReportTypeOrmMapper extends TypeOrmMapper<
     persistence.scheduledFor = domain.scheduledFor;
     return persistence;
   }
+
+  toPersistencePartial(domain: Partial<Report>): Partial<ReportPersistence> {
+    const persistence: Partial<ReportPersistence> = {};
+    if (domain.id !== undefined) persistence.id = domain.id;
+    if (domain.supplierId !== undefined) persistence.supplierId = domain.supplierId;
+    if (domain.mealSelectionWindowId !== undefined) persistence.mealSelectionWindowId = domain.mealSelectionWindowId;
+    if (domain.generatedAt !== undefined) persistence.generatedAt = domain.generatedAt;
+    if (domain.type !== undefined) persistence.type = domain.type;
+    if (domain.isScheduled !== undefined) persistence.isScheduled = domain.isScheduled;
+    if (domain.scheduledFor !== undefined) persistence.scheduledFor = domain.scheduledFor;
+    return persistence;
+  }
 }

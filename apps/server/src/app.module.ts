@@ -16,6 +16,7 @@ import {
 } from './shared/application/config-service.interface';
 import { DomainEventsModule } from './shared/application/domain-events/domain-events.module';
 import { ConfigModule } from './shared/infrastructure/config/config.module';
+import { TransactionModule } from './shared/infrastructure/transaction/transaction.module';
 import { DomainExceptionFilter } from './shared/infrastructure/domain-exception-filter';
 import { DisabledEndpointGuard } from './shared/infrastructure/guards/disabled-endpoint.guard';
 import { LoggingMiddleware } from './shared/infrastructure/logger/logger.middleware';
@@ -49,6 +50,7 @@ import { LoggerModule } from './shared/infrastructure/logger/logger.module';
     //   rootPath: join(__dirname, '../..', 'client', 'dist'),
     // }),
     LoggerModule,
+    TransactionModule,
     CoreModule,
     ConfigModule,
     DomainEventsModule,

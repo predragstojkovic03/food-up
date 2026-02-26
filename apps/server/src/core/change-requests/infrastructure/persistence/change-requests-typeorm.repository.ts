@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { TransactionContext } from 'src/shared/infrastructure/transaction-context';
 import { TypeOrmRepository } from 'src/shared/infrastructure/typeorm.repository';
-import { Repository } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { ChangeRequest } from '../../domain/change-request.entity';
 import { ChangeRequestTypeOrmMapper } from './change-request-typeorm.mapper';
 import { ChangeRequest as ChangeRequestPersistence } from './change-request.typeorm-entity';
@@ -9,9 +10,9 @@ import { ChangeRequest as ChangeRequestPersistence } from './change-request.type
 @Injectable()
 export class ChangeRequestsTypeOrmRepository extends TypeOrmRepository<ChangeRequest> {
   constructor(
-    @InjectRepository(ChangeRequestPersistence)
-    repository: Repository<ChangeRequestPersistence>,
+    @InjectDataSource() dataSource: DataSource,
+    transactionContext: TransactionContext,
   ) {
-    super(repository, new ChangeRequestTypeOrmMapper());
+    super(dataSource, ChangeRequestPersistence, new ChangeRequestTypeOrmMapper(), transactionContext);
   }
 }

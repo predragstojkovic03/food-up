@@ -30,4 +30,15 @@ export class MealTypeOrmMapper extends TypeOrmMapper<
 
     return persistence;
   }
+
+  toPersistencePartial(domain: Partial<MealDomain>): Partial<MealPersistence> {
+    const persistence: Partial<MealPersistence> = {};
+    if (domain.id !== undefined) persistence.id = domain.id;
+    if (domain.name !== undefined) persistence.name = domain.name;
+    if (domain.description !== undefined) persistence.description = domain.description;
+    if (domain.type !== undefined) persistence.type = domain.type;
+    if (domain.price !== undefined) persistence.price = domain.price;
+    if (domain.supplierId !== undefined) persistence.supplier = { id: domain.supplierId } as any;
+    return persistence;
+  }
 }
