@@ -13,7 +13,7 @@ export class EmployeeTypeOrmMapper extends TypeOrmMapper<
       throw new Error('Business relation is required to map Employee domain');
     }
 
-    const employee = new Employee(
+    const employee = Employee.reconstitute(
       persistence.id,
       persistence.name,
       persistence.role,
@@ -35,13 +35,17 @@ export class EmployeeTypeOrmMapper extends TypeOrmMapper<
     return employeePersistence;
   }
 
-  toPersistencePartial(domain: Partial<Employee>): Partial<EmployeePersistence> {
+  toPersistencePartial(
+    domain: Partial<Employee>,
+  ): Partial<EmployeePersistence> {
     const persistence: Partial<EmployeePersistence> = {};
     if (domain.id !== undefined) persistence.id = domain.id;
     if (domain.name !== undefined) persistence.name = domain.name;
     if (domain.role !== undefined) persistence.role = domain.role;
-    if (domain.businessId !== undefined) persistence.business = { id: domain.businessId } as Business;
-    if (domain.identityId !== undefined) persistence.identity = { id: domain.identityId } as Identity;
+    if (domain.businessId !== undefined)
+      persistence.business = { id: domain.businessId } as Business;
+    if (domain.identityId !== undefined)
+      persistence.identity = { id: domain.identityId } as Identity;
     return persistence;
   }
 }

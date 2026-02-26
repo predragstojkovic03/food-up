@@ -6,7 +6,6 @@ import {
   ITransactionRunner,
 } from 'src/shared/application/transaction.runner';
 import { EmployeeRole } from 'src/shared/domain/role.enum';
-import { ulid } from 'ulid';
 import { Employee } from '../domain/employee.entity';
 import {
   I_EMPLOYEES_REPOSITORY,
@@ -33,8 +32,7 @@ export class EmployeesService {
         isActive: true,
       });
 
-      const entity = new Employee(
-        ulid(),
+      const entity = Employee.create(
         dto.name,
         dto.role ?? EmployeeRole.Basic,
         dto.businessId,
@@ -58,14 +56,17 @@ export class EmployeesService {
   }
 
   async update(id: string, dto: any): Promise<Employee> {
-    const entity = new Employee(
-      id,
-      dto.name,
-      dto.role ?? EmployeeRole.Basic,
-      dto.businessId,
-      dto.identityId,
-    );
-    return this.repo.update(id, entity);
+    const employee = await this.findOne(id);
+
+    if (dto.name !== undefined) {
+      employee.name = dto.name;
+    }
+
+    if (dto.role !== undefined) {
+      employee.role = dto.role;
+    }
+
+    return this.repo.update(id, employee);
   }
 
   async delete(id: string): Promise<void> {
