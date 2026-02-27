@@ -36,13 +36,28 @@ export class Supplier {
   )
   businessSuppliers: BusinessSupplier[];
 
+  @Column('character varying', {
+    length: 26,
+    nullable: true,
+    name: 'identity_id',
+  })
+  identityId: string;
+
   @OneToOne(() => Identity, { nullable: true, cascade: true, eager: true })
-  @JoinColumn()
+  @JoinColumn({ name: 'identity_id' })
   identity: Identity;
+
+  @Column('character varying', {
+    length: 26,
+    nullable: true,
+    name: 'managing_business_id',
+  })
+  managingBusinessId: string | null;
 
   @ManyToOne(() => Business, (business) => business.managedSuppliers, {
     nullable: true,
   })
+  @JoinColumn({ name: 'managing_business_id' })
   managingBusiness?: Business | null;
 
   @OneToMany(() => Meal, (meal) => meal.supplier)
