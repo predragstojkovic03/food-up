@@ -4,6 +4,11 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { join } from 'node:path';
 import { AppModule } from './app.module';
+import { EnvironmentVariables, NodeEnv } from './env.validation';
+import {
+  I_CONFIG_SERVICE,
+  IConfigService,
+} from './shared/application/config-service.interface';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -35,8 +40,18 @@ async function bootstrap() {
     .addBearerAuth()
     .build();
 
+  const configService =
+    app.get<IConfigService<EnvironmentVariables, true>>(I_CONFIG_SERVICE);
+  const isProduction = configService.get('NODE_ENV') === NodeEnv.Production;
+
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document);
+  SwaggerModule.setup('api/docs', app, document, {
+    swaggerOptions: {
+      supportedSubmitMethods: isProduction
+        ? []
+        : ['get', 'post', 'put', 'patch', 'delete'],
+    },
+  });
 
   await app.listen(3000);
 }
