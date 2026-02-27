@@ -13,6 +13,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { plainToClass } from 'class-transformer';
 import { CurrentIdentity } from 'src/core/auth/infrastructure/current-identity.decorator';
 import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
 import { MealsService } from '../../application/meals.service';
@@ -81,11 +82,13 @@ export class MealsController {
   }
 
   private toResponseDto(entity: Meal): MealResponseDto {
-    return {
+    const dto: MealResponseDto = {
       id: entity.id,
       name: entity.name,
       description: entity.description,
       type: entity.type,
     };
+
+    return plainToClass(MealResponseDto, dto);
   }
 }

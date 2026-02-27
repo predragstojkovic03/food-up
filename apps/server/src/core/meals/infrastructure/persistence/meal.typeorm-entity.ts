@@ -17,7 +17,7 @@ export class Meal {
   @Column('enum', { enum: MealType })
   type: MealType;
 
-  @ManyToOne(() => Supplier, (supplier) => supplier.meals)
+  @ManyToOne(() => Supplier, (supplier) => supplier.meals, { eager: true })
   supplier: Supplier;
 
   @Column('numeric', { precision: 10, scale: 2, nullable: true })

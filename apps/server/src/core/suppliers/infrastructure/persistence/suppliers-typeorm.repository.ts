@@ -24,4 +24,45 @@ export class SuppliersTypeOrmRepository
       transactionContext,
     );
   }
+
+  override findAll(): Promise<Supplier[]> {
+    return this._repository
+      .find({
+        relations: {
+          businessSuppliers: true,
+          managingBusiness: true,
+        },
+      })
+      .then((entities) =>
+        entities.map((entity) => this._mapper.toDomain(entity)),
+      );
+  }
+
+  override findOneByCriteriaOrThrow(
+    criteria: Partial<Supplier>,
+  ): Promise<Supplier> {
+    return this._repository
+      .findOneOrFail({
+        where: criteria,
+        relations: {
+          businessSuppliers: true,
+          managingBusiness: true,
+        },
+      })
+      .then((entity) => this._mapper.toDomain(entity));
+  }
+
+  override findOneByCriteria(
+    criteria: Partial<Supplier>,
+  ): Promise<Supplier | null> {
+    return this._repository
+      .findOne({
+        where: criteria,
+        relations: {
+          businessSuppliers: true,
+          managingBusiness: true,
+        },
+      })
+      .then((entity) => (entity ? this._mapper.toDomain(entity) : null));
+  }
 }

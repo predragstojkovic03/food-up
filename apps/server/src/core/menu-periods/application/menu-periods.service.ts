@@ -31,8 +31,8 @@ export class MenuPeriodsService {
   async create(
     identityId: string,
     dto: {
-      startDate: Date;
-      endDate: Date;
+      startDate: string;
+      endDate: string;
       supplierId?: string;
     },
   ): Promise<MenuPeriod> {
@@ -68,7 +68,7 @@ export class MenuPeriodsService {
   async update(
     id: string,
     identityId: string,
-    dto: { startDate?: Date; endDate?: Date },
+    dto: { startDate?: string; endDate?: string },
   ): Promise<MenuPeriod> {
     const menuPeriod = await this._repository.findOneByCriteriaOrThrow({ id });
 

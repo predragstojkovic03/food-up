@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { MealsService } from 'src/core/meals/application/meals.service';
+import { MenuPeriodsService } from 'src/core/menu-periods/application/menu-periods.service';
 import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
 import { MenuItem } from '../domain/menu-item.entity';
 import {
@@ -15,6 +16,7 @@ export class MenuItemsService {
     private readonly _repository: IMenuItemsRepository,
     private readonly _menuItemsQueryService: MenuItemsQueryService,
     private readonly _mealsService: MealsService,
+    private readonly _menuPeriodsService: MenuPeriodsService,
   ) {}
 
   async create(dto: {
@@ -24,6 +26,16 @@ export class MenuItemsService {
     mealId: string;
   }): Promise<MenuItem> {
     const meal = await this._mealsService.findOne(dto.mealId);
+
+    const menuPeriod = await this._menuPeriodsService.findOne(dto.menuPeriodId);
+
+    console.log(menuPeriod.supplierId, ',', meal.supplierId);
+
+    if (menuPeriod.supplierId !== meal.supplierId) {
+      throw new InvalidInputDataException(
+        `Meal with ID ${meal.id} does not belong to the supplier of menu period ${dto.menuPeriodId}`,
+      );
+    }
 
     const existingMealOnSameDay = await this._repository.findOneByCriteria({
       menuPeriodId: dto.menuPeriodId,

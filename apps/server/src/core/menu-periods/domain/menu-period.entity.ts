@@ -4,7 +4,12 @@ import { MenuPeriodCreatedEvent } from './events/menu-period-created.event';
 import { MenuPeriodDetailsUpdatedEvent } from './events/menu-period-details-updated.event';
 
 export class MenuPeriod extends Entity {
-  constructor(id: string, startDate: Date, endDate: Date, supplierId: string) {
+  constructor(
+    id: string,
+    startDate: string,
+    endDate: string,
+    supplierId: string,
+  ) {
     if (endDate <= startDate) {
       throw new InvalidInputDataException('End date must be after start date');
     }
@@ -19,19 +24,19 @@ export class MenuPeriod extends Entity {
   }
 
   private readonly _id: string;
-  private _startDate: Date;
-  private _endDate: Date;
+  private _startDate: string;
+  private _endDate: string;
   private readonly _supplierId: string;
 
   get id(): string {
     return this._id;
   }
 
-  get startDate(): Date {
+  get startDate(): string {
     return this._startDate;
   }
 
-  get endDate(): Date {
+  get endDate(): string {
     return this._endDate;
   }
 
@@ -39,7 +44,7 @@ export class MenuPeriod extends Entity {
     return this._supplierId;
   }
 
-  updateDetails(startDate?: Date, endDate?: Date): void {
+  updateDetails(startDate?: string, endDate?: string): void {
     if (startDate) {
       this._startDate = startDate;
     }

@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Expose } from 'class-transformer';
 import { MealType } from 'src/core/meals/domain/meal.entity';
 
+@Expose()
 export class MealResponseDto {
   @ApiProperty({ example: 'meal-uuid', description: 'Meal ID' })
   id: string;

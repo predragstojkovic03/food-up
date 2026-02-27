@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsDateString, IsOptional, IsString } from 'class-validator';
 
 export class UpdateMenuPeriodDto {
   @ApiProperty({
@@ -7,7 +8,9 @@ export class UpdateMenuPeriodDto {
     type: String,
     required: false,
   })
-  startDate?: Date;
+  @IsDateString()
+  @IsOptional()
+  startDate?: string;
 
   @ApiProperty({
     example: '2025-08-31',
@@ -15,12 +18,16 @@ export class UpdateMenuPeriodDto {
     type: String,
     required: false,
   })
-  endDate?: Date;
+  @IsDateString()
+  @IsOptional()
+  endDate?: string;
 
   @ApiProperty({
     example: 'supplier-uuid',
     description: 'Supplier ID',
     required: false,
   })
+  @IsString()
+  @IsOptional()
   supplierId?: string;
 }

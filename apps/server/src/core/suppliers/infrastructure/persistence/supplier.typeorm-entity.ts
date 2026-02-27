@@ -45,7 +45,7 @@ export class Supplier {
   })
   managingBusiness?: Business | null;
 
-  @OneToMany(() => Meal, (meal) => meal.supplier, { eager: true })
+  @OneToMany(() => Meal, (meal) => meal.supplier)
   meals: Meal[];
 
   @BeforeInsert()

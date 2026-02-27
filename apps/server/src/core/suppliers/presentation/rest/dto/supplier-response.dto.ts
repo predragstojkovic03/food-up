@@ -22,4 +22,8 @@ export class SupplierResponseDto {
   @ApiProperty({ type: [String] })
   @Expose()
   businessIds: string[];
+
+  @ApiProperty({ required: false })
+  @Expose()
+  managingBusinessId?: string;
 }

@@ -11,14 +11,14 @@ export class MenuPeriodResponseDto {
     description: 'Start date of the menu period',
     type: String,
   })
-  startDate: Date;
+  startDate: string;
 
   @ApiProperty({
     example: '2025-08-31',
     description: 'End date of the menu period',
     type: String,
   })
-  endDate: Date;
+  endDate: string;
 
   @ApiProperty({ example: 'supplier-uuid', description: 'Supplier ID' })
   supplierId: string;

@@ -131,6 +131,7 @@ export class SuppliersController {
       type: entity.type,
       contactInfo: entity.contactInfo,
       businessIds: entity.businessIds ?? [],
+      managingBusinessId: entity.managingBusinessId,
     };
 
     return plainToInstance(SupplierResponseDto, response, {

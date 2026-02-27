@@ -7,11 +7,11 @@ export class MenuPeriod {
   @PrimaryColumn('character varying', { length: 26 })
   id: string;
 
-  @Column('timestamp with time zone')
-  startDate: Date;
+  @Column('date')
+  startDate: string;
 
-  @Column('timestamp with time zone')
-  endDate: Date;
+  @Column('date')
+  endDate: string;
 
   @Column('character varying', { length: 26 })
   supplierId: string;
