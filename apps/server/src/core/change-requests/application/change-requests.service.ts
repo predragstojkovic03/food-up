@@ -5,7 +5,6 @@ import { MenuItemsService } from 'src/core/menu-items/application/menu-items.ser
 import { DomainEvents } from 'src/shared/application/domain-events/domain-events.decorator';
 import { UnauthorizedException } from 'src/shared/domain/exceptions/unauthorized.exception';
 import { EmployeeRole } from 'src/shared/domain/role.enum';
-import { ulid } from 'ulid';
 import { ChangeRequestStatus } from '../domain/change-request-status.enum';
 import { ChangeRequest } from '../domain/change-request.entity';
 import {
@@ -45,16 +44,12 @@ export class ChangeRequestsService {
       await this._menuItemsService.findOne(dto.newMenuItemId);
     }
 
-    const changeRequest = new ChangeRequest(
-      ulid(),
+    const changeRequest = ChangeRequest.create(
       employee.id,
       dto.mealSelectionId,
       dto.newMenuItemId ?? null,
       dto.newQuantity ?? null,
-      ChangeRequestStatus.Pending,
       dto.clearSelection,
-      null,
-      null,
     );
 
     await this._repository.insert(changeRequest);

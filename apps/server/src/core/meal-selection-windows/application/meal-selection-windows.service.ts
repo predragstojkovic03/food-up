@@ -2,7 +2,6 @@ import { Inject, Injectable } from '@nestjs/common';
 import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { MenuItemsService } from 'src/core/menu-items/application/menu-items.service';
 import { MenuPeriodsService } from 'src/core/menu-periods/application/menu-periods.service';
-import { ulid } from 'ulid';
 import { MealSelectionWindow } from '../domain/meal-selection-window.entity';
 import {
   I_MEAL_SELECTION_WINDOWS_REPOSITORY,
@@ -46,8 +45,7 @@ export class MealSelectionWindowsService {
         dto.menuPeriodIds.map((id) => this._menuPeriodsService.findOne(id)),
       );
     }
-    const window = new MealSelectionWindow(
-      ulid(),
+    const window = MealSelectionWindow.create(
       dto.startTime,
       dto.endTime,
       new Set(dto.targetDates),

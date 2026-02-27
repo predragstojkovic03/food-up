@@ -8,7 +8,7 @@ export class MealSelectionTypeOrmMapper extends TypeOrmMapper<
   MealSelectionPersistence
 > {
   toDomain(persistence: MealSelectionPersistence): MealSelection {
-    return new MealSelection(
+    return MealSelection.reconstitute(
       persistence.id,
       persistence.employeeId,
       persistence.menuItem.id,

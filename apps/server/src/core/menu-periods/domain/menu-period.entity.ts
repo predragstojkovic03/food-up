@@ -1,10 +1,30 @@
 import { Entity } from 'src/shared/domain/entity';
+import { generateId } from 'src/shared/domain/generate-id';
 import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
 import { MenuPeriodCreatedEvent } from './events/menu-period-created.event';
 import { MenuPeriodDetailsUpdatedEvent } from './events/menu-period-details-updated.event';
 
 export class MenuPeriod extends Entity {
-  constructor(
+  static create(
+    startDate: string,
+    endDate: string,
+    supplierId: string,
+  ): MenuPeriod {
+    const period = new MenuPeriod(generateId(), startDate, endDate, supplierId);
+    period.addDomainEvent(new MenuPeriodCreatedEvent(period.id));
+    return period;
+  }
+
+  static reconstitute(
+    id: string,
+    startDate: string,
+    endDate: string,
+    supplierId: string,
+  ): MenuPeriod {
+    return new MenuPeriod(id, startDate, endDate, supplierId);
+  }
+
+  private constructor(
     id: string,
     startDate: string,
     endDate: string,
@@ -19,8 +39,6 @@ export class MenuPeriod extends Entity {
     this._startDate = startDate;
     this._endDate = endDate;
     this._supplierId = supplierId;
-
-    this.addDomainEvent(new MenuPeriodCreatedEvent(this._id));
   }
 
   private readonly _id: string;

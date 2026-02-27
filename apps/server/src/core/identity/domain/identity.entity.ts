@@ -1,6 +1,7 @@
-// ...existing code...
 import { Entity } from 'src/shared/domain/entity';
+import { generateId } from 'src/shared/domain/generate-id';
 import { IdentityActiveStatusChangedEvent } from './events/identity-active-status-changed.event';
+
 export enum IdentityType {
   Employee = 'employee',
   Supplier = 'supplier',
@@ -9,7 +10,26 @@ export enum IdentityType {
 }
 
 export class Identity extends Entity {
-  constructor(
+  static create(
+    email: string,
+    passwordHash: string,
+    type: IdentityType,
+    isActive: boolean = true,
+  ): Identity {
+    return new Identity(generateId(), email, passwordHash, type, isActive);
+  }
+
+  static reconstitute(
+    id: string,
+    email: string,
+    passwordHash: string,
+    type: IdentityType,
+    isActive: boolean = true,
+  ): Identity {
+    return new Identity(id, email, passwordHash, type, isActive);
+  }
+
+  private constructor(
     id: string,
     email: string,
     passwordHash: string,

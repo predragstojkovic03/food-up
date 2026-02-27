@@ -7,7 +7,7 @@ export class ChangeRequestTypeOrmMapper extends TypeOrmMapper<
   ChangeRequestPersistence
 > {
   toDomain(persistence: ChangeRequestPersistence): ChangeRequest {
-    return new ChangeRequest(
+    return ChangeRequest.reconstitute(
       persistence.id,
       persistence.employeeId,
       persistence.mealSelectionId,

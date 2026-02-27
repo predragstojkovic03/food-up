@@ -9,7 +9,7 @@ export class BusinessTypeOrmMapper extends TypeOrmMapper<
   BusinessPersistence
 > {
   toDomain(persistence: BusinessPersistence): Business {
-    const business = new Business(
+    return Business.reconstitute(
       persistence.id,
       persistence.name,
       persistence.contactEmail,
@@ -18,8 +18,6 @@ export class BusinessTypeOrmMapper extends TypeOrmMapper<
       persistence.businessSuppliers?.map((bs) => bs.supplier?.id),
       persistence.managedSuppliers?.map((supplier) => supplier.id),
     );
-
-    return business;
   }
 
   toPersistence(domain: Business): any {

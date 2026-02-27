@@ -1,5 +1,6 @@
 import { Entity } from 'src/shared/domain/entity';
 import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
+import { generateId } from 'src/shared/domain/generate-id';
 import { ManagedSupplierCreatedEvent } from './events/managed-supplier-created.even';
 import { SupplierContactInfoChangedEvent } from './events/supplier-contact-info-changed.event';
 import { SupplierInfoUpdatedEvent } from './events/supplier-info-updated.event';
@@ -8,14 +9,74 @@ import { SupplierRegisteredEvent } from './events/supplier-registered.event';
 import { SupplierType } from './supplier-type.enum';
 
 export class Supplier extends Entity {
-  constructor(
+  static register(
+    name: string,
+    contactInfo: string,
+    identityId: string,
+  ): Supplier {
+    const supplier = new Supplier(
+      generateId(),
+      name,
+      SupplierType.Standalone,
+      contactInfo,
+      [],
+      undefined,
+      identityId,
+    );
+    supplier.addDomainEvent(
+      new SupplierRegisteredEvent(supplier.id, identityId),
+    );
+    return supplier;
+  }
+
+  static createManaged(
+    name: string,
+    contactInfo: string,
+    businessIds: string[],
+    managingBusinessId: string,
+  ): Supplier {
+    const supplier = new Supplier(
+      generateId(),
+      name,
+      SupplierType.Managed,
+      contactInfo,
+      businessIds,
+      managingBusinessId,
+    );
+    supplier.addDomainEvent(
+      new ManagedSupplierCreatedEvent(supplier.id, managingBusinessId),
+    );
+    return supplier;
+  }
+
+  static reconstitute(
     id: string,
     name: string,
     type: SupplierType,
     contactInfo: string,
     businessIds: string[] = [],
-    managingBusinessId?: string, // Optional field for managing business ID
-    identityId?: string, // Optional field for associated identity ID
+    managingBusinessId?: string,
+    identityId?: string,
+  ): Supplier {
+    return new Supplier(
+      id,
+      name,
+      type,
+      contactInfo,
+      businessIds,
+      managingBusinessId,
+      identityId,
+    );
+  }
+
+  private constructor(
+    id: string,
+    name: string,
+    type: SupplierType,
+    contactInfo: string,
+    businessIds: string[] = [],
+    managingBusinessId?: string,
+    identityId?: string,
   ) {
     super();
 
@@ -38,14 +99,6 @@ export class Supplier extends Entity {
     this._businessIds = businessIds;
     this._managingBusinessId = managingBusinessId;
     this._identityId = identityId;
-
-    if (this.isStandalone()) {
-      this.addDomainEvent(new SupplierRegisteredEvent(id, this.identityId));
-    } else if (this.isManaged()) {
-      this.addDomainEvent(
-        new ManagedSupplierCreatedEvent(id, this.managingBusinessId),
-      );
-    }
   }
 
   private readonly _id: string;

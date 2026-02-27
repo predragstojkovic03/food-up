@@ -48,7 +48,7 @@ export class IdentityTypeOrmRepository implements IIdentityRepository {
   }
 
   private toDomain(entity: IdentityTypeormEntity): Identity {
-    return new Identity(
+    return Identity.reconstitute(
       entity.id,
       entity.email,
       entity.passwordHash,

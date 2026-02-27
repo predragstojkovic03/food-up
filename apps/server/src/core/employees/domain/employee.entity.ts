@@ -2,7 +2,7 @@ import { Business } from 'src/core/businesses/domain/business.entity';
 import { Identity } from 'src/core/identity/domain/identity.entity';
 import { Entity } from 'src/shared/domain/entity';
 import { EmployeeRole } from 'src/shared/domain/role.enum';
-import { ulid } from 'ulid';
+import { generateId } from 'src/shared/domain/generate-id';
 import { EmployeeCreatedEvent } from './events/employee-created.event';
 
 export class Employee extends Entity {
@@ -12,7 +12,7 @@ export class Employee extends Entity {
     businessId: string,
     identityId: Identity['id'],
   ): Employee {
-    const employee = new Employee(ulid(), name, role, businessId, identityId);
+    const employee = new Employee(generateId(), name, role, businessId, identityId);
 
     employee.addDomainEvent(
       new EmployeeCreatedEvent(

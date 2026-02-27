@@ -7,7 +7,7 @@ export class MealTypeOrmMapper extends TypeOrmMapper<
   MealPersistence
 > {
   toDomain(persistence: MealPersistence): MealDomain {
-    return new MealDomain(
+    return MealDomain.reconstitute(
       persistence.id,
       persistence.name,
       persistence.description,

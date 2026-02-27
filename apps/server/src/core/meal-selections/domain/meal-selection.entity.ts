@@ -1,5 +1,5 @@
 import { Entity } from 'src/shared/domain/entity';
-import { ulid } from 'ulid';
+import { generateId } from 'src/shared/domain/generate-id';
 import { MealSelectionCreatedEvent } from './events/meal-selection-created.event';
 import { MealSelectionMenuItemChangedEvent } from './events/meal-selection-menu-item-changed.event';
 import { MealSelectionQuantityChangedEvent } from './events/meal-selection-quantity-changed.event';
@@ -12,9 +12,9 @@ export class MealSelection extends Entity {
     mealSelectionWindowId: string,
     date: string,
     quantity?: number,
-  ) {
+  ): MealSelection {
     const mealSelection = new MealSelection(
-      ulid(),
+      generateId(),
       employeeId,
       menuItemId,
       mealSelectionWindowId,
@@ -29,16 +29,25 @@ export class MealSelection extends Entity {
     return mealSelection;
   }
 
-  /**
-   * Should not be used directly, use the factory method {@link create} instead.
-   * @param id
-   * @param employeeId
-   * @param menuItemId
-   * @param mealSelectionWindowId
-   * @param date
-   * @param quantity
-   */
-  constructor(
+  static reconstitute(
+    id: string,
+    employeeId: string,
+    menuItemId: string,
+    mealSelectionWindowId: string,
+    date: string,
+    quantity?: number | null,
+  ): MealSelection {
+    return new MealSelection(
+      id,
+      employeeId,
+      menuItemId,
+      mealSelectionWindowId,
+      date,
+      quantity,
+    );
+  }
+
+  private constructor(
     id: string,
     employeeId: string,
     menuItemId: string,

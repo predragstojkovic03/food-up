@@ -8,13 +8,13 @@ export class MealSelectionWindowTypeOrmMapper extends TypeOrmMapper<
 > {
   toDomain(persistence: MealSelectionWindowPersistence): MealSelectionWindow {
     console.log('Mapping to domain:', persistence);
-    return new MealSelectionWindow(
+    return MealSelectionWindow.reconstitute(
       persistence.id,
       persistence.startTime,
       persistence.endTime,
       new Set(persistence.targetDates),
       persistence.business.id,
-      persistence.menuPeriods?.map((mp) => mp.id) ?? [], // Assuming menuPeriods is an array of objects with at least an id property
+      persistence.menuPeriods?.map((mp) => mp.id) ?? [],
     );
   }
 

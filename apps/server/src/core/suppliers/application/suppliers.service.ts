@@ -9,7 +9,6 @@ import {
 } from 'src/shared/application/transaction.runner';
 import { UnauthorizedException } from 'src/shared/domain/exceptions/unauthorized.exception';
 import { EmployeeRole } from 'src/shared/domain/role.enum';
-import { ulid } from 'ulid';
 import { SupplierType } from '../domain/supplier-type.enum';
 import { Supplier } from '../domain/supplier.entity';
 import {
@@ -40,13 +39,9 @@ export class SuppliersService {
         isActive: false,
       });
 
-      const supplier = new Supplier(
-        ulid(),
+      const supplier = Supplier.register(
         dto.name,
-        SupplierType.Standalone,
         dto.contactInfo,
-        undefined,
-        undefined,
         identity.id,
       );
 
@@ -66,10 +61,8 @@ export class SuppliersService {
       throw new UnauthorizedException('Only managers can manage suppliers.');
     }
 
-    const supplier = new Supplier(
-      ulid(),
+    const supplier = Supplier.createManaged(
       dto.name,
-      SupplierType.Managed,
       dto.contactInfo,
       [employee.businessId],
       employee.businessId,

@@ -1,19 +1,48 @@
 import { Entity } from 'src/shared/domain/entity';
+import { generateId } from 'src/shared/domain/generate-id';
 import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
 import { MealSelectionWindowCreatedEvent } from './events/meal-selection-window-created.event';
 import { MealSelectionWindowUpdatedEvent } from './events/meal-selection-window-updated.event';
 
 export class MealSelectionWindow extends Entity {
-  /**
-   *
-   * @param id
-   * @param startTime
-   * @param endTime
-   * @param businessId
-   * @param menuPeriodIds
-   * @throws {InvalidInputDataException} if menuPeriodIds is empty
-   */
-  constructor(
+  static create(
+    startTime: Date,
+    endTime: Date,
+    targetDates: Set<string>,
+    businessId: string,
+    menuPeriodIds: string[],
+  ): MealSelectionWindow {
+    const window = new MealSelectionWindow(
+      generateId(),
+      startTime,
+      endTime,
+      targetDates,
+      businessId,
+      menuPeriodIds,
+    );
+    window.addDomainEvent(new MealSelectionWindowCreatedEvent(window.id));
+    return window;
+  }
+
+  static reconstitute(
+    id: string,
+    startTime: Date,
+    endTime: Date,
+    targetDates: Set<string>,
+    businessId: string,
+    menuPeriodIds: string[],
+  ): MealSelectionWindow {
+    return new MealSelectionWindow(
+      id,
+      startTime,
+      endTime,
+      targetDates,
+      businessId,
+      menuPeriodIds,
+    );
+  }
+
+  private constructor(
     id: string,
     startTime: Date,
     endTime: Date,
@@ -30,8 +59,6 @@ export class MealSelectionWindow extends Entity {
     this.businessId = businessId;
     this.menuPeriodIds = menuPeriodIds;
     this.targetDates = targetDates;
-
-    this.addDomainEvent(new MealSelectionWindowCreatedEvent(this.id));
   }
 
   update(

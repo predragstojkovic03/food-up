@@ -9,7 +9,6 @@ import { DomainEvents } from 'src/shared/application/domain-events/domain-events
 import { AuthenticationException } from 'src/shared/domain/exceptions/authentication.exception';
 import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
 import { UnauthorizedException } from 'src/shared/domain/exceptions/unauthorized.exception';
-import { ulid } from 'ulid';
 import { MenuPeriod } from '../domain/menu-period.entity';
 import {
   I_MENU_PERIODS_REPOSITORY,
@@ -41,12 +40,7 @@ export class MenuPeriodsService {
       dto.supplierId,
     );
 
-    const entity = new MenuPeriod(
-      ulid(),
-      dto.startDate,
-      dto.endDate,
-      supplier.id,
-    );
+    const entity = MenuPeriod.create(dto.startDate, dto.endDate, supplier.id);
 
     await this._repository.insert(entity);
     return entity;

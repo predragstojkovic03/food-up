@@ -2,7 +2,6 @@ import { Inject, Injectable } from '@nestjs/common';
 import { compare, hash } from 'bcrypt';
 import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
 import { AuthenticationException } from 'src/shared/domain/exceptions/authentication.exception';
-import { ulid } from 'ulid';
 import { Identity, IdentityType } from '../domain/identity.entity';
 import {
   I_IDENTITY_REPOSITORY,
@@ -21,8 +20,7 @@ export class IdentityService {
   async create(dto: CreateIdentityDto): Promise<Identity> {
     const passwordHash = await hash(dto.password, 10);
 
-    const entity = new Identity(
-      ulid(),
+    const entity = Identity.create(
       dto.email,
       passwordHash,
       dto.type as IdentityType,

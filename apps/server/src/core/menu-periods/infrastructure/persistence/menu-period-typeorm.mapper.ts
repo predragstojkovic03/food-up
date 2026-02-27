@@ -7,7 +7,7 @@ export class MenuPeriodTypeOrmMapper extends TypeOrmMapper<
   MenuPeriodPersistence
 > {
   toDomain(persistence: MenuPeriodPersistence): MenuPeriod {
-    return new MenuPeriod(
+    return MenuPeriod.reconstitute(
       persistence.id,
       persistence.startDate,
       persistence.endDate,

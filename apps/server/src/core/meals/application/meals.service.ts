@@ -9,7 +9,6 @@ import { AuthenticationException } from 'src/shared/domain/exceptions/authentica
 import { EntityInstanceNotFoundException } from 'src/shared/domain/exceptions/entity-instance-not-found.exception';
 import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
 import { EmployeeRole } from 'src/shared/domain/role.enum';
-import { ulid } from 'ulid';
 import { Meal } from '../domain/meal.entity';
 import {
   I_MEALS_REPOSITORY,
@@ -77,8 +76,7 @@ export class MealsService {
       throw new InvalidInputDataException('Supplier ID is required.');
     }
 
-    const meal = new Meal(
-      ulid(),
+    const meal = Meal.create(
       dto.name,
       dto.description,
       dto.type,

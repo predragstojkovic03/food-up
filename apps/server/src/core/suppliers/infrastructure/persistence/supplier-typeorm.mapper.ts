@@ -8,7 +8,7 @@ export class SupplierTypeOrmMapper extends TypeOrmMapper<
   SupplierPersistence
 > {
   toDomain(persistence: SupplierPersistence): Supplier {
-    return new Supplier(
+    return Supplier.reconstitute(
       persistence.id,
       persistence.name,
       persistence.type,

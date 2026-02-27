@@ -7,7 +7,7 @@ export class MenuItemTypeOrmMapper extends TypeOrmMapper<
   MenuItemPersistence
 > {
   toDomain(persistence: MenuItemPersistence): MenuItem {
-    return new MenuItem(
+    return MenuItem.reconstitute(
       persistence.id,
       persistence.price,
       persistence.menuPeriod.id,

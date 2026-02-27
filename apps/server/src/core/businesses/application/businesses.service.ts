@@ -1,5 +1,4 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ulid } from 'ulid';
 import { Business } from '../domain/business.entity';
 import {
   I_BUSINESSES_REPOSITORY,
@@ -15,8 +14,7 @@ export class BusinessesService {
   ) {}
 
   async create(createBusinessDto: CreateBusinessDto): Promise<Business> {
-    const business = new Business(
-      ulid(),
+    const business = Business.create(
       createBusinessDto.name,
       createBusinessDto.contactEmail,
       createBusinessDto.contactPhone,
