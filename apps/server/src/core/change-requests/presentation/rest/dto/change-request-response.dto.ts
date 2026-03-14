@@ -18,11 +18,19 @@ export class ChangeRequestResponseDto {
   employeeId: string;
 
   @ApiProperty({
-    description: 'Unique identifier for the meal selection',
+    description: 'Unique identifier for the meal selection window',
     example: ulid(),
   })
   @Expose()
-  mealSelectionId: string;
+  mealSelectionWindowId: string;
+
+  @ApiProperty({
+    description: 'Unique identifier for the meal selection. Null for late selection requests.',
+    example: ulid(),
+    nullable: true,
+  })
+  @Expose()
+  mealSelectionId: string | undefined;
 
   @ApiProperty({
     description: 'Unique identifier for the new menu item',

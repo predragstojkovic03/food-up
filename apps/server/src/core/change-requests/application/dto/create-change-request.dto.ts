@@ -1,5 +1,6 @@
 export type CreateChangeRequestDto = {
-  mealSelectionId: string;
+  mealSelectionWindowId: string;
+  mealSelectionId?: string;
   newMenuItemId?: string;
   newQuantity?: number;
   clearSelection?: boolean;

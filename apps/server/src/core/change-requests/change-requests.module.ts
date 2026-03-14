@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { EmployeesModule } from '../employees/employees.module';
+import { MealSelectionWindowsModule } from '../meal-selection-windows/meal-selection-windows.module';
 import { MealSelectionsModule } from '../meal-selections/meal-selections.module';
 import { MenuItemsModule } from '../menu-items/menu-items.module';
 import { ChangeRequestsService } from './application/change-requests.service';
@@ -11,6 +12,7 @@ import { ChangeRequestsController } from './presentation/rest/change-requests.co
     MealSelectionsModule,
     MenuItemsModule,
     EmployeesModule,
+    MealSelectionWindowsModule,
   ],
   controllers: [ChangeRequestsController],
   providers: [ChangeRequestsRepositoryProvide, ChangeRequestsService],

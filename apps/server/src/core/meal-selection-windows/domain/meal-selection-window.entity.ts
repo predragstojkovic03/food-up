@@ -1,6 +1,6 @@
 import { Entity } from 'src/shared/domain/entity';
-import { generateId } from 'src/shared/domain/generate-id';
 import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
+import { generateId } from 'src/shared/domain/generate-id';
 import { MealSelectionWindowCreatedEvent } from './events/meal-selection-window-created.event';
 import { MealSelectionWindowUpdatedEvent } from './events/meal-selection-window-updated.event';
 
@@ -19,6 +19,7 @@ export class MealSelectionWindow extends Entity {
       targetDates,
       businessId,
       menuPeriodIds,
+      true, // New windows are locked by default until explicitly unlocked
     );
     window.addDomainEvent(new MealSelectionWindowCreatedEvent(window.id));
     return window;
@@ -31,6 +32,7 @@ export class MealSelectionWindow extends Entity {
     targetDates: Set<string>,
     businessId: string,
     menuPeriodIds: string[],
+    isLocked: boolean,
   ): MealSelectionWindow {
     return new MealSelectionWindow(
       id,
@@ -39,6 +41,7 @@ export class MealSelectionWindow extends Entity {
       targetDates,
       businessId,
       menuPeriodIds,
+      isLocked,
     );
   }
 
@@ -49,16 +52,17 @@ export class MealSelectionWindow extends Entity {
     targetDates: Set<string>,
     businessId: string,
     menuPeriodIds: string[],
+    isLocked: boolean,
   ) {
     super();
-    this.verifyMealSelectionInputs(menuPeriodIds, startTime, endTime);
-
+    MealSelectionWindow.verifyInputs(menuPeriodIds, startTime, endTime);
     this.id = id;
     this.startTime = startTime;
     this.endTime = endTime;
     this.businessId = businessId;
     this.menuPeriodIds = menuPeriodIds;
     this.targetDates = targetDates;
+    this.isLocked = isLocked;
   }
 
   update(
@@ -68,7 +72,7 @@ export class MealSelectionWindow extends Entity {
     menuPeriodIds?: string[],
     targetDates?: Set<string>,
   ): this {
-    this.verifyMealSelectionInputs(
+    MealSelectionWindow.verifyInputs(
       menuPeriodIds ?? this.menuPeriodIds,
       startTime ?? this.startTime,
       endTime ?? this.endTime,
@@ -85,8 +89,12 @@ export class MealSelectionWindow extends Entity {
   }
 
   public get isActive(): boolean {
+    return !this.isPastDeadline && !this.isLocked;
+  }
+
+  public get isPastDeadline(): boolean {
     const now = new Date();
-    return now >= this.startTime && now <= this.endTime;
+    return now > this.endTime;
   }
 
   readonly id: string;
@@ -96,8 +104,9 @@ export class MealSelectionWindow extends Entity {
   targetDates: Set<string>;
   businessId: string;
   menuPeriodIds: string[];
+  isLocked: boolean;
 
-  private verifyMealSelectionInputs(
+  private static verifyInputs(
     menuPeriodIds: string[],
     startTime: Date,
     endTime: Date,

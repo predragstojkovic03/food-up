@@ -1,8 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { EmployeesService } from 'src/core/employees/application/employees.service';
+import { MealSelectionWindowsService } from 'src/core/meal-selection-windows/application/meal-selection-windows.service';
 import { MealSelectionsService } from 'src/core/meal-selections/application/meal-selections.service';
 import { MenuItemsService } from 'src/core/menu-items/application/menu-items.service';
 import { DomainEvents } from 'src/shared/application/domain-events/domain-events.decorator';
+import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
+import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
 import { UnauthorizedException } from 'src/shared/domain/exceptions/unauthorized.exception';
 import { EmployeeRole } from 'src/shared/domain/role.enum';
 import { ChangeRequestStatus } from '../domain/change-request-status.enum';
@@ -21,6 +24,8 @@ export class ChangeRequestsService {
     private readonly _mealSelectionsService: MealSelectionsService,
     private readonly _menuItemsService: MenuItemsService,
     private readonly _employeesService: EmployeesService,
+    private readonly _mealSelectionWindowsService: MealSelectionWindowsService,
+    @Inject(I_LOGGER) private readonly _logger: ILogger,
   ) {}
 
   @DomainEvents
@@ -30,25 +35,62 @@ export class ChangeRequestsService {
   ): Promise<ChangeRequest> {
     const employee = await this._employeesService.findByIdentity(identityId);
 
-    const mealSelection = await this._mealSelectionsService.findOne(
-      dto.mealSelectionId,
+    const mealSelectionWindow = await this._mealSelectionWindowsService.findOne(
+      dto.mealSelectionWindowId,
     );
 
-    if (mealSelection.employeeId !== employee.id) {
-      throw new UnauthorizedException(
-        'Employee can only create change requests for his own meal selections.',
+    if (!mealSelectionWindow.isPastDeadline) {
+      throw new InvalidInputDataException(
+        'Cannot create a change request for a meal selection window that has not passed its deadline.',
       );
     }
 
+    if (dto.mealSelectionId) {
+      const mealSelection = await this._mealSelectionsService.findOne(
+        dto.mealSelectionId,
+      );
+
+      if (mealSelection.employeeId !== employee.id) {
+        throw new UnauthorizedException(
+          'Employee can only create change requests for their own meal selections.',
+        );
+      }
+
+      if (mealSelection.mealSelectionWindowId !== mealSelectionWindow.id) {
+        throw new InvalidInputDataException(
+          'Meal selection does not belong to the specified meal selection window.',
+        );
+      }
+    } else {
+      const existingSelection =
+        await this._mealSelectionsService.findByEmployeeAndWindow(
+          employee.id,
+          mealSelectionWindow.id,
+        );
+
+      if (existingSelection) {
+        throw new InvalidInputDataException(
+          'Employee already has a meal selection for this window. Reference it via mealSelectionId instead.',
+        );
+      }
+    }
+
     if (dto.newMenuItemId) {
-      await this._menuItemsService.findOne(dto.newMenuItemId);
+      const newMenuItem = await this._menuItemsService.findOne(dto.newMenuItemId);
+
+      if (!mealSelectionWindow.menuPeriodIds.includes(newMenuItem.menuPeriodId)) {
+        throw new InvalidInputDataException(
+          `New menu item with ID ${dto.newMenuItemId} does not belong to any of the menu periods associated with meal selection window ${mealSelectionWindow.id}`,
+        );
+      }
     }
 
     const changeRequest = ChangeRequest.create(
       employee.id,
-      dto.mealSelectionId,
+      mealSelectionWindow.id,
       dto.newMenuItemId ?? null,
       dto.newQuantity ?? null,
+      dto.mealSelectionId,
       dto.clearSelection,
     );
 
@@ -68,26 +110,31 @@ export class ChangeRequestsService {
   @DomainEvents
   async update(
     id: string,
-    employeeId: string,
+    identityId: string,
     dto: UpdateChangeRequestDto,
   ): Promise<ChangeRequest> {
+    const employee = await this._employeesService.findByIdentity(identityId);
+
     const changeRequest = await this._repository.findOneByCriteriaOrThrow({
       id,
+      employeeId: employee.id,
     });
 
-    const menuItemId =
-      (await (async () => {
-        if (dto.mealSelectionId) {
-          return this._menuItemsService
-            .findOne(dto.mealSelectionId)
-            .then((ms) => ms.id);
-        }
+    if (dto.newMenuItemId) {
+      const mealSelectionWindow = await this._mealSelectionWindowsService.findOne(
+        changeRequest.mealSelectionWindowId,
+      );
+      const newMenuItem = await this._menuItemsService.findOne(dto.newMenuItemId);
 
-        return changeRequest.newMenuItemId;
-      })()) ?? undefined;
+      if (!mealSelectionWindow.menuPeriodIds.includes(newMenuItem.menuPeriodId)) {
+        throw new InvalidInputDataException(
+          `New menu item with ID ${dto.newMenuItemId} does not belong to any of the menu periods associated with meal selection window ${changeRequest.mealSelectionWindowId}`,
+        );
+      }
+    }
 
     changeRequest.updateSelection(
-      menuItemId,
+      dto.newMenuItemId,
       dto.newQuantity,
       dto.clearSelection,
     );

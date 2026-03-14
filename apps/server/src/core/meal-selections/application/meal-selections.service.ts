@@ -2,7 +2,6 @@ import { Inject, Injectable } from '@nestjs/common';
 import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { MealSelectionWindowsService } from 'src/core/meal-selection-windows/application/meal-selection-windows.service';
 import { MenuItemsService } from 'src/core/menu-items/application/menu-items.service';
-import { MenuPeriodsService } from 'src/core/menu-periods/application/menu-periods.service';
 import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
 import { MealSelection } from '../domain/meal-selection.entity';
 import {
@@ -19,7 +18,6 @@ export class MealSelectionsService {
     private readonly _repository: IMealSelectionsRepository,
     private readonly _mealSelectionWindowsService: MealSelectionWindowsService,
     private readonly _employeesService: EmployeesService,
-    private readonly _menuPeriodsService: MenuPeriodsService,
     private readonly _menuItemsService: MenuItemsService,
   ) {}
 
@@ -41,9 +39,9 @@ export class MealSelectionsService {
 
     const menuItem = await this._menuItemsService.findOne(dto.menuItemId);
 
-    if (dto.date !== menuItem.day) {
+    if (!mealSelectionWindow.menuPeriodIds.includes(menuItem.menuPeriodId)) {
       throw new InvalidInputDataException(
-        'Menu item is not available on the selected date',
+        `Menu item with ID ${dto.menuItemId} does not belong to any of the menu periods associated with meal selection window ${dto.mealSelectionWindowId}`,
       );
     }
 
@@ -51,7 +49,7 @@ export class MealSelectionsService {
       employee.id,
       dto.menuItemId,
       mealSelectionWindow.id,
-      dto.date,
+      menuItem.day,
       dto.quantity,
     );
 
@@ -68,6 +66,16 @@ export class MealSelectionsService {
     return this._repository.findOneByCriteriaOrThrow({ id });
   }
 
+  findByEmployeeAndWindow(
+    employeeId: string,
+    mealSelectionWindowId: string,
+  ): Promise<MealSelection | null> {
+    return this._repository.findOneByCriteria({
+      employeeId,
+      mealSelectionWindowId,
+    });
+  }
+
   async update(
     id: string,
     identityId: string,
@@ -79,6 +87,26 @@ export class MealSelectionsService {
       id,
       employeeId: employee.id,
     });
+
+    const mealSelectionWindow = await this._mealSelectionWindowsService.findOne(
+      mealSelection.mealSelectionWindowId,
+    );
+
+    if (!mealSelectionWindow.isActive) {
+      throw new InvalidInputDataException(
+        'Meal selection window is not active',
+      );
+    }
+
+    if (dto.menuItemId) {
+      const menuItem = await this._menuItemsService.findOne(dto.menuItemId);
+
+      if (!mealSelectionWindow.menuPeriodIds.includes(menuItem.menuPeriodId)) {
+        throw new InvalidInputDataException(
+          `Menu item with ID ${dto.menuItemId} does not belong to any of the menu periods associated with meal selection window ${mealSelection.mealSelectionWindowId}`,
+        );
+      }
+    }
 
     mealSelection.update(dto.menuItemId, dto.quantity);
 

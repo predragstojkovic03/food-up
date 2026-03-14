@@ -10,18 +10,20 @@ import { ChangeRequestStatusUpdatedEvent } from './events/change-request-status-
 export class ChangeRequest extends Entity {
   static create(
     employeeId: string,
-    mealSelectionId: string,
+    mealSelectionWindowId: string,
     newMenuItemId: string | null,
     newQuantity: number | null,
+    mealSelectionId?: string,
     clearSelection?: boolean,
   ): ChangeRequest {
     const changeRequest = new ChangeRequest(
       generateId(),
       employeeId,
-      mealSelectionId,
+      mealSelectionWindowId,
       newMenuItemId,
       newQuantity,
       ChangeRequestStatus.Pending,
+      mealSelectionId,
       clearSelection,
       null,
       null,
@@ -33,10 +35,11 @@ export class ChangeRequest extends Entity {
   static reconstitute(
     id: string,
     employeeId: string,
-    mealSelectionId: string,
+    mealSelectionWindowId: string,
     newMenuItemId: string | null,
     newQuantity: number | null,
     status: ChangeRequestStatus,
+    mealSelectionId?: string,
     clearSelection?: boolean,
     approvedBy?: string | null,
     approvedAt?: Date | null,
@@ -44,10 +47,11 @@ export class ChangeRequest extends Entity {
     return new ChangeRequest(
       id,
       employeeId,
-      mealSelectionId,
+      mealSelectionWindowId,
       newMenuItemId,
       newQuantity,
       status,
+      mealSelectionId,
       clearSelection,
       approvedBy,
       approvedAt,
@@ -57,10 +61,11 @@ export class ChangeRequest extends Entity {
   private constructor(
     id: string,
     employeeId: string,
-    mealSelectionId: string,
+    mealSelectionWindowId: string,
     newMenuItemId: string | null,
     newQuantity: number | null,
     status: ChangeRequestStatus,
+    mealSelectionId?: string,
     clearSelection?: boolean,
     approvedBy?: string | null,
     approvedAt?: Date | null,
@@ -68,6 +73,7 @@ export class ChangeRequest extends Entity {
     super();
     this.id = id;
     this.employeeId = employeeId;
+    this.mealSelectionWindowId = mealSelectionWindowId;
     this.mealSelectionId = mealSelectionId;
     this.newMenuItemId = newMenuItemId;
     this.newQuantity = newQuantity;
@@ -80,6 +86,19 @@ export class ChangeRequest extends Entity {
       throw new InvalidInputDataException(
         'Quantity must be a positive integer.',
       );
+    }
+
+    if (mealSelectionId === undefined) {
+      if (!newMenuItemId || newQuantity === null) {
+        throw new InvalidInputDataException(
+          'Late selection requests require newMenuItemId and newQuantity.',
+        );
+      }
+      if (clearSelection) {
+        throw new InvalidInputDataException(
+          'Cannot clear a selection that does not exist.',
+        );
+      }
     }
   }
 
@@ -97,6 +116,12 @@ export class ChangeRequest extends Entity {
     if (newQuantity !== undefined && newQuantity <= 0) {
       throw new InvalidInputDataException(
         'Quantity must be a positive integer.',
+      );
+    }
+
+    if (this.mealSelectionId === undefined && clearSelection) {
+      throw new InvalidInputDataException(
+        'Cannot clear a selection that does not exist.',
       );
     }
 
@@ -127,7 +152,8 @@ export class ChangeRequest extends Entity {
 
   readonly id: string;
   employeeId: string;
-  mealSelectionId: string;
+  mealSelectionWindowId: string;
+  mealSelectionId: string | undefined;
   newMenuItemId: string | null;
   newQuantity: number | null;
   status: ChangeRequestStatus;

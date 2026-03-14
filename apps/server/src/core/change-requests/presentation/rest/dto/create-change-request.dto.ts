@@ -3,11 +3,20 @@ import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateChangeRequestDto {
   @ApiProperty({
-    example: 'meal-selection-uuid',
-    description: 'Meal selection ID',
+    example: 'meal-selection-window-uuid',
+    description: 'Meal selection window ID',
   })
   @IsString()
-  mealSelectionId: string;
+  mealSelectionWindowId: string;
+
+  @ApiProperty({
+    example: 'meal-selection-uuid',
+    description: 'Meal selection ID. Omit if no prior selection was made (late selection request).',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  mealSelectionId?: string;
 
   @ApiProperty({ example: 'menu-item-uuid', description: 'New menu item ID' })
   @IsOptional()

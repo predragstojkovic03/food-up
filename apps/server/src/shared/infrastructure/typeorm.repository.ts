@@ -1,7 +1,9 @@
 import { InjectDataSource } from '@nestjs/typeorm';
 import {
   DataSource,
+  EntityNotFoundError,
   EntityTarget,
+  FindOneOptions,
   FindOptionsWhere,
   In,
   ObjectLiteral,
@@ -39,7 +41,9 @@ export abstract class TypeOrmRepository<
   }
 
   async delete(id: Entity['id']): Promise<void> {
-    await this._repository.delete({ id } as unknown as FindOptionsWhere<TPersistence>);
+    await this._repository.delete({
+      id,
+    } as unknown as FindOptionsWhere<TPersistence>);
   }
 
   async insert(entity: TDomain): Promise<TDomain> {
@@ -65,7 +69,9 @@ export abstract class TypeOrmRepository<
   }
 
   exists(id: Entity['id']): Promise<boolean> {
-    return this._repository.existsBy({ id } as unknown as FindOptionsWhere<TPersistence>);
+    return this._repository.existsBy({
+      id,
+    } as unknown as FindOptionsWhere<TPersistence>);
   }
 
   count(): Promise<number> {
@@ -104,6 +110,20 @@ export abstract class TypeOrmRepository<
       });
   }
 
+  protected async findOneOrFailMapped(
+    options: FindOneOptions<TPersistence>,
+  ): Promise<TDomain> {
+    return this._repository
+      .findOneOrFail(options)
+      .then((entity) => this._mapper.toDomain(entity))
+      .catch((e) => {
+        if (e instanceof EntityNotFoundError) {
+          throw new EntityInstanceNotFoundException();
+        }
+        throw e;
+      });
+  }
+
   async findOneByCriteriaOrThrow(criteria: Partial<TDomain>): Promise<TDomain> {
     const entity = await this.findOneByCriteria(criteria);
 
@@ -116,7 +136,11 @@ export abstract class TypeOrmRepository<
     return entity;
   }
 
-  protected buildWhere(criteria: Partial<TDomain>): FindOptionsWhere<TPersistence> {
-    return this._mapper.toPersistencePartial(criteria) as FindOptionsWhere<TPersistence>;
+  protected buildWhere(
+    criteria: Partial<TDomain>,
+  ): FindOptionsWhere<TPersistence> {
+    return this._mapper.toPersistencePartial(
+      criteria,
+    ) as FindOptionsWhere<TPersistence>;
   }
 }

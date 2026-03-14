@@ -15,7 +15,6 @@ export class MealSelection {
   })
   menuItem: MenuItem;
 
-  @Column('character varying', { length: 26 })
   @ManyToOne(
     () => MealSelectionWindow,
     (mealSelectionWindow) => mealSelectionWindow.mealSelections,

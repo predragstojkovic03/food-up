@@ -104,6 +104,13 @@ export class MealSelectionsController {
   }
 
   private toResponseDto(entity: MealSelection): MealSelectionResponseDto {
-    return plainToInstance(MealSelectionResponseDto, entity);
+    const dto: MealSelectionResponseDto = {
+      id: entity.id,
+      employeeId: entity.employeeId,
+      menuItemId: entity.menuItemId,
+      mealSelectionWindowId: entity.mealSelectionWindowId,
+      quantity: entity.quantity,
+    };
+    return plainToInstance(MealSelectionResponseDto, dto);
   }
 }

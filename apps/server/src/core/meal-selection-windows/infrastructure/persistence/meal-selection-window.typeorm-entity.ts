@@ -31,7 +31,7 @@ export class MealSelectionWindow {
   @Column('date', { array: true })
   targetDates: string[];
 
-  @ManyToMany(() => MenuPeriod, (menuPeriod) => menuPeriod.menuSelectionWindows)
+  @ManyToMany(() => MenuPeriod, (menuPeriod) => menuPeriod.menuSelectionWindows, { eager: true })
   @JoinTable()
   menuPeriods: MenuPeriod[];
 
@@ -40,4 +40,7 @@ export class MealSelectionWindow {
     (mealSelection) => mealSelection.mealSelectionWindow,
   )
   mealSelections: MealSelection[];
+
+  @Column('boolean', { default: true })
+  isLocked: boolean;
 }

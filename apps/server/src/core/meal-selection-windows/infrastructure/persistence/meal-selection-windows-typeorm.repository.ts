@@ -17,23 +17,23 @@ export class MealSelectionWindowsTypeOrmRepository
     @InjectDataSource() dataSource: DataSource,
     transactionContext: TransactionContext,
   ) {
-    super(dataSource, MealSelectionWindowPersistence, new MealSelectionWindowTypeOrmMapper(), transactionContext);
+    super(
+      dataSource,
+      MealSelectionWindowPersistence,
+      new MealSelectionWindowTypeOrmMapper(),
+      transactionContext,
+    );
   }
 
   async findLatestActiveByBusiness(
     businessId: string,
   ): Promise<MealSelectionWindow> {
-    return this._repository
-      .findOneOrFail({
-        where: {
-          business: { id: businessId },
-          endTime: MoreThanOrEqual(new Date()),
-        },
-        relations: { menuPeriods: true },
-      })
-      .then((entity) => {
-        console.log('Found entity:', entity);
-        return this._mapper.toDomain(entity);
-      });
+    return this.findOneOrFailMapped({
+      where: {
+        business: { id: businessId },
+        endTime: MoreThanOrEqual(new Date()),
+        isLocked: false,
+      },
+    });
   }
 }
