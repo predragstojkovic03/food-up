@@ -15,8 +15,7 @@ import {
 import { plainToInstance } from 'class-transformer';
 import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { IdentityService } from 'src/core/identity/application/identity.service';
-import { IdentityType } from 'src/core/identity/domain/identity.entity';
-import { EmployeeRole } from 'src/shared/domain/role.enum';
+import { EmployeeRole, IdentityType } from '@food-up/shared';
 import { CurrentIdentity } from '../../infrastructure/current-identity.decorator';
 import { JwtPayload } from '../../infrastructure/jwt-payload';
 import { Public } from '../../infrastructure/public.decorator';

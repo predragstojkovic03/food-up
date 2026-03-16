@@ -1,5 +1,5 @@
 import { SetMetadata } from '@nestjs/common';
-import { EmployeeRole as EmployeeRoleEnum } from 'src/shared/domain/role.enum';
+import { EmployeeRole as EmployeeRoleEnum } from '@food-up/shared';
 
 export const EMPLOYEE_ROLE_KEY = 'employeeRole';
 export const RequiredEmployeeRole = (...roles: EmployeeRoleEnum[]) =>

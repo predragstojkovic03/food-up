@@ -1,14 +1,6 @@
+import { MealType } from '@food-up/shared';
 import { Entity } from 'src/shared/domain/entity';
 import { generateId } from 'src/shared/domain/generate-id';
-
-export enum MealType {
-  Breakfast = 'breakfast',
-  Lunch = 'lunch',
-  Dinner = 'dinner',
-  Soup = 'soup',
-  Salad = 'salad',
-  Dessert = 'dessert',
-}
 
 export class Meal extends Entity {
   static create(

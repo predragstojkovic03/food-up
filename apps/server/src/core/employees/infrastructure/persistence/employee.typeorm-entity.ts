@@ -1,6 +1,6 @@
 import { Business } from 'src/core/businesses/infrastructure/persistence/business.typeorm-entity';
 import { Identity } from 'src/core/identity/infrastructure/persistence/identity.typeorm-entity';
-import { EmployeeRole } from 'src/shared/domain/role.enum';
+import { EmployeeRole } from '@food-up/shared';
 import {
   Column,
   Entity,

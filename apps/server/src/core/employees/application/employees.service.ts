@@ -1,11 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { BusinessInvitesService } from 'src/core/business-invites/application/business-invites.service';
 import { IdentityService } from 'src/core/identity/application/identity.service';
-import { IdentityType } from 'src/core/identity/domain/identity.entity';
+import { EmployeeRole, IdentityType } from '@food-up/shared';
 import {
   I_TRANSACTION_RUNNER,
   ITransactionRunner,
 } from 'src/shared/application/transaction.runner';
-import { EmployeeRole } from 'src/shared/domain/role.enum';
 import { Employee } from '../domain/employee.entity';
 import {
   I_EMPLOYEES_REPOSITORY,
@@ -19,11 +19,39 @@ export class EmployeesService {
     @Inject(I_EMPLOYEES_REPOSITORY)
     private readonly _repository: IEmployeeRepository,
     private readonly _identityService: IdentityService,
+    private readonly _businessInvitesService: BusinessInvitesService,
     @Inject(I_TRANSACTION_RUNNER)
     private readonly _transactionRunner: ITransactionRunner,
   ) {}
 
   async register(dto: CreateEmployeeDto): Promise<Employee> {
+    return this._transactionRunner.run(async () => {
+      const invite = await this._businessInvitesService.consume(dto.inviteToken);
+
+      const identity = await this._identityService.create({
+        email: dto.email,
+        password: dto.password,
+        type: IdentityType.Employee,
+        isActive: true,
+      });
+
+      const entity = Employee.create(
+        dto.name,
+        EmployeeRole.Basic,
+        invite.businessId,
+        identity.id,
+      );
+
+      return this._repository.insert(entity);
+    });
+  }
+
+  async createManager(dto: {
+    name: string;
+    email: string;
+    password: string;
+    businessId: string;
+  }): Promise<Employee> {
     return this._transactionRunner.run(async () => {
       const identity = await this._identityService.create({
         email: dto.email,
@@ -34,7 +62,7 @@ export class EmployeesService {
 
       const entity = Employee.create(
         dto.name,
-        dto.role ?? EmployeeRole.Basic,
+        EmployeeRole.Manager,
         dto.businessId,
         identity.id,
       );

@@ -14,7 +14,7 @@ import {
   OneToOne,
   PrimaryColumn,
 } from 'typeorm';
-import { SupplierType } from '../../domain/supplier-type.enum';
+import { SupplierType } from '@food-up/shared';
 
 @Entity()
 export class Supplier {

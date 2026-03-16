@@ -7,6 +7,7 @@ import {
   I_MENU_ITEMS_REPOSITORY,
   IMenuItemsRepository,
 } from '../domain/menu-items.repository.interface';
+import { MenuItemWithMealDto } from './queries/dto/find-menu-items-with-meals.dto';
 import { MenuItemsQueryService } from './queries/menu-items-query.service';
 
 @Injectable()

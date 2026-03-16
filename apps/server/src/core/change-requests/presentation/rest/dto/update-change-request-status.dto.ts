@@ -1,5 +1,5 @@
 import { IsEnum } from 'class-validator';
-import { ChangeRequestStatus } from 'src/core/change-requests/domain/change-request-status.enum';
+import { ChangeRequestStatus } from '@food-up/shared';
 
 export class UpdateChangeRequestStatusDto {
   @IsEnum(ChangeRequestStatus)

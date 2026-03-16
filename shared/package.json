@@ -1,8 +1,12 @@
 {
   "name": "@food-up/shared",
   "version": "0.0.0",
-  "main": "src/index.ts",
+  "main": "dist/index.js",
   "types": "src/index.ts",
   "description": "Shared code (DTOs, types, utilities) for web and server apps.",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch"
+  }
 }

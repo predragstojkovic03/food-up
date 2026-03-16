@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
-import { EmployeeRole } from 'src/shared/domain/role.enum';
+import { EmployeeRole } from '@food-up/shared';
 import { EMPLOYEE_ROLE_KEY } from './employee-role.decorator';
 
 @Injectable()

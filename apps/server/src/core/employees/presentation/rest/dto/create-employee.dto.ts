@@ -10,9 +10,9 @@ export class CreateEmployeeRequestDto {
   @IsEmail()
   email: string;
 
-  @ApiProperty({ example: 'business-uuid', description: 'Business ID' })
+  @ApiProperty({ description: 'Invite token from the registration link' })
   @IsString()
-  businessId: string;
+  inviteToken: string;
 
   @ApiProperty({ example: 'securePassword123', description: 'Password' })
   @IsString()

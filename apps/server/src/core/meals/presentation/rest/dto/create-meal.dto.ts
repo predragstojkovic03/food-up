@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
-import { MealType } from 'src/core/meals/domain/meal.entity';
+import { MealType } from '@food-up/shared';
 
 export class CreateMealDto {
   @ApiProperty({ example: 'Chicken Sandwich', description: 'Name of the meal' })

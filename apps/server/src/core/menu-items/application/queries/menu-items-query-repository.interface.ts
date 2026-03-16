@@ -1,3 +1,5 @@
+import { MenuItemWithMealDto } from './dto/find-menu-items-with-meals.dto';
+
 export const I_MENU_ITEMS_QUERY_REPOSITORY = Symbol(
   'I_MENU_ITEMS_QUERY_REPOSITORY',
 );

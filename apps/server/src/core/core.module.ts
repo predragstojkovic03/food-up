@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from './auth/auth.module';
+import { BusinessInvitesModule } from './business-invites/business-invites.module';
 import { BusinessSuppliersModule } from './business-suppliers/business-suppliers.module';
 import { BusinessesModule } from './businesses/businesses.module';
 import { ChangeRequestsModule } from './change-requests/change-requests.module';
@@ -14,6 +15,7 @@ import { SuppliersModule } from './suppliers/suppliers.module';
 
 @Module({
   imports: [
+    BusinessInvitesModule,
     BusinessesModule,
     EmployeesModule,
     SuppliersModule,

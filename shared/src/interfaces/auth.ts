@@ -1,4 +1,5 @@
-// Shared interfaces for Auth DTOs
+import { EmployeeRole } from '../enums/employee-role.enum';
+import { IdentityType } from '../enums/identity-type.enum';
 
 export interface ILogin {
   email: string;
@@ -11,6 +12,6 @@ export interface IAuthResponse {
 
 export interface IMeResponse {
   id: string;
-  type: string;
-  role?: string;
+  type: IdentityType;
+  role?: EmployeeRole;
 }

@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { MealType } from 'src/core/meals/domain/meal.entity';
+import { MealType } from '@food-up/shared';
 
 @Expose()
 export class MealResponseDto {

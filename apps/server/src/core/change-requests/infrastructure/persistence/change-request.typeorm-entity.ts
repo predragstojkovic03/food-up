@@ -2,7 +2,7 @@ import { MealSelection } from 'src/core/meal-selections/infrastructure/persisten
 import { MealSelectionWindow } from 'src/core/meal-selection-windows/infrastructure/persistence/meal-selection-window.typeorm-entity';
 import { MenuItem } from 'src/core/menu-items/infrastructure/persistence/menu-item.typeorm-entity';
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
-import { ChangeRequestStatus } from '../../domain/change-request-status.enum';
+import { ChangeRequestStatus } from '@food-up/shared';
 
 @Entity()
 export class ChangeRequest {

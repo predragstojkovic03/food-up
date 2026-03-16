@@ -1,7 +1,7 @@
 import { Business } from 'src/core/businesses/domain/business.entity';
 import { Identity } from 'src/core/identity/domain/identity.entity';
 import { Entity } from 'src/shared/domain/entity';
-import { EmployeeRole } from 'src/shared/domain/role.enum';
+import { EmployeeRole } from '@food-up/shared';
 import { generateId } from 'src/shared/domain/generate-id';
 import { EmployeeCreatedEvent } from './events/employee-created.event';
 

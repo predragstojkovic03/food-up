@@ -1,15 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { IdentityService } from 'src/core/identity/application/identity.service';
-import { IdentityType } from 'src/core/identity/domain/identity.entity';
+import { EmployeeRole, IdentityType, SupplierType } from '@food-up/shared';
 import { DomainEvents } from 'src/shared/application/domain-events/domain-events.decorator';
 import {
   I_TRANSACTION_RUNNER,
   ITransactionRunner,
 } from 'src/shared/application/transaction.runner';
 import { UnauthorizedException } from 'src/shared/domain/exceptions/unauthorized.exception';
-import { EmployeeRole } from 'src/shared/domain/role.enum';
-import { SupplierType } from '../domain/supplier-type.enum';
 import { Supplier } from '../domain/supplier.entity';
 import {
   I_SUPPLIERS_REPOSITORY,

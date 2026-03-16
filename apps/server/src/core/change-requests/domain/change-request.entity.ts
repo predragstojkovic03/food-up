@@ -2,7 +2,7 @@ import { Entity } from 'src/shared/domain/entity';
 import { generateId } from 'src/shared/domain/generate-id';
 import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
 import { InvalidOperationException } from 'src/shared/domain/exceptions/invalid-operation.exception';
-import { ChangeRequestStatus } from './change-request-status.enum';
+import { ChangeRequestStatus } from '@food-up/shared';
 import { ChangeRequestCreatedEvent } from './events/change-request-created.event';
 import { ChangeRequestSelectionUpdatedEvent } from './events/change-request-selection-updated.event';
 import { ChangeRequestStatusUpdatedEvent } from './events/change-request-status-updated.event';

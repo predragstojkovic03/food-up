@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { IdentityType } from 'src/core/identity/domain/identity.entity';
-import { EmployeeRole } from 'src/shared/domain/role.enum';
+import { EmployeeRole, IdentityType } from '@food-up/shared';
 import { ulid } from 'ulid';
 
 export class MeResponseDto {

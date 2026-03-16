@@ -1,14 +1,15 @@
-import { Role } from '@/shared/domain/role.enum';
+import { EmployeeRole, IdentityType } from '@food-up/shared';
 import { ReactNode } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../state/auth.store';
 
 type Props = {
-  roles: Role[];
+  types: IdentityType[];
+  employeeRoles?: EmployeeRole[];
   children: ReactNode;
 };
 
-const RequiredRoles = ({ roles, children }: Props) => {
+const RequiredRoles = ({ types, employeeRoles, children }: Props) => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
 
@@ -16,7 +17,16 @@ const RequiredRoles = ({ roles, children }: Props) => {
     return <Navigate to='/login' replace />;
   }
 
-  if (!roles.includes(user.role)) {
+  if (!types.includes(user.type)) {
+    navigate(-1);
+    return null;
+  }
+
+  if (
+    user.type === IdentityType.Employee &&
+    employeeRoles &&
+    (user.role === undefined || !employeeRoles.includes(user.role))
+  ) {
     navigate(-1);
     return null;
   }

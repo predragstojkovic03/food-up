@@ -2,13 +2,12 @@ import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { BusinessesService } from 'src/core/businesses/application/businesses.service';
 import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { IdentityService } from 'src/core/identity/application/identity.service';
-import { IdentityType } from 'src/core/identity/domain/identity.entity';
+import { EmployeeRole, IdentityType } from '@food-up/shared';
 import { SuppliersService } from 'src/core/suppliers/application/suppliers.service';
 import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
 import { AuthenticationException } from 'src/shared/domain/exceptions/authentication.exception';
 import { EntityInstanceNotFoundException } from 'src/shared/domain/exceptions/entity-instance-not-found.exception';
 import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
-import { EmployeeRole } from 'src/shared/domain/role.enum';
 import { Meal } from '../domain/meal.entity';
 import {
   I_MEALS_REPOSITORY,

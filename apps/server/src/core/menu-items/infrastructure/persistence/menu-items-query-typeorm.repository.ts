@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { TransactionContext } from 'src/shared/infrastructure/transaction-context';
 import { DataSource, Repository } from 'typeorm';
+import { MenuItemWithMealDto } from '../../application/queries/dto/find-menu-items-with-meals.dto';
 import { IMenuItemsQueryRepository } from '../../application/queries/menu-items-query-repository.interface';
 import { MenuItem } from './menu-item.typeorm-entity';
 

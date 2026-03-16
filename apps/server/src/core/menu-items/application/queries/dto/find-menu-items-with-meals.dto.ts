@@ -3,7 +3,7 @@ type MealDto = {
   description: string;
 };
 
-type MenuItemWithMealDto = {
+export type MenuItemWithMealDto = {
   id: string;
   day: string;
   price?: number;

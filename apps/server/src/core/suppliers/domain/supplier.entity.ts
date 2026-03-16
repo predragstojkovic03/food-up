@@ -1,3 +1,4 @@
+import { SupplierType } from '@food-up/shared';
 import { Entity } from 'src/shared/domain/entity';
 import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
 import { generateId } from 'src/shared/domain/generate-id';
@@ -6,7 +7,6 @@ import { SupplierContactInfoChangedEvent } from './events/supplier-contact-info-
 import { SupplierInfoUpdatedEvent } from './events/supplier-info-updated.event';
 import { SupplierNameChangedEvent } from './events/supplier-name-changed.event';
 import { SupplierRegisteredEvent } from './events/supplier-registered.event';
-import { SupplierType } from './supplier-type.enum';
 
 export class Supplier extends Entity {
   static register(

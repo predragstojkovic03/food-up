@@ -1,4 +1,4 @@
-import { IdentityType } from '../../domain/identity.entity';
+import { IdentityType } from '@food-up/shared';
 
 export class CreateIdentityDto {
   email: string;

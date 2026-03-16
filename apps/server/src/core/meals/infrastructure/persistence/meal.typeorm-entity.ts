@@ -1,7 +1,7 @@
 import { MenuItem } from 'src/core/menu-items/infrastructure/persistence/menu-item.typeorm-entity';
 import { Supplier } from 'src/core/suppliers/infrastructure/persistence/supplier.typeorm-entity';
 import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
-import { MealType } from '../../domain/meal.entity';
+import { MealType } from '@food-up/shared';
 
 @Entity()
 export class Meal {

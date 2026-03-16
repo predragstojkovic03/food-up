@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { BusinessesService } from 'src/core/businesses/application/businesses.service';
 import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { IdentityService } from 'src/core/identity/application/identity.service';
-import { IdentityType } from 'src/core/identity/domain/identity.entity';
+import { IdentityType } from '@food-up/shared';
 import { SuppliersService } from 'src/core/suppliers/application/suppliers.service';
 import { Supplier } from 'src/core/suppliers/domain/supplier.entity';
 import { DomainEvents } from 'src/shared/application/domain-events/domain-events.decorator';

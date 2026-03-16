@@ -2,7 +2,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import { compare, hash } from 'bcrypt';
 import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
 import { AuthenticationException } from 'src/shared/domain/exceptions/authentication.exception';
-import { Identity, IdentityType } from '../domain/identity.entity';
+import { IdentityType } from '@food-up/shared';
+import { Identity } from '../domain/identity.entity';
 import {
   I_IDENTITY_REPOSITORY,
   IIdentityRepository,

@@ -1,4 +1,5 @@
 import { Inject } from '@nestjs/common';
+import { MenuItemWithMealDto } from './dto/find-menu-items-with-meals.dto';
 import {
   I_MENU_ITEMS_QUERY_REPOSITORY,
   IMenuItemsQueryRepository,

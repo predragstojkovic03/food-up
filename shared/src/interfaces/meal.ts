@@ -1,9 +1,9 @@
-// Shared interfaces for Meal DTOs
+import { MealType } from '../enums/meal-type.enum';
 
 export interface ICreateMeal {
   name: string;
   description: string;
-  type: string;
+  type: MealType;
   price?: number;
   supplierId?: string;
 }
@@ -14,5 +14,5 @@ export interface IMealResponse {
   id: string;
   name: string;
   description: string;
-  type: string;
+  type: MealType;
 }

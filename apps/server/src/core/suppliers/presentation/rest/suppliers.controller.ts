@@ -18,9 +18,8 @@ import { CurrentIdentity } from 'src/core/auth/infrastructure/current-identity.d
 import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
 import { Public } from 'src/core/auth/infrastructure/public.decorator';
 import { RequiredEmployeeRole } from 'src/core/employees/presentation/rest/employee-role.decorator';
-import { IdentityType } from 'src/core/identity/domain/identity.entity';
+import { EmployeeRole, IdentityType } from '@food-up/shared';
 import { RequiredIdentityType } from 'src/core/identity/presentation/rest/identity-type.decorator';
-import { EmployeeRole } from 'src/shared/domain/role.enum';
 import { SuppliersService } from '../../application/suppliers.service';
 import { Supplier } from '../../domain/supplier.entity';
 import { CreateManagedSupplierDto } from './dto/create-managed-supplier.dto';

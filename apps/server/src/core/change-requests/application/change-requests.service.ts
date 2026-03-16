@@ -7,8 +7,7 @@ import { DomainEvents } from 'src/shared/application/domain-events/domain-events
 import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
 import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
 import { UnauthorizedException } from 'src/shared/domain/exceptions/unauthorized.exception';
-import { EmployeeRole } from 'src/shared/domain/role.enum';
-import { ChangeRequestStatus } from '../domain/change-request-status.enum';
+import { ChangeRequestStatus, EmployeeRole } from '@food-up/shared';
 import { ChangeRequest } from '../domain/change-request.entity';
 import {
   I_CHANGE_REQUESTS_REPOSITORY,

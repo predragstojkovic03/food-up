@@ -1,13 +1,7 @@
+import { IdentityType } from '@food-up/shared';
 import { Entity } from 'src/shared/domain/entity';
 import { generateId } from 'src/shared/domain/generate-id';
 import { IdentityActiveStatusChangedEvent } from './events/identity-active-status-changed.event';
-
-export enum IdentityType {
-  Employee = 'employee',
-  Supplier = 'supplier',
-  Business = 'business',
-  Admin = 'admin',
-}
 
 export class Identity extends Entity {
   static create(

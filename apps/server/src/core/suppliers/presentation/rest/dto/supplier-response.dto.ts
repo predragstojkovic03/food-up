@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { SupplierType } from 'src/core/suppliers/domain/supplier-type.enum';
+import { SupplierType } from '@food-up/shared';
 
 export class SupplierResponseDto {
   @ApiProperty()
