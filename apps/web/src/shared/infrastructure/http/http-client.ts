@@ -50,6 +50,25 @@ export class HttpClient {
     return res.json();
   }
 
+  async patch<TBody, TResponse>(url: string, body: TBody): Promise<TResponse> {
+    const res = await fetch(url, {
+      method: 'PATCH',
+      headers: this.buildHeaders(),
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new HttpError(res.status, await res.text());
+
+    return res.json();
+  }
+
+  async delete(url: string): Promise<void> {
+    const res = await fetch(url, {
+      method: 'DELETE',
+      headers: this.buildHeaders(),
+    });
+    if (!res.ok) throw new HttpError(res.status, await res.text());
+  }
+
   private buildHeaders(): HeadersInit {
     const token = this.getToken?.();
     return {

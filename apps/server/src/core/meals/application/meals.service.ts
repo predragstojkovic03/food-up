@@ -90,6 +90,10 @@ export class MealsService {
     return this._repository.findAll();
   }
 
+  async findBySupplier(supplierId: string): Promise<Meal[]> {
+    return this._repository.findByCriteria({ supplierId } as any);
+  }
+
   async findOne(id: string): Promise<Meal> {
     return this._repository.findOneByCriteriaOrThrow({ id });
   }

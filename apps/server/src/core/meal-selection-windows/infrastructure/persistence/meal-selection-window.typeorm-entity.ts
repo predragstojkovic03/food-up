@@ -28,7 +28,14 @@ export class MealSelectionWindow {
   })
   business: Business;
 
-  @Column('date', { array: true })
+  @Column('date', {
+    array: true,
+    transformer: {
+      from: (values: (Date | string)[]) =>
+        values?.map((v) => (v instanceof Date ? v.toISOString() : String(v)).split('T')[0]) ?? [],
+      to: (values: string[]) => values,
+    },
+  })
   targetDates: string[];
 
   @ManyToMany(() => MenuPeriod, (menuPeriod) => menuPeriod.menuSelectionWindows, { eager: true })

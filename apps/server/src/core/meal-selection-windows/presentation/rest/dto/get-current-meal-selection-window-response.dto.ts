@@ -1,3 +1,4 @@
+import { ICurrentWindowMenuItem, IGetCurrentMealSelectionWindowResponse } from '@food-up/shared';
 import { Expose, Type } from 'class-transformer';
 
 export class MealDto {
@@ -5,7 +6,7 @@ export class MealDto {
   @Expose() description: string;
 }
 
-export class MenuItem {
+export class MenuItem implements ICurrentWindowMenuItem {
   @Expose() id: string;
   @Expose() day: string;
   @Expose() price?: number;
@@ -15,15 +16,18 @@ export class MenuItem {
   meal: MealDto;
 }
 
-export class GetCurrentMealSelectionWindowResponseDto {
+export class GetCurrentMealSelectionWindowResponseDto implements IGetCurrentMealSelectionWindowResponse {
   @Expose()
   id: string;
 
   @Expose()
-  startTime: Date;
+  startTime: string;
 
   @Expose()
-  endTime: Date;
+  endTime: string;
+
+  @Expose()
+  targetDates: string[];
 
   @Expose()
   @Type(() => MenuItem)

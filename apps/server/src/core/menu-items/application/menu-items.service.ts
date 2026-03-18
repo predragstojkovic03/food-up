@@ -66,6 +66,10 @@ export class MenuItemsService {
     return this._repository.findAll();
   }
 
+  async findByMenuPeriod(menuPeriodId: string): Promise<MenuItem[]> {
+    return this._repository.findByCriteria({ menuPeriodId } as any);
+  }
+
   async findOne(id: string): Promise<MenuItem> {
     return this._repository.findOneByCriteriaOrThrow({ id });
   }

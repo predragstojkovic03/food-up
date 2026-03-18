@@ -20,4 +20,10 @@ export class MealSelectionsTypeOrmRepository
     super(dataSource, MealSelectionPersistence, new MealSelectionTypeOrmMapper(), transactionContext);
   }
 
+  async findByWindow(windowId: string): Promise<MealSelection[]> {
+    const entities = await this._repository.find({
+      where: { mealSelectionWindow: { id: windowId } } as any,
+    });
+    return entities.map((e) => this._mapper.toDomain(e));
+  }
 }

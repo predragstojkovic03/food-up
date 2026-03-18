@@ -66,6 +66,10 @@ export class MealSelectionsService {
     return this._repository.findOneByCriteriaOrThrow({ id });
   }
 
+  findByWindow(windowId: string): Promise<MealSelection[]> {
+    return this._repository.findByWindow(windowId);
+  }
+
   findByEmployeeAndWindow(
     employeeId: string,
     mealSelectionWindowId: string,

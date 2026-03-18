@@ -82,6 +82,32 @@ export class SuppliersController {
     return result.map(this.toResponseDto);
   }
 
+  @ApiOperation({ summary: 'Get in-house (managed) suppliers for the current manager\'s business' })
+  @ApiResponse({ status: 200, type: [SupplierResponseDto] })
+  @RequiredIdentityType(IdentityType.Employee)
+  @RequiredEmployeeRole(EmployeeRole.Manager)
+  @ApiBearerAuth()
+  @Get('managed')
+  async findManaged(
+    @CurrentIdentity() { sub }: JwtPayload,
+  ): Promise<SupplierResponseDto[]> {
+    const result = await this._suppliersService.findManagedByBusiness(sub);
+    return result.map(this.toResponseDto);
+  }
+
+  @ApiOperation({ summary: 'Get partner (standalone) suppliers for the current manager\'s business' })
+  @ApiResponse({ status: 200, type: [SupplierResponseDto] })
+  @RequiredIdentityType(IdentityType.Employee)
+  @RequiredEmployeeRole(EmployeeRole.Manager)
+  @ApiBearerAuth()
+  @Get('partners')
+  async findPartners(
+    @CurrentIdentity() { sub }: JwtPayload,
+  ): Promise<SupplierResponseDto[]> {
+    const result = await this._suppliersService.findPartnersByBusiness(sub);
+    return result.map(this.toResponseDto);
+  }
+
   @ApiOperation({ summary: 'Get a supplier by ID' })
   @ApiResponse({
     status: 200,

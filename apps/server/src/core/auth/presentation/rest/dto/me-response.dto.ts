@@ -24,4 +24,11 @@ export class MeResponseDto {
   })
   @Expose()
   role?: EmployeeRole;
+
+  @ApiProperty({
+    description: 'The business ID (only for employee identities)',
+    required: false,
+  })
+  @Expose()
+  businessId?: string;
 }

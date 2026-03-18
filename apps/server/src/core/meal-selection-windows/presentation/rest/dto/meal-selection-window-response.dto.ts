@@ -1,8 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
+import { IMealSelectionWindowResponse } from '@food-up/shared';
 
 @Expose()
-export class MealSelectionWindowResponseDto {
+export class MealSelectionWindowResponseDto implements IMealSelectionWindowResponse {
   @ApiProperty()
   id: string;
 
@@ -10,11 +11,14 @@ export class MealSelectionWindowResponseDto {
   menuPeriodIds: string[];
 
   @ApiProperty()
-  startTime: Date;
+  startTime: string;
 
   @ApiProperty()
-  endTime: Date;
+  endTime: string;
 
   @ApiProperty({ type: [String] })
   targetDates: string[];
+
+  @ApiProperty()
+  isLocked: boolean;
 }

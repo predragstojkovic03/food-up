@@ -1,8 +1,8 @@
-import { EmployeeRole } from '@food-up/shared';
+import { EmployeeRole, IEmployeeResponse } from '@food-up/shared';
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 
-export class EmployeeResponseDto {
+export class EmployeeResponseDto implements IEmployeeResponse {
   @ApiProperty()
   @Expose()
   id: string;
@@ -22,4 +22,12 @@ export class EmployeeResponseDto {
   @ApiProperty()
   @Expose()
   identityId: string;
+
+  @ApiProperty()
+  @Expose()
+  email: string;
+
+  @ApiProperty()
+  @Expose()
+  isActive: boolean;
 }

@@ -12,6 +12,8 @@ import {
   IEmployeeRepository,
 } from '../domain/employee.repository.interface';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
+import { UpdateEmployeeDto } from './dto/update-employee.dto';
+import { EmployeeView } from './dto/employee-view';
 
 @Injectable()
 export class EmployeesService {
@@ -75,6 +77,22 @@ export class EmployeesService {
     return this._repository.findByCriteria({ businessId });
   }
 
+  async findAllByBusinessEnriched(businessId: string): Promise<EmployeeView[]> {
+    const employees = await this.findAllByBusiness(businessId);
+    const identities = await Promise.all(
+      employees.map((emp) => this._identityService.findById(emp.identityId)),
+    );
+    return employees.map((emp, i) => ({
+      id: emp.id,
+      name: emp.name,
+      role: emp.role,
+      businessId: emp.businessId,
+      identityId: emp.identityId,
+      email: identities[i]!.email,
+      isActive: identities[i]!.isActive,
+    }));
+  }
+
   async findOne(id: string): Promise<Employee> {
     return this._repository.findOneByCriteriaOrThrow({ id });
   }
@@ -83,7 +101,21 @@ export class EmployeesService {
     return this._repository.findOneByCriteriaOrThrow({ identityId });
   }
 
-  async update(id: string, dto: any): Promise<Employee> {
+  async findByIdentityEnriched(identityId: string): Promise<EmployeeView> {
+    const employee = await this.findByIdentity(identityId);
+    const identity = await this._identityService.findById(identityId);
+    return {
+      id: employee.id,
+      name: employee.name,
+      role: employee.role,
+      businessId: employee.businessId,
+      identityId: employee.identityId,
+      email: identity!.email,
+      isActive: identity!.isActive,
+    };
+  }
+
+  async update(id: string, dto: UpdateEmployeeDto): Promise<EmployeeView> {
     const employee = await this.findOne(id);
 
     if (dto.name !== undefined) {
@@ -94,7 +126,15 @@ export class EmployeesService {
       employee.role = dto.role;
     }
 
-    return this._repository.update(id, employee);
+    await this._repository.update(id, employee);
+
+    if (dto.isActive !== undefined) {
+      await this._identityService.update(employee.identityId, {
+        isActive: dto.isActive,
+      });
+    }
+
+    return this.findByIdentityEnriched(employee.identityId);
   }
 
   async delete(id: string): Promise<void> {

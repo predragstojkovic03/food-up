@@ -15,8 +15,10 @@ import {
 } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 import { Public } from 'src/core/auth/infrastructure/public.decorator';
-import { Employee } from '../../domain/employee.entity';
+import { CurrentIdentity } from 'src/core/auth/infrastructure/current-identity.decorator';
+import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
 import { EmployeesService } from '../../application/employees.service';
+import { EmployeeView } from '../../application/dto/employee-view';
 import { CreateEmployeeRequestDto } from './dto/create-employee.dto';
 import { EmployeeResponseDto } from './dto/employee-response.dto';
 import { UpdateEmployeeRequestDto } from './dto/update-employee.dto';
@@ -34,23 +36,36 @@ export class EmployeesController {
     @Body() createEmployeeDto: CreateEmployeeRequestDto,
   ): Promise<EmployeeResponseDto> {
     const employee = await this._employeesService.register(createEmployeeDto);
-    return this.toDto(employee);
+    const identity = await this._employeesService.findByIdentityEnriched(employee.identityId);
+    return this.viewToDto(identity);
+  }
+
+  @Get('me')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get current employee profile' })
+  @ApiResponse({ status: 200, type: EmployeeResponseDto })
+  async getMe(@CurrentIdentity() user: JwtPayload): Promise<EmployeeResponseDto> {
+    const view = await this._employeesService.findByIdentityEnriched(user.sub);
+    return this.viewToDto(view);
   }
 
   @Get('business/:businessId')
   @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get all employees for a business' })
+  @ApiResponse({ status: 200, type: [EmployeeResponseDto] })
   async findAllByBusiness(
     @Param('businessId') businessId: string,
   ): Promise<EmployeeResponseDto[]> {
-    const employees = await this._employeesService.findAllByBusiness(businessId);
-    return employees.map((e) => this.toDto(e));
+    const views = await this._employeesService.findAllByBusinessEnriched(businessId);
+    return views.map((v) => this.viewToDto(v));
   }
 
   @Get(':id')
   @ApiBearerAuth()
-  async findOne(@Param('id') id: string): Promise<EmployeeResponseDto | null> {
+  async findOne(@Param('id') id: string): Promise<EmployeeResponseDto> {
     const employee = await this._employeesService.findOne(id);
-    return employee ? this.toDto(employee) : null;
+    const view = await this._employeesService.findByIdentityEnriched(employee.identityId);
+    return this.viewToDto(view);
   }
 
   @Patch(':id')
@@ -59,8 +74,8 @@ export class EmployeesController {
     @Param('id') id: string,
     @Body() updateDto: UpdateEmployeeRequestDto,
   ): Promise<EmployeeResponseDto> {
-    const employee = await this._employeesService.update(id, updateDto);
-    return this.toDto(employee);
+    const view = await this._employeesService.update(id, updateDto);
+    return this.viewToDto(view);
   }
 
   @Delete(':id')
@@ -69,13 +84,9 @@ export class EmployeesController {
     await this._employeesService.delete(id);
   }
 
-  private toDto(employee: Employee): EmployeeResponseDto {
-    return plainToInstance(EmployeeResponseDto, {
-      id: employee.id,
-      name: employee.name,
-      role: employee.role,
-      businessId: employee.businessId,
-      identityId: employee.identityId,
+  private viewToDto(view: EmployeeView): EmployeeResponseDto {
+    return plainToInstance(EmployeeResponseDto, view, {
+      excludeExtraneousValues: true,
     });
   }
 }

@@ -71,6 +71,7 @@ export class MealSelectionWindow extends Entity {
     businessId?: string,
     menuPeriodIds?: string[],
     targetDates?: Set<string>,
+    isLocked?: boolean,
   ): this {
     MealSelectionWindow.verifyInputs(
       menuPeriodIds ?? this.menuPeriodIds,
@@ -83,6 +84,7 @@ export class MealSelectionWindow extends Entity {
     this.businessId = businessId ?? this.businessId;
     this.menuPeriodIds = menuPeriodIds ?? this.menuPeriodIds;
     this.targetDates = targetDates ?? this.targetDates;
+    this.isLocked = isLocked ?? this.isLocked;
 
     this.addDomainEvent(new MealSelectionWindowUpdatedEvent(this.id));
     return this;

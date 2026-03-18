@@ -52,6 +52,17 @@ export class MenuPeriodsController {
     return periods.map((period) => this.domainToDto(period));
   }
 
+  @ApiOperation({ summary: 'Get all menu periods for a supplier' })
+  @ApiResponse({ status: 200, type: [MenuPeriodResponseDto] })
+  @ApiBearerAuth()
+  @Get('supplier/:supplierId')
+  async findBySupplier(
+    @Param('supplierId') supplierId: string,
+  ): Promise<MenuPeriodResponseDto[]> {
+    const periods = await this._menuPeriodsService.findBySupplier(supplierId);
+    return periods.map((p) => this.domainToDto(p));
+  }
+
   @ApiOperation({ summary: 'Get a menu period by ID' })
   @ApiResponse({ status: 200, type: MenuPeriodResponseDto })
   @ApiBearerAuth()

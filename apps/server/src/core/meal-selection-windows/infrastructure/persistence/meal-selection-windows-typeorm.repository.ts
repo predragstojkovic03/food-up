@@ -25,6 +25,14 @@ export class MealSelectionWindowsTypeOrmRepository
     );
   }
 
+  async findAllByBusiness(businessId: string): Promise<MealSelectionWindow[]> {
+    const entities = await this._repository.find({
+      where: { business: { id: businessId } } as any,
+      order: { startTime: 'DESC' },
+    });
+    return entities.map((e) => this._mapper.toDomain(e));
+  }
+
   async findLatestActiveByBusiness(
     businessId: string,
   ): Promise<MealSelectionWindow> {

@@ -49,6 +49,17 @@ export class MealsController {
     return meals.map(this.toResponseDto);
   }
 
+  @Get('supplier/:supplierId')
+  @ApiOperation({ summary: 'Get all meals for a supplier' })
+  @ApiResponse({ status: 200, type: [MealResponseDto] })
+  @ApiBearerAuth()
+  async findBySupplier(
+    @Param('supplierId') supplierId: string,
+  ): Promise<MealResponseDto[]> {
+    const meals = await this._mealsService.findBySupplier(supplierId);
+    return meals.map(this.toResponseDto);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get a meal by ID' })
   @ApiResponse({ status: 200, type: MealResponseDto })

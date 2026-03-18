@@ -1,75 +1,176 @@
-import { cn } from '@/lib/utils';
 import {
-  Calendar,
-  ChevronLeft,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+  SidebarProvider,
+  SidebarTrigger,
+} from '@/components/ui/sidebar';
+import { useAuthStore } from '@/features/auth/presentation/state/auth.store';
+import { useServices } from '@/shared/infrastructure/di/service.context';
+import {
+  CalendarRange,
   ChevronRight,
   ClipboardList,
   LayoutDashboard,
+  LogOut,
+  Store,
   Users,
-  UtensilsCrossed,
 } from 'lucide-react';
-import { useState } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 
-const navItems = [
-  { to: '/employee/manager', icon: LayoutDashboard, label: 'Dashboard', end: true },
-  { to: '/employee/manager/employees', icon: Users, label: 'Employees' },
-  { to: '/employee/manager/meals', icon: UtensilsCrossed, label: 'Meals' },
-  { to: '/employee/manager/menu-periods', icon: Calendar, label: 'Menu Periods' },
-  { to: '/employee/manager/change-requests', icon: ClipboardList, label: 'Change Requests' },
+const SUPPLIERS_PATHS = [
+  '/employee/manager/suppliers/in-house',
+  '/employee/manager/suppliers/partners',
 ];
 
 export default function ManagerLayout() {
-  const [collapsed, setCollapsed] = useState(false);
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const { authService } = useServices();
+  const clearUser = useAuthStore((s) => s.clearUser);
+  const suppliersOpen = SUPPLIERS_PATHS.some((p) => pathname.startsWith(p));
+
+  function handleLogout() {
+    authService.logout();
+    clearUser();
+    navigate('/login');
+  }
 
   return (
-    <div className='flex h-full'>
-      <aside
-        className={cn(
-          'flex flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border transition-[width] duration-300 overflow-hidden shrink-0',
-          collapsed ? 'w-14' : 'w-56',
-        )}
-      >
-        <div className='flex items-center border-b border-sidebar-border h-12 px-2'>
-          {!collapsed && (
-            <span className='flex-1 text-sm font-semibold text-sidebar-foreground/80 truncate pl-1'>
-              Manager
-            </span>
-          )}
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            className='ml-auto p-1.5 rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors'
-            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          >
-            {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-          </button>
+    <SidebarProvider>
+      <Sidebar collapsible='icon'>
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    render={<NavLink to='/employee/manager' end />}
+                    isActive={pathname === '/employee/manager'}
+                  >
+                    <LayoutDashboard />
+                    <span>Dashboard</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    render={<NavLink to='/employee/manager/employees' />}
+                    isActive={pathname.startsWith('/employee/manager/employees')}
+                  >
+                    <Users />
+                    <span>Employees</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+
+                <Collapsible defaultOpen={suppliersOpen} className='group/collapsible'>
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton isActive={suppliersOpen}>
+                        <Store />
+                        <span>Suppliers</span>
+                        <ChevronRight className='ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90' />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton
+                            render={<NavLink to='/employee/manager/suppliers/in-house' />}
+                            isActive={pathname.startsWith('/employee/manager/suppliers/in-house')}
+                          >
+                            In-House Suppliers
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton
+                            render={<NavLink to='/employee/manager/suppliers/partners' />}
+                            isActive={pathname.startsWith('/employee/manager/suppliers/partners')}
+                          >
+                            Partner Suppliers
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    render={<NavLink to='/employee/manager/meal-selection-windows' />}
+                    isActive={pathname.startsWith('/employee/manager/meal-selection-windows')}
+                  >
+                    <CalendarRange />
+                    <span>Meal Selection Windows</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    render={<NavLink to='/employee/manager/change-requests' />}
+                    isActive={pathname.startsWith('/employee/manager/change-requests')}
+                  >
+                    <ClipboardList />
+                    <span>Change Requests</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+      </Sidebar>
+
+      <main className='flex flex-col flex-1 overflow-auto'>
+        <header className='flex items-center justify-between h-12 px-4 border-b shrink-0'>
+          <SidebarTrigger />
+          <AlertDialog>
+            <AlertDialogTrigger className='flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors'>
+              <LogOut size={15} />
+              Logout
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Logout</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to log out?
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleLogout}>Logout</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </header>
+        <div className='flex-1 p-4'>
+          <Outlet />
         </div>
-
-        <nav className='flex-1 py-2 flex flex-col gap-0.5 px-1.5'>
-          {navItems.map(({ to, icon: Icon, label, end }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={end}
-              className={({ isActive }) =>
-                cn(
-                  'flex items-center gap-3 px-2.5 py-2 rounded-md transition-colors text-sm font-medium',
-                  isActive
-                    ? 'bg-sidebar-primary text-sidebar-primary-foreground'
-                    : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
-                )
-              }
-            >
-              <Icon size={16} className='shrink-0' />
-              {!collapsed && <span className='truncate'>{label}</span>}
-            </NavLink>
-          ))}
-        </nav>
-      </aside>
-
-      <div className='flex-1 overflow-auto'>
-        <Outlet />
-      </div>
-    </div>
+      </main>
+    </SidebarProvider>
   );
 }

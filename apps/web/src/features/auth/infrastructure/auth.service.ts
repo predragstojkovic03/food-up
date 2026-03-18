@@ -18,13 +18,12 @@ export class AuthService implements IAuthService {
 
     localStorage.setItem('access_token', access_token);
 
-    const { id, type, role } = await this.http.get<IMeResponse>('/api/auth/me');
+    const { id, type, role, businessId } = await this.http.get<IMeResponse>('/api/auth/me');
 
-    return User.reconstitute(id, type, role);
+    return User.reconstitute(id, type, role, businessId);
   }
 
-  async logout(): Promise<void> {
-    await this.http.post('/api/auth/logout', {});
+  logout(): void {
     localStorage.removeItem('access_token');
   }
 
@@ -45,8 +44,8 @@ export class AuthService implements IAuthService {
     if (!localStorage.getItem('access_token')) return null;
 
     try {
-      const { id, type, role } = await this.http.get<IMeResponse>('/api/auth/me');
-      return User.reconstitute(id, type, role);
+      const { id, type, role, businessId } = await this.http.get<IMeResponse>('/api/auth/me');
+      return User.reconstitute(id, type, role, businessId);
     } catch {
       localStorage.removeItem('access_token');
       return null;

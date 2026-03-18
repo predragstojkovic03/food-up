@@ -1,6 +1,20 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateEmployeeRequestDto } from './create-employee.dto';
+import { EmployeeRole, IUpdateEmployee } from '@food-up/shared';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
 
-export class UpdateEmployeeRequestDto extends PartialType(
-  CreateEmployeeRequestDto,
-) {}
+export class UpdateEmployeeRequestDto implements IUpdateEmployee {
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @ApiPropertyOptional({ enum: EmployeeRole })
+  @IsOptional()
+  @IsEnum(EmployeeRole)
+  role?: EmployeeRole;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
+}

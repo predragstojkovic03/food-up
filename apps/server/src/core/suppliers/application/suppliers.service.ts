@@ -74,6 +74,16 @@ export class SuppliersService {
     return this._repository.findAll();
   }
 
+  async findManagedByBusiness(identityId: string): Promise<Supplier[]> {
+    const employee = await this._employeesService.findByIdentity(identityId);
+    return this._repository.findManagedByBusiness(employee.businessId);
+  }
+
+  async findPartnersByBusiness(identityId: string): Promise<Supplier[]> {
+    const employee = await this._employeesService.findByIdentity(identityId);
+    return this._repository.findPartnersByBusiness(employee.businessId);
+  }
+
   async findOne(id: string): Promise<Supplier> {
     return this._repository.findOneByCriteriaOrThrow({ id });
   }

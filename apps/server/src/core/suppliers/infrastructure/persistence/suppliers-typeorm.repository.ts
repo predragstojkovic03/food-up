@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { ArchivableTypeormRepository } from 'src/shared/infrastructure/archivable-typeorm.repository';
 import { TransactionContext } from 'src/shared/infrastructure/transaction-context';
+import { SupplierType } from '@food-up/shared';
 import { DataSource } from 'typeorm';
 import { Supplier } from '../../domain/supplier.entity';
 import { ISuppliersRepository } from '../../domain/suppliers.repository.interface';
@@ -64,5 +65,27 @@ export class SuppliersTypeOrmRepository
         },
       })
       .then((entity) => (entity ? this._mapper.toDomain(entity) : null));
+  }
+
+  findManagedByBusiness(businessId: string): Promise<Supplier[]> {
+    return this._repository
+      .find({
+        where: { managingBusinessId: businessId, type: SupplierType.Managed },
+        relations: { businessSuppliers: true, managingBusiness: true },
+      })
+      .then((entities) => entities.map((e) => this._mapper.toDomain(e)));
+  }
+
+  findPartnersByBusiness(businessId: string): Promise<Supplier[]> {
+    return this._repository
+      .createQueryBuilder('supplier')
+      .innerJoin('supplier.businessSuppliers', 'bs')
+      .innerJoin('bs.business', 'business')
+      .where('business.id = :businessId', { businessId })
+      .andWhere('supplier.type = :type', { type: SupplierType.Standalone })
+      .leftJoinAndSelect('supplier.businessSuppliers', 'allBs')
+      .leftJoinAndSelect('allBs.business', 'allBusiness')
+      .getMany()
+      .then((entities) => entities.map((e) => this._mapper.toDomain(e)));
   }
 }

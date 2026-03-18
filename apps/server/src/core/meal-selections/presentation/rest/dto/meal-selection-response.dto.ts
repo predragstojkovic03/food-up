@@ -15,6 +15,9 @@ export class MealSelectionResponseDto {
   @ApiProperty()
   mealSelectionWindowId: string;
 
+  @ApiProperty()
+  date: string;
+
   @ApiProperty({ required: false })
   quantity?: number | null;
 }

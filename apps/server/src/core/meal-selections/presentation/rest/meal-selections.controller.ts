@@ -16,7 +16,8 @@ import {
 import { plainToInstance } from 'class-transformer';
 import { CurrentIdentity } from 'src/core/auth/infrastructure/current-identity.decorator';
 import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
-import { IdentityType } from '@food-up/shared';
+import { EmployeeRole, IdentityType } from '@food-up/shared';
+import { RequiredEmployeeRole } from 'src/core/employees/presentation/rest/employee-role.decorator';
 import { RequiredIdentityType } from 'src/core/identity/presentation/rest/identity-type.decorator';
 import { MealSelectionsService } from '../../application/meal-selections.service';
 import { MealSelection } from '../../domain/meal-selection.entity';
@@ -58,6 +59,19 @@ export class MealSelectionsController {
   async findAll(): Promise<MealSelectionResponseDto[]> {
     const result = await this._mealSelectionsService.findAll();
     return result.map(this.toResponseDto);
+  }
+
+  @RequiredIdentityType(IdentityType.Employee)
+  @RequiredEmployeeRole(EmployeeRole.Manager)
+  @ApiBearerAuth()
+  @Get('window/:windowId')
+  @ApiOperation({ summary: 'Get all meal selections for a window (manager view)' })
+  @ApiResponse({ status: 200, type: [MealSelectionResponseDto] })
+  async findByWindow(
+    @Param('windowId') windowId: string,
+  ): Promise<MealSelectionResponseDto[]> {
+    const result = await this._mealSelectionsService.findByWindow(windowId);
+    return result.map((e) => this.toResponseDto(e));
   }
 
   @Get(':id')
@@ -109,6 +123,7 @@ export class MealSelectionsController {
       employeeId: entity.employeeId,
       menuItemId: entity.menuItemId,
       mealSelectionWindowId: entity.mealSelectionWindowId,
+      date: entity.date,
       quantity: entity.quantity,
     };
     return plainToInstance(MealSelectionResponseDto, dto);

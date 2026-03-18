@@ -14,4 +14,5 @@ export interface IMeResponse {
   id: string;
   type: IdentityType;
   role?: EmployeeRole;
+  businessId?: string;
 }

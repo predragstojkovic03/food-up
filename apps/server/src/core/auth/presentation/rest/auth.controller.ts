@@ -78,12 +78,20 @@ export class AuthController {
     description: 'Current user information',
     type: MeResponseDto,
   })
-  getMe(@CurrentIdentity() user: JwtPayload): MeResponseDto {
+  async getMe(@CurrentIdentity() user: JwtPayload): Promise<MeResponseDto> {
+    let businessId: string | undefined;
+
+    if (user.type === IdentityType.Employee) {
+      const employee = await this._employeesService.findByIdentity(user.sub);
+      businessId = employee.businessId;
+    }
+
     return plainToInstance(
       MeResponseDto,
       {
         id: user.sub,
         ...user,
+        businessId,
       },
       {
         excludeExtraneousValues: true,

@@ -3,4 +3,6 @@ import { MealSelection } from './meal-selection.entity';
 
 export const I_MEAL_SELECTIONS_REPOSITORY = Symbol('IMealSelectionsRepository');
 
-export interface IMealSelectionsRepository extends IRepository<MealSelection> {}
+export interface IMealSelectionsRepository extends IRepository<MealSelection> {
+  findByWindow(windowId: string): Promise<MealSelection[]>;
+}

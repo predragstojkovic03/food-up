@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { MenuItemWithMealDto } from 'src/core/menu-items/application/queries/dto/find-menu-items-with-meals.dto';
 import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { MenuItemsService } from 'src/core/menu-items/application/menu-items.service';
 import { MenuPeriodsService } from 'src/core/menu-periods/application/menu-periods.service';
@@ -7,7 +8,6 @@ import {
   I_MEAL_SELECTION_WINDOWS_REPOSITORY,
   IMealSelectionWindowsRepository,
 } from '../domain/meal-selection-windows.repository.interface';
-import { GetCurrentMealSelectionWindowResponseDto } from '../presentation/rest/dto/get-current-meal-selection-window-response.dto';
 
 export interface CreateMealSelectionWindowDto {
   startTime: Date;
@@ -22,6 +22,15 @@ export interface UpdateMealSelectionWindowDto {
   businessId?: string;
   menuPeriodIds?: string[];
   targetDates?: string[];
+  isLocked?: boolean;
+}
+
+export interface CurrentMealSelectionWindowResult {
+  id: string;
+  startTime: Date;
+  endTime: Date;
+  targetDates: string[];
+  menuItems: MenuItemWithMealDto[];
 }
 
 @Injectable()
@@ -41,7 +50,7 @@ export class MealSelectionWindowsService {
     const employee = await this._employeesService.findByIdentity(identityId);
 
     if (dto.menuPeriodIds) {
-      const menuPeriods = await Promise.all(
+      await Promise.all(
         dto.menuPeriodIds.map((id) => this._menuPeriodsService.findOne(id)),
       );
     }
@@ -59,6 +68,11 @@ export class MealSelectionWindowsService {
     return this._repository.findAll();
   }
 
+  async findByMyBusiness(identityId: string): Promise<MealSelectionWindow[]> {
+    const employee = await this._employeesService.findByIdentity(identityId);
+    return this._repository.findAllByBusiness(employee.businessId);
+  }
+
   async findOne(id: string): Promise<MealSelectionWindow> {
     return this._repository.findOneByCriteriaOrThrow({ id });
   }
@@ -70,7 +84,7 @@ export class MealSelectionWindowsService {
     const existing = await this._repository.findOneByCriteriaOrThrow({ id });
 
     if (dto.menuPeriodIds) {
-      const menuPeriods = await Promise.all(
+      await Promise.all(
         dto.menuPeriodIds.map((id) => this._menuPeriodsService.findOne(id)),
       );
     }
@@ -80,22 +94,24 @@ export class MealSelectionWindowsService {
       dto.endTime,
       dto.businessId,
       dto.menuPeriodIds,
-      new Set(dto.targetDates),
+      dto.targetDates ? new Set(dto.targetDates) : undefined,
+      dto.isLocked,
     );
 
-    await this._repository.update(id, updated);
+    await this._repository.save(updated);
     return updated;
   }
 
-  async findCurrent(
-    sub: string,
-  ): Promise<GetCurrentMealSelectionWindowResponseDto> {
+  async findMenuItemsForWindow(windowId: string): Promise<MenuItemWithMealDto[]> {
+    const window = await this._repository.findOneByCriteriaOrThrow({ id: windowId });
+    return this._menuItemsService.findWithMealsByMenuPeriods(window.menuPeriodIds);
+  }
+
+  async findCurrent(sub: string): Promise<CurrentMealSelectionWindowResult> {
     const employee = await this._employeesService.findByIdentity(sub);
-    console.log('Employee:', employee);
 
     const mealSelectionWindow =
       await this._repository.findLatestActiveByBusiness(employee.businessId);
-    console.log('Meal Selection Window:', mealSelectionWindow);
 
     const menuItems = await this._menuItemsService.findWithMealsByMenuPeriods(
       mealSelectionWindow.menuPeriodIds,
@@ -105,6 +121,7 @@ export class MealSelectionWindowsService {
       id: mealSelectionWindow.id,
       startTime: mealSelectionWindow.startTime,
       endTime: mealSelectionWindow.endTime,
+      targetDates: Array.from(mealSelectionWindow.targetDates),
       menuItems,
     };
   }

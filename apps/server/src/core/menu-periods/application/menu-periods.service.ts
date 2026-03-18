@@ -50,6 +50,10 @@ export class MenuPeriodsService {
     return this._repository.findAll();
   }
 
+  async findBySupplier(supplierId: string): Promise<MenuPeriod[]> {
+    return this._repository.findByCriteria({ supplierId } as any);
+  }
+
   async findOne(id: string): Promise<MenuPeriod> {
     return this._repository.findOneByCriteriaOrThrow({ id });
   }
