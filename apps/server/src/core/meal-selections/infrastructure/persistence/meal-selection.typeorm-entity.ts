@@ -12,8 +12,9 @@ export class MealSelection {
 
   @ManyToOne(() => MenuItem, (menuItem) => menuItem.mealSelections, {
     eager: true,
+    nullable: true,
   })
-  menuItem: MenuItem;
+  menuItem: MenuItem | null;
 
   @ManyToOne(
     () => MealSelectionWindow,

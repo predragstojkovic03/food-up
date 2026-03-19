@@ -11,10 +11,10 @@ export class MealSelectionTypeOrmMapper extends TypeOrmMapper<
     return MealSelection.reconstitute(
       persistence.id,
       persistence.employeeId,
-      persistence.menuItem.id,
       persistence.mealSelectionWindow.id,
       persistence.date,
-      persistence.quantity,
+      persistence.menuItem?.id ?? undefined,
+      persistence.quantity ?? undefined,
     );
   }
 
@@ -22,23 +22,29 @@ export class MealSelectionTypeOrmMapper extends TypeOrmMapper<
     const persistence = new MealSelectionPersistence();
     persistence.id = domain.id;
     persistence.employeeId = domain.employeeId;
-    persistence.menuItem = { id: domain.menuItemId } as any as MenuItem;
-    persistence.mealSelectionWindow = {
-      id: domain.mealSelectionWindowId,
-    } as any;
+    persistence.menuItem = domain.menuItemId
+      ? ({ id: domain.menuItemId } as any as MenuItem)
+      : null;
+    persistence.mealSelectionWindow = { id: domain.mealSelectionWindowId } as any;
     persistence.date = domain.date;
-    persistence.quantity = domain.quantity;
+    persistence.quantity = domain.quantity ?? null;
     return persistence;
   }
 
-  toPersistencePartial(domain: Partial<MealSelection>): Partial<MealSelectionPersistence> {
+  toPersistencePartial(
+    domain: Partial<MealSelection>,
+  ): Partial<MealSelectionPersistence> {
     const persistence: Partial<MealSelectionPersistence> = {};
     if (domain.id !== undefined) persistence.id = domain.id;
     if (domain.employeeId !== undefined) persistence.employeeId = domain.employeeId;
     if (domain.date !== undefined) persistence.date = domain.date;
-    if (domain.quantity !== undefined) persistence.quantity = domain.quantity;
-    if (domain.menuItemId !== undefined) persistence.menuItem = { id: domain.menuItemId } as any;
-    if (domain.mealSelectionWindowId !== undefined) persistence.mealSelectionWindow = { id: domain.mealSelectionWindowId } as any;
+    if (domain.quantity !== undefined) persistence.quantity = domain.quantity ?? null;
+    if (domain.menuItemId !== undefined)
+      persistence.menuItem = domain.menuItemId
+        ? ({ id: domain.menuItemId } as any)
+        : null;
+    if (domain.mealSelectionWindowId !== undefined)
+      persistence.mealSelectionWindow = { id: domain.mealSelectionWindowId } as any;
     return persistence;
   }
 }

@@ -3,9 +3,10 @@ import { generateId } from 'src/shared/domain/generate-id';
 import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
 import { InvalidOperationException } from 'src/shared/domain/exceptions/invalid-operation.exception';
 import { ChangeRequestStatus } from '@food-up/shared';
+import { ChangeRequestApprovedEvent } from './events/change-request-approved.event';
 import { ChangeRequestCreatedEvent } from './events/change-request-created.event';
+import { ChangeRequestRejectedEvent } from './events/change-request-rejected.event';
 import { ChangeRequestSelectionUpdatedEvent } from './events/change-request-selection-updated.event';
-import { ChangeRequestStatusUpdatedEvent } from './events/change-request-status-updated.event';
 
 export class ChangeRequest extends Entity {
   static create(
@@ -147,7 +148,21 @@ export class ChangeRequest extends Entity {
     this.approvedBy = approvedBy;
     this.approvedAt = date;
 
-    this.addDomainEvent(new ChangeRequestStatusUpdatedEvent(this.id));
+    if (status === ChangeRequestStatus.Approved) {
+      this.addDomainEvent(
+        new ChangeRequestApprovedEvent(
+          this.id,
+          this.mealSelectionId,
+          this.newMenuItemId,
+          this.newQuantity,
+          this.clearSelection ?? false,
+        ),
+      );
+    } else {
+      this.addDomainEvent(
+        new ChangeRequestRejectedEvent(this.id, this.employeeId),
+      );
+    }
   }
 
   readonly id: string;

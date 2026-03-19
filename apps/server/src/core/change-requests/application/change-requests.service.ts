@@ -5,6 +5,10 @@ import { MealSelectionsService } from 'src/core/meal-selections/application/meal
 import { MenuItemsService } from 'src/core/menu-items/application/menu-items.service';
 import { DomainEvents } from 'src/shared/application/domain-events/domain-events.decorator';
 import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
+import {
+  I_TRANSACTION_RUNNER,
+  ITransactionRunner,
+} from 'src/shared/application/transaction.runner';
 import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
 import { UnauthorizedException } from 'src/shared/domain/exceptions/unauthorized.exception';
 import { ChangeRequestStatus, EmployeeRole } from '@food-up/shared';
@@ -13,6 +17,7 @@ import {
   I_CHANGE_REQUESTS_REPOSITORY,
   IChangeRequestsRepository,
 } from '../domain/change-requests.repository.interface';
+import { BulkUpdateChangeRequestStatusDto } from './dto/bulk-update-change-request-status.dto';
 import { CreateChangeRequestDto } from './dto/create-change-request.dto';
 import { UpdateChangeRequestDto } from './dto/update-change-request.dto';
 @Injectable()
@@ -25,6 +30,8 @@ export class ChangeRequestsService {
     private readonly _employeesService: EmployeesService,
     private readonly _mealSelectionWindowsService: MealSelectionWindowsService,
     @Inject(I_LOGGER) private readonly _logger: ILogger,
+    @Inject(I_TRANSACTION_RUNNER)
+    private readonly _transactionRunner: ITransactionRunner,
   ) {}
 
   @DomainEvents
@@ -58,6 +65,16 @@ export class ChangeRequestsService {
       if (mealSelection.mealSelectionWindowId !== mealSelectionWindow.id) {
         throw new InvalidInputDataException(
           'Meal selection does not belong to the specified meal selection window.',
+        );
+      }
+
+      if (
+        dto.newMenuItemId &&
+        dto.newMenuItemId === mealSelection.menuItemId &&
+        (dto.newQuantity ?? 1) === (mealSelection.quantity ?? 1)
+      ) {
+        throw new InvalidInputDataException(
+          'Change request is identical to the current meal selection.',
         );
       }
     } else {
@@ -166,6 +183,32 @@ export class ChangeRequestsService {
     await this._repository.update(id, changeRequest);
 
     return changeRequest;
+  }
+
+  async bulkUpdateStatus(
+    dto: BulkUpdateChangeRequestStatusDto,
+    performedByIdentityId: string,
+  ): Promise<void> {
+    const performer = await this._employeesService.findByIdentity(
+      performedByIdentityId,
+    );
+
+    if (performer.role !== EmployeeRole.Manager) {
+      throw new UnauthorizedException(
+        'Only managers can change the status of a change request',
+      );
+    }
+
+    await this._transactionRunner.run(async () => {
+      for (const item of dto.items) {
+        const changeRequest = await this._repository.findOneByCriteriaOrThrow({
+          id: item.id,
+        });
+
+        changeRequest.changeStatus(item.status, performer.id, new Date());
+        await this._repository.update(item.id, changeRequest);
+      }
+    });
   }
 
   async delete(id: string): Promise<void> {

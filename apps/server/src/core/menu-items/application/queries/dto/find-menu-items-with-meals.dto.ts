@@ -1,6 +1,9 @@
+import { MealType } from '@food-up/shared';
+
 type MealDto = {
   name: string;
   description: string;
+  type: MealType;
 };
 
 export type MenuItemWithMealDto = {

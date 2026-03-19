@@ -9,4 +9,7 @@ export interface IMealSelectionWindowsRepository
   extends IRepository<MealSelectionWindow> {
   findAllByBusiness(businessId: string): Promise<MealSelectionWindow[]>;
   findLatestActiveByBusiness(businessId: string): Promise<MealSelectionWindow>;
+  findLatestPublishedByBusiness(
+    businessId: string,
+  ): Promise<MealSelectionWindow | null>;
 }

@@ -85,6 +85,31 @@ Each feature module under `apps/server/src/core/[feature]/` follows strict layer
 - `domain` ← `application` ← `infrastructure` / `presentation`
 - Domain layer has zero framework dependencies
 
+**Query Repository Pattern:**
+
+For read-heavy views that join multiple entities or return shaped DTOs (not domain entities), use a **separate query repository** — do NOT add these methods to the main domain repository.
+
+```
+application/queries/
+  [feature]-query-repository.interface.ts   ← Symbol + interface, returns plain DTOs
+  [feature]-query.service.ts               ← thin @Injectable service
+  dto/[query-name].dto.ts                  ← plain TypeScript types (no class-transformer)
+
+infrastructure/persistence/
+  [feature]-query-typeorm.repository.ts    ← QueryBuilder impl, respects TransactionContext
+```
+
+Use a query repository when:
+- The response joins multiple entities (e.g. employee name + meal details in one row)
+- The result shape doesn't map to a single domain entity
+- It's a read-only view — no insert/update/delete
+
+Use the main domain repository when:
+- Returning a domain entity that will be mutated
+- Simple `findById` / `findByCriteria` with no cross-entity joins
+
+Query repositories use `createQueryBuilder` + `getRawMany` with explicit `SELECT` aliases. They always respect `TransactionContext` (same pattern as the main repository's `_repository` getter).
+
 **Entity pattern:**
 ```typescript
 class MyEntity {

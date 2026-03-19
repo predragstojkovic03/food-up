@@ -2,12 +2,12 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class UpdateMealSelectionDto {
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ nullable: true, description: 'Set to null to record a skip' })
   @IsString()
   @IsOptional()
-  menuItemId?: string;
+  menuItemId?: string | null;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ nullable: true })
   @IsOptional()
   @IsNumber()
   quantity?: number | null;

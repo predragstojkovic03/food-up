@@ -33,6 +33,14 @@ export interface CurrentMealSelectionWindowResult {
   menuItems: MenuItemWithMealDto[];
 }
 
+export interface RelevantMealSelectionWindowResult {
+  id: string;
+  startTime: Date;
+  endTime: Date;
+  targetDates: string[];
+  isActive: boolean;
+}
+
 @Injectable()
 export class MealSelectionWindowsService {
   constructor(
@@ -123,6 +131,23 @@ export class MealSelectionWindowsService {
       endTime: mealSelectionWindow.endTime,
       targetDates: Array.from(mealSelectionWindow.targetDates),
       menuItems,
+    };
+  }
+
+  async findRelevant(
+    identityId: string,
+  ): Promise<RelevantMealSelectionWindowResult | null> {
+    const employee = await this._employeesService.findByIdentity(identityId);
+    const window = await this._repository.findLatestPublishedByBusiness(
+      employee.businessId,
+    );
+    if (!window) return null;
+    return {
+      id: window.id,
+      startTime: window.startTime,
+      endTime: window.endTime,
+      targetDates: Array.from(window.targetDates),
+      isActive: window.isActive,
     };
   }
 

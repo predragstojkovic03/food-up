@@ -1,9 +1,10 @@
-import { ICurrentWindowMenuItem, IGetCurrentMealSelectionWindowResponse } from '@food-up/shared';
+import { ICurrentWindowMenuItem, IGetCurrentMealSelectionWindowResponse, MealType } from '@food-up/shared';
 import { Expose, Type } from 'class-transformer';
 
 export class MealDto {
   @Expose() name: string;
   @Expose() description: string;
+  @Expose() type: MealType;
 }
 
 export class MenuItem implements ICurrentWindowMenuItem {

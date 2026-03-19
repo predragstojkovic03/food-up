@@ -47,7 +47,8 @@ export class HttpClient {
     });
     if (!res.ok) throw new HttpError(res.status, await res.text());
 
-    return res.json();
+    const text = await res.text();
+    return text ? JSON.parse(text) : (undefined as TResponse);
   }
 
   async patch<TBody, TResponse>(url: string, body: TBody): Promise<TResponse> {
@@ -58,7 +59,8 @@ export class HttpClient {
     });
     if (!res.ok) throw new HttpError(res.status, await res.text());
 
-    return res.json();
+    const text = await res.text();
+    return text ? JSON.parse(text) : (undefined as TResponse);
   }
 
   async delete(url: string): Promise<void> {

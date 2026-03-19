@@ -1,5 +1,6 @@
 import { IAuthService } from '@/features/auth/domain/auth-service.interface';
 import { IBusinessService } from '@/features/businesses/domain/business-service.interface';
+import { IChangeRequestService } from '@/features/change-requests/domain/change-request-service.interface';
 import { IEmployeeService } from '@/features/employees/domain/employee-service.interface';
 import { IMealSelectionService } from '@/features/meal-selections/domain/meal-selection-service.interface';
 import { IMealSelectionWindowService } from '@/features/meal-selection-windows/domain/meal-selection-window-service.interface';
@@ -18,4 +19,5 @@ export interface ServiceContainer {
   menuItemService: IMenuItemService;
   mealSelectionWindowService: IMealSelectionWindowService;
   mealSelectionService: IMealSelectionService;
+  changeRequestService: IChangeRequestService;
 }

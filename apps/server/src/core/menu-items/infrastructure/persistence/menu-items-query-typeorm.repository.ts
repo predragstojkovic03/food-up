@@ -39,6 +39,7 @@ export class MenuItemsQueryTypeOrmRepository
       meal: {
         name: menuItem.meal.name,
         description: menuItem.meal.description,
+        type: menuItem.meal.type,
       },
     }));
   }

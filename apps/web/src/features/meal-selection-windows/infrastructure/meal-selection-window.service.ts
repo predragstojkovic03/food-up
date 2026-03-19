@@ -3,6 +3,7 @@ import {
   ICreateMealSelectionWindow,
   IGetCurrentMealSelectionWindowResponse,
   IMealSelectionWindowResponse,
+  IRelevantMealSelectionWindowResponse,
   IUpdateMealSelectionWindow,
   IWindowMenuItemResponse,
 } from '@food-up/shared';
@@ -35,6 +36,10 @@ export class MealSelectionWindowService implements IMealSelectionWindowService {
 
   getMenuItems(windowId: string): Promise<IWindowMenuItemResponse[]> {
     return this.http.get<IWindowMenuItemResponse[]>(`/api/meal-selection-windows/${windowId}/menu-items`);
+  }
+
+  getRelevant(): Promise<IRelevantMealSelectionWindowResponse | null> {
+    return this.http.get<IRelevantMealSelectionWindowResponse | null>('/api/meal-selection-windows/my-relevant');
   }
 
   remove(id: string): Promise<void> {

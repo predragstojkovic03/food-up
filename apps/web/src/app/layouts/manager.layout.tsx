@@ -9,6 +9,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { Badge } from '@/components/ui/badge';
 import {
   Collapsible,
   CollapsibleContent,
@@ -28,6 +29,8 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from '@/components/ui/sidebar';
+import { useWindowPendingCount } from '@/features/change-requests/application/use-window-change-requests.hook';
+import { useLatestBusinessWindow } from '@/features/meal-selection-windows/application/use-latest-business-window.hook';
 import { useAuthStore } from '@/features/auth/presentation/state/auth.store';
 import { useServices } from '@/shared/infrastructure/di/service.context';
 import {
@@ -52,6 +55,8 @@ export default function ManagerLayout() {
   const { authService } = useServices();
   const clearUser = useAuthStore((s) => s.clearUser);
   const suppliersOpen = SUPPLIERS_PATHS.some((p) => pathname.startsWith(p));
+  const { data: latestWindow } = useLatestBusinessWindow();
+  const { data: pendingCount = 0 } = useWindowPendingCount(latestWindow?.id);
 
   function handleLogout() {
     authService.logout();
@@ -136,6 +141,9 @@ export default function ManagerLayout() {
                   >
                     <ClipboardList />
                     <span>Change Requests</span>
+                    {pendingCount > 0 && (
+                      <Badge className='ml-auto text-xs px-1.5 py-0'>{pendingCount}</Badge>
+                    )}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
 

@@ -4,6 +4,6 @@ export class MealSelectionMenuItemChangedEvent implements IEvent {
   name: string = 'mealSelection.menuItemChanged';
   constructor(
     public readonly mealSelectionId: string,
-    public readonly menuItemId: string,
+    public readonly menuItemId: string | undefined,
   ) {}
 }

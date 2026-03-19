@@ -22,12 +22,14 @@ import { RequiredIdentityType } from 'src/core/identity/presentation/rest/identi
 import {
   CurrentMealSelectionWindowResult,
   MealSelectionWindowsService,
+  RelevantMealSelectionWindowResult,
 } from '../../application/meal-selection-windows.service';
 import { MealSelectionWindow } from '../../domain/meal-selection-window.entity';
 import { CreateMealSelectionWindowDto } from './dto/create-meal-selection-window.dto';
 import { GetCurrentMealSelectionWindowResponseDto } from './dto/get-current-meal-selection-window-response.dto';
 import { MealSelectionWindowResponseDto } from './dto/meal-selection-window-response.dto';
 import { UpdateMealSelectionWindowDto } from './dto/update-meal-selection-window.dto';
+import { RelevantMealSelectionWindowResponseDto } from './dto/relevant-meal-selection-window-response.dto';
 import { WindowMenuItemResponseDto } from './dto/window-menu-item-response.dto';
 
 @ApiTags('MealSelectionWindows')
@@ -97,7 +99,19 @@ export class MealSelectionWindowsController {
   }
 
   @RequiredIdentityType(IdentityType.Employee)
-  @RequiredEmployeeRole(EmployeeRole.Manager)
+  @ApiBearerAuth()
+  @Get('my-relevant')
+  @ApiOperation({ summary: 'Get the latest published window for the employee (active or past deadline)' })
+  @ApiResponse({ status: 200, type: RelevantMealSelectionWindowResponseDto })
+  async getMyRelevant(
+    @CurrentIdentity() { sub }: JwtPayload,
+  ): Promise<RelevantMealSelectionWindowResponseDto | null> {
+    const result = await this._mealSelectionWindowService.findRelevant(sub);
+    if (!result) return null;
+    return this.toRelevantResponseDto(result);
+  }
+
+  @RequiredIdentityType(IdentityType.Employee)
   @ApiBearerAuth()
   @Get(':id/menu-items')
   @ApiOperation({ summary: 'Get enriched menu items for a meal selection window' })
@@ -149,6 +163,22 @@ export class MealSelectionWindowsController {
   @Delete(':id')
   async delete(@Param('id') id: string): Promise<void> {
     return this._mealSelectionWindowService.delete(id);
+  }
+
+  private toRelevantResponseDto(
+    result: RelevantMealSelectionWindowResult,
+  ): RelevantMealSelectionWindowResponseDto {
+    return plainToInstance(
+      RelevantMealSelectionWindowResponseDto,
+      {
+        id: result.id,
+        startTime: result.startTime.toISOString(),
+        endTime: result.endTime.toISOString(),
+        targetDates: result.targetDates,
+        isActive: result.isActive,
+      },
+      { strategy: 'excludeAll' },
+    );
   }
 
   private toCurrentResponseDto(

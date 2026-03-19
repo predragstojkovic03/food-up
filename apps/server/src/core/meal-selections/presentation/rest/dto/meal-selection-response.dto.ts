@@ -9,8 +9,8 @@ export class MealSelectionResponseDto {
   @ApiProperty()
   employeeId: string;
 
-  @ApiProperty()
-  menuItemId: string;
+  @ApiProperty({ nullable: true })
+  menuItemId: string | null;
 
   @ApiProperty()
   mealSelectionWindowId: string;
@@ -18,6 +18,6 @@ export class MealSelectionResponseDto {
   @ApiProperty()
   date: string;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   quantity?: number | null;
 }

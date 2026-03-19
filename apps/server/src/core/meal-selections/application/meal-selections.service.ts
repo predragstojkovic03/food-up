@@ -7,6 +7,7 @@ import { MealSelection } from '../domain/meal-selection.entity';
 import {
   I_MEAL_SELECTIONS_REPOSITORY,
   IMealSelectionsRepository,
+  RichMealSelection,
 } from '../domain/meal-selections.repository.interface';
 import { CreateMealSelectionDto } from '../presentation/rest/dto/create-meal-selection.dto';
 import { UpdateMealSelectionDto } from '../presentation/rest/dto/update-meal-selection.dto';
@@ -37,19 +38,27 @@ export class MealSelectionsService {
       );
     }
 
-    const menuItem = await this._menuItemsService.findOne(dto.menuItemId);
-
-    if (!mealSelectionWindow.menuPeriodIds.includes(menuItem.menuPeriodId)) {
+    if (!mealSelectionWindow.targetDates.has(dto.date)) {
       throw new InvalidInputDataException(
-        `Menu item with ID ${dto.menuItemId} does not belong to any of the menu periods associated with meal selection window ${dto.mealSelectionWindowId}`,
+        `Date ${dto.date} is not a valid target date for this meal selection window`,
       );
+    }
+
+    if (dto.menuItemId) {
+      const menuItem = await this._menuItemsService.findOne(dto.menuItemId);
+
+      if (!mealSelectionWindow.menuPeriodIds.includes(menuItem.menuPeriodId)) {
+        throw new InvalidInputDataException(
+          `Menu item ${dto.menuItemId} does not belong to any menu period of window ${dto.mealSelectionWindowId}`,
+        );
+      }
     }
 
     const mealSelection = MealSelection.create(
       employee.id,
-      dto.menuItemId,
       mealSelectionWindow.id,
-      menuItem.day,
+      dto.date,
+      dto.menuItemId,
       dto.quantity,
     );
 
@@ -70,14 +79,23 @@ export class MealSelectionsService {
     return this._repository.findByWindow(windowId);
   }
 
-  findByEmployeeAndWindow(
+  async findByEmployeeAndWindow(
     employeeId: string,
-    mealSelectionWindowId: string,
+    windowId: string,
   ): Promise<MealSelection | null> {
-    return this._repository.findOneByCriteria({
+    const results = await this._repository.findAllByEmployeeAndWindow(
       employeeId,
-      mealSelectionWindowId,
-    });
+      windowId,
+    );
+    return results[0] ?? null;
+  }
+
+  async findMySelectionsForWindow(
+    identityId: string,
+    windowId: string,
+  ): Promise<RichMealSelection[]> {
+    const employee = await this._employeesService.findByIdentity(identityId);
+    return this._repository.findRichByEmployeeAndWindow(employee.id, windowId);
   }
 
   async update(
@@ -107,7 +125,7 @@ export class MealSelectionsService {
 
       if (!mealSelectionWindow.menuPeriodIds.includes(menuItem.menuPeriodId)) {
         throw new InvalidInputDataException(
-          `Menu item with ID ${dto.menuItemId} does not belong to any of the menu periods associated with meal selection window ${mealSelection.mealSelectionWindowId}`,
+          `Menu item ${dto.menuItemId} does not belong to any menu period of window ${mealSelection.mealSelectionWindowId}`,
         );
       }
     }

@@ -1,3 +1,4 @@
+import { EmployeeRole, IdentityType } from '@food-up/shared';
 import {
   Body,
   Controller,
@@ -16,13 +17,13 @@ import {
 import { plainToInstance } from 'class-transformer';
 import { CurrentIdentity } from 'src/core/auth/infrastructure/current-identity.decorator';
 import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
-import { EmployeeRole, IdentityType } from '@food-up/shared';
 import { RequiredEmployeeRole } from 'src/core/employees/presentation/rest/employee-role.decorator';
 import { RequiredIdentityType } from 'src/core/identity/presentation/rest/identity-type.decorator';
 import { MealSelectionsService } from '../../application/meal-selections.service';
 import { MealSelection } from '../../domain/meal-selection.entity';
 import { CreateMealSelectionDto } from './dto/create-meal-selection.dto';
 import { MealSelectionResponseDto } from './dto/meal-selection-response.dto';
+import { MyMealSelectionResponseDto } from './dto/my-meal-selection-response.dto';
 import { UpdateMealSelectionDto } from './dto/update-meal-selection.dto';
 
 @ApiTags('MealSelections')
@@ -65,7 +66,9 @@ export class MealSelectionsController {
   @RequiredEmployeeRole(EmployeeRole.Manager)
   @ApiBearerAuth()
   @Get('window/:windowId')
-  @ApiOperation({ summary: 'Get all meal selections for a window (manager view)' })
+  @ApiOperation({
+    summary: 'Get all meal selections for a window (manager view)',
+  })
   @ApiResponse({ status: 200, type: [MealSelectionResponseDto] })
   async findByWindow(
     @Param('windowId') windowId: string,
@@ -117,11 +120,29 @@ export class MealSelectionsController {
     return this._mealSelectionsService.delete(id);
   }
 
+  @RequiredIdentityType(IdentityType.Employee)
+  @ApiBearerAuth()
+  @Get('my/window/:windowId')
+  @ApiOperation({ summary: 'Get current employee selections for a window' })
+  @ApiResponse({ status: 200, type: [MyMealSelectionResponseDto] })
+  async findMySelectionsForWindow(
+    @Param('windowId') windowId: string,
+    @CurrentIdentity() { sub }: JwtPayload,
+  ): Promise<MyMealSelectionResponseDto[]> {
+    return plainToInstance(
+      MyMealSelectionResponseDto,
+      await this._mealSelectionsService.findMySelectionsForWindow(
+        sub,
+        windowId,
+      ),
+    );
+  }
+
   private toResponseDto(entity: MealSelection): MealSelectionResponseDto {
     const dto: MealSelectionResponseDto = {
       id: entity.id,
       employeeId: entity.employeeId,
-      menuItemId: entity.menuItemId,
+      menuItemId: entity.menuItemId ?? null,
       mealSelectionWindowId: entity.mealSelectionWindowId,
       date: entity.date,
       quantity: entity.quantity,

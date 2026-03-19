@@ -1,3 +1,5 @@
+import { MealType } from '../enums/meal-type.enum';
+
 export interface IMealSelectionWindowResponse {
   id: string;
   menuPeriodIds: string[];
@@ -18,6 +20,7 @@ export interface IGetCurrentMealSelectionWindowResponse {
 export interface IWindowMenuItemMeal {
   name: string;
   description: string;
+  type: MealType;
 }
 
 export interface ICurrentWindowMenuItem {
@@ -32,6 +35,14 @@ export interface IWindowMenuItemResponse {
   day: string;
   price?: number;
   meal: IWindowMenuItemMeal;
+}
+
+export interface IRelevantMealSelectionWindowResponse {
+  id: string;
+  startTime: string;
+  endTime: string;
+  targetDates: string[];
+  isActive: boolean;
 }
 
 export interface ICreateMealSelectionWindow {

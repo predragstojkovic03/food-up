@@ -8,17 +8,17 @@ import { MealSelectionUpdatedEvent } from './events/meal-selection-updated.event
 export class MealSelection extends Entity {
   static create(
     employeeId: string,
-    menuItemId: string,
     mealSelectionWindowId: string,
     date: string,
+    menuItemId?: string,
     quantity?: number,
   ): MealSelection {
     const mealSelection = new MealSelection(
       generateId(),
       employeeId,
-      menuItemId,
       mealSelectionWindowId,
       date,
+      menuItemId,
       quantity,
     );
 
@@ -32,44 +32,44 @@ export class MealSelection extends Entity {
   static reconstitute(
     id: string,
     employeeId: string,
-    menuItemId: string,
     mealSelectionWindowId: string,
     date: string,
+    menuItemId?: string,
     quantity?: number | null,
   ): MealSelection {
     return new MealSelection(
       id,
       employeeId,
-      menuItemId,
       mealSelectionWindowId,
       date,
-      quantity,
+      menuItemId,
+      quantity ?? undefined,
     );
   }
 
   private constructor(
     id: string,
     employeeId: string,
-    menuItemId: string,
     mealSelectionWindowId: string,
     date: string,
-    quantity?: number | null,
+    menuItemId?: string,
+    quantity?: number,
   ) {
     super();
 
     this._id = id;
     this._employeeId = employeeId;
-    this._menuItemId = menuItemId;
     this._mealSelectionWindowId = mealSelectionWindowId;
-    this._quantity = quantity ?? null;
     this._date = date;
+    this._menuItemId = menuItemId;
+    this._quantity = quantity;
   }
 
   private readonly _id: string;
   private readonly _employeeId: string;
-  private _menuItemId: string;
+  private _menuItemId: string | undefined;
   private readonly _mealSelectionWindowId: string;
-  private _quantity: number | null;
+  private _quantity: number | undefined;
   private readonly _date: string;
 
   get id(): string {
@@ -80,11 +80,11 @@ export class MealSelection extends Entity {
     return this._employeeId;
   }
 
-  get menuItemId(): string {
+  get menuItemId(): string | undefined {
     return this._menuItemId;
   }
 
-  set menuItemId(value: string) {
+  set menuItemId(value: string | undefined) {
     this._menuItemId = value;
     this.addDomainEvent(new MealSelectionMenuItemChangedEvent(this.id, value));
   }
@@ -93,11 +93,11 @@ export class MealSelection extends Entity {
     return this._mealSelectionWindowId;
   }
 
-  get quantity(): number | null {
+  get quantity(): number | undefined {
     return this._quantity;
   }
 
-  set quantity(value: number | null) {
+  set quantity(value: number | undefined) {
     this._quantity = value;
     this.addDomainEvent(new MealSelectionQuantityChangedEvent(this.id, value));
   }
@@ -106,12 +106,14 @@ export class MealSelection extends Entity {
     return this._date;
   }
 
-  update(menuItemId?: string, quantity?: number | null) {
+  // menuItemId: undefined = don't change, null = set to skip (clear), string = change to this item
+  // quantity:   undefined = don't change, null = set to skip (clear)
+  update(menuItemId?: string | null, quantity?: number | null) {
     if (menuItemId !== undefined) {
-      this.menuItemId = menuItemId;
+      this.menuItemId = menuItemId ?? undefined;
     }
     if (quantity !== undefined) {
-      this.quantity = quantity;
+      this.quantity = quantity ?? undefined;
     }
     this.addDomainEvent(new MealSelectionUpdatedEvent(this.id));
   }

@@ -44,4 +44,16 @@ export class MealSelectionWindowsTypeOrmRepository
       },
     });
   }
+
+  async findLatestPublishedByBusiness(
+    businessId: string,
+  ): Promise<MealSelectionWindow | null> {
+    const entities = await this._repository.find({
+      where: { business: { id: businessId }, isLocked: false } as any,
+      order: { endTime: 'DESC' },
+      take: 1,
+    });
+    if (!entities.length) return null;
+    return this._mapper.toDomain(entities[0]);
+  }
 }
