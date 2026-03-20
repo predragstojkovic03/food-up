@@ -21,6 +21,9 @@
     "seed": "ts-node --transpile-only -r tsconfig-paths/register src/seed.ts"
   },
   "dependencies": {
+    "@bull-board/api": "^6.20.6",
+    "@bull-board/express": "^6.20.6",
+    "@bull-board/nestjs": "^6.20.6",
     "@food-up/shared": "*",
     "@nestjs/bullmq": "^11.0.4",
     "@nestjs/common": "^11.0.1",

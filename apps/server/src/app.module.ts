@@ -3,7 +3,6 @@ import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { trace } from '@opentelemetry/api';
 import { LoggerModule as PinoLoggerModule } from 'nestjs-pino';
 import { join } from 'path';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
@@ -36,27 +35,38 @@ import { TransactionModule } from './shared/infrastructure/transaction/transacti
           `Response ${req.method} ${res.statusCode} | ${Math.round((responseTime as number) * 100) / 100} [ms]`,
         customErrorMessage: (_req, res, err) =>
           `Response ${res.statusCode} | ERROR: ${err.message}`,
-        customProps: (req) => {
-          const expressReq = req as unknown as Record<string, unknown>;
-          return {
-            ...(expressReq['body'] &&
-            Object.keys(expressReq['body'] as object).length > 0
-              ? { body: expressReq['body'] }
+        redact: {
+          paths: [
+            'req.body.password',
+            'req.body.currentPassword',
+            'req.body.newPassword',
+            'req.body.token',
+            'req.body.accessToken',
+            'req.body.refreshToken',
+            'req.body.secret',
+            'req.body.apiKey',
+          ],
+          censor: '[REDACTED]',
+        },
+        serializers: {
+          req: (req) => ({
+            id: req.id,
+            method: req.method,
+            url: req.url,
+            remoteAddress: req.remoteAddress,
+            ...(req.body && Object.keys(req.body as object).length > 0
+              ? { body: req.body }
               : {}),
-            ...(expressReq['query'] &&
-            Object.keys(expressReq['query'] as object).length > 0
-              ? { query: expressReq['query'] }
+            ...(req.query && Object.keys(req.query as object).length > 0
+              ? { query: req.query }
               : {}),
-          };
+          }),
+          res: (res) => ({
+            statusCode: res.statusCode,
+          }),
         },
         formatters: {
           level: (label: string) => ({ level: label }),
-        },
-        mixin() {
-          const span = trace.getActiveSpan();
-          if (!span) return {};
-          const { traceId, spanId } = span.spanContext();
-          return { traceId, spanId };
         },
       },
     }),
@@ -68,6 +78,10 @@ import { TransactionModule } from './shared/infrastructure/transaction/transacti
         connection: {
           host: configService.get('REDIS_HOST'),
           port: configService.get('REDIS_PORT'),
+        },
+        defaultJobOptions: {
+          attempts: 3,
+          backoff: { type: 'exponential', delay: 5000 },
         },
       }),
       inject: [I_CONFIG_SERVICE],

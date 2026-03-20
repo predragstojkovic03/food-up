@@ -1,8 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { MenuItemWithMealDto } from 'src/core/menu-items/application/queries/dto/find-menu-items-with-meals.dto';
 import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { MenuItemsService } from 'src/core/menu-items/application/menu-items.service';
+import { MenuItemWithMealDto } from 'src/core/menu-items/application/queries/dto/find-menu-items-with-meals.dto';
 import { MenuPeriodsService } from 'src/core/menu-periods/application/menu-periods.service';
+import { DomainEvents } from 'src/shared/application/domain-events/domain-events.decorator';
 import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
 import { MealSelectionWindow } from '../domain/meal-selection-window.entity';
 import {
@@ -92,6 +93,7 @@ export class MealSelectionWindowsService {
     return this._repository.findOneByCriteriaOrThrow({ id });
   }
 
+  @DomainEvents
   async update(
     id: string,
     dto: UpdateMealSelectionWindowDto,
@@ -121,9 +123,15 @@ export class MealSelectionWindowsService {
     return updated;
   }
 
-  async findMenuItemsForWindow(windowId: string): Promise<MenuItemWithMealDto[]> {
-    const window = await this._repository.findOneByCriteriaOrThrow({ id: windowId });
-    return this._menuItemsService.findWithMealsByMenuPeriods(window.menuPeriodIds);
+  async findMenuItemsForWindow(
+    windowId: string,
+  ): Promise<MenuItemWithMealDto[]> {
+    const window = await this._repository.findOneByCriteriaOrThrow({
+      id: windowId,
+    });
+    return this._menuItemsService.findWithMealsByMenuPeriods(
+      window.menuPeriodIds,
+    );
   }
 
   async findCurrent(sub: string): Promise<CurrentMealSelectionWindowResult> {

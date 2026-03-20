@@ -1,10 +1,10 @@
-import { Inject, Injectable } from '@nestjs/common';
 import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { Inject, Injectable } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { Redis } from 'ioredis';
-import { MealSelectionWindowUpdatedPayload } from 'src/core/meal-selection-windows/domain/events/meal-selection-window-updated.event';
 import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { MealSelectionWindowsService } from 'src/core/meal-selection-windows/application/meal-selection-windows.service';
+import { MealSelectionWindowUpdatedPayload } from 'src/core/meal-selection-windows/domain/events/meal-selection-window-updated.event';
 import { EnvironmentVariables } from 'src/env.validation';
 import {
   I_CONFIG_SERVICE,
@@ -38,7 +38,9 @@ export class MealSelectionWindowOpenedProcessor extends WorkerHost {
     if (inCooldown) return;
 
     const window = await this._windowsService.findOne(mealSelectionWindowId);
-    const employees = await this._employeesService.findAllByBusinessEnriched(window.businessId);
+    const employees = await this._employeesService.findAllByBusinessEnriched(
+      window.businessId,
+    );
 
     const webAppUrl = this._configService.get('WEB_APP_URL');
 
