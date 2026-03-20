@@ -28,14 +28,19 @@ export class IdentityService {
       dto.isActive ?? true,
     );
 
-    return this._repository.create(entity);
+    const result = await this._repository.create(entity);
+    this._logger.log(
+      `Identity created: id=${result.id} type=${dto.type}`,
+      IdentityService.name,
+    );
+    return result;
   }
 
   async validateCredentials(
     email: string,
     password: string,
   ): Promise<Identity> {
-    this._logger.debug(`Password ${password} for email ${email}`);
+    this._logger.debug('Validating credentials', IdentityService.name);
     const identity = await this.findByEmail(email);
     if (!identity) throw new AuthenticationException('Invalid credentials');
 
@@ -57,10 +62,13 @@ export class IdentityService {
   }
 
   async update(id: string, update: Partial<Identity>): Promise<Identity> {
-    return this._repository.update(id, update);
+    const result = await this._repository.update(id, update);
+    this._logger.log(`Identity updated: id=${id}`, IdentityService.name);
+    return result;
   }
 
   async delete(id: string): Promise<void> {
-    return this._repository.delete(id);
+    await this._repository.delete(id);
+    this._logger.log(`Identity deleted: id=${id}`, IdentityService.name);
   }
 }

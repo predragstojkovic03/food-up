@@ -38,7 +38,10 @@ export class DomainExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const status = this.getStatus(exception);
 
-    this.logger.error(JSON.stringify(exception));
+    this.logger.error(
+      `[${exception.constructor.name}] ${exception.message} → HTTP ${status}`,
+      DomainExceptionFilter.name,
+    );
 
     response.status(status).json({
       statusCode: status,

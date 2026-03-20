@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { MealSelectionWindowsService } from 'src/core/meal-selection-windows/application/meal-selection-windows.service';
 import { MenuItemsService } from 'src/core/menu-items/application/menu-items.service';
+import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
 import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
 import { MealSelection } from '../domain/meal-selection.entity';
 import {
@@ -20,6 +21,7 @@ export class MealSelectionsService {
     private readonly _mealSelectionWindowsService: MealSelectionWindowsService,
     private readonly _employeesService: EmployeesService,
     private readonly _menuItemsService: MenuItemsService,
+    @Inject(I_LOGGER) private readonly _logger: ILogger,
   ) {}
 
   async create(
@@ -63,6 +65,10 @@ export class MealSelectionsService {
     );
 
     await this._repository.insert(mealSelection);
+    this._logger.log(
+      `Meal selection created: id=${mealSelection.id} employeeId=${employee.id} windowId=${dto.mealSelectionWindowId} date=${dto.date}`,
+      MealSelectionsService.name,
+    );
 
     return mealSelection;
   }
@@ -133,11 +139,13 @@ export class MealSelectionsService {
     mealSelection.update(dto.menuItemId, dto.quantity);
 
     await this._repository.update(id, mealSelection);
+    this._logger.log(`Meal selection updated: id=${id}`, MealSelectionsService.name);
 
     return mealSelection;
   }
 
   async delete(id: string): Promise<void> {
-    return this._repository.delete(id);
+    await this._repository.delete(id);
+    this._logger.log(`Meal selection deleted: id=${id}`, MealSelectionsService.name);
   }
 }

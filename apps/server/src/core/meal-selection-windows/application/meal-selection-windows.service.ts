@@ -3,6 +3,7 @@ import { MenuItemWithMealDto } from 'src/core/menu-items/application/queries/dto
 import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { MenuItemsService } from 'src/core/menu-items/application/menu-items.service';
 import { MenuPeriodsService } from 'src/core/menu-periods/application/menu-periods.service';
+import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
 import { MealSelectionWindow } from '../domain/meal-selection-window.entity';
 import {
   I_MEAL_SELECTION_WINDOWS_REPOSITORY,
@@ -49,6 +50,7 @@ export class MealSelectionWindowsService {
     private readonly _menuPeriodsService: MenuPeriodsService,
     private readonly _employeesService: EmployeesService,
     private readonly _menuItemsService: MenuItemsService,
+    @Inject(I_LOGGER) private readonly _logger: ILogger,
   ) {}
 
   async create(
@@ -69,7 +71,12 @@ export class MealSelectionWindowsService {
       employee.businessId,
       dto.menuPeriodIds,
     );
-    return this._repository.save(window);
+    const result = await this._repository.save(window);
+    this._logger.log(
+      `Meal selection window created: id=${result.id} businessId=${employee.businessId} startTime=${dto.startTime.toISOString()} endTime=${dto.endTime.toISOString()}`,
+      MealSelectionWindowsService.name,
+    );
+    return result;
   }
 
   async findAll(): Promise<MealSelectionWindow[]> {
@@ -107,6 +114,10 @@ export class MealSelectionWindowsService {
     );
 
     await this._repository.save(updated);
+    this._logger.log(
+      `Meal selection window updated: id=${id}`,
+      MealSelectionWindowsService.name,
+    );
     return updated;
   }
 
@@ -152,6 +163,10 @@ export class MealSelectionWindowsService {
   }
 
   async delete(id: string): Promise<void> {
-    return this._repository.delete(id);
+    await this._repository.delete(id);
+    this._logger.log(
+      `Meal selection window deleted: id=${id}`,
+      MealSelectionWindowsService.name,
+    );
   }
 }

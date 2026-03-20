@@ -60,11 +60,10 @@ export class MealsService {
       );
 
       if (!business.managedSupplierIds.includes(dto.supplierId)) {
-        this._logger.debug(
-          `Managed supplier IDs: ${business.managedSupplierIds.join(', ')}`,
+        this._logger.warn(
+          `Unauthorized meal creation: supplierId=${dto.supplierId} not managed by businessId=${business.id}`,
+          MealsService.name,
         );
-        this._logger.debug(`Provided supplier ID: ${dto.supplierId}`);
-
         throw new UnauthorizedException(
           'You can only create meals for suppliers managed by your business.',
         );
@@ -83,7 +82,12 @@ export class MealsService {
       dto.price,
     );
 
-    return this._repository.insert(meal);
+    const result = await this._repository.insert(meal);
+    this._logger.log(
+      `Meal created: id=${result.id} name=${dto.name} supplierId=${supplierId}`,
+      MealsService.name,
+    );
+    return result;
   }
 
   async findAll(): Promise<Meal[]> {
@@ -101,10 +105,13 @@ export class MealsService {
   async update(id: string, dto: UpdateMealDto): Promise<Meal> {
     const existing = await this._repository.findOneByCriteria({ id });
     if (!existing) throw new EntityInstanceNotFoundException('Meal not found');
-    return this._repository.update(id, { ...existing, ...dto } as any);
+    const result = await this._repository.update(id, { ...existing, ...dto } as any);
+    this._logger.log(`Meal updated: id=${id}`, MealsService.name);
+    return result;
   }
 
   async delete(id: string): Promise<void> {
-    return this._repository.delete(id);
+    await this._repository.delete(id);
+    this._logger.log(`Meal deleted: id=${id}`, MealsService.name);
   }
 }

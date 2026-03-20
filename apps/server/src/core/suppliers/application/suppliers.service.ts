@@ -3,6 +3,7 @@ import { EmployeesService } from 'src/core/employees/application/employees.servi
 import { IdentityService } from 'src/core/identity/application/identity.service';
 import { EmployeeRole, IdentityType, SupplierType } from '@food-up/shared';
 import { DomainEvents } from 'src/shared/application/domain-events/domain-events.decorator';
+import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
 import {
   I_TRANSACTION_RUNNER,
   ITransactionRunner,
@@ -25,6 +26,7 @@ export class SuppliersService {
     private readonly _employeesService: EmployeesService,
     @Inject(I_TRANSACTION_RUNNER)
     private readonly _transactionRunner: ITransactionRunner,
+    @Inject(I_LOGGER) private readonly _logger: ILogger,
   ) {}
 
   @DomainEvents
@@ -44,6 +46,10 @@ export class SuppliersService {
       );
 
       await this._repository.insert(supplier);
+      this._logger.log(
+        `Supplier registered: id=${supplier.id} name=${dto.name}`,
+        SuppliersService.name,
+      );
       return supplier;
     });
   }
@@ -67,6 +73,10 @@ export class SuppliersService {
     );
 
     await this._repository.insert(supplier);
+    this._logger.log(
+      `Managed supplier created: id=${supplier.id} name=${dto.name} businessId=${employee.businessId}`,
+      SuppliersService.name,
+    );
     return supplier;
   }
 
@@ -102,6 +112,10 @@ export class SuppliersService {
 
     if (supplier.type === SupplierType.Standalone) {
       if (supplier.identityId !== identityId) {
+        this._logger.warn(
+          `Unauthorized supplier update attempt: supplierId=${id} identityId=${identityId}`,
+          SuppliersService.name,
+        );
         throw new UnauthorizedException(
           'Not authorized to update this supplier.',
         );
@@ -112,6 +126,10 @@ export class SuppliersService {
         employee.businessId !== supplier.managingBusinessId ||
         employee.role !== EmployeeRole.Manager
       ) {
+        this._logger.warn(
+          `Unauthorized supplier update attempt: supplierId=${id} identityId=${identityId}`,
+          SuppliersService.name,
+        );
         throw new UnauthorizedException(
           'Not authorized to update this supplier.',
         );
@@ -120,6 +138,7 @@ export class SuppliersService {
 
     supplier.updateInfo(dto.name, dto.contactInfo);
     await this._repository.update(id, supplier);
+    this._logger.log(`Supplier updated: id=${id}`, SuppliersService.name);
 
     return supplier;
   }

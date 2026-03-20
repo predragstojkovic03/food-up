@@ -2,6 +2,7 @@ import { EmployeeRole, IdentityType } from '@food-up/shared';
 import { Inject, Injectable } from '@nestjs/common';
 import { BusinessInvitesService } from 'src/core/business-invites/application/business-invites.service';
 import { IdentityService } from 'src/core/identity/application/identity.service';
+import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
 import {
   I_TRANSACTION_RUNNER,
   ITransactionRunner,
@@ -25,6 +26,7 @@ export class EmployeesService {
     private readonly _businessInvitesService: BusinessInvitesService,
     @Inject(I_TRANSACTION_RUNNER)
     private readonly _transactionRunner: ITransactionRunner,
+    @Inject(I_LOGGER) private readonly _logger: ILogger,
   ) {}
 
   async register(dto: CreateEmployeeDto): Promise<Employee> {
@@ -47,7 +49,12 @@ export class EmployeesService {
         identity.id,
       );
 
-      return this._repository.insert(entity);
+      const result = await this._repository.insert(entity);
+      this._logger.log(
+        `Employee registered: id=${result.id} name=${dto.name} businessId=${invite.businessId}`,
+        EmployeesService.name,
+      );
+      return result;
     });
   }
 
@@ -72,7 +79,12 @@ export class EmployeesService {
         identity.id,
       );
 
-      return this._repository.insert(entity);
+      const result = await this._repository.insert(entity);
+      this._logger.log(
+        `Manager created: id=${result.id} name=${dto.name} businessId=${dto.businessId}`,
+        EmployeesService.name,
+      );
+      return result;
     });
   }
 
@@ -163,10 +175,12 @@ export class EmployeesService {
       });
     }
 
+    this._logger.log(`Employee updated: id=${id}`, EmployeesService.name);
     return this.findByIdentityEnriched(employee.identityId);
   }
 
   async delete(id: string): Promise<void> {
-    return this._repository.delete(id);
+    await this._repository.delete(id);
+    this._logger.log(`Employee deleted: id=${id}`, EmployeesService.name);
   }
 }

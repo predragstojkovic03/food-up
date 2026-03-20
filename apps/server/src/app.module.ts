@@ -1,12 +1,12 @@
+import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { BullModule } from '@nestjs/bullmq';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { trace } from '@opentelemetry/api';
+import { LoggerModule as PinoLoggerModule } from 'nestjs-pino';
 import { join } from 'path';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
-import { LoggerModule as PinoLoggerModule } from 'nestjs-pino';
-import { trace } from '@opentelemetry/api';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { JwtAuthGuard } from './core/auth/infrastructure/jwt-auth.guard';
@@ -20,11 +20,11 @@ import {
 } from './shared/application/config-service.interface';
 import { DomainEventsModule } from './shared/application/domain-events/domain-events.module';
 import { ConfigModule } from './shared/infrastructure/config/config.module';
-import { TransactionModule } from './shared/infrastructure/transaction/transaction.module';
 import { DomainExceptionFilter } from './shared/infrastructure/domain-exception-filter';
 import { DisabledEndpointGuard } from './shared/infrastructure/guards/disabled-endpoint.guard';
 import { LoggerModule } from './shared/infrastructure/logger/logger.module';
 import { NotificationsModule } from './shared/infrastructure/notifications/notifications.module';
+import { TransactionModule } from './shared/infrastructure/transaction/transaction.module';
 
 @Module({
   imports: [
@@ -62,7 +62,9 @@ import { NotificationsModule } from './shared/infrastructure/notifications/notif
     }),
     EventEmitterModule.forRoot({ wildcard: true }),
     BullModule.forRootAsync({
-      useFactory: (configService: IConfigService<EnvironmentVariables, true>) => ({
+      useFactory: (
+        configService: IConfigService<EnvironmentVariables, true>,
+      ) => ({
         connection: {
           host: configService.get('REDIS_HOST'),
           port: configService.get('REDIS_PORT'),

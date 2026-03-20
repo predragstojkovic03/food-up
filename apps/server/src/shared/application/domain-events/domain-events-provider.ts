@@ -23,8 +23,9 @@ export class DomainEventsProvider {
         const domainEvents = result.pullDomainEvents();
 
         for (const domainEvent of domainEvents) {
-          this._logger.log(
+          this._logger.debug(
             `Domain Event Dispatched: ${domainEvent.constructor.name}`,
+            DomainEventsProvider.name,
           );
           this._eventEmitter.emit(domainEvent.name, domainEvent);
         }

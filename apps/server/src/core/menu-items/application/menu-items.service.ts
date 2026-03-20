@@ -30,8 +30,6 @@ export class MenuItemsService {
 
     const menuPeriod = await this._menuPeriodsService.findOne(dto.menuPeriodId);
 
-    console.log(menuPeriod.supplierId, ',', meal.supplierId);
-
     if (menuPeriod.supplierId !== meal.supplierId) {
       throw new InvalidInputDataException(
         `Meal with ID ${meal.id} does not belong to the supplier of menu period ${dto.menuPeriodId}`,

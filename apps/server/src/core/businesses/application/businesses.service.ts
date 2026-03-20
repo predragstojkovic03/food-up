@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
 import { Business } from '../domain/business.entity';
 import {
   I_BUSINESSES_REPOSITORY,
@@ -11,6 +12,7 @@ export class BusinessesService {
   constructor(
     @Inject(I_BUSINESSES_REPOSITORY)
     private readonly _repository: IBusinessesRepository,
+    @Inject(I_LOGGER) private readonly _logger: ILogger,
   ) {}
 
   async create(createBusinessDto: CreateBusinessDto): Promise<Business> {
@@ -20,7 +22,12 @@ export class BusinessesService {
       createBusinessDto.contactPhone,
     );
 
-    return this._repository.insert(business);
+    const result = await this._repository.insert(business);
+    this._logger.log(
+      `Business created: id=${result.id} name=${result.name}`,
+      BusinessesService.name,
+    );
+    return result;
   }
 
   async findAll(): Promise<Business[]> {

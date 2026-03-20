@@ -114,6 +114,10 @@ export class ChangeRequestsService {
     );
 
     await this._repository.insert(changeRequest);
+    this._logger.log(
+      `Change request created: id=${changeRequest.id} employeeId=${employee.id} windowId=${dto.mealSelectionWindowId}`,
+      ChangeRequestsService.name,
+    );
 
     return changeRequest;
   }
@@ -159,6 +163,7 @@ export class ChangeRequestsService {
     );
 
     await this._repository.update(id, changeRequest);
+    this._logger.log(`Change request updated: id=${id}`, ChangeRequestsService.name);
 
     return changeRequest;
   }
@@ -184,6 +189,10 @@ export class ChangeRequestsService {
 
     changeRequest.changeStatus(status, performer.id, new Date());
     await this._repository.update(id, changeRequest);
+    this._logger.log(
+      `Change request status updated: id=${id} status=${status} by=${performer.id}`,
+      ChangeRequestsService.name,
+    );
 
     return changeRequest;
   }
@@ -225,6 +234,11 @@ export class ChangeRequestsService {
       }
     });
 
+    this._logger.log(
+      `Bulk change request status update: count=${dto.items.length} by=${performer.id}`,
+      ChangeRequestsService.name,
+    );
+
     this._eventEmitter.emit(
       ChangeRequestBulkStatusUpdatedEvent.EVENT_NAME,
       new ChangeRequestBulkStatusUpdatedEvent({ items: results }),
@@ -232,6 +246,7 @@ export class ChangeRequestsService {
   }
 
   async delete(id: string): Promise<void> {
-    return this._repository.delete(id);
+    await this._repository.delete(id);
+    this._logger.log(`Change request deleted: id=${id}`, ChangeRequestsService.name);
   }
 }
