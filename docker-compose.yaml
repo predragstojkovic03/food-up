@@ -21,6 +21,7 @@ services:
     depends_on:
       - postgres
       - redis
+      - otel-lgtm
     environment:
       DB_NAME: ${POSTGRES_DB}
       DB_USER: ${POSTGRES_USER}
@@ -34,6 +35,8 @@ services:
       REDIS_PORT: 6379
       MAIL_FROM: ${MAIL_FROM}
       WEB_APP_URL: ${WEB_APP_URL}
+      OTEL_SERVICE_NAME: food-up
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-lgtm:4318
     env_file:
       - .env
 
@@ -76,6 +79,20 @@ services:
       - pgadmin:/var/lib/pgadmin
     depends_on:
       - postgres
+
+  otel-lgtm:
+    image: grafana/otel-lgtm:latest
+    container_name: food-up-otel-lgtm
+    restart: unless-stopped
+    ports:
+      - '3001:3000'
+      - '4317:4317'
+      - '4318:4318'
+    volumes:
+      - ./grafana/provisioning/food-up-dashboards.yaml:/otel-lgtm/grafana/conf/provisioning/dashboards/food-up-dashboards.yaml:ro
+      - ./grafana/dashboards:/otel-lgtm/grafana/dashboards:ro
+    networks:
+      - shared-network
 
 networks:
   shared-network:

@@ -1,7 +1,10 @@
+import './instrumentation';
+
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { Logger } from 'nestjs-pino';
 import { join } from 'node:path';
 import { AppModule } from './app.module';
 import { EnvironmentVariables, NodeEnv } from './env.validation';
@@ -11,7 +14,11 @@ import {
 } from './shared/application/config-service.interface';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bufferLogs: true,
+  });
+
+  app.useLogger(app.get(Logger));
 
   app.useStaticAssets(join(__dirname, '..', 'public'), {
     index: false,

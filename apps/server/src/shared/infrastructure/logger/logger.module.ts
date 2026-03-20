@@ -1,14 +1,14 @@
 import { Global, Module } from '@nestjs/common';
+import { LoggerModule as PinoLoggerModule } from 'nestjs-pino';
 import { I_LOGGER } from 'src/shared/application/logger.interface';
-import { CustomLogger } from './custom-logger';
+import { PinoLoggerAdapter } from './pino-logger.adapter';
 
 @Global()
 @Module({
+  imports: [PinoLoggerModule],
   providers: [
-    {
-      provide: I_LOGGER,
-      useClass: CustomLogger,
-    },
+    PinoLoggerAdapter,
+    { provide: I_LOGGER, useExisting: PinoLoggerAdapter },
   ],
   exports: [I_LOGGER],
 })
