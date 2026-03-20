@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { MealSelectionWindowsService } from 'src/core/meal-selection-windows/application/meal-selection-windows.service';
 import { MealSelectionsService } from 'src/core/meal-selections/application/meal-selections.service';
@@ -17,6 +18,7 @@ import {
   I_CHANGE_REQUESTS_REPOSITORY,
   IChangeRequestsRepository,
 } from '../domain/change-requests.repository.interface';
+import { ChangeRequestBulkStatusUpdatedEvent } from '../domain/events/change-request-bulk-status-updated.event';
 import { BulkUpdateChangeRequestStatusDto } from './dto/bulk-update-change-request-status.dto';
 import { CreateChangeRequestDto } from './dto/create-change-request.dto';
 import { UpdateChangeRequestDto } from './dto/update-change-request.dto';
@@ -32,6 +34,7 @@ export class ChangeRequestsService {
     @Inject(I_LOGGER) private readonly _logger: ILogger,
     @Inject(I_TRANSACTION_RUNNER)
     private readonly _transactionRunner: ITransactionRunner,
+    private readonly _eventEmitter: EventEmitter2,
   ) {}
 
   @DomainEvents
@@ -199,6 +202,12 @@ export class ChangeRequestsService {
       );
     }
 
+    const results: Array<{
+      changeRequestId: string;
+      employeeId: string;
+      status: ChangeRequestStatus;
+    }> = [];
+
     await this._transactionRunner.run(async () => {
       for (const item of dto.items) {
         const changeRequest = await this._repository.findOneByCriteriaOrThrow({
@@ -207,8 +216,19 @@ export class ChangeRequestsService {
 
         changeRequest.changeStatus(item.status, performer.id, new Date());
         await this._repository.update(item.id, changeRequest);
+
+        results.push({
+          changeRequestId: item.id,
+          employeeId: changeRequest.employeeId,
+          status: item.status,
+        });
       }
     });
+
+    this._eventEmitter.emit(
+      ChangeRequestBulkStatusUpdatedEvent.EVENT_NAME,
+      new ChangeRequestBulkStatusUpdatedEvent({ items: results }),
+    );
   }
 
   async delete(id: string): Promise<void> {

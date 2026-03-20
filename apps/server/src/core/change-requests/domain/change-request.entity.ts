@@ -150,17 +150,23 @@ export class ChangeRequest extends Entity {
 
     if (status === ChangeRequestStatus.Approved) {
       this.addDomainEvent(
-        new ChangeRequestApprovedEvent(
-          this.id,
-          this.mealSelectionId,
-          this.newMenuItemId,
-          this.newQuantity,
-          this.clearSelection ?? false,
-        ),
+        new ChangeRequestApprovedEvent({
+          changeRequestId: this.id,
+          employeeId: this.employeeId,
+          mealSelectionId: this.mealSelectionId,
+          newMenuItemId: this.newMenuItemId,
+          newQuantity: this.newQuantity,
+          clearSelection: this.clearSelection ?? false,
+          status: ChangeRequestStatus.Approved,
+        }),
       );
     } else {
       this.addDomainEvent(
-        new ChangeRequestRejectedEvent(this.id, this.employeeId),
+        new ChangeRequestRejectedEvent({
+          changeRequestId: this.id,
+          employeeId: this.employeeId,
+          status: ChangeRequestStatus.Rejected,
+        }),
       );
     }
   }

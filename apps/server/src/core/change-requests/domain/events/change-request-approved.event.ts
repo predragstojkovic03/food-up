@@ -1,13 +1,19 @@
+import { ChangeRequestStatus } from '@food-up/shared';
 import { IEvent } from 'src/shared/domain/event.interface';
 
-export class ChangeRequestApprovedEvent implements IEvent {
-  name: string = 'changeRequest.approved';
+export interface ChangeRequestApprovedPayload {
+  changeRequestId: string;
+  employeeId: string;
+  mealSelectionId: string | undefined;
+  newMenuItemId: string | null;
+  newQuantity: number | null;
+  clearSelection: boolean;
+  status: ChangeRequestStatus;
+}
 
-  constructor(
-    public readonly changeRequestId: string,
-    public readonly mealSelectionId: string | undefined,
-    public readonly newMenuItemId: string | null,
-    public readonly newQuantity: number | null,
-    public readonly clearSelection: boolean,
-  ) {}
+export class ChangeRequestApprovedEvent implements IEvent {
+  static readonly EVENT_NAME = 'changeRequest.approved';
+  readonly name = ChangeRequestApprovedEvent.EVENT_NAME;
+
+  constructor(public readonly payload: ChangeRequestApprovedPayload) {}
 }

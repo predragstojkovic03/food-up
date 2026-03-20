@@ -35,6 +35,19 @@ export class EnvironmentVariables {
   @IsBoolean()
   @Transform(({ value }) => value === 'true')
   ORM_SYNC: boolean;
+
+  @IsString()
+  REDIS_HOST: string;
+
+  @Transform(({ value }) => Number(value))
+  @IsNumber()
+  REDIS_PORT: number;
+
+  @IsString()
+  WEB_APP_URL: string;
+
+  @IsString()
+  MAIL_FROM: string;
 }
 
 export function validate(config: Record<string, unknown>) {

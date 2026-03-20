@@ -1,19 +1,20 @@
+import { EmployeeRole, IdentityType } from '@food-up/shared';
 import { Inject, Injectable } from '@nestjs/common';
 import { BusinessInvitesService } from 'src/core/business-invites/application/business-invites.service';
 import { IdentityService } from 'src/core/identity/application/identity.service';
-import { EmployeeRole, IdentityType } from '@food-up/shared';
 import {
   I_TRANSACTION_RUNNER,
   ITransactionRunner,
 } from 'src/shared/application/transaction.runner';
+import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
 import { Employee } from '../domain/employee.entity';
 import {
   I_EMPLOYEES_REPOSITORY,
   IEmployeeRepository,
 } from '../domain/employee.repository.interface';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
-import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { EmployeeView } from './dto/employee-view';
+import { UpdateEmployeeDto } from './dto/update-employee.dto';
 
 @Injectable()
 export class EmployeesService {
@@ -28,7 +29,9 @@ export class EmployeesService {
 
   async register(dto: CreateEmployeeDto): Promise<Employee> {
     return this._transactionRunner.run(async () => {
-      const invite = await this._businessInvitesService.consume(dto.inviteToken);
+      const invite = await this._businessInvitesService.consume(
+        dto.inviteToken,
+      );
 
       const identity = await this._identityService.create({
         email: dto.email,
@@ -101,17 +104,43 @@ export class EmployeesService {
     return this._repository.findOneByCriteriaOrThrow({ identityId });
   }
 
-  async findByIdentityEnriched(identityId: string): Promise<EmployeeView> {
-    const employee = await this.findByIdentity(identityId);
-    const identity = await this._identityService.findById(identityId);
+  async findOneEnriched(id: string): Promise<EmployeeView> {
+    const employee = await this.findOne(id);
+    const identity = await this._identityService.findById(employee.identityId);
+
+    if (!identity) {
+      throw new InvalidInputDataException(
+        'Requested employee has no identity.',
+      );
+    }
+
     return {
       id: employee.id,
       name: employee.name,
       role: employee.role,
       businessId: employee.businessId,
       identityId: employee.identityId,
-      email: identity!.email,
-      isActive: identity!.isActive,
+      email: identity.email,
+      isActive: identity.isActive,
+    };
+  }
+
+  async findByIdentityEnriched(identityId: string): Promise<EmployeeView> {
+    const identity = await this._identityService.findById(identityId);
+    if (!identity) {
+      throw new InvalidInputDataException('Requested identity does not exist.');
+    }
+
+    const employee = await this.findByIdentity(identityId);
+
+    return {
+      id: employee.id,
+      name: employee.name,
+      role: employee.role,
+      businessId: employee.businessId,
+      identityId: employee.identityId,
+      email: identity.email,
+      isActive: identity.isActive,
     };
   }
 

@@ -86,7 +86,12 @@ export class MealSelectionWindow extends Entity {
     this.targetDates = targetDates ?? this.targetDates;
     this.isLocked = isLocked ?? this.isLocked;
 
-    this.addDomainEvent(new MealSelectionWindowUpdatedEvent(this.id));
+    this.addDomainEvent(
+      new MealSelectionWindowUpdatedEvent({
+        mealSelectionWindowId: this.id,
+        isLocked: this.isLocked,
+      }),
+    );
     return this;
   }
 

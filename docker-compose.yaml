@@ -20,6 +20,7 @@ services:
       - shared-network
     depends_on:
       - postgres
+      - redis
     environment:
       DB_NAME: ${POSTGRES_DB}
       DB_USER: ${POSTGRES_USER}
@@ -29,6 +30,10 @@ services:
       NODE_ENV: ${NODE_ENV}
       PORT: ${SERVER_PORT}
       ORM_SYNC: ${ORM_SYNC}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      MAIL_FROM: ${MAIL_FROM}
+      WEB_APP_URL: ${WEB_APP_URL}
     env_file:
       - .env
 
@@ -47,6 +52,14 @@ services:
       - pg:/var/lib/postgresql/data
     env_file:
       - .env
+
+  redis:
+    image: redis:8-alpine
+    container_name: food-up-redis
+    ports:
+      - '6379:6379'
+    networks:
+      - shared-network
 
   pgadmin:
     image: dpage/pgadmin4:latest

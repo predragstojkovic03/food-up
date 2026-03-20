@@ -1,7 +1,13 @@
 import { IEvent } from 'src/shared/domain/event.interface';
 
-export class MealSelectionWindowUpdatedEvent implements IEvent {
-  name: string = 'mealSelectionWindow.updated';
+export interface MealSelectionWindowUpdatedPayload {
+  mealSelectionWindowId: string;
+  isLocked: boolean;
+}
 
-  constructor(public readonly mealSelectionWindowId: string) {}
+export class MealSelectionWindowUpdatedEvent implements IEvent {
+  static readonly EVENT_NAME = 'mealSelectionWindow.updated';
+  readonly name = MealSelectionWindowUpdatedEvent.EVENT_NAME;
+
+  constructor(public readonly payload: MealSelectionWindowUpdatedPayload) {}
 }

@@ -1,5 +1,7 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { BullModule } from '@nestjs/bullmq';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
@@ -21,9 +23,20 @@ import { DomainExceptionFilter } from './shared/infrastructure/domain-exception-
 import { DisabledEndpointGuard } from './shared/infrastructure/guards/disabled-endpoint.guard';
 import { LoggingMiddleware } from './shared/infrastructure/logger/logger.middleware';
 import { LoggerModule } from './shared/infrastructure/logger/logger.module';
+import { NotificationsModule } from './shared/infrastructure/notifications/notifications.module';
 
 @Module({
   imports: [
+    EventEmitterModule.forRoot({ wildcard: true }),
+    BullModule.forRootAsync({
+      useFactory: (configService: IConfigService<EnvironmentVariables, true>) => ({
+        connection: {
+          host: configService.get('REDIS_HOST'),
+          port: configService.get('REDIS_PORT'),
+        },
+      }),
+      inject: [I_CONFIG_SERVICE],
+    }),
     DomainEventsModule,
     ConfigModule,
     TypeOrmModule.forRootAsync({
@@ -53,7 +66,7 @@ import { LoggerModule } from './shared/infrastructure/logger/logger.module';
     TransactionModule,
     CoreModule,
     ConfigModule,
-    DomainEventsModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [
