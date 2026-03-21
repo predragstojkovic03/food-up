@@ -44,7 +44,7 @@ export class SuppliersTypeOrmRepository
   ): Promise<Supplier> {
     return this._repository
       .findOneOrFail({
-        where: criteria,
+        where: criteria as any,
         relations: {
           businessSuppliers: true,
           managingBusiness: true,
@@ -58,7 +58,7 @@ export class SuppliersTypeOrmRepository
   ): Promise<Supplier | null> {
     return this._repository
       .findOne({
-        where: criteria,
+        where: criteria as any,
         relations: {
           businessSuppliers: true,
           managingBusiness: true,

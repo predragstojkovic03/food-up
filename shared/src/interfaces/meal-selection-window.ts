@@ -7,6 +7,7 @@ export interface IMealSelectionWindowResponse {
   endTime: string;
   targetDates: string[];
   isLocked: boolean;
+  notifyOnDeadline: boolean;
 }
 
 export interface IGetCurrentMealSelectionWindowResponse {
@@ -50,6 +51,7 @@ export interface ICreateMealSelectionWindow {
   startTime: string;
   endTime: string;
   targetDates: string[];
+  notifyOnDeadline?: boolean;
 }
 
 export interface IUpdateMealSelectionWindow {
@@ -58,4 +60,5 @@ export interface IUpdateMealSelectionWindow {
   endTime?: string;
   targetDates?: string[];
   isLocked?: boolean;
+  notifyOnDeadline?: boolean;
 }

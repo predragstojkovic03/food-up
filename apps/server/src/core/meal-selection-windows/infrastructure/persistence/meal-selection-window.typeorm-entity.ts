@@ -50,4 +50,7 @@ export class MealSelectionWindow {
 
   @Column('boolean', { default: true })
   isLocked: boolean;
+
+  @Column('boolean', { default: false })
+  notifyOnDeadline: boolean;
 }

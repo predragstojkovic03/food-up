@@ -1,12 +1,13 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsEmail, IsOptional, IsString } from 'class-validator';
 
 export class CreateManagedSupplierDto {
   @ApiProperty()
   @IsString()
   name: string;
 
-  @ApiProperty()
-  @IsString()
-  contactInfo: string;
+  @ApiPropertyOptional()
+  @IsEmail()
+  @IsOptional()
+  email?: string;
 }

@@ -16,6 +16,7 @@ export interface CreateMealSelectionWindowDto {
   endTime: Date;
   menuPeriodIds: string[];
   targetDates: string[];
+  notifyOnDeadline?: boolean;
 }
 
 export interface UpdateMealSelectionWindowDto {
@@ -25,6 +26,7 @@ export interface UpdateMealSelectionWindowDto {
   menuPeriodIds?: string[];
   targetDates?: string[];
   isLocked?: boolean;
+  notifyOnDeadline?: boolean;
 }
 
 export interface CurrentMealSelectionWindowResult {
@@ -71,6 +73,7 @@ export class MealSelectionWindowsService {
       new Set(dto.targetDates),
       employee.businessId,
       dto.menuPeriodIds,
+      dto.notifyOnDeadline ?? false,
     );
     const result = await this._repository.save(window);
     this._logger.log(
@@ -113,6 +116,7 @@ export class MealSelectionWindowsService {
       dto.menuPeriodIds,
       dto.targetDates ? new Set(dto.targetDates) : undefined,
       dto.isLocked,
+      dto.notifyOnDeadline,
     );
 
     await this._repository.save(updated);

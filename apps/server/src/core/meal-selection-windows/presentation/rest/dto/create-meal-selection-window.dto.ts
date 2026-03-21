@@ -1,10 +1,12 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
   ArrayNotEmpty,
   IsArray,
+  IsBoolean,
   IsDate,
   IsDateString,
+  IsOptional,
   IsString,
 } from 'class-validator';
 
@@ -30,4 +32,9 @@ export class CreateMealSelectionWindowDto {
   @IsDateString({ strict: true }, { each: true })
   @Transform(({ value }) => value.map((date: string) => date.split('T')[0]))
   targetDates: string[];
+
+  @ApiPropertyOptional()
+  @IsBoolean()
+  @IsOptional()
+  notifyOnDeadline?: boolean;
 }

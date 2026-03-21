@@ -41,7 +41,7 @@ export class SuppliersService {
 
       const supplier = Supplier.register(
         dto.name,
-        dto.contactInfo,
+        dto.email,
         identity.id,
       );
 
@@ -57,7 +57,7 @@ export class SuppliersService {
   @DomainEvents
   async createManagedSupplier(
     sub: string,
-    dto: { contactInfo: string; name: string },
+    dto: { email?: string; name: string },
   ) {
     const employee = await this._employeesService.findByIdentity(sub);
 
@@ -67,7 +67,7 @@ export class SuppliersService {
 
     const supplier = Supplier.createManaged(
       dto.name,
-      dto.contactInfo,
+      dto.email ?? null,
       [employee.businessId],
       employee.businessId,
     );
@@ -136,7 +136,7 @@ export class SuppliersService {
       }
     }
 
-    supplier.updateInfo(dto.name, dto.contactInfo);
+    supplier.updateInfo(dto.name, dto.email);
     await this._repository.update(id, supplier);
     this._logger.log(`Supplier updated: id=${id}`, SuppliersService.name);
 

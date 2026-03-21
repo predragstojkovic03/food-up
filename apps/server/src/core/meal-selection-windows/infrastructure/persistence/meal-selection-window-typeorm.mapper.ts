@@ -15,6 +15,7 @@ export class MealSelectionWindowTypeOrmMapper extends TypeOrmMapper<
       persistence.business.id,
       persistence.menuPeriods?.map((mp) => mp.id) ?? [],
       persistence.isLocked,
+      persistence.notifyOnDeadline,
     );
   }
 
@@ -27,6 +28,7 @@ export class MealSelectionWindowTypeOrmMapper extends TypeOrmMapper<
     persistence.targetDates = Array.from(domain.targetDates);
     persistence.menuPeriods = domain.menuPeriodIds.map((id) => ({ id }) as any); // Assuming menuPeriods is an array of objects with at least an id property
     persistence.isLocked = domain.isLocked;
+    persistence.notifyOnDeadline = domain.notifyOnDeadline;
     return persistence;
   }
 
@@ -41,6 +43,7 @@ export class MealSelectionWindowTypeOrmMapper extends TypeOrmMapper<
     if (domain.businessId !== undefined)
       persistence.business = { id: domain.businessId } as any;
     if (domain.isLocked !== undefined) persistence.isLocked = domain.isLocked;
+    if (domain.notifyOnDeadline !== undefined) persistence.notifyOnDeadline = domain.notifyOnDeadline;
     return persistence;
   }
 }

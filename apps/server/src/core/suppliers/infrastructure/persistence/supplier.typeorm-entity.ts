@@ -27,8 +27,8 @@ export class Supplier {
   @Column('enum', { enum: SupplierType })
   type: SupplierType;
 
-  @Column('character varying', { length: 255 })
-  contactInfo: string;
+  @Column('character varying', { length: 255, name: 'email', nullable: true })
+  email: string | null;
 
   @OneToMany(
     () => BusinessSupplier,

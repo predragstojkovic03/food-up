@@ -3,7 +3,7 @@ import { Entity } from 'src/shared/domain/entity';
 import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
 import { generateId } from 'src/shared/domain/generate-id';
 import { ManagedSupplierCreatedEvent } from './events/managed-supplier-created.even';
-import { SupplierContactInfoChangedEvent } from './events/supplier-contact-info-changed.event';
+import { SupplierEmailChangedEvent } from './events/supplier-email-changed.event';
 import { SupplierInfoUpdatedEvent } from './events/supplier-info-updated.event';
 import { SupplierNameChangedEvent } from './events/supplier-name-changed.event';
 import { SupplierRegisteredEvent } from './events/supplier-registered.event';
@@ -11,14 +11,14 @@ import { SupplierRegisteredEvent } from './events/supplier-registered.event';
 export class Supplier extends Entity {
   static register(
     name: string,
-    contactInfo: string,
+    email: string | null,
     identityId: string,
   ): Supplier {
     const supplier = new Supplier(
       generateId(),
       name,
       SupplierType.Standalone,
-      contactInfo,
+      email,
       [],
       undefined,
       identityId,
@@ -31,7 +31,7 @@ export class Supplier extends Entity {
 
   static createManaged(
     name: string,
-    contactInfo: string,
+    email: string | null,
     businessIds: string[],
     managingBusinessId: string,
   ): Supplier {
@@ -39,7 +39,7 @@ export class Supplier extends Entity {
       generateId(),
       name,
       SupplierType.Managed,
-      contactInfo,
+      email,
       businessIds,
       managingBusinessId,
     );
@@ -53,7 +53,7 @@ export class Supplier extends Entity {
     id: string,
     name: string,
     type: SupplierType,
-    contactInfo: string,
+    email: string | null,
     businessIds: string[] = [],
     managingBusinessId?: string,
     identityId?: string,
@@ -62,7 +62,7 @@ export class Supplier extends Entity {
       id,
       name,
       type,
-      contactInfo,
+      email,
       businessIds,
       managingBusinessId,
       identityId,
@@ -73,7 +73,7 @@ export class Supplier extends Entity {
     id: string,
     name: string,
     type: SupplierType,
-    contactInfo: string,
+    email: string | null,
     businessIds: string[] = [],
     managingBusinessId?: string,
     identityId?: string,
@@ -95,7 +95,7 @@ export class Supplier extends Entity {
     this._id = id;
     this._name = name;
     this._type = type;
-    this._contactInfo = contactInfo;
+    this._email = email;
     this._businessIds = businessIds;
     this._managingBusinessId = managingBusinessId;
     this._identityId = identityId;
@@ -104,7 +104,7 @@ export class Supplier extends Entity {
   private readonly _id: string;
   private _name: string;
   private readonly _type: SupplierType;
-  private _contactInfo: string;
+  private _email: string | null;
   private readonly _businessIds: string[];
   private readonly _managingBusinessId?: string;
   private readonly _identityId?: string;
@@ -140,13 +140,13 @@ export class Supplier extends Entity {
     return this._type === SupplierType.Managed;
   }
 
-  get contactInfo(): string {
-    return this._contactInfo;
+  get email(): string | null {
+    return this._email;
   }
 
-  set contactInfo(value: string) {
-    this._contactInfo = value;
-    this.addDomainEvent(new SupplierContactInfoChangedEvent(this.id, value));
+  set email(value: string | null) {
+    this._email = value;
+    this.addDomainEvent(new SupplierEmailChangedEvent(this.id, value));
   }
 
   get businessIds(): string[] {
@@ -161,12 +161,12 @@ export class Supplier extends Entity {
     return this._identityId;
   }
 
-  updateInfo(name?: string, contactInfo?: string) {
+  updateInfo(name?: string, email?: string) {
     if (name !== undefined) {
       this.name = name;
     }
-    if (contactInfo !== undefined) {
-      this.contactInfo = contactInfo;
+    if (email !== undefined) {
+      this.email = email;
     }
     this.addDomainEvent(new SupplierInfoUpdatedEvent(this.id));
   }

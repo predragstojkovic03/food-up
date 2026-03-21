@@ -21,4 +21,7 @@ export class MealSelectionWindowResponseDto implements IMealSelectionWindowRespo
 
   @ApiProperty()
   isLocked: boolean;
+
+  @ApiProperty()
+  notifyOnDeadline: boolean;
 }

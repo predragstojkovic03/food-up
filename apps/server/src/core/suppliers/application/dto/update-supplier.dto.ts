@@ -1,4 +1,4 @@
 export type UpdateSupplierDto = {
   name?: string;
-  contactInfo?: string;
+  email?: string;
 };

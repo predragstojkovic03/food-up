@@ -1,19 +1,19 @@
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity()
-export class ReportItem {
+export class OrderSummarySend {
   @PrimaryColumn('character varying', { length: 26 })
   id: string;
 
   @Column('character varying', { length: 26 })
-  reportId: string;
+  windowId: string;
 
   @Column('character varying', { length: 26 })
-  menuItemId: string;
+  supplierId: string;
 
-  @Column('date')
-  date: Date;
+  @Column('timestamptz')
+  sentAt: Date;
 
-  @Column('int')
-  quantity: number;
+  @Column('character varying', { length: 26 })
+  sentByEmployeeId: string;
 }

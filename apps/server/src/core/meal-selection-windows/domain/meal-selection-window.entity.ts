@@ -11,6 +11,7 @@ export class MealSelectionWindow extends Entity {
     targetDates: Set<string>,
     businessId: string,
     menuPeriodIds: string[],
+    notifyOnDeadline: boolean = false,
   ): MealSelectionWindow {
     const window = new MealSelectionWindow(
       generateId(),
@@ -20,6 +21,7 @@ export class MealSelectionWindow extends Entity {
       businessId,
       menuPeriodIds,
       true, // New windows are locked by default until explicitly unlocked
+      notifyOnDeadline,
     );
     window.addDomainEvent(new MealSelectionWindowCreatedEvent(window.id));
     return window;
@@ -33,6 +35,7 @@ export class MealSelectionWindow extends Entity {
     businessId: string,
     menuPeriodIds: string[],
     isLocked: boolean,
+    notifyOnDeadline: boolean = false,
   ): MealSelectionWindow {
     return new MealSelectionWindow(
       id,
@@ -42,6 +45,7 @@ export class MealSelectionWindow extends Entity {
       businessId,
       menuPeriodIds,
       isLocked,
+      notifyOnDeadline,
     );
   }
 
@@ -53,6 +57,7 @@ export class MealSelectionWindow extends Entity {
     businessId: string,
     menuPeriodIds: string[],
     isLocked: boolean,
+    notifyOnDeadline: boolean = false,
   ) {
     super();
     MealSelectionWindow.verifyInputs(menuPeriodIds, startTime, endTime);
@@ -63,6 +68,7 @@ export class MealSelectionWindow extends Entity {
     this.menuPeriodIds = menuPeriodIds;
     this.targetDates = targetDates;
     this.isLocked = isLocked;
+    this.notifyOnDeadline = notifyOnDeadline;
   }
 
   update(
@@ -72,6 +78,7 @@ export class MealSelectionWindow extends Entity {
     menuPeriodIds?: string[],
     targetDates?: Set<string>,
     isLocked?: boolean,
+    notifyOnDeadline?: boolean,
   ): this {
     MealSelectionWindow.verifyInputs(
       menuPeriodIds ?? this.menuPeriodIds,
@@ -85,11 +92,14 @@ export class MealSelectionWindow extends Entity {
     this.menuPeriodIds = menuPeriodIds ?? this.menuPeriodIds;
     this.targetDates = targetDates ?? this.targetDates;
     this.isLocked = isLocked ?? this.isLocked;
+    this.notifyOnDeadline = notifyOnDeadline ?? this.notifyOnDeadline;
 
     this.addDomainEvent(
       new MealSelectionWindowUpdatedEvent({
         mealSelectionWindowId: this.id,
+        endTime: this.endTime,
         isLocked: this.isLocked,
+        notifyOnDeadline: this.notifyOnDeadline,
       }),
     );
     return this;
@@ -112,6 +122,7 @@ export class MealSelectionWindow extends Entity {
   businessId: string;
   menuPeriodIds: string[];
   isLocked: boolean;
+  notifyOnDeadline: boolean;
 
   private static verifyInputs(
     menuPeriodIds: string[],

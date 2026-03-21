@@ -6,10 +6,6 @@ export class RegisterSupplierDto {
   @IsString()
   name: string;
 
-  @ApiProperty()
-  @IsString()
-  contactInfo: string;
-
   @ApiProperty({ type: [String], required: false })
   @IsArray()
   @IsOptional()

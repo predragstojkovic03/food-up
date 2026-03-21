@@ -23,4 +23,8 @@ export class ChangeRequestsQueryService {
   findPendingCountByWindow(windowId: string): Promise<number> {
     return this._repository.findPendingCountByWindow(windowId);
   }
+
+  hasApprovedCrForWindowAfter(windowId: string, since: Date): Promise<boolean> {
+    return this._repository.hasApprovedCrForWindowAfter(windowId, since);
+  }
 }

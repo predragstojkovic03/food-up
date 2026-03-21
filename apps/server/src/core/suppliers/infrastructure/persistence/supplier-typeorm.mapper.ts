@@ -11,7 +11,7 @@ export class SupplierTypeOrmMapper extends TypeOrmMapper<
       persistence.id,
       persistence.name,
       persistence.type,
-      persistence.contactInfo,
+      persistence.email,
       persistence?.businessSuppliers?.map((bs) => bs.business?.id) ?? [],
       persistence.managingBusinessId ?? undefined,
       persistence.identity?.id,
@@ -23,7 +23,7 @@ export class SupplierTypeOrmMapper extends TypeOrmMapper<
     persistence.id = domain.id;
     persistence.name = domain.name;
     persistence.type = domain.type;
-    persistence.contactInfo = domain.contactInfo;
+    persistence.email = domain.email;
     persistence.managingBusinessId = domain.managingBusinessId ?? null;
     persistence.identity = { id: domain.identityId } as any;
     return persistence;
@@ -36,8 +36,7 @@ export class SupplierTypeOrmMapper extends TypeOrmMapper<
     if (domain.id !== undefined) persistence.id = domain.id;
     if (domain.name !== undefined) persistence.name = domain.name;
     if (domain.type !== undefined) persistence.type = domain.type;
-    if (domain.contactInfo !== undefined)
-      persistence.contactInfo = domain.contactInfo;
+    if (domain.email !== undefined) persistence.email = domain.email;
     if (domain.managingBusinessId !== undefined) {
       persistence.managingBusinessId = domain.managingBusinessId ?? null;
     }

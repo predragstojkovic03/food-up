@@ -207,6 +207,7 @@ export class MealSelectionWindowsController {
       menuPeriodIds: entity.menuPeriodIds,
       targetDates: Array.from(entity.targetDates),
       isLocked: entity.isLocked,
+      notifyOnDeadline: entity.notifyOnDeadline,
     };
     return plainToInstance(MealSelectionWindowResponseDto, dto, {
       strategy: 'excludeAll',

@@ -1,68 +1,63 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, StreamableFile } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
-
+import { CurrentIdentity } from 'src/core/auth/infrastructure/current-identity.decorator';
+import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
+import { RequiredEmployeeRole } from 'src/core/employees/presentation/rest/employee-role.decorator';
+import { RequiredIdentityType } from 'src/core/identity/presentation/rest/identity-type.decorator';
+import { EmployeeRole, IdentityType } from '@food-up/shared';
 import { ReportsService } from '../../application/reports.service';
-import { CreateReportDto } from './dto/create-report.dto';
-import { ReportResponseDto } from './dto/report-response.dto';
-import { UpdateReportDto } from './dto/update-report.dto';
+import { SendReportDto } from './dto/send-report.dto';
+import { SupplierSendStatusResponseDto } from './dto/supplier-send-status-response.dto';
 
 @ApiTags('Reports')
 @Controller('reports')
+@ApiBearerAuth()
+@RequiredIdentityType(IdentityType.Employee)
+@RequiredEmployeeRole(EmployeeRole.Manager)
 export class ReportsController {
   constructor(private readonly _reportsService: ReportsService) {}
 
-  @Post()
-  @ApiOperation({ summary: 'Create a new report' })
-  @ApiResponse({ status: 201, type: ReportResponseDto })
-  @ApiBearerAuth()
-  async create(@Body() dto: CreateReportDto): Promise<ReportResponseDto> {
-    const report = await this._reportsService.create(dto);
-    return plainToInstance(ReportResponseDto, report);
+  @Get('export')
+  @ApiOperation({ summary: 'Download XLSX order summary for a meal selection window' })
+  @ApiQuery({ name: 'windowId', required: true, type: String })
+  @ApiResponse({ status: 200, description: 'XLSX file download' })
+  async exportXlsx(
+    @Query('windowId') windowId: string,
+  ): Promise<StreamableFile> {
+    const { buffer, filename } = await this._reportsService.generateXlsx(windowId);
+    return new StreamableFile(buffer, {
+      disposition: `attachment; filename="${filename}"`,
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
   }
 
-  @Get()
-  @ApiOperation({ summary: 'Get all reports' })
-  @ApiResponse({ status: 200, type: [ReportResponseDto] })
-  @ApiBearerAuth()
-  async findAll(): Promise<ReportResponseDto[]> {
-    const reports = await this._reportsService.findAll();
-    return plainToInstance(ReportResponseDto, reports);
+  @Get('send-status')
+  @ApiOperation({ summary: 'Get send status per supplier for a meal selection window' })
+  @ApiQuery({ name: 'windowId', required: true, type: String })
+  @ApiResponse({ status: 200, type: [SupplierSendStatusResponseDto] })
+  async getSendStatus(
+    @Query('windowId') windowId: string,
+  ): Promise<SupplierSendStatusResponseDto[]> {
+    const statuses = await this._reportsService.getSendStatus(windowId);
+    return plainToInstance(SupplierSendStatusResponseDto, statuses, {
+      strategy: 'excludeAll',
+    });
   }
 
-  @Get(':id')
-  @ApiBearerAuth()
-  async findOne(@Param('id') id: string): Promise<ReportResponseDto> {
-    const report = await this._reportsService.findOne(id);
-    return plainToInstance(ReportResponseDto, report);
-  }
-
-  @Patch(':id')
-  @ApiBearerAuth()
-  async update(
-    @Param('id') id: string,
-    @Body() dto: UpdateReportDto,
-  ): Promise<ReportResponseDto> {
-    const report = await this._reportsService.update(id, dto);
-    return plainToInstance(ReportResponseDto, report);
-  }
-
-  @Delete(':id')
-  @ApiBearerAuth()
-  async delete(@Param('id') id: string): Promise<void> {
-    return this._reportsService.delete(id);
+  @Post('send')
+  @ApiOperation({ summary: 'Send order summary email to selected suppliers' })
+  @ApiResponse({ status: 201, description: 'Emails sent' })
+  async sendToSuppliers(
+    @Body() dto: SendReportDto,
+    @CurrentIdentity() { sub }: JwtPayload,
+  ): Promise<void> {
+    await this._reportsService.sendToSuppliers(dto.windowId, dto.supplierIds, sub);
   }
 }

@@ -48,6 +48,19 @@ export class ChangeRequestsQueryTypeOrmRepository
       .getCount();
   }
 
+  async hasApprovedCrForWindowAfter(
+    windowId: string,
+    since: Date,
+  ): Promise<boolean> {
+    const count = await this._repository
+      .createQueryBuilder('cr')
+      .where('cr.mealSelectionWindowId = :windowId', { windowId })
+      .andWhere('cr.status = :status', { status: ChangeRequestStatus.Approved })
+      .andWhere('cr.approvedAt > :since', { since })
+      .getCount();
+    return count > 0;
+  }
+
   private _buildRichQuery() {
     return this._repository
       .createQueryBuilder('cr')

@@ -52,5 +52,6 @@ const ChangeRequestsQueryRepositoryProvider: Provider = {
     ChangeRequestsQueryService,
     ChangeRequestEventHandler,
   ],
+  exports: [ChangeRequestsQueryService],
 })
 export class ChangeRequestsModule {}

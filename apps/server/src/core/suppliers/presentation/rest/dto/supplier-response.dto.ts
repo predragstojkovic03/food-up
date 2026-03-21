@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { SupplierType } from '@food-up/shared';
 
@@ -15,15 +15,15 @@ export class SupplierResponseDto {
   @Expose()
   type: SupplierType;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   @Expose()
-  contactInfo: string;
+  email: string | null;
 
   @ApiProperty({ type: [String] })
   @Expose()
   businessIds: string[];
 
-  @ApiProperty({ required: false })
+  @ApiPropertyOptional()
   @Expose()
   managingBusinessId?: string;
 }
