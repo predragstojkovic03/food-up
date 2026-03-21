@@ -78,7 +78,11 @@ export default function MealSelectionFlowPage() {
     if (!windowData || selectionsLoading || initialized.current) return;
     initialized.current = true;
 
-    const initial: DaySelection[] = windowData.targetDates.map((date) => {
+    const activeDates = windowData.targetDates.filter((date) =>
+      windowData.menuItems.some((item) => item.day === date),
+    );
+
+    const initial: DaySelection[] = activeDates.map((date) => {
       const existing = existingSelections.filter((s) => s.date === date);
       const choices: Partial<Record<MealType, string>> = {};
       const existingIds: Partial<Record<MealType, string>> = {};
@@ -109,7 +113,13 @@ export default function MealSelectionFlowPage() {
       }))
     : [];
 
-  const totalDays = windowData?.targetDates.length ?? 0;
+  const activeDates = windowData
+    ? windowData.targetDates.filter((date) =>
+        windowData.menuItems.some((item) => item.day === date),
+      )
+    : [];
+
+  const totalDays = activeDates.length;
   const isSummaryStep = step === totalDays;
 
   // ── Handlers ──────────────────────────────────────────────────────────────
@@ -175,6 +185,10 @@ export default function MealSelectionFlowPage() {
   const handleEditDay = useCallback((index: number) => {
     setStep(index);
   }, []);
+
+  const handleExit = useCallback(() => {
+    navigate('/employee');
+  }, [navigate]);
 
   // ── Submit ─────────────────────────────────────────────────────────────────
 
@@ -245,7 +259,7 @@ export default function MealSelectionFlowPage() {
     );
   }
 
-  const currentDate = windowData!.targetDates[step];
+  const currentDate = activeDates[step];
   const currentSelection = daySelections[step];
   const itemsByType = currentDate
     ? buildItemsByType(windowData!.menuItems, currentDate)
@@ -265,6 +279,7 @@ export default function MealSelectionFlowPage() {
             total={totalDays}
             date={currentDate}
             onBack={step > 0 ? handleBack : undefined}
+            onExit={handleExit}
           />
 
           <div className="animate-in fade-in slide-in-from-right-4 duration-200">

@@ -11,7 +11,7 @@ export class MenuItem {
   @Column('decimal', { nullable: true })
   price: number | null;
 
-  @ManyToOne(() => MenuPeriod, { eager: true })
+  @ManyToOne(() => MenuPeriod, { eager: true, onDelete: 'CASCADE' })
   menuPeriod: MenuPeriod;
 
   @Column('date')
