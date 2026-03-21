@@ -4,8 +4,7 @@ import { ChangeRequestsModule } from 'src/core/change-requests/change-requests.m
 import { EmployeesModule } from 'src/core/employees/employees.module';
 import { MealSelectionWindowsModule } from 'src/core/meal-selection-windows/meal-selection-windows.module';
 import { ReportsModule } from 'src/core/reports/reports.module';
-import { I_MAIL_SERVICE } from './mail.service.interface';
-import { ResendMailService } from './resend-mail.service';
+import { MailModule } from './mail/mail.module';
 import { BulkChangeRequestStatusProcessor } from './processors/bulk-change-request-status.processor';
 import { ChangeRequestStatusProcessor } from './processors/change-request-status.processor';
 import { MealSelectionWindowDeadlineProcessor } from './processors/meal-selection-window-deadline.processor';
@@ -26,6 +25,7 @@ import { RedisClientProvider } from './redis-client.provider';
       { name: BULK_CHANGE_REQUEST_QUEUE },
       { name: WINDOW_DEADLINE_QUEUE },
     ),
+    MailModule,
     EmployeesModule,
     MealSelectionWindowsModule,
     ReportsModule,
@@ -33,7 +33,6 @@ import { RedisClientProvider } from './redis-client.provider';
   ],
   providers: [
     RedisClientProvider,
-    { provide: I_MAIL_SERVICE, useClass: ResendMailService },
     MealSelectionWindowOpenedProcessor,
     ChangeRequestStatusProcessor,
     BulkChangeRequestStatusProcessor,

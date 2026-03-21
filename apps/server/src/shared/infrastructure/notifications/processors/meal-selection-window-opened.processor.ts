@@ -11,7 +11,7 @@ import {
   IConfigService,
 } from 'src/shared/application/config-service.interface';
 import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
-import { I_MAIL_SERVICE, IMailService } from '../mail.service.interface';
+import { I_MAIL_SERVICE, IMailService } from '../mail/mail.service.interface';
 import { MEAL_WINDOW_QUEUE } from '../queue-names';
 import { REDIS_CLIENT } from '../redis-client.provider';
 

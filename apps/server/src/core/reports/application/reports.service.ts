@@ -3,22 +3,22 @@ import * as ExcelJS from 'exceljs';
 import { ChangeRequestsQueryService } from 'src/core/change-requests/application/queries/change-requests-query.service';
 import { IdentityService } from 'src/core/identity/application/identity.service';
 import { SuppliersService } from 'src/core/suppliers/application/suppliers.service';
-import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
 import { DomainEvents } from 'src/shared/application/domain-events/domain-events.decorator';
+import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
 import {
   I_MAIL_SERVICE,
   IMailService,
-} from 'src/shared/infrastructure/notifications/mail.service.interface';
-import {
-  IOrderSummarySendsRepository,
-  I_ORDER_SUMMARY_SENDS_REPOSITORY,
-} from '../domain/order-summary-sends.repository.interface';
+} from 'src/shared/infrastructure/notifications/mail/mail.service.interface';
 import { OrderSummarySend } from '../domain/order-summary-send.entity';
 import {
-  IOrderSummaryQueryRepository,
-  I_ORDER_SUMMARY_QUERY_REPOSITORY,
-} from './queries/order-summary-query-repository.interface';
+  I_ORDER_SUMMARY_SENDS_REPOSITORY,
+  IOrderSummarySendsRepository,
+} from '../domain/order-summary-sends.repository.interface';
 import { OrderSummaryRow } from './queries/dto/order-summary-row.dto';
+import {
+  I_ORDER_SUMMARY_QUERY_REPOSITORY,
+  IOrderSummaryQueryRepository,
+} from './queries/order-summary-query-repository.interface';
 
 export type SupplierSendStatus = {
   supplierId: string;
@@ -30,10 +30,36 @@ export type SupplierSendStatus = {
 };
 
 const FUN_WORDS = [
-  'mango', 'delta', 'tango', 'kiwi', 'cobalt', 'amber', 'echo', 'nova',
-  'jade', 'sierra', 'solar', 'lunar', 'pepper', 'maple', 'cedar', 'onyx',
-  'basil', 'zephyr', 'coral', 'indigo', 'saffron', 'jasper', 'lotus',
-  'cinnamon', 'quartz', 'papaya', 'nimbus', 'falcon', 'bravo', 'pluto',
+  'mango',
+  'delta',
+  'tango',
+  'kiwi',
+  'cobalt',
+  'amber',
+  'echo',
+  'nova',
+  'jade',
+  'sierra',
+  'solar',
+  'lunar',
+  'pepper',
+  'maple',
+  'cedar',
+  'onyx',
+  'basil',
+  'zephyr',
+  'coral',
+  'indigo',
+  'saffron',
+  'jasper',
+  'lotus',
+  'cinnamon',
+  'quartz',
+  'papaya',
+  'nimbus',
+  'falcon',
+  'bravo',
+  'pluto',
 ];
 
 @Injectable()
@@ -55,7 +81,9 @@ export class ReportsService {
     return this._queryRepository.getByWindow(windowId);
   }
 
-  async generateXlsx(windowId: string): Promise<{ buffer: Buffer; filename: string }> {
+  async generateXlsx(
+    windowId: string,
+  ): Promise<{ buffer: Buffer; filename: string }> {
     const rows = await this._queryRepository.getByWindow(windowId);
 
     const workbook = new ExcelJS.Workbook();
@@ -75,7 +103,11 @@ export class ReportsService {
         sheet.getRow(1).font = { bold: true };
 
         for (const row of supplierRows) {
-          sheet.addRow({ date: row.date, meal: row.mealName, qty: row.totalQuantity });
+          sheet.addRow({
+            date: row.date,
+            meal: row.mealName,
+            qty: row.totalQuantity,
+          });
         }
       }
     }
@@ -98,10 +130,11 @@ export class ReportsService {
     return Promise.all(
       uniqueSupplierIds.map(async (supplierId) => {
         const supplier = await this._suppliersService.findOne(supplierId);
-        const lastSend = await this._sendsRepository.findLastByWindowAndSupplier(
-          windowId,
-          supplierId,
-        );
+        const lastSend =
+          await this._sendsRepository.findLastByWindowAndSupplier(
+            windowId,
+            supplierId,
+          );
 
         const lastSentAt = lastSend?.sentAt ?? null;
         let hasNewDataSinceLastSend = false;
@@ -155,10 +188,11 @@ export class ReportsService {
         supplierId,
       );
 
-      const previousSend = await this._sendsRepository.findLastByWindowAndSupplier(
-        windowId,
-        supplierId,
-      );
+      const previousSend =
+        await this._sendsRepository.findLastByWindowAndSupplier(
+          windowId,
+          supplierId,
+        );
       const isFirstSend = previousSend === null;
 
       const subject = isFirstSend
@@ -171,7 +205,11 @@ export class ReportsService {
         cc: managerEmail ?? undefined,
       });
 
-      const send = OrderSummarySend.create(windowId, supplierId, managerIdentityId);
+      const send = OrderSummarySend.create(
+        windowId,
+        supplierId,
+        managerIdentityId,
+      );
       await this._sendsRepository.insert(send);
 
       this._logger.log(
@@ -211,7 +249,9 @@ export class ReportsService {
     `;
   }
 
-  private _groupBySupplier(rows: OrderSummaryRow[]): Map<string, OrderSummaryRow[]> {
+  private _groupBySupplier(
+    rows: OrderSummaryRow[],
+  ): Map<string, OrderSummaryRow[]> {
     const map = new Map<string, OrderSummaryRow[]>();
     for (const row of rows) {
       const existing = map.get(row.supplierName);
