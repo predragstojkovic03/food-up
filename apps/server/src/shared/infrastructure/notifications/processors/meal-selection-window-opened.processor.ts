@@ -44,16 +44,30 @@ export class MealSelectionWindowOpenedProcessor extends WorkerHost {
 
     const webAppUrl = this._configService.get('WEB_APP_URL');
 
-    await this._mailService.sendBatch(
+    const results = await Promise.allSettled(
       employees
         .filter((employee) => employee.email)
-        .map((employee) => ({
-          to: employee.email,
-          subject: 'Meal selection window is now open',
-          html: `<p>The meal selection window is now open. <a href="${webAppUrl}">Click here</a> to select your meals.</p>`,
-        })),
+        .map(async (employee) => {
+          const sentKey = `meal-window-notified:${mealSelectionWindowId}:${employee.id}`;
+          if (await this._redis.get(sentKey)) return;
+          await this._mailService.send(
+            employee.email,
+            'Meal selection window is now open',
+            `<p>The meal selection window is now open. <a href="${webAppUrl}">Click here</a> to select your meals.</p>`,
+          );
+          // Mark AFTER successful send — if send throws, key stays unset and employee is retried
+          await this._redis.set(sentKey, '1', 'EX', COOLDOWN_SECONDS);
+        }),
     );
 
+    const failures = results.filter((r) => r.status === 'rejected');
+    if (failures.length > 0) {
+      throw new Error(
+        `${failures.length} of ${employees.length} notification emails failed to send`,
+      );
+    }
+
+    // Set window-level cooldown only after all sends succeed
     await this._redis.set(cooldownKey, '1', 'EX', COOLDOWN_SECONDS);
   }
 }

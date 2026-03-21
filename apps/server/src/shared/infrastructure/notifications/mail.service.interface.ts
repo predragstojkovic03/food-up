@@ -2,6 +2,7 @@ export const I_MAIL_SERVICE = Symbol('IMailService');
 
 export interface MailOptions {
   cc?: string;
+  replyTo?: string;
 }
 
 export interface IMailService {

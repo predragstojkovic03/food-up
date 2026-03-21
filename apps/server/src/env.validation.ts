@@ -48,6 +48,9 @@ export class EnvironmentVariables {
 
   @IsString()
   MAIL_FROM: string;
+
+  @IsString()
+  RESEND_API_KEY: string;
 }
 
 export function validate(config: Record<string, unknown>) {
