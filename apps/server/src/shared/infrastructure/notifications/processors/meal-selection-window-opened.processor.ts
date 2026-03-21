@@ -44,16 +44,14 @@ export class MealSelectionWindowOpenedProcessor extends WorkerHost {
 
     const webAppUrl = this._configService.get('WEB_APP_URL');
 
-    await Promise.all(
+    await this._mailService.sendBatch(
       employees
         .filter((employee) => employee.email)
-        .map((employee) =>
-          this._mailService.send(
-            employee.email,
-            'Meal selection window is now open',
-            `<p>The meal selection window is now open. <a href="${webAppUrl}">Click here</a> to select your meals.</p>`,
-          ),
-        ),
+        .map((employee) => ({
+          to: employee.email,
+          subject: 'Meal selection window is now open',
+          html: `<p>The meal selection window is now open. <a href="${webAppUrl}">Click here</a> to select your meals.</p>`,
+        })),
     );
 
     await this._redis.set(cooldownKey, '1', 'EX', COOLDOWN_SECONDS);

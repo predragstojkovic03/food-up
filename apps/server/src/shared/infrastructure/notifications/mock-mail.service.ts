@@ -9,4 +9,12 @@ export class MockMailService implements IMailService {
   async send(to: string, subject: string, html: string): Promise<void> {
     this._logger.log(`[MAIL] to: ${to} | subject: ${subject}\n${html}`);
   }
+
+  async sendBatch(
+    emails: Array<{ to: string; subject: string; html: string }>,
+  ): Promise<void> {
+    emails.forEach(({ to, subject, html }) => {
+      this._logger.log(`[MAIL] to: ${to} | subject: ${subject}\n${html}`);
+    });
+  }
 }
