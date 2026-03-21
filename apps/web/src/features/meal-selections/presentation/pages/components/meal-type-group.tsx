@@ -9,6 +9,7 @@ const TYPE_LABELS: Record<MealType, string> = {
   [MealType.Breakfast]: 'Breakfast',
   [MealType.Dinner]: 'Dinner',
   [MealType.Dessert]: 'Dessert',
+  [MealType.Bread]: 'Bread',
 };
 
 interface MealTypeGroupProps {

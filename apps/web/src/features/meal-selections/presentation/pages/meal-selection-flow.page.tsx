@@ -13,6 +13,7 @@ import { DaySelection, MenuItemOption } from './types';
 
 const TYPE_ORDER: MealType[] = [
   MealType.Breakfast,
+  MealType.Bread,
   MealType.Soup,
   MealType.Lunch,
   MealType.Dinner,
