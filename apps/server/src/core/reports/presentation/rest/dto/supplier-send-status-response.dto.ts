@@ -1,7 +1,8 @@
+import { ISupplierSendStatus } from '@food-up/shared';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 
-export class SupplierSendStatusResponseDto {
+export class SupplierSendStatusResponseDto implements ISupplierSendStatus {
   @ApiProperty()
   @Expose()
   supplierId: string;
@@ -16,7 +17,7 @@ export class SupplierSendStatusResponseDto {
 
   @ApiPropertyOptional({ type: String, nullable: true })
   @Expose()
-  lastSentAt: Date | null;
+  lastSentAt: string | null;
 
   @ApiProperty()
   @Expose()

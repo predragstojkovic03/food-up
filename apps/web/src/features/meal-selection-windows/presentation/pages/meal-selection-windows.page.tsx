@@ -10,13 +10,17 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useServices } from '@/shared/infrastructure/di/service.context';
 import {
   IMealSelectionResponse,
   IMealSelectionWindowResponse,
   IMenuPeriodResponse,
+  ISupplierSendStatus,
   IWindowMenuItemResponse,
 } from '@food-up/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -24,9 +28,11 @@ import {
   CalendarRange,
   ChevronDown,
   ChevronRight,
+  Download,
   Lock,
   LockOpen,
   Plus,
+  Send,
   Trash2,
   X,
 } from 'lucide-react';
@@ -95,6 +101,7 @@ export default function MealSelectionWindowsPage() {
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
   const [targetDates, setTargetDates] = useState<string[]>(['']);
+  const [notifyOnDeadline, setNotifyOnDeadline] = useState(false);
   const [expandedWindowId, setExpandedWindowId] = useState<string | null>(null);
 
   function toggleMenuPeriod(id: string) {
@@ -108,6 +115,7 @@ export default function MealSelectionWindowsPage() {
     setStartTime('');
     setEndTime('');
     setTargetDates(['']);
+    setNotifyOnDeadline(false);
   }
 
   function handleCreate(e: React.FormEvent) {
@@ -118,6 +126,7 @@ export default function MealSelectionWindowsPage() {
         startTime: new Date(startTime).toISOString(),
         endTime: new Date(endTime).toISOString(),
         targetDates: targetDates.filter(Boolean),
+        notifyOnDeadline,
       },
       { onSuccess: () => { resetForm(); setShowCreatePanel(false); } },
     );
@@ -155,12 +164,14 @@ export default function MealSelectionWindowsPage() {
           startTime={startTime}
           endTime={endTime}
           targetDates={targetDates}
+          notifyOnDeadline={notifyOnDeadline}
           isPending={createWindow.isPending}
           isError={createWindow.isError}
           onToggleMenuPeriod={toggleMenuPeriod}
           onStartTimeChange={setStartTime}
           onEndTimeChange={setEndTime}
           onTargetDatesChange={setTargetDates}
+          onNotifyOnDeadlineChange={setNotifyOnDeadline}
           onSubmit={handleCreate}
           onClose={() => { setShowCreatePanel(false); resetForm(); }}
         />
@@ -267,7 +278,11 @@ export default function MealSelectionWindowsPage() {
               </div>
 
               {isExpanded && (
-                <WindowDetails windowId={window.id} targetDates={window.targetDates} />
+                <WindowDetails
+                  windowId={window.id}
+                  endTime={window.endTime}
+                  targetDates={window.targetDates}
+                />
               )}
             </div>
           );
@@ -279,8 +294,15 @@ export default function MealSelectionWindowsPage() {
 
 // ─── Expanded Details ────────────────────────────────────────────────────────
 
-function WindowDetails({ windowId, targetDates }: { windowId: string; targetDates: string[] }) {
-  const { mealSelectionWindowService, mealSelectionService } = useServices();
+interface WindowDetailsProps {
+  windowId: string;
+  endTime: string;
+  targetDates: string[];
+}
+
+function WindowDetails({ windowId, endTime, targetDates }: WindowDetailsProps) {
+  const { mealSelectionWindowService, mealSelectionService, reportService } = useServices();
+  const isExpired = new Date(endTime) < new Date();
 
   const { data: menuItems = [], isLoading: loadingItems } = useQuery<IWindowMenuItemResponse[]>({
     queryKey: ['meal-selection-windows', windowId, 'menu-items'],
@@ -292,11 +314,14 @@ function WindowDetails({ windowId, targetDates }: { windowId: string; targetDate
     queryFn: () => mealSelectionService.getByWindow(windowId),
   });
 
+  const downloadXlsx = useMutation({
+    mutationFn: () => reportService.downloadXlsx(windowId),
+  });
+
   const isLoading = loadingItems || loadingSelections;
 
-  // Group menu items by target date (item.day), then aggregate quantities per item
   const quantityByMenuItemId = selections.reduce<Record<string, number>>((acc, s) => {
-    acc[s.menuItemId] = (acc[s.menuItemId] ?? 0) + (s.quantity ?? 1);
+    if (s.menuItemId) acc[s.menuItemId] = (acc[s.menuItemId] ?? 0) + (s.quantity ?? 1);
     return acc;
   }, {});
 
@@ -367,6 +392,165 @@ function WindowDetails({ windowId, targetDates }: { windowId: string; targetDate
           </div>
         );
       })}
+
+      <Separator />
+
+      <div className='space-y-3'>
+        <div className='flex items-center justify-between'>
+          <h3 className='text-xs font-semibold text-muted-foreground uppercase tracking-wide'>
+            Order Summary
+          </h3>
+          <div className='flex items-center gap-2'>
+            {downloadXlsx.isError && (
+              <span className='text-xs text-destructive'>Download failed.</span>
+            )}
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={() => downloadXlsx.mutate()}
+              disabled={downloadXlsx.isPending}
+              className='gap-1.5 text-xs'
+            >
+              <Download size={13} />
+              {downloadXlsx.isPending ? 'Downloading…' : 'Download XLSX'}
+            </Button>
+          </div>
+        </div>
+
+        {isExpired && <WindowReportsPanel windowId={windowId} />}
+      </div>
+    </div>
+  );
+}
+
+// ─── Reports Panel (send-to-suppliers, expired windows only) ─────────────────
+
+function WindowReportsPanel({ windowId }: { windowId: string }) {
+  const { reportService } = useServices();
+  const queryClient = useQueryClient();
+
+  const SEND_STATUS_KEY = ['reports', 'send-status', windowId];
+
+  const { data: statuses = [], isLoading } = useQuery<ISupplierSendStatus[]>({
+    queryKey: SEND_STATUS_KEY,
+    queryFn: () => reportService.getSendStatus(windowId),
+  });
+
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  const sendMutation = useMutation({
+    mutationFn: (supplierIds: string[]) =>
+      reportService.sendToSuppliers(windowId, supplierIds),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: SEND_STATUS_KEY });
+      setSelectedIds([]);
+    },
+  });
+
+  function toggleSupplier(supplierId: string) {
+    setSelectedIds((prev) =>
+      prev.includes(supplierId) ? prev.filter((id) => id !== supplierId) : [...prev, supplierId],
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className='space-y-2'>
+        {[1, 2, 3].map((i) => (
+          <div key={i} className='grid grid-cols-[auto_1fr_1fr_1fr_auto] gap-4 items-center'>
+            <Skeleton className='h-4 w-4 rounded' />
+            <Skeleton className='h-4 w-32' />
+            <Skeleton className='h-4 w-40' />
+            <Skeleton className='h-4 w-24' />
+            <Skeleton className='h-5 w-16 rounded-full' />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (statuses.length === 0) {
+    return (
+      <p className='text-xs text-muted-foreground'>No supplier data for this window.</p>
+    );
+  }
+
+  return (
+    <div className='space-y-3'>
+      <h4 className='text-xs font-medium text-muted-foreground'>Send to Suppliers</h4>
+
+      <div className='border rounded-lg overflow-hidden'>
+        <div className='grid grid-cols-[auto_1fr_1fr_1fr_auto] text-xs font-medium text-muted-foreground bg-muted/40 px-3 py-2 border-b gap-4'>
+          <span />
+          <span>Supplier</span>
+          <span>Email</span>
+          <span>Last sent</span>
+          <span />
+        </div>
+
+        {statuses.map((status) => {
+          const isChecked = selectedIds.includes(status.supplierId);
+          return (
+            <div
+              key={status.supplierId}
+              className='grid grid-cols-[auto_1fr_1fr_1fr_auto] items-center px-3 py-2.5 border-b last:border-b-0 gap-4 hover:bg-muted/10 transition-colors'
+            >
+              <Checkbox
+                checked={isChecked}
+                disabled={!status.canSend}
+                onCheckedChange={() => toggleSupplier(status.supplierId)}
+              />
+
+              <span className='text-sm font-medium'>{status.supplierName}</span>
+
+              <span className='text-sm'>
+                {status.email ?? (
+                  <span className='text-muted-foreground'>No email</span>
+                )}
+              </span>
+
+              <span className='text-sm'>
+                {status.lastSentAt ? (
+                  new Date(status.lastSentAt).toLocaleString()
+                ) : (
+                  <span className='text-muted-foreground'>Never</span>
+                )}
+              </span>
+
+              <span>
+                {status.hasNewDataSinceLastSend && (
+                  <span className='text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium whitespace-nowrap'>
+                    New data
+                  </span>
+                )}
+                {!status.canSend && !status.email && (
+                  <span className='text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium whitespace-nowrap'>
+                    No email
+                  </span>
+                )}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className='flex items-center gap-3'>
+        <Button
+          size='sm'
+          disabled={selectedIds.length === 0 || sendMutation.isPending}
+          onClick={() => sendMutation.mutate(selectedIds)}
+          className='gap-1.5'
+        >
+          <Send size={13} />
+          {sendMutation.isPending
+            ? 'Sending…'
+            : `Send to ${selectedIds.length} supplier${selectedIds.length !== 1 ? 's' : ''}`}
+        </Button>
+
+        {sendMutation.isError && (
+          <p className='text-sm text-destructive'>Failed to send. Please try again.</p>
+        )}
+      </div>
     </div>
   );
 }
@@ -380,12 +564,14 @@ interface CreateWindowPanelProps {
   startTime: string;
   endTime: string;
   targetDates: string[];
+  notifyOnDeadline: boolean;
   isPending: boolean;
   isError: boolean;
   onToggleMenuPeriod: (id: string) => void;
   onStartTimeChange: (v: string) => void;
   onEndTimeChange: (v: string) => void;
   onTargetDatesChange: (dates: string[]) => void;
+  onNotifyOnDeadlineChange: (v: boolean) => void;
   onSubmit: (e: React.FormEvent) => void;
   onClose: () => void;
 }
@@ -397,12 +583,14 @@ function CreateWindowPanel({
   startTime,
   endTime,
   targetDates,
+  notifyOnDeadline,
   isPending,
   isError,
   onToggleMenuPeriod,
   onStartTimeChange,
   onEndTimeChange,
   onTargetDatesChange,
+  onNotifyOnDeadlineChange,
   onSubmit,
   onClose,
 }: CreateWindowPanelProps) {
@@ -500,6 +688,23 @@ function CreateWindowPanel({
               <Plus size={12} />
               Add date
             </button>
+          </div>
+        </div>
+
+        <div className='flex items-start gap-3'>
+          <Checkbox
+            id='notify-on-deadline'
+            checked={notifyOnDeadline}
+            onCheckedChange={(checked) => onNotifyOnDeadlineChange(checked === true)}
+            className='mt-0.5'
+          />
+          <div>
+            <Label htmlFor='notify-on-deadline' className='font-normal cursor-pointer'>
+              Auto-send order summary to suppliers when the deadline passes
+            </Label>
+            <p className='text-xs text-muted-foreground mt-0.5'>
+              Only sends if no change requests have been approved.
+            </p>
           </div>
         </div>
 

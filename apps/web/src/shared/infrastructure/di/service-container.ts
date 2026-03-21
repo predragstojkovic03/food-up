@@ -7,6 +7,7 @@ import { IMealSelectionWindowService } from '@/features/meal-selection-windows/d
 import { IMealService } from '@/features/meals/domain/meal-service.interface';
 import { IMenuItemService } from '@/features/menu-items/domain/menu-item-service.interface';
 import { IMenuPeriodService } from '@/features/menu-periods/domain/menu-period-service.interface';
+import { IReportService } from '@/features/reports/domain/report-service.interface';
 import { ISupplierService } from '@/features/suppliers/domain/supplier-service.interface';
 
 export interface ServiceContainer {
@@ -20,4 +21,5 @@ export interface ServiceContainer {
   mealSelectionWindowService: IMealSelectionWindowService;
   mealSelectionService: IMealSelectionService;
   changeRequestService: IChangeRequestService;
+  reportService: IReportService;
 }

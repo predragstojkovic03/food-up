@@ -9,3 +9,4 @@ export * from './supplier';
 export * from './meal-selection';
 export * from './meal-selection-window';
 export * from './menu-period';
+export * from './reports';

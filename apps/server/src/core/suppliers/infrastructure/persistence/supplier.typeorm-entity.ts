@@ -2,6 +2,7 @@ import { BusinessSupplier } from 'src/core/business-suppliers/infrastructure/per
 import { Business } from 'src/core/businesses/infrastructure/persistence/business.typeorm-entity';
 import { Identity } from 'src/core/identity/infrastructure/persistence/identity.typeorm-entity';
 import { Meal } from 'src/core/meals/infrastructure/persistence/meal.typeorm-entity';
+import { MenuPeriod } from 'src/core/menu-periods/infrastructure/persistence/menu-period.typeorm-entity';
 import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
 import {
   BeforeInsert,
@@ -62,6 +63,9 @@ export class Supplier {
 
   @OneToMany(() => Meal, (meal) => meal.supplier)
   meals: Meal[];
+
+  @OneToMany(() => MenuPeriod, (menuPeriod) => menuPeriod.supplier)
+  menuPeriods: MenuPeriod[];
 
   @BeforeInsert()
   @BeforeUpdate()

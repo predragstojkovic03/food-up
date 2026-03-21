@@ -3,6 +3,7 @@ import { AuthService } from '@/features/auth/infrastructure/auth.service';
 import { BusinessService } from '@/features/businesses/infrastructure/business.service';
 import { EmployeeService } from '@/features/employees/infrastructure/employee.service';
 import { ChangeRequestService } from '@/features/change-requests/infrastructure/change-request.service';
+import { ReportService } from '@/features/reports/infrastructure/report.service';
 import { MealSelectionService } from '@/features/meal-selections/infrastructure/meal-selection.service';
 import { MealSelectionWindowService } from '@/features/meal-selection-windows/infrastructure/meal-selection-window.service';
 import { MealService } from '@/features/meals/infrastructure/meal.service';
@@ -31,6 +32,7 @@ const services = {
   mealSelectionWindowService: new MealSelectionWindowService(httpClient),
   mealSelectionService: new MealSelectionService(httpClient),
   changeRequestService: new ChangeRequestService(httpClient),
+  reportService: new ReportService(httpClient),
 };
 
 function SessionGate({ children }: { children: ReactNode }) {

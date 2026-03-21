@@ -71,6 +71,30 @@ export class HttpClient {
     if (!res.ok) throw new HttpError(res.status, await res.text());
   }
 
+  /**
+   * Fetches a binary resource with auth headers and triggers a browser file download.
+   * Reads the filename from the `Content-Disposition` response header.
+   *
+   * @param url - Request URL pointing to a binary resource.
+   * @throws {HttpError} When the response status is not ok.
+   */
+  async download(url: string): Promise<void> {
+    const res = await fetch(url, { headers: this.buildHeaders() });
+    if (!res.ok) throw new HttpError(res.status, await res.text());
+
+    const blob = await res.blob();
+    const disposition = res.headers.get('Content-Disposition') ?? '';
+    const match = disposition.match(/filename="([^"]+)"/);
+    const filename = match?.[1] ?? 'download';
+
+    const objectUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = objectUrl;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(objectUrl);
+  }
+
   private buildHeaders(): HeadersInit {
     const token = this.getToken?.();
     return {
