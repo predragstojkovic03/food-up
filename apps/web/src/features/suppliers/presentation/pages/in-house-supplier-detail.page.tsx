@@ -19,11 +19,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useServices } from '@/shared/infrastructure/di/service.context';
 import {
   IMealResponse,
-  IMenuItemResponse,
   IMenuPeriodResponse,
   MealType,
 } from '@food-up/shared';
@@ -40,9 +40,11 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { MenuPeriodBuilder } from './components/menu-period-builder/menu-period-builder';
 
 const MEAL_TYPE_LABELS: Record<MealType, string> = {
   [MealType.Breakfast]: 'Breakfast',
+  [MealType.Bread]: 'Bread',
   [MealType.Lunch]: 'Lunch',
   [MealType.Dinner]: 'Dinner',
   [MealType.Soup]: 'Soup',
@@ -574,26 +576,6 @@ function MenuPeriodRow({
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ITEMS_KEY }),
   });
 
-  const [day, setDay] = useState('');
-  const [mealId, setMealId] = useState('');
-  const [showAddItem, setShowAddItem] = useState(false);
-
-  function handleAddItem(e: React.FormEvent) {
-    e.preventDefault();
-    createItem.mutate(
-      { menuPeriodId: period.id, day, mealId },
-      {
-        onSuccess: () => {
-          setDay('');
-          setMealId('');
-          setShowAddItem(false);
-        },
-      },
-    );
-  }
-
-  const mealById = Object.fromEntries(meals.map((m) => [m.id, m]));
-
   return (
     <div className='border rounded-lg overflow-hidden'>
       <div className='flex items-center px-4 py-3 gap-3'>
@@ -635,94 +617,22 @@ function MenuPeriodRow({
       </div>
 
       {expanded && (
-        <div className='border-t bg-muted/20 px-4 py-3 space-y-3'>
-          {itemsLoading && (
-            <p className='text-xs text-muted-foreground'>Loading items…</p>
-          )}
-
-          {!itemsLoading && items.length === 0 && !showAddItem && (
-            <p className='text-xs text-muted-foreground'>
-              No meals assigned yet.
-            </p>
-          )}
-
-          {items
-            .sort(
-              (a, b) => new Date(a.day).getTime() - new Date(b.day).getTime(),
-            )
-            .map((item) => (
-              <MenuItemRow
-                key={item.id}
-                item={item}
-                meal={mealById[item.mealId]}
-                isRemoving={
-                  removeItem.isPending && removeItem.variables === item.id
-                }
-                onRemove={() => removeItem.mutate(item.id)}
-              />
-            ))}
-
-          {showAddItem ? (
-            <form
-              onSubmit={handleAddItem}
-              className='flex gap-2 items-end pt-1'
-            >
-              <div>
-                <Label className='mb-1 block text-xs'>Day</Label>
-                <Input
-                  type='date'
-                  value={day}
-                  onChange={(e) => setDay(e.target.value)}
-                  min={period.startDate}
-                  max={period.endDate}
-                  required
-                  className='h-8 text-sm w-36'
-                />
-              </div>
-              <div>
-                <Label className='mb-1 block text-xs'>Meal</Label>
-                <Select value={mealId} onValueChange={(v) => setMealId(v ?? '')} required>
-                  <SelectTrigger className='h-8 w-44 text-sm'>
-                    <SelectValue placeholder='Select meal' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {meals.map((m) => (
-                      <SelectItem key={m.id} value={m.id}>
-                        {m.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button
-                type='submit'
-                size='sm'
-                disabled={createItem.isPending || !mealId}
-              >
-                {createItem.isPending ? '…' : 'Add'}
-              </Button>
-              <Button
-                type='button'
-                size='sm'
-                variant='ghost'
-                onClick={() => setShowAddItem(false)}
-              >
-                Cancel
-              </Button>
-            </form>
+        <div className='border-t'>
+          {itemsLoading ? (
+            <Skeleton className='h-48 m-4' />
           ) : (
-            <button
-              onClick={() => setShowAddItem(true)}
-              className='flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors'
-            >
-              <Plus size={13} />
-              Assign meal to a day
-            </button>
+            <MenuPeriodBuilder
+              period={period}
+              meals={meals}
+              items={items}
+              removingItemId={removeItem.isPending ? removeItem.variables : undefined}
+              onCreate={(data) => createItem.mutate(data)}
+              onRemove={(id) => removeItem.mutate(id)}
+            />
           )}
-
           {createItem.isError && (
-            <p className='text-xs text-destructive'>
-              Failed to add meal. It may already be assigned on that day.
+            <p className='mx-4 mb-3 text-xs text-destructive'>
+              Failed to assign meal.
             </p>
           )}
         </div>
@@ -731,33 +641,3 @@ function MenuPeriodRow({
   );
 }
 
-function MenuItemRow({
-  item,
-  meal,
-  isRemoving,
-  onRemove,
-}: {
-  item: IMenuItemResponse;
-  meal: IMealResponse | undefined;
-  isRemoving: boolean;
-  onRemove: () => void;
-}) {
-  return (
-    <div className='flex items-center gap-3 text-sm'>
-      <span className='text-muted-foreground w-24 shrink-0'>{item.day}</span>
-      <span className='flex-1 font-medium'>{meal?.name ?? item.mealId}</span>
-      {meal && (
-        <span className='text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground'>
-          {MEAL_TYPE_LABELS[meal.type]}
-        </span>
-      )}
-      <button
-        onClick={onRemove}
-        disabled={isRemoving}
-        className='p-1 text-muted-foreground hover:text-destructive disabled:opacity-30'
-      >
-        <Trash2 size={13} />
-      </button>
-    </div>
-  );
-}

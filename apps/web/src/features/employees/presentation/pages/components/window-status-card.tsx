@@ -35,6 +35,7 @@ import { CreateChangeRequestDrawer } from './create-change-request-drawer';
 
 const TYPE_LABELS: Record<MealType, string> = {
   [MealType.Breakfast]: 'Breakfast',
+  [MealType.Bread]: 'Bread',
   [MealType.Soup]: 'Soup',
   [MealType.Lunch]: 'Main',
   [MealType.Dinner]: 'Dinner',
