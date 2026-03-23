@@ -1,6 +1,6 @@
 import { ChangeRequestStatus } from '@food-up/shared';
 import { Processor, WorkerHost } from '@nestjs/bullmq';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { BulkChangeRequestNotificationJobData } from 'src/core/change-requests/infrastructure/change-request-event-handler.service';
 import { EmployeesService } from 'src/core/employees/application/employees.service';
@@ -8,7 +8,6 @@ import { I_MAIL_SERVICE, IMailService } from '../mail/mail.service.interface';
 import { BULK_CHANGE_REQUEST_QUEUE } from '../queue-names';
 
 @Processor(BULK_CHANGE_REQUEST_QUEUE)
-@Injectable()
 export class BulkChangeRequestStatusProcessor extends WorkerHost {
   constructor(
     private readonly _employeesService: EmployeesService,

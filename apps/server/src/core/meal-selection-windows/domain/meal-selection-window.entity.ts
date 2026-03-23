@@ -79,6 +79,7 @@ export class MealSelectionWindow extends Entity {
     targetDates?: Set<string>,
     isLocked?: boolean,
     notifyOnDeadline?: boolean,
+    notifyEmployees?: boolean,
   ): this {
     MealSelectionWindow.verifyInputs(
       menuPeriodIds ?? this.menuPeriodIds,
@@ -97,9 +98,11 @@ export class MealSelectionWindow extends Entity {
     this.addDomainEvent(
       new MealSelectionWindowUpdatedEvent({
         mealSelectionWindowId: this.id,
+        businessId: this.businessId,
         endTime: this.endTime,
         isLocked: this.isLocked,
         notifyOnDeadline: this.notifyOnDeadline,
+        notifyEmployees: notifyEmployees ?? false,
       }),
     );
     return this;

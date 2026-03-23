@@ -279,14 +279,47 @@ export default function MealSelectionWindowsPage() {
 
                 <div className='flex items-center gap-1' onClick={(e) => e.stopPropagation()}>
                   {!isExpired && (
-                    <button
-                      onClick={() => updateWindow.mutate({ id: window.id, isLocked: !window.isLocked })}
-                      disabled={isToggling}
-                      className='p-1.5 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-30'
-                      title={window.isLocked ? 'Unlock — allow employees to select' : 'Lock — prevent new selections'}
-                    >
-                      {window.isLocked ? <LockOpen size={15} /> : <Lock size={15} />}
-                    </button>
+                    window.isLocked ? (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild disabled={isToggling}>
+                          <button
+                            className='p-1.5 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-30'
+                            title='Unlock — allow employees to select'
+                          >
+                            <LockOpen size={15} />
+                          </button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Notify employees?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Do you want to notify employees that this meal selection window is now open?
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel
+                              onClick={() => updateWindow.mutate({ id: window.id, isLocked: false, notifyEmployees: false })}
+                            >
+                              No, just unlock
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => updateWindow.mutate({ id: window.id, isLocked: false, notifyEmployees: true })}
+                            >
+                              Yes, notify
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    ) : (
+                      <button
+                        onClick={() => updateWindow.mutate({ id: window.id, isLocked: true })}
+                        disabled={isToggling}
+                        className='p-1.5 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-30'
+                        title='Lock — prevent new selections'
+                      >
+                        <Lock size={15} />
+                      </button>
+                    )
                   )}
                   <AlertDialog>
                     <AlertDialogTrigger

@@ -2,9 +2,11 @@ import { IEvent } from 'src/shared/domain/event.interface';
 
 export interface MealSelectionWindowUpdatedPayload {
   mealSelectionWindowId: string;
+  businessId: string;
   endTime: Date;
   isLocked: boolean;
   notifyOnDeadline: boolean;
+  notifyEmployees: boolean;
 }
 
 export class MealSelectionWindowUpdatedEvent implements IEvent {

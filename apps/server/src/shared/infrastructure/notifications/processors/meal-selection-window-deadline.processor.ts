@@ -1,20 +1,16 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { EmployeeRole } from '@food-up/shared';
 import { MealSelectionWindowsService } from 'src/core/meal-selection-windows/application/meal-selection-windows.service';
 import { ReportsService } from 'src/core/reports/application/reports.service';
 import { ChangeRequestsQueryService } from 'src/core/change-requests/application/queries/change-requests-query.service';
+import { WindowDeadlineJobData } from 'src/core/meal-selection-windows/infrastructure/meal-selection-window-event-handler.service';
 import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
 import { WINDOW_DEADLINE_QUEUE } from '../queue-names';
 
-export interface WindowDeadlineJobPayload {
-  mealSelectionWindowId: string;
-}
-
 @Processor(WINDOW_DEADLINE_QUEUE)
-@Injectable()
 export class MealSelectionWindowDeadlineProcessor extends WorkerHost {
   constructor(
     private readonly _windowsService: MealSelectionWindowsService,
@@ -26,7 +22,7 @@ export class MealSelectionWindowDeadlineProcessor extends WorkerHost {
     super();
   }
 
-  async process(job: Job<WindowDeadlineJobPayload>): Promise<void> {
+  async process(job: Job<WindowDeadlineJobData>): Promise<void> {
     const { mealSelectionWindowId } = job.data;
 
     const window = await this._windowsService.findOne(mealSelectionWindowId);

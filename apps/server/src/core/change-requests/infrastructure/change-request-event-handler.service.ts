@@ -11,6 +11,11 @@ import {
   CHANGE_REQUEST_QUEUE,
 } from 'src/shared/infrastructure/notifications/queue-names';
 
+export interface ChangeRequestStatusNotificationJobData {
+  employeeId: string;
+  status: ChangeRequestStatus;
+}
+
 export interface BulkChangeRequestNotificationJobData {
   employeeId: string;
   items: Array<{ changeRequestId: string; status: ChangeRequestStatus }>;
@@ -20,9 +25,9 @@ export interface BulkChangeRequestNotificationJobData {
 export class ChangeRequestEventHandler {
   constructor(
     @InjectQueue(CHANGE_REQUEST_QUEUE)
-    private readonly _changeRequestQueue: Queue,
+    private readonly _changeRequestQueue: Queue<ChangeRequestStatusNotificationJobData>,
     @InjectQueue(BULK_CHANGE_REQUEST_QUEUE)
-    private readonly _bulkChangeRequestQueue: Queue,
+    private readonly _bulkChangeRequestQueue: Queue<BulkChangeRequestNotificationJobData>,
   ) {}
 
   @OnEvent(ChangeRequestApprovedEvent.EVENT_NAME)

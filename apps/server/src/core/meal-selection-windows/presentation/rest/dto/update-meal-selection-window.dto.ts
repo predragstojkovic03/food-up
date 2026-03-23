@@ -44,4 +44,9 @@ export class UpdateMealSelectionWindowDto {
   @IsBoolean()
   @IsOptional()
   notifyOnDeadline?: boolean;
+
+  @ApiPropertyOptional()
+  @IsBoolean()
+  @IsOptional()
+  notifyEmployees?: boolean;
 }

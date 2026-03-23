@@ -28,6 +28,7 @@ export interface UpdateMealSelectionWindowDto {
   targetDates?: string[];
   isLocked?: boolean;
   notifyOnDeadline?: boolean;
+  notifyEmployees?: boolean;
 }
 
 export interface CurrentMealSelectionWindowResult {
@@ -115,6 +116,7 @@ export class MealSelectionWindowsService {
       dto.targetDates ? new Set(dto.targetDates) : undefined,
       dto.isLocked,
       dto.notifyOnDeadline,
+      dto.notifyEmployees,
     );
 
     await this._repository.save(updated);

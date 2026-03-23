@@ -61,4 +61,5 @@ export interface IUpdateMealSelectionWindow {
   targetDates?: string[];
   isLocked?: boolean;
   notifyOnDeadline?: boolean;
+  notifyEmployees?: boolean;
 }

@@ -28,20 +28,8 @@ const ChangeRequestsQueryRepositoryProvider: Provider = {
     EmployeesModule,
     MealSelectionWindowsModule,
     BullModule.registerQueue(
-      {
-        name: CHANGE_REQUEST_QUEUE,
-        defaultJobOptions: {
-          attempts: 3,
-          backoff: { type: 'exponential', delay: 5000 },
-        },
-      },
-      {
-        name: BULK_CHANGE_REQUEST_QUEUE,
-        defaultJobOptions: {
-          attempts: 3,
-          backoff: { type: 'exponential', delay: 5000 },
-        },
-      },
+      { name: CHANGE_REQUEST_QUEUE },
+      { name: BULK_CHANGE_REQUEST_QUEUE },
     ),
   ],
   controllers: [ChangeRequestsController],
