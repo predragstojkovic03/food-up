@@ -672,26 +672,51 @@ function CreateWindowPanel({
               No menu periods available. Create menu periods under each supplier first.
             </p>
           ) : (
-            <div className='flex flex-wrap gap-2'>
-              {menuPeriods.map((mp) => {
-                const selected = selectedMenuPeriodIds.includes(mp.id);
+            <>
+              {(() => {
+                const lastTargetDate = activeDates.length > 0 ? [...activeDates].sort().at(-1)! : null;
+                const deadlineDate = endTime ? endTime.split('T')[0] : null;
+                const minRequiredEndDate = [lastTargetDate, deadlineDate].filter(Boolean).sort().at(-1) ?? null;
+                const hasIncompatible = minRequiredEndDate
+                  ? menuPeriods.some((mp) => mp.endDate < minRequiredEndDate)
+                  : false;
                 return (
-                  <button
-                    key={mp.id}
-                    type='button'
-                    onClick={() => onToggleMenuPeriod(mp.id)}
-                    className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
-                      selected
-                        ? 'bg-primary text-primary-foreground border-primary'
-                        : 'bg-background text-foreground border-border hover:border-primary'
-                    }`}
-                  >
-                    {supplierNameById[mp.supplierId] ?? 'Supplier'} ·{' '}
-                    {formatDateWithWeekday(mp.startDate)} – {formatDateWithWeekday(mp.endDate)}
-                  </button>
+                  <>
+                    <div className='flex flex-wrap gap-2'>
+                      {menuPeriods.map((mp) => {
+                        const selected = selectedMenuPeriodIds.includes(mp.id);
+                        const compatible = minRequiredEndDate ? mp.endDate >= minRequiredEndDate : true;
+                        return (
+                          <button
+                            key={mp.id}
+                            type='button'
+                            onClick={() => compatible ? onToggleMenuPeriod(mp.id) : undefined}
+                            disabled={!compatible && !selected}
+                            className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+                              selected && compatible
+                                ? 'bg-primary text-primary-foreground border-primary'
+                                : selected && !compatible
+                                  ? 'border-destructive text-destructive bg-destructive/10'
+                                  : compatible
+                                    ? 'bg-background text-foreground border-border hover:border-primary'
+                                    : 'opacity-40 cursor-not-allowed bg-background text-foreground border-border'
+                            }`}
+                          >
+                            {supplierNameById[mp.supplierId] ?? 'Supplier'} ·{' '}
+                            {formatDateWithWeekday(mp.startDate)} – {formatDateWithWeekday(mp.endDate)}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {hasIncompatible && (
+                      <p className='text-xs text-muted-foreground mt-1.5'>
+                        Some menu periods are unavailable because their end date is before the deadline or last target date.
+                      </p>
+                    )}
+                  </>
                 );
-              })}
-            </div>
+              })()}
+            </>
           )}
         </div>
 

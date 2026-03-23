@@ -5,6 +5,7 @@ import { MenuItemWithMealDto } from 'src/core/menu-items/application/queries/dto
 import { MenuPeriodsService } from 'src/core/menu-periods/application/menu-periods.service';
 import { DomainEvents } from 'src/shared/application/domain-events/domain-events.decorator';
 import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
+import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
 import { MealSelectionWindow } from '../domain/meal-selection-window.entity';
 import {
   I_MEAL_SELECTION_WINDOWS_REPOSITORY,
@@ -62,11 +63,8 @@ export class MealSelectionWindowsService {
   ): Promise<MealSelectionWindow> {
     const employee = await this._employeesService.findByIdentity(identityId);
 
-    if (dto.menuPeriodIds) {
-      await Promise.all(
-        dto.menuPeriodIds.map((id) => this._menuPeriodsService.findOne(id)),
-      );
-    }
+    await this._validateMenuPeriodsForTargetDates(dto.menuPeriodIds, dto.targetDates);
+
     const window = MealSelectionWindow.create(
       dto.startTime,
       dto.endTime,
@@ -103,10 +101,10 @@ export class MealSelectionWindowsService {
   ): Promise<MealSelectionWindow> {
     const existing = await this._repository.findOneByCriteriaOrThrow({ id });
 
-    if (dto.menuPeriodIds) {
-      await Promise.all(
-        dto.menuPeriodIds.map((id) => this._menuPeriodsService.findOne(id)),
-      );
+    if (dto.menuPeriodIds || dto.targetDates) {
+      const effectiveMenuPeriodIds = dto.menuPeriodIds ?? existing.menuPeriodIds;
+      const effectiveTargetDates = dto.targetDates ?? Array.from(existing.targetDates);
+      await this._validateMenuPeriodsForTargetDates(effectiveMenuPeriodIds, effectiveTargetDates);
     }
 
     const updated = existing.update(
@@ -180,5 +178,34 @@ export class MealSelectionWindowsService {
       `Meal selection window deleted: id=${id}`,
       MealSelectionWindowsService.name,
     );
+  }
+
+  private async _validateMenuPeriodsForTargetDates(
+    menuPeriodIds: string[],
+    targetDates: string[],
+  ): Promise<void> {
+    const menuPeriods = await this._menuPeriodsService.findBulkByIds(menuPeriodIds);
+
+    for (const date of targetDates) {
+      const covered = menuPeriods.some(
+        (mp) => mp.startDate <= date && mp.endDate >= date,
+      );
+      if (!covered) {
+        throw new InvalidInputDataException(
+          `Target date ${date} is not covered by any selected menu period's date range`,
+        );
+      }
+    }
+
+    const menuItems = await this._menuItemsService.findWithMealsByMenuPeriods(menuPeriodIds);
+    const daysWithItems = new Set(menuItems.map((item) => item.day));
+
+    for (const date of targetDates) {
+      if (!daysWithItems.has(date)) {
+        throw new InvalidInputDataException(
+          `No menu items are scheduled for target date ${date}`,
+        );
+      }
+    }
   }
 }
