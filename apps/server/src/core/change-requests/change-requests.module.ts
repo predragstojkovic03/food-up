@@ -1,5 +1,6 @@
 import { BullModule } from '@nestjs/bullmq';
 import { Module, Provider } from '@nestjs/common';
+import { bullmqTelemetry } from 'src/shared/infrastructure/notifications/bullmq-telemetry';
 import {
   BULK_CHANGE_REQUEST_QUEUE,
   CHANGE_REQUEST_QUEUE,
@@ -28,8 +29,8 @@ const ChangeRequestsQueryRepositoryProvider: Provider = {
     EmployeesModule,
     MealSelectionWindowsModule,
     BullModule.registerQueue(
-      { name: CHANGE_REQUEST_QUEUE },
-      { name: BULK_CHANGE_REQUEST_QUEUE },
+      { name: CHANGE_REQUEST_QUEUE, telemetry: bullmqTelemetry },
+      { name: BULK_CHANGE_REQUEST_QUEUE, telemetry: bullmqTelemetry },
     ),
   ],
   controllers: [ChangeRequestsController],

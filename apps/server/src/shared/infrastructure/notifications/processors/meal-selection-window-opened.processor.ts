@@ -9,10 +9,11 @@ import {
 } from 'src/shared/application/config-service.interface';
 import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
 import { MealWindowNotificationJobData } from 'src/core/meal-selection-windows/infrastructure/meal-selection-window-event-handler.service';
+import { bullmqTelemetry } from '../bullmq-telemetry';
 import { I_MAIL_SERVICE, IMailService } from '../mail/mail.service.interface';
 import { MEAL_WINDOW_QUEUE } from '../queue-names';
 
-@Processor(MEAL_WINDOW_QUEUE)
+@Processor(MEAL_WINDOW_QUEUE, { telemetry: bullmqTelemetry })
 export class MealSelectionWindowOpenedProcessor extends WorkerHost {
   constructor(
     private readonly _employeesService: EmployeesService,
@@ -26,6 +27,11 @@ export class MealSelectionWindowOpenedProcessor extends WorkerHost {
 
   async process(job: Job<MealWindowNotificationJobData>): Promise<void> {
     const { windowId, employeeId } = job.data;
+    const start = Date.now();
+    this._logger.log(
+      `job:start queue=${job.queueName} jobId=${job.id} attempt=${job.attemptsMade + 1}`,
+      MealSelectionWindowOpenedProcessor.name,
+    );
 
     const employee = await this._employeesService.findOneEnriched(employeeId);
     if (!employee?.email) return;
@@ -38,7 +44,7 @@ export class MealSelectionWindowOpenedProcessor extends WorkerHost {
     );
 
     this._logger.log(
-      `Window-open notification sent windowId=${windowId} employeeId=${employeeId}`,
+      `job:done queue=${job.queueName} jobId=${job.id} attempt=${job.attemptsMade + 1} windowId=${windowId} employeeId=${employeeId} durationMs=${Date.now() - start}`,
       MealSelectionWindowOpenedProcessor.name,
     );
   }

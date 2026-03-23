@@ -64,7 +64,10 @@ export class MealSelectionWindowsService {
   ): Promise<MealSelectionWindow> {
     const employee = await this._employeesService.findByIdentity(identityId);
 
-    await this._validateMenuPeriodsForTargetDates(dto.menuPeriodIds, dto.targetDates);
+    await this._validateMenuPeriodsForTargetDates(
+      dto.menuPeriodIds,
+      dto.targetDates,
+    );
 
     const window = MealSelectionWindow.create(
       dto.startTime,
@@ -103,9 +106,14 @@ export class MealSelectionWindowsService {
     const existing = await this._repository.findOneByCriteriaOrThrow({ id });
 
     if (dto.menuPeriodIds || dto.targetDates) {
-      const effectiveMenuPeriodIds = dto.menuPeriodIds ?? existing.menuPeriodIds;
-      const effectiveTargetDates = dto.targetDates ?? Array.from(existing.targetDates);
-      await this._validateMenuPeriodsForTargetDates(effectiveMenuPeriodIds, effectiveTargetDates);
+      const effectiveMenuPeriodIds =
+        dto.menuPeriodIds ?? existing.menuPeriodIds;
+      const effectiveTargetDates =
+        dto.targetDates ?? Array.from(existing.targetDates);
+      await this._validateMenuPeriodsForTargetDates(
+        effectiveMenuPeriodIds,
+        effectiveTargetDates,
+      );
     }
 
     const updated = existing.update(
@@ -186,7 +194,8 @@ export class MealSelectionWindowsService {
     menuPeriodIds: string[],
     targetDates: string[],
   ): Promise<void> {
-    const menuPeriods = await this._menuPeriodsService.findBulkByIds(menuPeriodIds);
+    const menuPeriods =
+      await this._menuPeriodsService.findBulkByIds(menuPeriodIds);
 
     for (const date of targetDates) {
       const covered = menuPeriods.some(
@@ -199,7 +208,8 @@ export class MealSelectionWindowsService {
       }
     }
 
-    const menuItems = await this._menuItemsService.findWithMealsByMenuPeriods(menuPeriodIds);
+    const menuItems =
+      await this._menuItemsService.findWithMealsByMenuPeriods(menuPeriodIds);
     const daysWithItems = new Set(menuItems.map((item) => item.day));
 
     for (const date of targetDates) {

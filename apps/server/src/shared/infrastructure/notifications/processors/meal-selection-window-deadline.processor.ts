@@ -8,9 +8,10 @@ import { ReportsService } from 'src/core/reports/application/reports.service';
 import { ChangeRequestsQueryService } from 'src/core/change-requests/application/queries/change-requests-query.service';
 import { WindowDeadlineJobData } from 'src/core/meal-selection-windows/infrastructure/meal-selection-window-event-handler.service';
 import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
+import { bullmqTelemetry } from '../bullmq-telemetry';
 import { WINDOW_DEADLINE_QUEUE } from '../queue-names';
 
-@Processor(WINDOW_DEADLINE_QUEUE)
+@Processor(WINDOW_DEADLINE_QUEUE, { telemetry: bullmqTelemetry })
 export class MealSelectionWindowDeadlineProcessor extends WorkerHost {
   constructor(
     private readonly _windowsService: MealSelectionWindowsService,
@@ -24,6 +25,11 @@ export class MealSelectionWindowDeadlineProcessor extends WorkerHost {
 
   async process(job: Job<WindowDeadlineJobData>): Promise<void> {
     const { mealSelectionWindowId } = job.data;
+    const start = Date.now();
+    this._logger.log(
+      `job:start queue=${job.queueName} jobId=${job.id} attempt=${job.attemptsMade + 1}`,
+      MealSelectionWindowDeadlineProcessor.name,
+    );
 
     const window = await this._windowsService.findOne(mealSelectionWindowId);
 
@@ -85,7 +91,7 @@ export class MealSelectionWindowDeadlineProcessor extends WorkerHost {
     );
 
     this._logger.log(
-      `Deadline auto-send complete: windowId=${mealSelectionWindowId} suppliers=${uniqueSupplierIds.length}`,
+      `job:done queue=${job.queueName} jobId=${job.id} attempt=${job.attemptsMade + 1} windowId=${mealSelectionWindowId} suppliers=${uniqueSupplierIds.length} durationMs=${Date.now() - start}`,
       MealSelectionWindowDeadlineProcessor.name,
     );
   }

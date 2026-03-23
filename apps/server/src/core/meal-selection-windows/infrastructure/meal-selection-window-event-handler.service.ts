@@ -40,7 +40,7 @@ export class MealSelectionWindowEventHandler {
         await this._mealWindowQueue.add(
           'notify',
           { windowId: event.payload.mealSelectionWindowId, employeeId: employee.id },
-          { jobId: `${event.payload.mealSelectionWindowId}:${employee.id}` },
+          { jobId: `${event.payload.mealSelectionWindowId}_${employee.id}` },
         );
       }
     }
