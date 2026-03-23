@@ -10,9 +10,11 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
+import { DateTimePicker } from '@/components/ui/datetime-picker';
 import { Label } from '@/components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useServices } from '@/shared/infrastructure/di/service.context';
@@ -45,6 +47,41 @@ const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Frida
 function formatDateWithWeekday(dateStr: string): string {
   const d = new Date(dateStr + 'T00:00:00');
   return `${WEEKDAYS[d.getDay()]}, ${d.toLocaleDateString()}`;
+}
+
+function dateToString(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function getNextWorkWeek(afterDate: Date): string[] {
+  const day = afterDate.getDay(); // 0=Sun, 1=Mon … 5=Fri, 6=Sat
+
+  // How many work days remain in the current week after the deadline day:
+  // Mon(1)→4, Tue(2)→3, Wed(3)→2, Thu(4)→1, Fri/Sat/Sun→0
+  const remainingInWeek = day >= 1 && day <= 4 ? 5 - day : 0;
+
+  if (remainingInWeek > 0) {
+    return Array.from({ length: remainingInWeek }, (_, i) => {
+      const d = new Date(afterDate);
+      d.setDate(afterDate.getDate() + i + 1);
+      d.setHours(0, 0, 0, 0);
+      return dateToString(d);
+    });
+  }
+
+  // Fri / Sat / Sun → full Mon–Fri of the next work week
+  const daysToNextMon = day === 0 ? 1 : 8 - day; // Sun→1, Fri→3, Sat→2
+  const monday = new Date(afterDate);
+  monday.setDate(afterDate.getDate() + daysToNextMon);
+  monday.setHours(0, 0, 0, 0);
+  return Array.from({ length: 5 }, (_, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return dateToString(d);
+  });
 }
 
 export default function MealSelectionWindowsPage() {
@@ -114,7 +151,7 @@ export default function MealSelectionWindowsPage() {
     setSelectedMenuPeriodIds([]);
     setStartTime('');
     setEndTime('');
-    setTargetDates(['']);
+    setTargetDates([]);
     setNotifyOnDeadline(false);
   }
 
@@ -594,15 +631,29 @@ function CreateWindowPanel({
   onSubmit,
   onClose,
 }: CreateWindowPanelProps) {
-  function setDate(index: number, value: string) {
-    const next = [...targetDates];
-    next[index] = value;
-    onTargetDatesChange(next);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [draftDates, setDraftDates] = useState<Date[]>([]);
+
+  function openCalendar() {
+    setDraftDates(targetDates.filter(Boolean).map((s) => new Date(s + 'T00:00:00')));
+    setCalendarOpen(true);
   }
 
-  function removeDate(index: number) {
-    onTargetDatesChange(targetDates.filter((_, i) => i !== index));
+  function applyDraftDates() {
+    onTargetDatesChange(draftDates.map(dateToString).sort());
+    setCalendarOpen(false);
   }
+
+  function removeDate(dateStr: string) {
+    onTargetDatesChange(targetDates.filter((d) => d !== dateStr));
+  }
+
+  function fillNextWorkWeek() {
+    if (!endTime) return;
+    onTargetDatesChange(getNextWorkWeek(new Date(endTime)));
+  }
+
+  const activeDates = targetDates.filter(Boolean);
 
   return (
     <div className='mb-6 border rounded-lg p-5 bg-card'>
@@ -646,49 +697,72 @@ function CreateWindowPanel({
 
         <div className='grid grid-cols-2 gap-4'>
           <div>
-            <Label htmlFor='start-time' className='mb-1.5 block'>Selection Opens</Label>
-            <Input id='start-time' type='datetime-local' value={startTime} onChange={(e) => onStartTimeChange(e.target.value)} required />
+            <Label className='mb-1.5 block'>Selection Opens</Label>
+            <DateTimePicker value={startTime} onChange={onStartTimeChange} placeholder='Pick date & time' />
           </div>
           <div>
-            <Label htmlFor='end-time' className='mb-1.5 block'>Selection Closes (Deadline)</Label>
-            <Input id='end-time' type='datetime-local' value={endTime} onChange={(e) => onEndTimeChange(e.target.value)} required />
+            <Label className='mb-1.5 block'>Selection Closes (Deadline)</Label>
+            <DateTimePicker value={endTime} onChange={onEndTimeChange} placeholder='Pick date & time' />
           </div>
         </div>
 
         <div>
-          <Label className='mb-2 block'>Target Dates</Label>
-          <p className='text-xs text-muted-foreground mb-2'>The meal dates employees are selecting for.</p>
-          <div className='space-y-2'>
-            {targetDates.map((date, index) => (
-              <div key={index} className='flex gap-2 items-center'>
-                <Input
-                  type='date'
-                  value={date}
-                  onChange={(e) => setDate(index, e.target.value)}
-                  required
-                  className='w-48'
-                />
-                {date && (
-                  <span className='text-xs text-muted-foreground'>
-                    {WEEKDAYS[new Date(date + 'T00:00:00').getDay()]}
-                  </span>
-                )}
-                {targetDates.length > 1 && (
-                  <button type='button' onClick={() => removeDate(index)} className='text-muted-foreground hover:text-destructive transition-colors'>
-                    <X size={14} />
-                  </button>
-                )}
-              </div>
-            ))}
-            <button
+          <div className='flex items-center justify-between mb-2'>
+            <Label>Target Dates</Label>
+            <Button
               type='button'
-              onClick={() => onTargetDatesChange([...targetDates, ''])}
+              variant='outline'
+              size='sm'
+              disabled={!endTime}
+              onClick={fillNextWorkWeek}
+              className='gap-1.5 h-7 text-xs'
+            >
+              <CalendarRange size={12} />
+              Next work week
+            </Button>
+          </div>
+          <p className='text-xs text-muted-foreground mb-3'>The meal dates employees are selecting for.</p>
+
+          {activeDates.length > 0 && (
+            <div className='flex flex-wrap gap-1.5 mb-3'>
+              {[...activeDates].sort().map((date) => (
+                <span
+                  key={date}
+                  className='inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-primary/10 text-primary border border-primary/20'
+                >
+                  {formatDateWithWeekday(date)}
+                  <button
+                    type='button'
+                    onClick={() => removeDate(date)}
+                    className='hover:text-destructive transition-colors'
+                  >
+                    <X size={11} />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+
+          <Popover open={calendarOpen} onOpenChange={(o) => { if (o) openCalendar(); else setCalendarOpen(false); }}>
+            <PopoverTrigger
+              type='button'
               className='text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1'
             >
               <Plus size={12} />
-              Add date
-            </button>
-          </div>
+              {activeDates.length > 0 ? 'Edit dates' : 'Add dates'}
+            </PopoverTrigger>
+            <PopoverContent className='w-auto p-0' align='start'>
+              <Calendar
+                mode='multiple'
+                selected={draftDates}
+                onSelect={(dates) => setDraftDates(dates ?? [])}
+              />
+              <div className='flex justify-end gap-2 border-t px-3 py-2'>
+                <Button type='button' variant='ghost' size='sm' onClick={() => setCalendarOpen(false)}>Cancel</Button>
+                <Button type='button' size='sm' onClick={applyDraftDates}>Apply</Button>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
 
         <div className='flex items-start gap-3'>
@@ -709,7 +783,7 @@ function CreateWindowPanel({
         </div>
 
         <div className='flex gap-3 items-center'>
-          <Button type='submit' disabled={isPending || selectedMenuPeriodIds.length === 0}>
+          <Button type='submit' disabled={isPending || selectedMenuPeriodIds.length === 0 || !startTime || !endTime || activeDates.length === 0}>
             {isPending ? 'Creating…' : 'Create Window'}
           </Button>
           <p className='text-xs text-muted-foreground'>

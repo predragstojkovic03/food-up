@@ -10,6 +10,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -481,23 +482,13 @@ function MenuPeriodsTab({ supplierId }: { supplierId: string }) {
           <form onSubmit={handleCreate} className='flex gap-3 items-end'>
             <div>
               <Label className='mb-1.5 block text-xs'>Start date</Label>
-              <Input
-                type='date'
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                required
-              />
+              <DatePicker value={startDate} onChange={setStartDate} placeholder='Pick start date' />
             </div>
             <div>
               <Label className='mb-1.5 block text-xs'>End date</Label>
-              <Input
-                type='date'
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                required
-              />
+              <DatePicker value={endDate} onChange={setEndDate} placeholder='Pick end date' />
             </div>
-            <Button type='submit' size='sm' disabled={createPeriod.isPending}>
+            <Button type='submit' size='sm' disabled={createPeriod.isPending || !startDate || !endDate}>
               {createPeriod.isPending ? 'Creating…' : 'Create'}
             </Button>
           </form>
