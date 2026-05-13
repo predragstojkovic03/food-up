@@ -1,4 +1,4 @@
-import { OrderSummaryRow } from './dto/order-summary-row.dto';
+import { EmployeeDaySelectionRow, OrderSummaryRow } from './dto/order-summary-row.dto';
 
 export const I_ORDER_SUMMARY_QUERY_REPOSITORY = Symbol(
   'IOrderSummaryQueryRepository',
@@ -10,4 +10,5 @@ export interface IOrderSummaryQueryRepository {
     windowId: string,
     supplierId: string,
   ): Promise<OrderSummaryRow[]>;
+  getEmployeeSelections(windowId: string): Promise<EmployeeDaySelectionRow[]>;
 }

@@ -14,7 +14,7 @@ import {
   I_ORDER_SUMMARY_SENDS_REPOSITORY,
   IOrderSummarySendsRepository,
 } from '../domain/order-summary-sends.repository.interface';
-import { OrderSummaryRow } from './queries/dto/order-summary-row.dto';
+import { EmployeeDaySelectionRow, OrderSummaryRow } from './queries/dto/order-summary-row.dto';
 import {
   I_ORDER_SUMMARY_QUERY_REPOSITORY,
   IOrderSummaryQueryRepository,
@@ -84,7 +84,10 @@ export class ReportsService {
   async generateXlsx(
     windowId: string,
   ): Promise<{ buffer: Buffer; filename: string }> {
-    const rows = await this._queryRepository.getByWindow(windowId);
+    const [rows, employeeRows] = await Promise.all([
+      this._queryRepository.getByWindow(windowId),
+      this._queryRepository.getEmployeeSelections(windowId),
+    ]);
 
     const workbook = new ExcelJS.Workbook();
     const supplierGroups = this._groupBySupplier(rows);
@@ -94,22 +97,13 @@ export class ReportsService {
       sheet.addRow(['No meal selections found for this window.']);
     } else {
       for (const [supplierName, supplierRows] of supplierGroups) {
-        const sheet = workbook.addWorksheet(supplierName.slice(0, 31));
-        sheet.columns = [
-          { header: 'Date', key: 'date', width: 14 },
-          { header: 'Meal', key: 'meal', width: 30 },
-          { header: 'Qty', key: 'qty', width: 8 },
-        ];
-        sheet.getRow(1).font = { bold: true };
-
-        for (const row of supplierRows) {
-          sheet.addRow({
-            date: row.date,
-            meal: row.mealName,
-            qty: row.totalQuantity,
-          });
-        }
+        this._buildSupplierSheet(workbook, supplierName, supplierRows);
       }
+    }
+
+    const dateGroups = this._groupEmployeesByDate(employeeRows);
+    for (const [date, dayRows] of dateGroups) {
+      this._buildDaySheet(workbook, date, dayRows);
     }
 
     const buffer = Buffer.from(await workbook.xlsx.writeBuffer());
@@ -249,6 +243,85 @@ export class ReportsService {
     `;
   }
 
+  private _buildSupplierSheet(
+    workbook: ExcelJS.Workbook,
+    supplierName: string,
+    rows: OrderSummaryRow[],
+  ): void {
+    const sheet = workbook.addWorksheet(supplierName.slice(0, 31));
+    sheet.columns = [
+      { key: 'meal', width: 35 },
+      { key: 'qty', width: 8 },
+    ];
+
+    const byDate = this._groupByDateAndType(rows);
+
+    for (const [date, typeGroups] of byDate) {
+      const dayRow = sheet.addRow([this._formatDayLabel(date), '']);
+      sheet.mergeCells(dayRow.number, 1, dayRow.number, 2);
+      dayRow.getCell(1).font = { bold: true, size: 11 };
+      dayRow.getCell(1).fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFD0E4FF' },
+      };
+      dayRow.getCell(1).alignment = { vertical: 'middle' };
+
+      for (const [mealType, meals] of typeGroups) {
+        const typeRow = sheet.addRow([this._formatMealTypeLabel(mealType), '']);
+        sheet.mergeCells(typeRow.number, 1, typeRow.number, 2);
+        typeRow.getCell(1).font = { bold: true, italic: true };
+        typeRow.getCell(1).fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFECF5FF' },
+        };
+        typeRow.getCell(1).alignment = { indent: 1 };
+
+        for (const meal of meals) {
+          const mealRow = sheet.addRow({ meal: meal.mealName, qty: meal.totalQuantity });
+          mealRow.getCell(1).alignment = { indent: 2 };
+        }
+      }
+
+      sheet.addRow([]);
+    }
+  }
+
+  private _buildDaySheet(
+    workbook: ExcelJS.Workbook,
+    date: string,
+    rows: EmployeeDaySelectionRow[],
+  ): void {
+    const sheetName = this._formatShortDayLabel(date);
+    const sheet = workbook.addWorksheet(sheetName);
+
+    const hasMultiQuantity = rows.some((r) => r.quantity > 1);
+
+    if (hasMultiQuantity) {
+      sheet.columns = [
+        { header: 'Employee', key: 'employee', width: 28 },
+        { header: 'Meal', key: 'meal', width: 35 },
+        { header: 'Qty', key: 'qty', width: 8 },
+      ];
+    } else {
+      sheet.columns = [
+        { header: 'Employee', key: 'employee', width: 28 },
+        { header: 'Meal', key: 'meal', width: 35 },
+      ];
+    }
+
+    sheet.getRow(1).font = { bold: true };
+
+    for (const row of rows) {
+      if (hasMultiQuantity) {
+        sheet.addRow({ employee: row.employeeName, meal: row.mealName, qty: row.quantity });
+      } else {
+        sheet.addRow({ employee: row.employeeName, meal: row.mealName });
+      }
+    }
+  }
+
   private _groupBySupplier(
     rows: OrderSummaryRow[],
   ): Map<string, OrderSummaryRow[]> {
@@ -262,6 +335,71 @@ export class ReportsService {
       }
     }
     return map;
+  }
+
+  private _groupByDateAndType(
+    rows: OrderSummaryRow[],
+  ): Map<string, Map<string, OrderSummaryRow[]>> {
+    const byDate = new Map<string, Map<string, OrderSummaryRow[]>>();
+    for (const row of rows) {
+      if (!byDate.has(row.date)) {
+        byDate.set(row.date, new Map());
+      }
+      const typeMap = byDate.get(row.date)!;
+      if (!typeMap.has(row.mealType)) {
+        typeMap.set(row.mealType, []);
+      }
+      typeMap.get(row.mealType)!.push(row);
+    }
+    return byDate;
+  }
+
+  private _groupEmployeesByDate(
+    rows: EmployeeDaySelectionRow[],
+  ): Map<string, EmployeeDaySelectionRow[]> {
+    const map = new Map<string, EmployeeDaySelectionRow[]>();
+    for (const row of rows) {
+      const existing = map.get(row.date);
+      if (existing) {
+        existing.push(row);
+      } else {
+        map.set(row.date, [row]);
+      }
+    }
+    return map;
+  }
+
+  private _formatDayLabel(date: string): string {
+    const d = new Date(date + 'T00:00:00Z');
+    const dayName = d.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' });
+    const dateStr = d.toLocaleDateString('en-US', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      timeZone: 'UTC',
+    });
+    return `${dayName}, ${dateStr}`;
+  }
+
+  private _formatShortDayLabel(date: string): string {
+    const d = new Date(date + 'T00:00:00Z');
+    const dayShort = d.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' });
+    const day = String(d.getUTCDate()).padStart(2, '0');
+    const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+    return `${dayShort} ${day}-${month}`;
+  }
+
+  private _formatMealTypeLabel(mealType: string): string {
+    const labels: Record<string, string> = {
+      breakfast: 'Breakfasts',
+      lunch: 'Lunches',
+      dinner: 'Dinners',
+      bread: 'Breads',
+      soup: 'Soups',
+      salad: 'Salads',
+      dessert: 'Desserts',
+    };
+    return labels[mealType] ?? mealType.charAt(0).toUpperCase() + mealType.slice(1) + 's';
   }
 
   private _buildFilename(): string {
