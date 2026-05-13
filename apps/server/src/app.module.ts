@@ -10,6 +10,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { JwtAuthGuard } from './core/auth/infrastructure/jwt-auth.guard';
 import { CoreModule } from './core/core.module';
+import { HealthModule } from './health/health.module';
 import { EmployeeRoleGuard } from './core/employees/presentation/rest/employee-role.guard';
 import { IdentityTypeGuard } from './core/identity/presentation/rest/identity-type.guard';
 import { EnvironmentVariables } from './env.validation';
@@ -114,6 +115,7 @@ import { TransactionModule } from './shared/infrastructure/transaction/transacti
     CoreModule,
     ConfigModule,
     NotificationsModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [
