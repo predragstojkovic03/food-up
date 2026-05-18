@@ -1,5 +1,6 @@
 import { User } from '@/features/users/domain/user.entity';
 import { HttpClient } from '@/shared/infrastructure/http/http-client';
+import { tokenStore } from '@/shared/infrastructure/auth/token-store';
 import { IAuthResponse, ILogin, IMeResponse } from '@food-up/shared';
 import {
   IAuthService,
@@ -16,15 +17,22 @@ export class AuthService implements IAuthService {
       { email, password },
     );
 
-    localStorage.setItem('access_token', access_token);
+    // Store in memory only — never in localStorage.
+    // The server sets the refresh token as an httpOnly cookie automatically.
+    tokenStore.set(access_token);
 
     const { id, type, role, businessId } = await this.http.get<IMeResponse>('/api/auth/me');
-
     return User.reconstitute(id, type, role, businessId);
   }
 
-  logout(): void {
-    localStorage.removeItem('access_token');
+  async logout(): Promise<void> {
+    // Tell the server to revoke the refresh token (reads the httpOnly cookie server-side)
+    try {
+      await this.http.post('/api/auth/logout', {});
+    } finally {
+      // Always clear memory even if the server call fails
+      tokenStore.clear();
+    }
   }
 
   async registerEmployee(data: IRegisterEmployee): Promise<void> {
@@ -36,18 +44,27 @@ export class AuthService implements IAuthService {
   }
 
   async validateInvite(token: string): Promise<string | null> {
-    const result = await this.http.get<{ email: string } | null>(`/api/businesses/invites/validate?token=${encodeURIComponent(token)}`);
+    const result = await this.http.get<{ email: string } | null>(
+      `/api/businesses/invites/validate?token=${encodeURIComponent(token)}`,
+    );
     return result?.email ?? null;
   }
 
+  /**
+   * Called on app mount to restore the session from the httpOnly refresh cookie.
+   *
+   * WHY no localStorage check: there's nothing in localStorage anymore. The access
+   * token is in memory (cleared on refresh/close). The refresh cookie is httpOnly and
+   * the browser attaches it automatically.
+   *
+   * Flow: GET /auth/me → 401 → HttpClient fires /auth/refresh (with cookie) → new
+   * access token stored in memory → retry /auth/me → returns user. All transparent.
+   */
   async restoreSession(): Promise<User | null> {
-    if (!localStorage.getItem('access_token')) return null;
-
     try {
       const { id, type, role, businessId } = await this.http.get<IMeResponse>('/api/auth/me');
       return User.reconstitute(id, type, role, businessId);
     } catch {
-      localStorage.removeItem('access_token');
       return null;
     }
   }

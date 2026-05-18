@@ -1,85 +1,57 @@
+import { tokenStore } from '../auth/token-store';
 import { HttpError } from './http-error';
 
-/**
- * Typed HTTP client wrapping the native Fetch API.
- *
- * Automatically attaches `Content-Type: application/json` and an `Authorization`
- * bearer token to every request when a token getter is provided.
- * Throws {@link HttpError} for any non-2xx response.
- */
+type TokenStore = typeof tokenStore;
+
 export class HttpClient {
   /**
-   * @param getToken - Optional function returning the current bearer token.
-   *   Called before each request; returning `null` omits the Authorization header.
-   */
-  constructor(private readonly getToken?: () => string | null) {}
-
-  /**
-   * Sends a GET request and returns the parsed JSON response body.
+   * In-flight refresh promise, shared across all concurrent requests.
    *
-   * @template TResponse - Expected shape of the response body.
-   * @param url - Request URL.
-   * @throws {HttpError} When the response status is not ok.
+   * WHY deduplicate: if the access token expires while 5 requests are in flight,
+   * all 5 get 401 simultaneously. Without deduplication, all 5 would fire a
+   * /auth/refresh call — which would trigger reuse detection and kill the session.
+   * By sharing a single promise, only one refresh fires; the others await its result.
    */
-  async get<TResponse>(url: string): Promise<TResponse> {
-    const res = await fetch(url, {
-      headers: this.buildHeaders(),
-    });
-    if (!res.ok) throw new HttpError(res.status, await res.text());
+  private _refreshPromise: Promise<string | null> | null = null;
 
+  constructor(
+    private readonly _tokenStore: TokenStore,
+    private readonly _onUnauthorized?: () => void,
+  ) {}
+
+  async get<TResponse>(url: string): Promise<TResponse> {
+    const res = await this._fetch(url, {});
+    if (!res.ok) throw new HttpError(res.status, await res.text());
     return res.json();
   }
 
-  /**
-   * Sends a POST request with a JSON-serialized body and returns the parsed JSON response body.
-   *
-   * @template TBody - Shape of the request body.
-   * @template TResponse - Expected shape of the response body.
-   * @param url - Request URL.
-   * @param body - Request payload, serialized to JSON.
-   * @throws {HttpError} When the response status is not ok.
-   */
   async post<TBody, TResponse>(url: string, body: TBody): Promise<TResponse> {
-    const res = await fetch(url, {
+    const res = await this._fetch(url, {
       method: 'POST',
-      headers: this.buildHeaders(),
       body: JSON.stringify(body),
     });
     if (!res.ok) throw new HttpError(res.status, await res.text());
-
     const text = await res.text();
     return text ? JSON.parse(text) : (undefined as TResponse);
   }
 
   async patch<TBody, TResponse>(url: string, body: TBody): Promise<TResponse> {
-    const res = await fetch(url, {
+    const res = await this._fetch(url, {
       method: 'PATCH',
-      headers: this.buildHeaders(),
       body: JSON.stringify(body),
     });
     if (!res.ok) throw new HttpError(res.status, await res.text());
-
     const text = await res.text();
     return text ? JSON.parse(text) : (undefined as TResponse);
   }
 
   async delete(url: string): Promise<void> {
-    const res = await fetch(url, {
-      method: 'DELETE',
-      headers: this.buildHeaders(),
-    });
+    const res = await this._fetch(url, { method: 'DELETE' });
     if (!res.ok) throw new HttpError(res.status, await res.text());
   }
 
-  /**
-   * Fetches a binary resource with auth headers and triggers a browser file download.
-   * Reads the filename from the `Content-Disposition` response header.
-   *
-   * @param url - Request URL pointing to a binary resource.
-   * @throws {HttpError} When the response status is not ok.
-   */
   async download(url: string): Promise<void> {
-    const res = await fetch(url, { headers: this.buildHeaders() });
+    const res = await this._fetch(url, {});
     if (!res.ok) throw new HttpError(res.status, await res.text());
 
     const blob = await res.blob();
@@ -95,11 +67,60 @@ export class HttpClient {
     URL.revokeObjectURL(objectUrl);
   }
 
-  private buildHeaders(): HeadersInit {
-    const token = this.getToken?.();
-    return {
+  /**
+   * Core request executor with transparent 401 → refresh → retry.
+   *
+   * WHY build headers inline via a closure: `_buildHeaders()` reads the *current*
+   * tokenStore value at call time. After a successful refresh, the store holds the
+   * new token — so calling `_buildHeaders()` again for the retry automatically picks
+   * up the fresh token without any extra wiring.
+   */
+  private async _fetch(url: string, init: Omit<RequestInit, 'headers'>): Promise<Response> {
+    const buildHeaders = (): HeadersInit => ({
       'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    };
+      ...(this._tokenStore.get() ? { Authorization: `Bearer ${this._tokenStore.get()}` } : {}),
+    });
+
+    let res = await fetch(url, { ...init, headers: buildHeaders() });
+
+    if (res.status !== 401) return res;
+
+    // Attempt a silent token refresh before giving up
+    if (!this._refreshPromise) {
+      this._refreshPromise = this._doRefresh().finally(() => {
+        this._refreshPromise = null;
+      });
+    }
+    const newToken = await this._refreshPromise;
+
+    if (!newToken) {
+      // Refresh failed — the session is dead. Only redirect if the user is
+      // already authenticated (avoids redirect loops during initial session restore).
+      this._onUnauthorized?.();
+      return res; // caller will see the 401 and can handle it (e.g. throw HttpError)
+    }
+
+    // Retry with the fresh token — buildHeaders() now reads the updated store
+    return fetch(url, { ...init, headers: buildHeaders() });
+  }
+
+  /**
+   * Calls /api/auth/refresh with credentials: 'include' so the browser sends the
+   * httpOnly refresh cookie. Uses native fetch directly to avoid triggering the
+   * 401 interceptor recursively.
+   */
+  private async _doRefresh(): Promise<string | null> {
+    try {
+      const res = await fetch('/api/auth/refresh', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (!res.ok) return null;
+      const { access_token } = await res.json();
+      this._tokenStore.set(access_token);
+      return access_token;
+    } catch {
+      return null;
+    }
   }
 }

@@ -19,8 +19,8 @@ export default function MainLayout() {
   const clearUser = useAuthStore((s) => s.clearUser);
   const navigate = useNavigate();
 
-  function handleLogout() {
-    authService.logout();
+  async function handleLogout() {
+    await authService.logout();
     clearUser();
     navigate('/login');
   }

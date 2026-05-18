@@ -16,7 +16,7 @@ export interface IRegisterSupplier {
 
 export interface IAuthService {
   login(email: string, password: string): Promise<User>;
-  logout(): void;
+  logout(): Promise<void>;
   registerEmployee(data: IRegisterEmployee): Promise<void>;
   registerSupplier(data: IRegisterSupplier): Promise<void>;
   restoreSession(): Promise<User | null>;

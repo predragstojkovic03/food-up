@@ -51,6 +51,16 @@ export class EnvironmentVariables {
 
   @IsString()
   RESEND_API_KEY: string;
+
+  @IsString()
+  JWT_SECRET: string;
+
+  @IsString()
+  JWT_ACCESS_EXPIRY: string;
+
+  @Transform(({ value }) => Number(value))
+  @IsNumber()
+  JWT_REFRESH_EXPIRY_DAYS: number;
 }
 
 export function validate(config: Record<string, unknown>) {

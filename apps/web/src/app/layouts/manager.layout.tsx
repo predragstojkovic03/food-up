@@ -58,8 +58,8 @@ export default function ManagerLayout() {
   const { data: latestWindow } = useLatestBusinessWindow();
   const { data: pendingCount = 0 } = useWindowPendingCount(latestWindow?.id);
 
-  function handleLogout() {
-    authService.logout();
+  async function handleLogout() {
+    await authService.logout();
     clearUser();
     navigate('/login');
   }

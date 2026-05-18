@@ -37,6 +37,9 @@ services:
       WEB_APP_URL: ${WEB_APP_URL}
       OTEL_SERVICE_NAME: food-up
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-lgtm:4318
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ACCESS_EXPIRY: ${JWT_ACCESS_EXPIRY}
+      JWT_REFRESH_EXPIRY_DAYS: ${JWT_REFRESH_EXPIRY_DAYS}
     env_file:
       - .env
 

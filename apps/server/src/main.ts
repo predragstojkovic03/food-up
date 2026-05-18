@@ -4,6 +4,7 @@ import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as cookieParser from 'cookie-parser';
 import { Logger } from 'nestjs-pino';
 import { join } from 'node:path';
 import { AppModule } from './app.module';
@@ -19,6 +20,26 @@ async function bootstrap() {
   });
 
   app.useLogger(app.get(Logger));
+
+  const configService =
+    app.get<IConfigService<EnvironmentVariables, true>>(I_CONFIG_SERVICE);
+  const isProduction = configService.get('NODE_ENV') === NodeEnv.Production;
+
+  /**
+   * cookie-parser makes req.cookies available so controllers can read the httpOnly
+   * refresh token cookie without manual header parsing.
+   */
+  app.use(cookieParser());
+
+  /**
+   * credentials: true is required for the browser to send cookies on cross-origin requests
+   * (e.g. frontend on :5000, backend on :3000 during development).
+   * Without this, fetch(..., { credentials: 'include' }) would not attach the refresh cookie.
+   */
+  app.enableCors({
+    origin: configService.get('WEB_APP_URL'),
+    credentials: true,
+  });
 
   app.useStaticAssets(join(__dirname, '..', 'public'), {
     index: false,
@@ -46,10 +67,6 @@ async function bootstrap() {
     .setVersion('1.0')
     .addBearerAuth()
     .build();
-
-  const configService =
-    app.get<IConfigService<EnvironmentVariables, true>>(I_CONFIG_SERVICE);
-  const isProduction = configService.get('NODE_ENV') === NodeEnv.Production;
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document, {
