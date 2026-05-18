@@ -72,6 +72,7 @@ export default function MealSelectionFlowPage() {
   const [daySelections, setDaySelections] = useState<DaySelection[]>([]);
   const [step, setStep] = useState<number>(0); // index into targetDates; targetDates.length = summary
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const initialized = useRef(false);
 
   // Initialise flow state once both window and existing selections are loaded
@@ -195,6 +196,7 @@ export default function MealSelectionFlowPage() {
 
   const handleConfirm = useCallback(async () => {
     if (!windowId || !windowData) return;
+    setSubmitError(null);
     setIsSubmitting(true);
 
     try {
@@ -242,6 +244,8 @@ export default function MealSelectionFlowPage() {
       queryClient.invalidateQueries({ queryKey: ['meal-selections', 'my', windowId] });
       queryClient.invalidateQueries({ queryKey: ['meal-selection-windows', 'relevant'] });
       navigate('/employee');
+    } catch {
+      setSubmitError('Failed to save your selections. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -316,6 +320,9 @@ export default function MealSelectionFlowPage() {
             onConfirm={handleConfirm}
             isSubmitting={isSubmitting}
           />
+          {submitError && (
+            <p className="text-sm text-destructive text-center">{submitError}</p>
+          )}
         </div>
       )}
     </div>

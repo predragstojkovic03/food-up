@@ -11,8 +11,8 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { DatePicker } from '@/components/ui/date-picker';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -28,6 +28,7 @@ import {
   IMenuPeriodResponse,
   MealType,
 } from '@food-up/shared';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ArrowLeft,
@@ -40,7 +41,9 @@ import {
   X,
 } from 'lucide-react';
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
+import { z } from 'zod/v3';
 import { MenuPeriodBuilder } from './components/menu-period-builder/menu-period-builder';
 
 const MEAL_TYPE_LABELS: Record<MealType, string> = {
@@ -104,6 +107,14 @@ export default function InHouseSupplierDetailPage() {
 
 // ─── Meals Tab ───────────────────────────────────────────────────────────────
 
+const createMealSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  description: z.string().min(1, 'Description is required'),
+  type: z.nativeEnum(MealType),
+  price: z.string().optional(),
+});
+type CreateMealFormValues = z.infer<typeof createMealSchema>;
+
 function MealsTab({ supplierId }: { supplierId: string }) {
   const { mealService } = useServices();
   const queryClient = useQueryClient();
@@ -120,11 +131,10 @@ function MealsTab({ supplierId }: { supplierId: string }) {
   });
 
   const updateMeal = useMutation({
-    mutationFn: ({
-      id,
-      ...data
-    }: { id: string } & Parameters<typeof mealService.update>[1]) =>
-      mealService.update(id, data),
+    mutationFn: (payload: { id: string; name?: string; description?: string; type?: MealType }) => {
+      const { id, ...data } = payload;
+      return mealService.update(id, data);
+    },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: QUERY_KEY }),
   });
 
@@ -134,27 +144,24 @@ function MealsTab({ supplierId }: { supplierId: string }) {
   });
 
   const [showCreate, setShowCreate] = useState(false);
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [type, setType] = useState<MealType>(MealType.Lunch);
-  const [price, setPrice] = useState('');
 
-  function handleCreate(e: React.FormEvent) {
-    e.preventDefault();
+  const createMealForm = useForm<CreateMealFormValues>({
+    resolver: zodResolver(createMealSchema),
+    defaultValues: { name: '', description: '', type: MealType.Lunch, price: '' },
+  });
+
+  function handleCreate(values: CreateMealFormValues) {
     createMeal.mutate(
       {
-        name,
-        description,
-        type,
-        price: price ? Number(price) : undefined,
+        name: values.name,
+        description: values.description,
+        type: values.type,
+        price: values.price ? Number(values.price) : undefined,
         supplierId,
       },
       {
         onSuccess: () => {
-          setName('');
-          setDescription('');
-          setType(MealType.Lunch);
-          setPrice('');
+          createMealForm.reset();
           setShowCreate(false);
         },
       },
@@ -184,65 +191,79 @@ function MealsTab({ supplierId }: { supplierId: string }) {
               <X size={15} />
             </button>
           </div>
-          <form onSubmit={handleCreate} className='grid grid-cols-2 gap-3'>
-            <div>
-              <Label className='mb-1.5 block text-xs'>Name</Label>
-              <Input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder='Chicken sandwich'
-                required
+          <Form {...createMealForm}>
+            <form onSubmit={createMealForm.handleSubmit(handleCreate)} className='grid grid-cols-2 gap-3'>
+              <FormField
+                control={createMealForm.control}
+                name='name'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className='text-xs'>Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder='Chicken sandwich' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <div>
-              <Label className='mb-1.5 block text-xs'>Type</Label>
-              <Select
-                value={type}
-                onValueChange={(v) => setType(v as MealType)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.values(MealType).map((t) => (
-                    <SelectItem key={t} value={t}>
-                      {MEAL_TYPE_LABELS[t]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className='col-span-2'>
-              <Label className='mb-1.5 block text-xs'>Description</Label>
-              <Input
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder='Brief description'
-                required
+              <FormField
+                control={createMealForm.control}
+                name='type'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className='text-xs'>Type</FormLabel>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {Object.values(MealType).map((t) => (
+                          <SelectItem key={t} value={t}>{MEAL_TYPE_LABELS[t]}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <div>
-              <Label className='mb-1.5 block text-xs'>Price (optional)</Label>
-              <Input
-                type='number'
-                step='0.01'
-                min='0'
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                placeholder='0.00'
+              <FormField
+                control={createMealForm.control}
+                name='description'
+                render={({ field }) => (
+                  <FormItem className='col-span-2'>
+                    <FormLabel className='text-xs'>Description</FormLabel>
+                    <FormControl>
+                      <Input placeholder='Brief description' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <div className='flex items-end'>
-              <Button type='submit' size='sm' disabled={createMeal.isPending}>
-                {createMeal.isPending ? 'Creating…' : 'Create'}
-              </Button>
-            </div>
-          </form>
-          {createMeal.isError && (
-            <p className='mt-2 text-xs text-destructive'>
-              Failed to create meal.
-            </p>
-          )}
+              <FormField
+                control={createMealForm.control}
+                name='price'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className='text-xs'>Price (optional)</FormLabel>
+                    <FormControl>
+                      <Input type='number' step='0.01' min='0' placeholder='0.00' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className='flex items-end'>
+                <Button type='submit' size='sm' disabled={createMeal.isPending}>
+                  {createMeal.isPending ? 'Creating…' : 'Create'}
+                </Button>
+              </div>
+              {createMeal.isError && (
+                <p className='col-span-2 text-xs text-destructive'>Failed to create meal.</p>
+              )}
+            </form>
+          </Form>
         </div>
       )}
 
@@ -254,9 +275,16 @@ function MealsTab({ supplierId }: { supplierId: string }) {
           <span />
         </div>
         {isLoading && (
-          <div className='px-4 py-8 text-center text-muted-foreground text-sm'>
-            Loading…
-          </div>
+          <>
+            {[0, 1, 2].map((i) => (
+              <div key={i} className='grid grid-cols-[1fr_1fr_auto_auto] items-center px-4 py-3 border-b gap-3'>
+                <Skeleton className='h-4 w-32' />
+                <Skeleton className='h-4 w-40' />
+                <Skeleton className='h-5 w-16 rounded-full' />
+                <Skeleton className='h-6 w-12 rounded' />
+              </div>
+            ))}
+          </>
         )}
         {!isLoading && meals.length === 0 && (
           <div className='px-4 py-8 text-center text-muted-foreground text-sm'>
@@ -269,7 +297,7 @@ function MealsTab({ supplierId }: { supplierId: string }) {
             meal={meal}
             isUpdating={
               updateMeal.isPending &&
-              (updateMeal.variables as any)?.id === meal.id
+              updateMeal.variables?.id === meal.id
             }
             isRemoving={
               removeMeal.isPending && removeMeal.variables === meal.id
@@ -283,23 +311,15 @@ function MealsTab({ supplierId }: { supplierId: string }) {
   );
 }
 
-function MealRow({
-  meal,
-  isUpdating,
-  isRemoving,
-  onUpdate,
-  onRemove,
-}: {
+interface MealRowProps {
   meal: IMealResponse;
   isUpdating: boolean;
   isRemoving: boolean;
-  onUpdate: (data: {
-    name?: string;
-    description?: string;
-    type?: MealType;
-  }) => void;
+  onUpdate: (data: { name?: string; description?: string; type?: MealType }) => void;
   onRemove: () => void;
-}) {
+}
+
+function MealRow({ meal, isUpdating, isRemoving, onUpdate, onRemove }: MealRowProps) {
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(meal.name);
   const [description, setDescription] = useState(meal.description);
@@ -413,6 +433,12 @@ function MealRow({
 
 // ─── Menu Periods Tab ─────────────────────────────────────────────────────────
 
+const createPeriodSchema = z.object({
+  startDate: z.string().min(1, 'Start date is required'),
+  endDate: z.string().min(1, 'End date is required'),
+});
+type CreatePeriodFormValues = z.infer<typeof createPeriodSchema>;
+
 function MenuPeriodsTab({ supplierId }: { supplierId: string }) {
   const { menuPeriodService, mealService } = useServices();
   const queryClient = useQueryClient();
@@ -439,17 +465,18 @@ function MenuPeriodsTab({ supplierId }: { supplierId: string }) {
   });
 
   const [showCreate, setShowCreate] = useState(false);
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
 
-  function handleCreate(e: React.FormEvent) {
-    e.preventDefault();
+  const createPeriodForm = useForm<CreatePeriodFormValues>({
+    resolver: zodResolver(createPeriodSchema),
+    defaultValues: { startDate: '', endDate: '' },
+  });
+
+  function handleCreate(values: CreatePeriodFormValues) {
     createPeriod.mutate(
-      { startDate, endDate, supplierId },
+      { startDate: values.startDate, endDate: values.endDate, supplierId },
       {
         onSuccess: () => {
-          setStartDate('');
-          setEndDate('');
+          createPeriodForm.reset();
           setShowCreate(false);
         },
       },
@@ -479,19 +506,39 @@ function MenuPeriodsTab({ supplierId }: { supplierId: string }) {
               <X size={15} />
             </button>
           </div>
-          <form onSubmit={handleCreate} className='flex gap-3 items-end'>
-            <div>
-              <Label className='mb-1.5 block text-xs'>Start date</Label>
-              <DatePicker value={startDate} onChange={setStartDate} placeholder='Pick start date' />
-            </div>
-            <div>
-              <Label className='mb-1.5 block text-xs'>End date</Label>
-              <DatePicker value={endDate} onChange={setEndDate} placeholder='Pick end date' />
-            </div>
-            <Button type='submit' size='sm' disabled={createPeriod.isPending || !startDate || !endDate}>
-              {createPeriod.isPending ? 'Creating…' : 'Create'}
-            </Button>
-          </form>
+          <Form {...createPeriodForm}>
+            <form onSubmit={createPeriodForm.handleSubmit(handleCreate)} className='flex gap-3 items-end'>
+              <FormField
+                control={createPeriodForm.control}
+                name='startDate'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className='text-xs'>Start date</FormLabel>
+                    <FormControl>
+                      <DatePicker value={field.value} onChange={field.onChange} placeholder='Pick start date' />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={createPeriodForm.control}
+                name='endDate'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className='text-xs'>End date</FormLabel>
+                    <FormControl>
+                      <DatePicker value={field.value} onChange={field.onChange} placeholder='Pick end date' />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type='submit' size='sm' disabled={createPeriod.isPending || !createPeriodForm.watch('startDate') || !createPeriodForm.watch('endDate')}>
+                {createPeriod.isPending ? 'Creating…' : 'Create'}
+              </Button>
+            </form>
+          </Form>
           {createPeriod.isError && (
             <p className='mt-2 text-xs text-destructive'>
               Failed to create period.
@@ -530,19 +577,15 @@ function MenuPeriodsTab({ supplierId }: { supplierId: string }) {
   );
 }
 
-function MenuPeriodRow({
-  period,
-  meals,
-  isRemoving,
-  onRemove,
-  onInvalidate,
-}: {
+interface MenuPeriodRowProps {
   period: IMenuPeriodResponse;
   meals: IMealResponse[];
   isRemoving: boolean;
   onRemove: () => void;
   onInvalidate: () => void;
-}) {
+}
+
+function MenuPeriodRow({ period, meals, isRemoving, onRemove, onInvalidate }: MenuPeriodRowProps) {
   const { menuItemService } = useServices();
   const queryClient = useQueryClient();
   const [expanded, setExpanded] = useState(false);
@@ -631,4 +674,3 @@ function MenuPeriodRow({
     </div>
   );
 }
-

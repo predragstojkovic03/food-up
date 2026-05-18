@@ -10,16 +10,26 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useServices } from '@/shared/infrastructure/di/service.context';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { ISupplierResponse } from '@food-up/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, Pencil, Plus, Settings2, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
+import { z } from 'zod/v3';
 
 const QUERY_KEY = ['suppliers', 'in-house'];
+
+const createSupplierSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  contactInfo: z.string().min(1, 'Contact info is required'),
+});
+type CreateSupplierFormValues = z.infer<typeof createSupplierSchema>;
 
 export default function InHouseSuppliersPage() {
   const { supplierService } = useServices();
@@ -54,21 +64,19 @@ export default function InHouseSuppliersPage() {
   });
 
   const [showCreatePanel, setShowCreatePanel] = useState(false);
-  const [createName, setCreateName] = useState('');
-  const [createContact, setCreateContact] = useState('');
 
-  function handleCreate(e: React.FormEvent) {
-    e.preventDefault();
-    createSupplier.mutate(
-      { name: createName, contactInfo: createContact },
-      {
-        onSuccess: () => {
-          setCreateName('');
-          setCreateContact('');
-          setShowCreatePanel(false);
-        },
+  const createForm = useForm<CreateSupplierFormValues>({
+    resolver: zodResolver(createSupplierSchema),
+    defaultValues: { name: '', contactInfo: '' },
+  });
+
+  function handleCreate(values: CreateSupplierFormValues) {
+    createSupplier.mutate(values, {
+      onSuccess: () => {
+        createForm.reset();
+        setShowCreatePanel(false);
       },
-    );
+    });
   }
 
   return (
@@ -91,45 +99,45 @@ export default function InHouseSuppliersPage() {
           <div className='flex items-center justify-between mb-4'>
             <h2 className='font-semibold'>Create In-House Supplier</h2>
             <button
-              onClick={() => {
-                setShowCreatePanel(false);
-                setCreateName('');
-                setCreateContact('');
-              }}
+              onClick={() => { setShowCreatePanel(false); createForm.reset(); }}
               className='text-muted-foreground hover:text-foreground transition-colors'
             >
               <X size={16} />
             </button>
           </div>
-          <form onSubmit={handleCreate} className='flex gap-3 items-end'>
-            <div className='flex-1'>
-              <Label htmlFor='supplier-name' className='mb-1.5 block'>
-                Name
-              </Label>
-              <Input
-                id='supplier-name'
-                placeholder='Supplier name'
-                value={createName}
-                onChange={(e) => setCreateName(e.target.value)}
-                required
+          <Form {...createForm}>
+            <form onSubmit={createForm.handleSubmit(handleCreate)} className='flex gap-3 items-end'>
+              <FormField
+                control={createForm.control}
+                name='name'
+                render={({ field }) => (
+                  <FormItem className='flex-1'>
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder='Supplier name' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <div className='flex-1'>
-              <Label htmlFor='supplier-contact' className='mb-1.5 block'>
-                Contact info
-              </Label>
-              <Input
-                id='supplier-contact'
-                placeholder='Email or phone'
-                value={createContact}
-                onChange={(e) => setCreateContact(e.target.value)}
-                required
+              <FormField
+                control={createForm.control}
+                name='contactInfo'
+                render={({ field }) => (
+                  <FormItem className='flex-1'>
+                    <FormLabel>Contact info</FormLabel>
+                    <FormControl>
+                      <Input placeholder='Email or phone' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <Button type='submit' disabled={createSupplier.isPending}>
-              {createSupplier.isPending ? 'Creating…' : 'Create'}
-            </Button>
-          </form>
+              <Button type='submit' disabled={createSupplier.isPending}>
+                {createSupplier.isPending ? 'Creating…' : 'Create'}
+              </Button>
+            </form>
+          </Form>
           {createSupplier.isError && (
             <p className='mt-2 text-sm text-destructive'>
               Failed to create supplier. Please try again.
@@ -146,9 +154,15 @@ export default function InHouseSuppliersPage() {
         </div>
 
         {isLoading && (
-          <div className='px-4 py-8 text-center text-muted-foreground text-sm'>
-            Loading suppliers…
-          </div>
+          <>
+            {[0, 1, 2].map((i) => (
+              <div key={i} className='grid grid-cols-[1fr_1fr_auto] items-center px-4 py-3 border-b gap-4'>
+                <Skeleton className='h-4 w-32' />
+                <Skeleton className='h-4 w-40' />
+                <Skeleton className='h-6 w-16 rounded' />
+              </div>
+            ))}
+          </>
         )}
 
         {!isLoading && suppliers.length === 0 && (

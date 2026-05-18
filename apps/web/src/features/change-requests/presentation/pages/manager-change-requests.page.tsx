@@ -1,5 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useWindowChangeRequests } from '@/features/change-requests/application/use-window-change-requests.hook';
 import { useLatestBusinessWindow } from '@/features/meal-selection-windows/application/use-latest-business-window.hook';
@@ -147,11 +148,9 @@ export default function ManagerChangeRequestsPage() {
           {/* Table header */}
           <div className="grid grid-cols-[auto_1fr_1fr_1fr_auto_auto] items-center gap-4 px-4 py-2.5 bg-muted/40 border-b text-xs font-medium text-muted-foreground">
             {pendingCRs.length > 0 ? (
-              <input
-                type="checkbox"
+              <Checkbox
                 checked={allPendingSelected}
-                onChange={toggleSelectAll}
-                className="size-4 accent-primary"
+                onCheckedChange={toggleSelectAll}
               />
             ) : (
               <span />
@@ -173,11 +172,9 @@ export default function ManagerChangeRequestsPage() {
                 className="grid grid-cols-[auto_1fr_1fr_1fr_auto_auto] items-center gap-4 px-4 py-3 border-b last:border-b-0 hover:bg-muted/20 transition-colors"
               >
                 {isPendingCR ? (
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     checked={isSelected}
-                    onChange={() => toggleSelect(cr.id)}
-                    className="size-4 accent-primary"
+                    onCheckedChange={() => toggleSelect(cr.id)}
                   />
                 ) : (
                   <span />

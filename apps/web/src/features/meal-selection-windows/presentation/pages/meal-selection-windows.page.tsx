@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DateTimePicker } from '@/components/ui/datetime-picker';
+import { Form, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
@@ -25,6 +26,7 @@ import {
   ISupplierSendStatus,
   IWindowMenuItemResponse,
 } from '@food-up/shared';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   CalendarRange,
@@ -39,6 +41,8 @@ import {
   X,
 } from 'lucide-react';
 import { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { z } from 'zod/v3';
 
 const WINDOWS_QUERY_KEY = ['meal-selection-windows', 'business'];
 
@@ -134,39 +138,12 @@ export default function MealSelectionWindowsPage() {
   });
 
   const [showCreatePanel, setShowCreatePanel] = useState(false);
-  const [selectedMenuPeriodIds, setSelectedMenuPeriodIds] = useState<string[]>([]);
-  const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
-  const [targetDates, setTargetDates] = useState<string[]>(['']);
-  const [notifyOnDeadline, setNotifyOnDeadline] = useState(false);
   const [expandedWindowId, setExpandedWindowId] = useState<string | null>(null);
 
-  function toggleMenuPeriod(id: string) {
-    setSelectedMenuPeriodIds((prev) =>
-      prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id],
-    );
-  }
-
-  function resetForm() {
-    setSelectedMenuPeriodIds([]);
-    setStartTime('');
-    setEndTime('');
-    setTargetDates([]);
-    setNotifyOnDeadline(false);
-  }
-
-  function handleCreate(e: React.FormEvent) {
-    e.preventDefault();
-    createWindow.mutate(
-      {
-        menuPeriodIds: selectedMenuPeriodIds,
-        startTime: new Date(startTime).toISOString(),
-        endTime: new Date(endTime).toISOString(),
-        targetDates: targetDates.filter(Boolean),
-        notifyOnDeadline,
-      },
-      { onSuccess: () => { resetForm(); setShowCreatePanel(false); } },
-    );
+  function handleCreateWindow(data: Parameters<typeof mealSelectionWindowService.create>[0]) {
+    createWindow.mutate(data, {
+      onSuccess: () => setShowCreatePanel(false),
+    });
   }
 
   const supplierNameById = Object.fromEntries(allSuppliers.map((s) => [s.id, s.name]));
@@ -174,8 +151,8 @@ export default function MealSelectionWindowsPage() {
   function getWindowStatus(w: IMealSelectionWindowResponse) {
     const expired = new Date(w.endTime) < new Date();
     if (expired) return { label: 'Expired', cls: 'bg-muted text-muted-foreground' };
-    if (w.isLocked) return { label: 'Locked', cls: 'bg-yellow-100 text-yellow-700' };
-    return { label: 'Active', cls: 'bg-green-100 text-green-700' };
+    if (w.isLocked) return { label: 'Locked', cls: 'bg-warning/15 text-warning' };
+    return { label: 'Active', cls: 'bg-success/15 text-success' };
   }
 
   return (
@@ -197,20 +174,10 @@ export default function MealSelectionWindowsPage() {
         <CreateWindowPanel
           menuPeriods={allMenuPeriods}
           supplierNameById={supplierNameById}
-          selectedMenuPeriodIds={selectedMenuPeriodIds}
-          startTime={startTime}
-          endTime={endTime}
-          targetDates={targetDates}
-          notifyOnDeadline={notifyOnDeadline}
           isPending={createWindow.isPending}
           isError={createWindow.isError}
-          onToggleMenuPeriod={toggleMenuPeriod}
-          onStartTimeChange={setStartTime}
-          onEndTimeChange={setEndTime}
-          onTargetDatesChange={setTargetDates}
-          onNotifyOnDeadlineChange={setNotifyOnDeadline}
-          onSubmit={handleCreate}
-          onClose={() => { setShowCreatePanel(false); resetForm(); }}
+          onSubmit={handleCreateWindow}
+          onClose={() => setShowCreatePanel(false)}
         />
       )}
 
@@ -225,7 +192,18 @@ export default function MealSelectionWindowsPage() {
         </div>
 
         {isLoading && (
-          <div className='px-4 py-8 text-center text-muted-foreground text-sm'>Loading windows…</div>
+          <>
+            {[0, 1, 2].map((i) => (
+              <div key={i} className='grid grid-cols-[auto_1fr_auto_auto_auto_auto] items-center px-4 py-3 border-b gap-4'>
+                <Skeleton className='h-4 w-4' />
+                <Skeleton className='h-4 w-56' />
+                <Skeleton className='h-5 w-28 rounded' />
+                <Skeleton className='h-4 w-16' />
+                <Skeleton className='h-5 w-14 rounded-full' />
+                <Skeleton className='h-6 w-12 rounded' />
+              </div>
+            ))}
+          </>
         )}
 
         {!isLoading && windows.length === 0 && (
@@ -589,7 +567,7 @@ function WindowReportsPanel({ windowId }: { windowId: string }) {
 
               <span>
                 {status.hasNewDataSinceLastSend && (
-                  <span className='text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium whitespace-nowrap'>
+                  <span className='text-xs px-2 py-0.5 rounded-full bg-warning/15 text-warning font-medium whitespace-nowrap'>
                     New data
                   </span>
                 )}
@@ -627,66 +605,99 @@ function WindowReportsPanel({ windowId }: { windowId: string }) {
 
 // ─── Create Panel ─────────────────────────────────────────────────────────────
 
+const createWindowSchema = z.object({
+  menuPeriodIds: z.array(z.string()).min(1, 'Select at least one menu period'),
+  startTime: z.string().min(1, 'Opening date is required'),
+  endTime: z.string().min(1, 'Deadline is required'),
+  targetDates: z.array(z.string()).min(1, 'Select at least one date'),
+  notifyOnDeadline: z.boolean().default(false),
+});
+type CreateWindowFormValues = z.infer<typeof createWindowSchema>;
+
 interface CreateWindowPanelProps {
   menuPeriods: IMenuPeriodResponse[];
   supplierNameById: Record<string, string>;
-  selectedMenuPeriodIds: string[];
-  startTime: string;
-  endTime: string;
-  targetDates: string[];
-  notifyOnDeadline: boolean;
   isPending: boolean;
   isError: boolean;
-  onToggleMenuPeriod: (id: string) => void;
-  onStartTimeChange: (v: string) => void;
-  onEndTimeChange: (v: string) => void;
-  onTargetDatesChange: (dates: string[]) => void;
-  onNotifyOnDeadlineChange: (v: boolean) => void;
-  onSubmit: (e: React.FormEvent) => void;
+  onSubmit: (data: {
+    menuPeriodIds: string[];
+    startTime: string;
+    endTime: string;
+    targetDates: string[];
+    notifyOnDeadline: boolean;
+  }) => void;
   onClose: () => void;
 }
 
 function CreateWindowPanel({
   menuPeriods,
   supplierNameById,
-  selectedMenuPeriodIds,
-  startTime,
-  endTime,
-  targetDates,
-  notifyOnDeadline,
   isPending,
   isError,
-  onToggleMenuPeriod,
-  onStartTimeChange,
-  onEndTimeChange,
-  onTargetDatesChange,
-  onNotifyOnDeadlineChange,
   onSubmit,
   onClose,
 }: CreateWindowPanelProps) {
+  const form = useForm<CreateWindowFormValues>({
+    resolver: zodResolver(createWindowSchema),
+    defaultValues: {
+      menuPeriodIds: [],
+      startTime: '',
+      endTime: '',
+      targetDates: [],
+      notifyOnDeadline: false,
+    },
+  });
+
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [draftDates, setDraftDates] = useState<Date[]>([]);
 
+  const watchedMenuPeriodIds = form.watch('menuPeriodIds');
+  const watchedEndTime = form.watch('endTime');
+  const watchedTargetDates = form.watch('targetDates');
+
+  function toggleMenuPeriod(id: string) {
+    const current = form.getValues('menuPeriodIds');
+    form.setValue(
+      'menuPeriodIds',
+      current.includes(id) ? current.filter((p) => p !== id) : [...current, id],
+      { shouldValidate: true },
+    );
+  }
+
   function openCalendar() {
-    setDraftDates(targetDates.filter(Boolean).map((s) => new Date(s + 'T00:00:00')));
+    setDraftDates(watchedTargetDates.filter(Boolean).map((s) => new Date(s + 'T00:00:00')));
     setCalendarOpen(true);
   }
 
   function applyDraftDates() {
-    onTargetDatesChange(draftDates.map(dateToString).sort());
+    form.setValue('targetDates', draftDates.map(dateToString).sort(), { shouldValidate: true });
     setCalendarOpen(false);
   }
 
   function removeDate(dateStr: string) {
-    onTargetDatesChange(targetDates.filter((d) => d !== dateStr));
+    form.setValue(
+      'targetDates',
+      watchedTargetDates.filter((d) => d !== dateStr),
+      { shouldValidate: true },
+    );
   }
 
   function fillNextWorkWeek() {
-    if (!endTime) return;
-    onTargetDatesChange(getNextWorkWeek(new Date(endTime)));
+    if (!watchedEndTime) return;
+    form.setValue('targetDates', getNextWorkWeek(new Date(watchedEndTime)), { shouldValidate: true });
   }
 
-  const activeDates = targetDates.filter(Boolean);
+  function handleSubmit(values: CreateWindowFormValues) {
+    onSubmit({
+      menuPeriodIds: values.menuPeriodIds,
+      startTime: new Date(values.startTime).toISOString(),
+      endTime: new Date(values.endTime).toISOString(),
+      targetDates: values.targetDates.filter(Boolean),
+      notifyOnDeadline: values.notifyOnDeadline,
+    });
+  }
+
+  const activeDates = watchedTargetDates.filter(Boolean);
 
   return (
     <div className='mb-6 border rounded-lg p-5 bg-card'>
@@ -697,162 +708,200 @@ function CreateWindowPanel({
         </button>
       </div>
 
-      <form onSubmit={onSubmit} className='space-y-5'>
-        <div>
-          <Label className='mb-2 block'>Menu Periods</Label>
-          {menuPeriods.length === 0 ? (
-            <p className='text-sm text-muted-foreground'>
-              No menu periods available. Create menu periods under each supplier first.
-            </p>
-          ) : (
-            <>
-              {(() => {
-                const lastTargetDate = activeDates.length > 0 ? [...activeDates].sort().at(-1)! : null;
-                const deadlineDate = endTime ? endTime.split('T')[0] : null;
-                const minRequiredEndDate = [lastTargetDate, deadlineDate].filter(Boolean).sort().at(-1) ?? null;
-                const hasIncompatible = minRequiredEndDate
-                  ? menuPeriods.some((mp) => mp.endDate < minRequiredEndDate)
-                  : false;
-                return (
-                  <>
-                    <div className='flex flex-wrap gap-2'>
-                      {menuPeriods.map((mp) => {
-                        const selected = selectedMenuPeriodIds.includes(mp.id);
-                        const compatible = minRequiredEndDate ? mp.endDate >= minRequiredEndDate : true;
-                        return (
-                          <button
-                            key={mp.id}
-                            type='button'
-                            onClick={() => compatible ? onToggleMenuPeriod(mp.id) : undefined}
-                            disabled={!compatible && !selected}
-                            className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
-                              selected && compatible
-                                ? 'bg-primary text-primary-foreground border-primary'
-                                : selected && !compatible
-                                  ? 'border-destructive text-destructive bg-destructive/10'
-                                  : compatible
-                                    ? 'bg-background text-foreground border-border hover:border-primary'
-                                    : 'opacity-40 cursor-not-allowed bg-background text-foreground border-border'
-                            }`}
-                          >
-                            {supplierNameById[mp.supplierId] ?? 'Supplier'} ·{' '}
-                            {formatDateWithWeekday(mp.startDate)} – {formatDateWithWeekday(mp.endDate)}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    {hasIncompatible && (
-                      <p className='text-xs text-muted-foreground mt-1.5'>
-                        Some menu periods are unavailable because their end date is before the deadline or last target date.
-                      </p>
-                    )}
-                  </>
-                );
-              })()}
-            </>
-          )}
-        </div>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className='space-y-5'>
+          {/* Menu Periods */}
+          <FormField
+            control={form.control}
+            name='menuPeriodIds'
+            render={() => {
+              // Compute compatibility inline (extracted from IIFE)
+              const lastTargetDate = activeDates.length > 0 ? [...activeDates].sort().at(-1)! : null;
+              const deadlineDate = watchedEndTime ? watchedEndTime.split('T')[0] : null;
+              const minRequiredEndDate = [lastTargetDate, deadlineDate].filter(Boolean).sort().at(-1) ?? null;
+              const hasIncompatible = minRequiredEndDate
+                ? menuPeriods.some((mp) => mp.endDate < minRequiredEndDate)
+                : false;
 
-        <div className='grid grid-cols-2 gap-4'>
-          <div>
-            <Label className='mb-1.5 block'>Selection Opens</Label>
-            <DateTimePicker value={startTime} onChange={onStartTimeChange} placeholder='Pick date & time' />
-          </div>
-          <div>
-            <Label className='mb-1.5 block'>Selection Closes (Deadline)</Label>
-            <DateTimePicker value={endTime} onChange={onEndTimeChange} placeholder='Pick date & time' />
-          </div>
-        </div>
-
-        <div>
-          <div className='flex items-center justify-between mb-2'>
-            <Label>Target Dates</Label>
-            <Button
-              type='button'
-              variant='outline'
-              size='sm'
-              disabled={!endTime}
-              onClick={fillNextWorkWeek}
-              className='gap-1.5 h-7 text-xs'
-            >
-              <CalendarRange size={12} />
-              Next work week
-            </Button>
-          </div>
-          <p className='text-xs text-muted-foreground mb-3'>The meal dates employees are selecting for.</p>
-
-          {activeDates.length > 0 && (
-            <div className='flex flex-wrap gap-1.5 mb-3'>
-              {[...activeDates].sort().map((date) => (
-                <span
-                  key={date}
-                  className='inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-primary/10 text-primary border border-primary/20'
-                >
-                  {formatDateWithWeekday(date)}
-                  <button
-                    type='button'
-                    onClick={() => removeDate(date)}
-                    className='hover:text-destructive transition-colors'
-                  >
-                    <X size={11} />
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
-
-          <Popover open={calendarOpen} onOpenChange={(o) => { if (o) openCalendar(); else setCalendarOpen(false); }}>
-            <PopoverTrigger
-              type='button'
-              className='text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1'
-            >
-              <Plus size={12} />
-              {activeDates.length > 0 ? 'Edit dates' : 'Add dates'}
-            </PopoverTrigger>
-            <PopoverContent className='w-auto p-0' align='start'>
-              <Calendar
-                mode='multiple'
-                selected={draftDates}
-                onSelect={(dates) => setDraftDates(dates ?? [])}
-              />
-              <div className='flex justify-end gap-2 border-t px-3 py-2'>
-                <Button type='button' variant='ghost' size='sm' onClick={() => setCalendarOpen(false)}>Cancel</Button>
-                <Button type='button' size='sm' onClick={applyDraftDates}>Apply</Button>
-              </div>
-            </PopoverContent>
-          </Popover>
-        </div>
-
-        <div className='flex items-start gap-3'>
-          <Checkbox
-            id='notify-on-deadline'
-            checked={notifyOnDeadline}
-            onCheckedChange={(checked) => onNotifyOnDeadlineChange(checked === true)}
-            className='mt-0.5'
+              return (
+                <FormItem>
+                  <FormLabel>Menu Periods</FormLabel>
+                  {menuPeriods.length === 0 ? (
+                    <p className='text-sm text-muted-foreground'>
+                      No menu periods available. Create menu periods under each supplier first.
+                    </p>
+                  ) : (
+                    <>
+                      <div className='flex flex-wrap gap-2'>
+                        {menuPeriods.map((mp) => {
+                          const selected = watchedMenuPeriodIds.includes(mp.id);
+                          const compatible = minRequiredEndDate ? mp.endDate >= minRequiredEndDate : true;
+                          return (
+                            <button
+                              key={mp.id}
+                              type='button'
+                              onClick={() => compatible ? toggleMenuPeriod(mp.id) : undefined}
+                              disabled={!compatible && !selected}
+                              className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+                                selected && compatible
+                                  ? 'bg-primary text-primary-foreground border-primary'
+                                  : selected && !compatible
+                                    ? 'border-destructive text-destructive bg-destructive/10'
+                                    : compatible
+                                      ? 'bg-background text-foreground border-border hover:border-primary'
+                                      : 'opacity-40 cursor-not-allowed bg-background text-foreground border-border'
+                              }`}
+                            >
+                              {supplierNameById[mp.supplierId] ?? 'Supplier'} ·{' '}
+                              {formatDateWithWeekday(mp.startDate)} – {formatDateWithWeekday(mp.endDate)}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {hasIncompatible && (
+                        <p className='text-xs text-muted-foreground mt-1.5'>
+                          Some menu periods are unavailable because their end date is before the deadline or last target date.
+                        </p>
+                      )}
+                    </>
+                  )}
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
-          <div>
-            <Label htmlFor='notify-on-deadline' className='font-normal cursor-pointer'>
-              Auto-send order summary to suppliers when the deadline passes
-            </Label>
-            <p className='text-xs text-muted-foreground mt-0.5'>
-              Only sends if no change requests have been approved.
+
+          {/* Start / End time */}
+          <div className='grid grid-cols-2 gap-4'>
+            <FormField
+              control={form.control}
+              name='startTime'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Selection Opens</FormLabel>
+                  <DateTimePicker value={field.value} onChange={field.onChange} placeholder='Pick date & time' />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='endTime'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Selection Closes (Deadline)</FormLabel>
+                  <DateTimePicker value={field.value} onChange={field.onChange} placeholder='Pick date & time' />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          {/* Target Dates */}
+          <FormField
+            control={form.control}
+            name='targetDates'
+            render={() => (
+              <FormItem>
+                <div className='flex items-center justify-between mb-2'>
+                  <FormLabel>Target Dates</FormLabel>
+                  <Button
+                    type='button'
+                    variant='outline'
+                    size='sm'
+                    disabled={!watchedEndTime}
+                    onClick={fillNextWorkWeek}
+                    className='gap-1.5 h-7 text-xs'
+                  >
+                    <CalendarRange size={12} />
+                    Next work week
+                  </Button>
+                </div>
+                <p className='text-xs text-muted-foreground mb-3'>The meal dates employees are selecting for.</p>
+
+                {activeDates.length > 0 && (
+                  <div className='flex flex-wrap gap-1.5 mb-3'>
+                    {[...activeDates].sort().map((date) => (
+                      <span
+                        key={date}
+                        className='inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-primary/10 text-primary border border-primary/20'
+                      >
+                        {formatDateWithWeekday(date)}
+                        <button
+                          type='button'
+                          onClick={() => removeDate(date)}
+                          className='hover:text-destructive transition-colors'
+                        >
+                          <X size={11} />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                <Popover open={calendarOpen} onOpenChange={(o) => { if (o) openCalendar(); else setCalendarOpen(false); }}>
+                  <PopoverTrigger
+                    type='button'
+                    className='text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1'
+                  >
+                    <Plus size={12} />
+                    {activeDates.length > 0 ? 'Edit dates' : 'Add dates'}
+                  </PopoverTrigger>
+                  <PopoverContent className='w-auto p-0' align='start'>
+                    <Calendar
+                      mode='multiple'
+                      selected={draftDates}
+                      onSelect={(dates) => setDraftDates(dates ?? [])}
+                    />
+                    <div className='flex justify-end gap-2 border-t px-3 py-2'>
+                      <Button type='button' variant='ghost' size='sm' onClick={() => setCalendarOpen(false)}>Cancel</Button>
+                      <Button type='button' size='sm' onClick={applyDraftDates}>Apply</Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Notify on deadline */}
+          <Controller
+            control={form.control}
+            name='notifyOnDeadline'
+            render={({ field }) => (
+              <div className='flex items-start gap-3'>
+                <Checkbox
+                  id='notify-on-deadline'
+                  checked={field.value}
+                  onCheckedChange={(checked) => field.onChange(checked === true)}
+                  className='mt-0.5'
+                />
+                <div>
+                  <Label htmlFor='notify-on-deadline' className='font-normal cursor-pointer'>
+                    Auto-send order summary to suppliers when the deadline passes
+                  </Label>
+                  <p className='text-xs text-muted-foreground mt-0.5'>
+                    Only sends if no change requests have been approved.
+                  </p>
+                </div>
+              </div>
+            )}
+          />
+
+          <div className='flex gap-3 items-center'>
+            <Button type='submit' disabled={isPending}>
+              {isPending ? 'Creating…' : 'Create Window'}
+            </Button>
+            <p className='text-xs text-muted-foreground'>
+              Windows are locked by default. Unlock when ready for employees.
             </p>
           </div>
-        </div>
 
-        <div className='flex gap-3 items-center'>
-          <Button type='submit' disabled={isPending || selectedMenuPeriodIds.length === 0 || !startTime || !endTime || activeDates.length === 0}>
-            {isPending ? 'Creating…' : 'Create Window'}
-          </Button>
-          <p className='text-xs text-muted-foreground'>
-            Windows are locked by default. Unlock when ready for employees.
-          </p>
-        </div>
-
-        {isError && (
-          <p className='text-sm text-destructive'>Failed to create window. Please try again.</p>
-        )}
-      </form>
+          {isError && (
+            <p className='text-sm text-destructive'>Failed to create window. Please try again.</p>
+          )}
+        </form>
+      </Form>
     </div>
   );
 }

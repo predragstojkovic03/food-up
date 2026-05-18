@@ -1,13 +1,22 @@
 import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useAuthStore } from '@/features/auth/presentation/state/auth.store';
 import { useServices } from '@/shared/infrastructure/di/service.context';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { IBusinessInviteResponse, IEmployeeResponse, EmployeeRole } from '@food-up/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, Copy, UserMinus, UserPlus, UserX, X } from 'lucide-react';
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod/v3';
+
+const inviteSchema = z.object({
+  email: z.string().email('Enter a valid email address'),
+});
+type InviteFormValues = z.infer<typeof inviteSchema>;
 
 export default function EmployeesPage() {
   const { employeeService } = useServices();
@@ -38,17 +47,20 @@ export default function EmployeesPage() {
   });
 
   const [showInvitePanel, setShowInvitePanel] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState('');
   const [generatedInvite, setGeneratedInvite] = useState<IBusinessInviteResponse | null>(null);
   const [copied, setCopied] = useState(false);
   const [pendingRemove, setPendingRemove] = useState<string | null>(null);
 
-  function handleInviteSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    createInvite.mutate(inviteEmail, {
+  const inviteForm = useForm<InviteFormValues>({
+    resolver: zodResolver(inviteSchema),
+    defaultValues: { email: '' },
+  });
+
+  function handleInviteSubmit(values: InviteFormValues) {
+    createInvite.mutate(values.email, {
       onSuccess: (invite) => {
         setGeneratedInvite(invite);
-        setInviteEmail('');
+        inviteForm.reset();
       },
     });
   }
@@ -65,7 +77,7 @@ export default function EmployeesPage() {
   function closeInvitePanel() {
     setShowInvitePanel(false);
     setGeneratedInvite(null);
-    setInviteEmail('');
+    inviteForm.reset();
     createInvite.reset();
   }
 
@@ -96,24 +108,26 @@ export default function EmployeesPage() {
           </div>
 
           {!generatedInvite ? (
-            <form onSubmit={handleInviteSubmit} className='flex gap-3 items-end'>
-              <div className='flex-1'>
-                <Label htmlFor='invite-email' className='mb-1.5 block'>
-                  Email address
-                </Label>
-                <Input
-                  id='invite-email'
-                  type='email'
-                  placeholder='employee@example.com'
-                  value={inviteEmail}
-                  onChange={(e) => setInviteEmail(e.target.value)}
-                  required
+            <Form {...inviteForm}>
+              <form onSubmit={inviteForm.handleSubmit(handleInviteSubmit)} className='flex gap-3 items-end'>
+                <FormField
+                  control={inviteForm.control}
+                  name='email'
+                  render={({ field }) => (
+                    <FormItem className='flex-1'>
+                      <FormLabel>Email address</FormLabel>
+                      <FormControl>
+                        <Input type='email' placeholder='employee@example.com' {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </div>
-              <Button type='submit' disabled={createInvite.isPending}>
-                {createInvite.isPending ? 'Sending…' : 'Generate Link'}
-              </Button>
-            </form>
+                <Button type='submit' disabled={createInvite.isPending}>
+                  {createInvite.isPending ? 'Sending…' : 'Generate Link'}
+                </Button>
+              </form>
+            </Form>
           ) : (
             <div className='space-y-3'>
               <p className='text-sm text-muted-foreground'>
@@ -158,7 +172,17 @@ export default function EmployeesPage() {
         </div>
 
         {isLoading && (
-          <div className='px-4 py-8 text-center text-muted-foreground text-sm'>Loading employees…</div>
+          <>
+            {[0, 1, 2].map((i) => (
+              <div key={i} className='grid grid-cols-[1fr_1fr_auto_auto_auto] items-center px-4 py-3 border-b gap-4'>
+                <Skeleton className='h-4 w-32' />
+                <Skeleton className='h-4 w-40' />
+                <Skeleton className='h-7 w-28 rounded-md' />
+                <Skeleton className='h-6 w-20 rounded-full' />
+                <Skeleton className='h-6 w-6 rounded' />
+              </div>
+            ))}
+          </>
         )}
 
         {!isLoading && employees.length === 0 && (
@@ -242,8 +266,8 @@ function EmployeeRow({
         disabled={isCurrentUser || isUpdating || isRemoving}
         className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full font-medium transition-colors disabled:opacity-50 ${
           employee.isActive
-            ? 'bg-green-100 text-green-700 hover:bg-green-200'
-            : 'bg-red-100 text-red-700 hover:bg-red-200'
+            ? 'bg-success/15 text-success hover:bg-success/25'
+            : 'bg-destructive/15 text-destructive hover:bg-destructive/25'
         }`}
       >
         {employee.isActive ? (
