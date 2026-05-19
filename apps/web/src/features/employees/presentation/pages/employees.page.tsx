@@ -256,8 +256,8 @@ function EmployeeRow({
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value={EmployeeRole.Manager}>Manager</SelectItem>
-          <SelectItem value={EmployeeRole.Basic}>Basic</SelectItem>
+          <SelectItem value={EmployeeRole.Manager} label="Manager">Manager</SelectItem>
+          <SelectItem value={EmployeeRole.Basic} label="Basic">Basic</SelectItem>
         </SelectContent>
       </Select>
 

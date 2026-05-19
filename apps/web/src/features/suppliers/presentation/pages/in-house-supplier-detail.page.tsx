@@ -220,7 +220,7 @@ function MealsTab({ supplierId }: { supplierId: string }) {
                       </FormControl>
                       <SelectContent>
                         {Object.values(MealType).map((t) => (
-                          <SelectItem key={t} value={t}>{MEAL_TYPE_LABELS[t]}</SelectItem>
+                          <SelectItem key={t} value={t} label={MEAL_TYPE_LABELS[t]}>{MEAL_TYPE_LABELS[t]}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -362,7 +362,7 @@ function MealRow({ meal, isUpdating, isRemoving, onUpdate, onRemove }: MealRowPr
           </SelectTrigger>
           <SelectContent>
             {Object.values(MealType).map((t) => (
-              <SelectItem key={t} value={t}>
+              <SelectItem key={t} value={t} label={MEAL_TYPE_LABELS[t]}>
                 {MEAL_TYPE_LABELS[t]}
               </SelectItem>
             ))}
