@@ -109,14 +109,14 @@ export default function ManagerLayout() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
 
-                <Collapsible defaultOpen={suppliersOpen} className='group/collapsible'>
+                <Collapsible defaultOpen={suppliersOpen}>
                   <SidebarMenuItem>
-                    <CollapsibleTrigger asChild>
-                      <SidebarMenuButton isActive={suppliersOpen}>
-                        <Store />
-                        <span>Suppliers</span>
-                        <ChevronRight className='ml-auto transition-transform duration-200 ease-in-out group-data-[state=open]/collapsible:rotate-90' />
-                      </SidebarMenuButton>
+                    <CollapsibleTrigger
+                      render={<SidebarMenuButton isActive={suppliersOpen} className='group/collapsible' />}
+                    >
+                      <Store />
+                      <span>Suppliers</span>
+                      <ChevronRight className='ml-auto transition-transform duration-200 ease-in-out group-data-[panel-open]/collapsible:rotate-90' />
                     </CollapsibleTrigger>
                     <CollapsibleContent>
                       <SidebarMenuSub>
