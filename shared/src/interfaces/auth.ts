@@ -16,3 +16,8 @@ export interface IMeResponse {
   role?: EmployeeRole;
   businessId?: string;
 }
+
+export interface IChangePassword {
+  currentPassword: string;
+  newPassword: string;
+}

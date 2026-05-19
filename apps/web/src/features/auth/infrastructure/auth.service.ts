@@ -1,7 +1,7 @@
 import { User } from '@/features/users/domain/user.entity';
 import { HttpClient } from '@/shared/infrastructure/http/http-client';
 import { tokenStore } from '@/shared/infrastructure/auth/token-store';
-import { IAuthResponse, ILogin, IMeResponse } from '@food-up/shared';
+import { IAuthResponse, IChangePassword, ILogin, IMeResponse } from '@food-up/shared';
 import {
   IAuthService,
   IRegisterEmployee,
@@ -60,6 +60,10 @@ export class AuthService implements IAuthService {
    * Flow: GET /auth/me → 401 → HttpClient fires /auth/refresh (with cookie) → new
    * access token stored in memory → retry /auth/me → returns user. All transparent.
    */
+  async changePassword(data: IChangePassword): Promise<void> {
+    await this.http.post<IChangePassword, void>('/api/auth/change-password', data);
+  }
+
   async restoreSession(): Promise<User | null> {
     try {
       const { id, type, role, businessId } = await this.http.get<IMeResponse>('/api/auth/me');

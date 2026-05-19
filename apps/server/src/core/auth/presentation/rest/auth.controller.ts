@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   HttpCode,
@@ -32,6 +33,7 @@ import { JwtPayload } from '../../infrastructure/jwt-payload';
 import { LocalAuthGuard } from '../../infrastructure/local-auth.guard';
 import { Public } from '../../infrastructure/public.decorator';
 import { AuthResponseDto } from './dto/auth-response.dto';
+import { ChangePasswordRequestDto } from './dto/change-password.dto';
 import { MeResponseDto } from './dto/me-response.dto';
 
 const REFRESH_COOKIE_NAME = 'refresh_token';
@@ -137,6 +139,19 @@ export class AuthController {
 
     // Clear the cookie by setting maxAge=0 (expires immediately)
     res.cookie(REFRESH_COOKIE_NAME, '', { ...refreshCookieOptions(this._isProduction), maxAge: 0 });
+  }
+
+  @Post('change-password')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Change password for the authenticated identity' })
+  @ApiResponse({ status: 204 })
+  @ApiResponse({ status: 401, description: 'Current password incorrect' })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async changePassword(
+    @CurrentIdentity() user: JwtPayload,
+    @Body() dto: ChangePasswordRequestDto,
+  ): Promise<void> {
+    await this._authService.changePassword(user.sub, dto.currentPassword, dto.newPassword);
   }
 
   @Get('me')

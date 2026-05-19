@@ -179,6 +179,11 @@ export class EmployeesService {
     return this.findByIdentityEnriched(employee.identityId);
   }
 
+  async updateSelf(identityId: string, name: string): Promise<EmployeeView> {
+    const employee = await this.findByIdentity(identityId);
+    return this.update(employee.id, { name });
+  }
+
   async delete(id: string): Promise<void> {
     await this._repository.delete(id);
     this._logger.log(`Employee deleted: id=${id}`, EmployeesService.name);

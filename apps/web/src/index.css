@@ -139,3 +139,25 @@
     @apply font-sans;
     }
 }
+
+@keyframes collapsible-open {
+  from { height: 0; opacity: 0; }
+  to   { height: var(--base-ui-collapsible-content-height); opacity: 1; }
+}
+
+@keyframes collapsible-close {
+  from { height: var(--base-ui-collapsible-content-height); opacity: 1; }
+  to   { height: 0; opacity: 0; }
+}
+
+[data-slot="collapsible-content"] {
+  overflow: hidden;
+}
+
+[data-slot="collapsible-content"][data-open] {
+  animation: collapsible-open 180ms ease-out;
+}
+
+[data-slot="collapsible-content"][data-closed] {
+  animation: collapsible-close 150ms ease-in;
+}

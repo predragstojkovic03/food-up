@@ -3,6 +3,7 @@ import {
   ICreateBusinessInvite,
   IEmployeeResponse,
   IUpdateEmployee,
+  IUpdateEmployeeSelf,
 } from '@food-up/shared';
 import { HttpClient } from '@/shared/infrastructure/http/http-client';
 import { IEmployeeService } from '../domain/employee-service.interface';
@@ -14,8 +15,16 @@ export class EmployeeService implements IEmployeeService {
     return this.http.get<IEmployeeResponse[]>(`/api/employees/business/${businessId}`);
   }
 
+  getMe(): Promise<IEmployeeResponse> {
+    return this.http.get<IEmployeeResponse>('/api/employees/me');
+  }
+
   update(id: string, data: IUpdateEmployee): Promise<IEmployeeResponse> {
     return this.http.patch<IUpdateEmployee, IEmployeeResponse>(`/api/employees/${id}`, data);
+  }
+
+  updateSelf(data: IUpdateEmployeeSelf): Promise<IEmployeeResponse> {
+    return this.http.patch<IUpdateEmployeeSelf, IEmployeeResponse>('/api/employees/me', data);
   }
 
   remove(id: string): Promise<void> {

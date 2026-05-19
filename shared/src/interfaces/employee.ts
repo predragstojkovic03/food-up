@@ -16,6 +16,10 @@ export interface IUpdateEmployee {
   isActive?: boolean;
 }
 
+export interface IUpdateEmployeeSelf {
+  name: string;
+}
+
 export interface ICreateBusinessInvite {
   email: string;
 }

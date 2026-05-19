@@ -3,6 +3,7 @@ import ManagerPage from '@/features/employees/presentation/pages/manager.page';
 import EmployeesPage from '@/features/employees/presentation/pages/employees.page';
 import EmployeeHomePage from '@/features/employees/presentation/pages/employee-home.page';
 import MealSelectionFlowPage from '@/features/meal-selections/presentation/pages/meal-selection-flow.page';
+import AccountPage from '@/features/employees/presentation/pages/account.page';
 import ManagerChangeRequestsPage from '@/features/change-requests/presentation/pages/manager-change-requests.page';
 import MealSelectionWindowsPage from '@/features/meal-selection-windows/presentation/pages/meal-selection-windows.page';
 import InHouseSupplierDetailPage from '@/features/suppliers/presentation/pages/in-house-supplier-detail.page';
@@ -45,6 +46,7 @@ function App() {
           <Route path='suppliers/partners' element={<PartnerSuppliersPage />} />
           <Route path='meal-selection-windows' element={<MealSelectionWindowsPage />} />
           <Route path='change-requests' element={<ManagerChangeRequestsPage />} />
+          <Route path='account' element={<AccountPage />} />
         </Route>
 
         {/* App routes */}

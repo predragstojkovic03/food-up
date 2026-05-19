@@ -176,6 +176,10 @@ export class AuthService {
     return this._buildCookieToken(record.id, rawSecret);
   }
 
+  async changePassword(identityId: string, currentPassword: string, newPassword: string): Promise<void> {
+    await this._identityService.changePassword(identityId, currentPassword, newPassword);
+  }
+
   private _buildCookieToken(tokenId: string, secret: string): string {
     return Buffer.from(`${tokenId}:${secret}`).toString('base64url');
   }

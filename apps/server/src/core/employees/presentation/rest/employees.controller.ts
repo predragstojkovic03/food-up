@@ -22,6 +22,7 @@ import { EmployeeView } from '../../application/dto/employee-view';
 import { CreateEmployeeRequestDto } from './dto/create-employee.dto';
 import { EmployeeResponseDto } from './dto/employee-response.dto';
 import { UpdateEmployeeRequestDto } from './dto/update-employee.dto';
+import { UpdateEmployeeSelfRequestDto } from './dto/update-employee-self.dto';
 
 @ApiTags('Employees')
 @Controller('employees')
@@ -46,6 +47,18 @@ export class EmployeesController {
   @ApiResponse({ status: 200, type: EmployeeResponseDto })
   async getMe(@CurrentIdentity() user: JwtPayload): Promise<EmployeeResponseDto> {
     const view = await this._employeesService.findByIdentityEnriched(user.sub);
+    return this.viewToDto(view);
+  }
+
+  @Patch('me')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update current employee name' })
+  @ApiResponse({ status: 200, type: EmployeeResponseDto })
+  async updateMe(
+    @CurrentIdentity() user: JwtPayload,
+    @Body() dto: UpdateEmployeeSelfRequestDto,
+  ): Promise<EmployeeResponseDto> {
+    const view = await this._employeesService.updateSelf(user.sub, dto.name);
     return this.viewToDto(view);
   }
 

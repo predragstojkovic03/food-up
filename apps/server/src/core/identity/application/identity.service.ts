@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { compare, hash } from 'bcrypt';
 import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
 import { AuthenticationException } from 'src/shared/domain/exceptions/authentication.exception';
@@ -65,6 +65,18 @@ export class IdentityService {
     const result = await this._repository.update(id, update);
     this._logger.log(`Identity updated: id=${id}`, IdentityService.name);
     return result;
+  }
+
+  async changePassword(identityId: string, currentPassword: string, newPassword: string): Promise<void> {
+    const identity = await this._repository.findById(identityId);
+    if (!identity) throw new UnauthorizedException('Identity not found');
+
+    const isValid = await identity.isPasswordValid(currentPassword, compare);
+    if (!isValid) throw new UnauthorizedException('Current password is incorrect');
+
+    const newHash = await hash(newPassword, 10);
+    await this._repository.update(identityId, { passwordHash: newHash } as unknown as Partial<Identity>);
+    this._logger.log(`Password changed for identity: id=${identityId}`, IdentityService.name);
   }
 
   async delete(id: string): Promise<void> {

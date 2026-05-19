@@ -1,3 +1,4 @@
+import { IChangePassword } from '@food-up/shared';
 import { User } from '@/features/users/domain/user.entity';
 
 export interface IRegisterEmployee {
@@ -21,4 +22,5 @@ export interface IAuthService {
   registerSupplier(data: IRegisterSupplier): Promise<void>;
   restoreSession(): Promise<User | null>;
   validateInvite(token: string): Promise<string | null>;
+  changePassword(data: IChangePassword): Promise<void>;
 }
