@@ -11,6 +11,7 @@ import { MenuItemsModule } from './menu-items/menu-items.module';
 import { MenuPeriodsModule } from './menu-periods/menu-periods.module';
 import { ReportsModule } from './reports/reports.module';
 import { SuppliersModule } from './suppliers/suppliers.module';
+import { UserPreferencesModule } from './user-preferences/user-preferences.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { SuppliersModule } from './suppliers/suppliers.module';
     AuthModule,
     SuppliersModule,
     ChangeRequestsModule,
+    UserPreferencesModule,
   ],
 })
 export class CoreModule {}
