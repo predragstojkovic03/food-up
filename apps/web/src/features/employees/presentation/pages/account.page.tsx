@@ -3,11 +3,13 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { IUserPreferencesResponse, ThemePreference } from '@food-up/shared';
+import { ThemePreference } from '@food-up/shared';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { useCurrentEmployee } from '../../application/use-current-employee.hook';
 import { useServices } from '@/shared/infrastructure/di/service.context';
@@ -217,7 +219,7 @@ function AppearanceSection() {
   const setTheme = usePreferencesStore((s) => s.setTheme);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
-  const mutation = useMutation<IUserPreferencesResponse, Error, ThemePreference, { previousTheme: ThemePreference }>({
+  const mutation = useMutation<void, Error, ThemePreference, { previousTheme: ThemePreference }>({
     mutationFn: (newTheme: ThemePreference) => preferencesService.update({ theme: newTheme }),
     onMutate: (newTheme) => {
       const previousTheme = theme;
@@ -247,22 +249,23 @@ function AppearanceSection() {
       <CardContent className='px-6 pt-4 pb-5'>
         <div className='space-y-4'>
           <div className='space-y-1'>
-            <label htmlFor='theme-select' className='text-sm font-medium leading-none'>
-              Theme
-            </label>
-            <select
-              id='theme-select'
+            <Label>Theme</Label>
+            <Select
               value={theme}
-              onChange={(e) => handleChange(e.target.value as ThemePreference)}
+              onValueChange={(v) => handleChange(v as ThemePreference)}
               disabled={mutation.isPending}
-              className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50'
             >
-              {THEME_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className='w-full'>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {THEME_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           {feedback && (
             <p className={feedback.type === 'success' ? 'text-sm text-success' : 'text-sm text-destructive'}>
