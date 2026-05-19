@@ -9,6 +9,7 @@ import { IMenuItemService } from '@/features/menu-items/domain/menu-item-service
 import { IMenuPeriodService } from '@/features/menu-periods/domain/menu-period-service.interface';
 import { IReportService } from '@/features/reports/domain/report-service.interface';
 import { ISupplierService } from '@/features/suppliers/domain/supplier-service.interface';
+import { IUserPreferencesService } from '@/features/user-preferences/domain/user-preferences-service.interface';
 
 export interface ServiceContainer {
   authService: IAuthService;
@@ -22,4 +23,5 @@ export interface ServiceContainer {
   mealSelectionService: IMealSelectionService;
   changeRequestService: IChangeRequestService;
   reportService: IReportService;
+  preferencesService: IUserPreferencesService;
 }

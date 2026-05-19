@@ -1,6 +1,8 @@
 import { useRestoreSession } from '@/features/auth/application/use-restore-session.hook';
 import { AuthService } from '@/features/auth/infrastructure/auth.service';
 import { useAuthStore } from '@/features/auth/presentation/state/auth.store';
+import { UserPreferencesService } from '@/features/user-preferences/infrastructure/user-preferences.service';
+import { useTheme } from '@/features/user-preferences/presentation/hooks/use-theme.hook';
 import { BusinessService } from '@/features/businesses/infrastructure/business.service';
 import { EmployeeService } from '@/features/employees/infrastructure/employee.service';
 import { ChangeRequestService } from '@/features/change-requests/infrastructure/change-request.service';
@@ -53,6 +55,7 @@ const services = {
   mealSelectionService: new MealSelectionService(httpClient),
   changeRequestService: new ChangeRequestService(httpClient),
   reportService: new ReportService(httpClient),
+  preferencesService: new UserPreferencesService(httpClient),
 };
 
 function SessionGate({ children }: { children: ReactNode }) {
@@ -62,6 +65,7 @@ function SessionGate({ children }: { children: ReactNode }) {
 }
 
 export function AppProviders({ children }: { children: ReactNode }) {
+  useTheme();
   return (
     <ServiceProvider value={services}>
       <QueryClientProvider client={queryClient}>

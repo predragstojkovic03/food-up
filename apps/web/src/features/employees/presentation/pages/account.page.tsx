@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { IUserPreferencesResponse, ThemePreference } from '@food-up/shared';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -10,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { useCurrentEmployee } from '../../application/use-current-employee.hook';
 import { useServices } from '@/shared/infrastructure/di/service.context';
+import { usePreferencesStore } from '@/features/user-preferences/presentation/state/preferences.store';
 
 // Extension point: when Google OAuth or other SSO is added, derive capabilities
 // from the identity provider returned by the API (e.g. canChangePassword = provider === 'local').
@@ -203,6 +205,76 @@ function SecuritySection() {
   );
 }
 
+const THEME_OPTIONS: { value: ThemePreference; label: string }[] = [
+  { value: ThemePreference.Light, label: 'Light' },
+  { value: ThemePreference.Dark, label: 'Dark' },
+  { value: ThemePreference.System, label: 'System' },
+];
+
+function AppearanceSection() {
+  const { preferencesService } = useServices();
+  const theme = usePreferencesStore((s) => s.theme);
+  const setTheme = usePreferencesStore((s) => s.setTheme);
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  const mutation = useMutation<IUserPreferencesResponse, Error, ThemePreference, { previousTheme: ThemePreference }>({
+    mutationFn: (newTheme: ThemePreference) => preferencesService.update({ theme: newTheme }),
+    onMutate: (newTheme) => {
+      const previousTheme = theme;
+      setTheme(newTheme);
+      return { previousTheme };
+    },
+    onSuccess: () => {
+      setFeedback({ type: 'success', message: 'Appearance updated successfully.' });
+    },
+    onError: (_err, _newTheme, context) => {
+      if (context) setTheme(context.previousTheme);
+      setFeedback({ type: 'error', message: 'Failed to update appearance. Please try again.' });
+    },
+  });
+
+  function handleChange(newTheme: ThemePreference) {
+    setFeedback(null);
+    mutation.mutate(newTheme);
+  }
+
+  return (
+    <Card>
+      <CardHeader className='px-6 pt-5 pb-0'>
+        <CardTitle className='text-base'>Appearance</CardTitle>
+      </CardHeader>
+      <Separator className='mt-4' />
+      <CardContent className='px-6 pt-4 pb-5'>
+        <div className='space-y-4'>
+          <div className='space-y-1'>
+            <label htmlFor='theme-select' className='text-sm font-medium leading-none'>
+              Theme
+            </label>
+            <select
+              id='theme-select'
+              value={theme}
+              onChange={(e) => handleChange(e.target.value as ThemePreference)}
+              disabled={mutation.isPending}
+              className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50'
+            >
+              {THEME_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          {feedback && (
+            <p className={feedback.type === 'success' ? 'text-sm text-success' : 'text-sm text-destructive'}>
+              {feedback.message}
+            </p>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function AccountPage() {
   return (
     <div className='max-w-2xl space-y-6'>
@@ -212,6 +284,7 @@ export default function AccountPage() {
       </div>
       {CAPABILITIES.canChangeName && <ProfileSection />}
       {CAPABILITIES.canChangePassword && <SecuritySection />}
+      <AppearanceSection />
     </div>
   );
 }
