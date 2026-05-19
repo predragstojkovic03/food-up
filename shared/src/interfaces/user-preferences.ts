@@ -5,5 +5,5 @@ export interface IUserPreferencesResponse {
 }
 
 export interface IUpdateUserPreferences {
-  theme?: ThemePreference;
+  theme: ThemePreference;
 }
