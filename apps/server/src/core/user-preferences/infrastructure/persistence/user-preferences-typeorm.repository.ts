@@ -38,9 +38,7 @@ export class UserPreferencesTypeOrmRepository implements IUserPreferencesReposit
 
   async update(prefs: UserPreferences): Promise<UserPreferences> {
     await this._repo.update({ id: prefs.id }, { theme: prefs.theme });
-    const updated = await this._repo.findOne({ where: { id: prefs.id } });
-    if (!updated) throw new Error('UserPreferences not found');
-    return this.toDomain(updated);
+    return prefs;
   }
 
   private toDomain(entity: UserPreferencesTypeOrmEntity): UserPreferences {
