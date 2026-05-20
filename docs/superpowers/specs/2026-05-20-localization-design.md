@@ -61,21 +61,25 @@ Non-nullable, default `Language.En`. Set by the manager in the new Business Sett
 
 ---
 
-## Domain Service: `SupplierCommunicationDomainService`
+## Domain Service: `SuppliersDomainService`
 
 The resolution of supplier email language varies by supplier type. Rather than branching on `supplier.type` throughout the codebase, a domain service encapsulates this rule. It is stateless, takes already-loaded domain objects, and has no infrastructure dependencies.
 
 ```typescript
-// suppliers/domain/supplier-communication.domain-service.ts
-class SupplierCommunicationDomainService {
+// suppliers/domain/suppliers.domain-service.ts
+class SuppliersDomainService {
+  resolveEmailLanguage(supplier: Supplier & { type: SupplierType.Managed }): Language;
+  resolveEmailLanguage(supplier: Supplier & { type: SupplierType.Standalone }, businessSupplier: BusinessSupplier): Language;
   resolveEmailLanguage(supplier: Supplier, businessSupplier?: BusinessSupplier): Language {
-    if (supplier.type === SupplierType.Managed) return supplier.language;
+    if (supplier.isManaged()) return supplier.language;
     return businessSupplier!.language;
   }
 }
 ```
 
-The application service fetches the `BusinessSupplier` when needed and passes it in. No other layer branches on `supplier.type` for language resolution.
+The overload signatures enforce at compile time that a `BusinessSupplier` is required when a standalone supplier is passed — no non-null assertion escapes to the caller. The implementation body uses `supplier.isManaged()` rather than comparing `supplier.type` directly, keeping the type check behind the domain entity's own interface.
+
+The application service fetches the `BusinessSupplier` when needed and passes it in. No other layer branches on supplier type for language resolution.
 
 **Why a domain service and not application layer:** The branching rule is a domain concern — it reflects how the domain models the managed-vs-standalone ownership distinction. It spans two aggregate concepts (`Supplier` and `BusinessSupplier`) so it doesn't belong on either entity alone.
 
