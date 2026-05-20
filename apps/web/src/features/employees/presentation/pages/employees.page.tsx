@@ -253,7 +253,7 @@ function EmployeeRow({
         disabled={isCurrentUser || isUpdating || isRemoving}
       >
         <SelectTrigger className='h-8 w-28 text-xs'>
-          <SelectValue />
+          <SelectValue>{(v: string) => v === EmployeeRole.Manager ? 'Manager' : 'Basic'}</SelectValue>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value={EmployeeRole.Manager} label="Manager">Manager</SelectItem>

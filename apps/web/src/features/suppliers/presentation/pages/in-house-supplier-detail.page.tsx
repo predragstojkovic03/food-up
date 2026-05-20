@@ -215,7 +215,7 @@ function MealsTab({ supplierId }: { supplierId: string }) {
                     <Select value={field.value} onValueChange={field.onChange}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue />
+                          <SelectValue>{(v: string) => MEAL_TYPE_LABELS[v as MealType] ?? v}</SelectValue>
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -358,7 +358,7 @@ function MealRow({ meal, isUpdating, isRemoving, onUpdate, onRemove }: MealRowPr
           disabled={isUpdating}
         >
           <SelectTrigger className='h-8 w-28 text-xs'>
-            <SelectValue />
+            <SelectValue>{(v: string) => MEAL_TYPE_LABELS[v as MealType] ?? v}</SelectValue>
           </SelectTrigger>
           <SelectContent>
             {Object.values(MealType).map((t) => (

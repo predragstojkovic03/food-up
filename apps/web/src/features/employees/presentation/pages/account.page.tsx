@@ -1,19 +1,32 @@
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ThemePreference } from '@food-up/shared';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { useCurrentEmployee } from '../../application/use-current-employee.hook';
-import { useServices } from '@/shared/infrastructure/di/service.context';
 import { usePreferencesStore } from '@/features/user-preferences/presentation/state/preferences.store';
+import { useServices } from '@/shared/infrastructure/di/service.context';
+import { ThemePreference } from '@food-up/shared';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { useCurrentEmployee } from '../../application/use-current-employee.hook';
 
 // Extension point: when Google OAuth or other SSO is added, derive capabilities
 // from the identity provider returned by the API (e.g. canChangePassword = provider === 'local').
@@ -33,9 +46,13 @@ const nameSchema = z.object({
 
 const passwordSchema = z
   .object({
-    currentPassword: z.string().min(6, 'Password must be at least 6 characters'),
+    currentPassword: z
+      .string()
+      .min(6, 'Password must be at least 6 characters'),
     newPassword: z.string().min(6, 'Password must be at least 6 characters'),
-    confirmPassword: z.string().min(6, 'Password must be at least 6 characters'),
+    confirmPassword: z
+      .string()
+      .min(6, 'Password must be at least 6 characters'),
   })
   .refine((d) => d.newPassword === d.confirmPassword, {
     message: 'Passwords do not match',
@@ -49,7 +66,10 @@ function ProfileSection() {
   const { employeeService } = useServices();
   const queryClient = useQueryClient();
   const { data: employee } = useCurrentEmployee();
-  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [feedback, setFeedback] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
 
   const form = useForm<NameFormValues>({
     resolver: zodResolver(nameSchema),
@@ -63,7 +83,10 @@ function ProfileSection() {
       setFeedback({ type: 'success', message: 'Name updated successfully.' });
     },
     onError: () => {
-      setFeedback({ type: 'error', message: 'Failed to update name. Please try again.' });
+      setFeedback({
+        type: 'error',
+        message: 'Failed to update name. Please try again.',
+      });
     },
   });
 
@@ -95,7 +118,13 @@ function ProfileSection() {
               )}
             />
             {feedback && (
-              <p className={feedback.type === 'success' ? 'text-sm text-success' : 'text-sm text-destructive'}>
+              <p
+                className={
+                  feedback.type === 'success'
+                    ? 'text-sm text-success'
+                    : 'text-sm text-destructive'
+                }
+              >
                 {feedback.message}
               </p>
             )}
@@ -111,19 +140,32 @@ function ProfileSection() {
 
 function SecuritySection() {
   const { authService } = useServices();
-  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [feedback, setFeedback] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
 
   const form = useForm<PasswordFormValues>({
     resolver: zodResolver(passwordSchema),
-    defaultValues: { currentPassword: '', newPassword: '', confirmPassword: '' },
+    defaultValues: {
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    },
   });
 
   const mutation = useMutation({
     mutationFn: (data: PasswordFormValues) =>
-      authService.changePassword({ currentPassword: data.currentPassword, newPassword: data.newPassword }),
+      authService.changePassword({
+        currentPassword: data.currentPassword,
+        newPassword: data.newPassword,
+      }),
     onSuccess: () => {
       form.reset();
-      setFeedback({ type: 'success', message: 'Password changed successfully.' });
+      setFeedback({
+        type: 'success',
+        message: 'Password changed successfully.',
+      });
     },
     onError: (error: unknown) => {
       const isWrongPassword =
@@ -193,7 +235,13 @@ function SecuritySection() {
               )}
             />
             {feedback && (
-              <p className={feedback.type === 'success' ? 'text-sm text-success' : 'text-sm text-destructive'}>
+              <p
+                className={
+                  feedback.type === 'success'
+                    ? 'text-sm text-success'
+                    : 'text-sm text-destructive'
+                }
+              >
                 {feedback.message}
               </p>
             )}
@@ -217,21 +265,36 @@ function AppearanceSection() {
   const { preferencesService } = useServices();
   const theme = usePreferencesStore((s) => s.theme);
   const setTheme = usePreferencesStore((s) => s.setTheme);
-  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [feedback, setFeedback] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
 
-  const mutation = useMutation<void, Error, ThemePreference, { previousTheme: ThemePreference }>({
-    mutationFn: (newTheme: ThemePreference) => preferencesService.update({ theme: newTheme }),
+  const mutation = useMutation<
+    void,
+    Error,
+    ThemePreference,
+    { previousTheme: ThemePreference }
+  >({
+    mutationFn: (newTheme: ThemePreference) =>
+      preferencesService.update({ theme: newTheme }),
     onMutate: (newTheme) => {
       const previousTheme = theme;
       setTheme(newTheme);
       return { previousTheme };
     },
     onSuccess: () => {
-      setFeedback({ type: 'success', message: 'Appearance updated successfully.' });
+      setFeedback({
+        type: 'success',
+        message: 'Appearance updated successfully.',
+      });
     },
     onError: (_err, _newTheme, context) => {
       if (context) setTheme(context.previousTheme);
-      setFeedback({ type: 'error', message: 'Failed to update appearance. Please try again.' });
+      setFeedback({
+        type: 'error',
+        message: 'Failed to update appearance. Please try again.',
+      });
     },
   });
 
@@ -248,7 +311,7 @@ function AppearanceSection() {
       <Separator className='mt-4' />
       <CardContent className='px-6 pt-4 pb-5'>
         <div className='space-y-4'>
-          <div className='space-y-1'>
+          <div className='space-y-2'>
             <Label>Theme</Label>
             <Select
               value={theme}
@@ -256,11 +319,19 @@ function AppearanceSection() {
               disabled={mutation.isPending}
             >
               <SelectTrigger className='w-full'>
-                <SelectValue />
+                <SelectValue>
+                  {(v: string) =>
+                    THEME_OPTIONS.find((o) => o.value === v)?.label ?? v
+                  }
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {THEME_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value} label={opt.label}>
+                  <SelectItem
+                    key={opt.value}
+                    value={opt.value}
+                    label={opt.label}
+                  >
                     {opt.label}
                   </SelectItem>
                 ))}
@@ -268,7 +339,13 @@ function AppearanceSection() {
             </Select>
           </div>
           {feedback && (
-            <p className={feedback.type === 'success' ? 'text-sm text-success' : 'text-sm text-destructive'}>
+            <p
+              className={
+                feedback.type === 'success'
+                  ? 'text-sm text-success'
+                  : 'text-sm text-destructive'
+              }
+            >
               {feedback.message}
             </p>
           )}
@@ -283,7 +360,9 @@ export default function AccountPage() {
     <div className='max-w-2xl space-y-6'>
       <div>
         <h1 className='text-xl font-semibold'>Account settings</h1>
-        <p className='text-sm text-muted-foreground mt-1'>Manage your profile and security preferences.</p>
+        <p className='text-sm text-muted-foreground mt-1'>
+          Manage your profile and security preferences.
+        </p>
       </div>
       {CAPABILITIES.canChangeName && <ProfileSection />}
       {CAPABILITIES.canChangePassword && <SecuritySection />}
