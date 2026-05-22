@@ -1,0 +1,29 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "employees": "Employees",
+    "suppliers": "Suppliers",
+    "inHouseSuppliers": "In-House Suppliers",
+    "partnerSuppliers": "Partner Suppliers",
+    "mealSelectionWindows": "Meal Selection Windows",
+    "changeRequests": "Change Requests",
+    "businessSettings": "Business Settings",
+    "account": "Account",
+    "logout": "Logout"
+  },
+  "actions": {
+    "save": "Save changes",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "create": "Create",
+    "creating": "Creating…",
+    "delete": "Delete",
+    "edit": "Edit",
+    "logout": "Logout"
+  },
+  "language": {
+    "label": "Language",
+    "en": "English",
+    "sr": "Srpski"
+  }
+}

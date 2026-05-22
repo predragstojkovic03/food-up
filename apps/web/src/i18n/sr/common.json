@@ -1,0 +1,29 @@
+{
+  "nav": {
+    "dashboard": "Kontrolna tabla",
+    "employees": "Zaposleni",
+    "suppliers": "Dobavljači",
+    "inHouseSuppliers": "Interni dobavljači",
+    "partnerSuppliers": "Partnerski dobavljači",
+    "mealSelectionWindows": "Prozori za izbor obroka",
+    "changeRequests": "Zahtevi za promenu",
+    "businessSettings": "Podešavanja firme",
+    "account": "Nalog",
+    "logout": "Odjava"
+  },
+  "actions": {
+    "save": "Sačuvaj izmene",
+    "saving": "Čuvanje…",
+    "cancel": "Otkaži",
+    "create": "Kreiraj",
+    "creating": "Kreiranje…",
+    "delete": "Obriši",
+    "edit": "Izmeni",
+    "logout": "Odjava"
+  },
+  "language": {
+    "label": "Jezik",
+    "en": "English",
+    "sr": "Srpski"
+  }
+}
