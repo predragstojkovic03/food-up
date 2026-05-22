@@ -270,9 +270,10 @@ export class ReportsService {
     lang: Language,
   ): void {
     const sheet = workbook.addWorksheet(supplierName.slice(0, 31));
+    sheet.properties.defaultRowHeight = 18;
     sheet.columns = [
-      { key: 'meal', width: 35 },
-      { key: 'qty', width: 8 },
+      { key: 'meal', width: 38 },
+      { key: 'qty', width: 10 },
     ];
 
     const byDate = this._groupByDateAndType(rows);
@@ -280,28 +281,29 @@ export class ReportsService {
     for (const [date, typeGroups] of byDate) {
       const dayRow = sheet.addRow([this._formatDayLabel(date, lang), '']);
       sheet.mergeCells(dayRow.number, 1, dayRow.number, 2);
-      dayRow.getCell(1).font = { bold: true, size: 11 };
-      dayRow.getCell(1).fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FFD0E4FF' },
-      };
-      dayRow.getCell(1).alignment = { vertical: 'middle' };
+      dayRow.height = 24;
+      const dayCell = dayRow.getCell(1);
+      dayCell.font = { name: 'Calibri', bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
+      dayCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2D6A4F' } };
+      dayCell.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
 
       for (const [mealType, meals] of typeGroups) {
         const typeRow = sheet.addRow([this._formatMealTypeLabel(mealType, lang), '']);
         sheet.mergeCells(typeRow.number, 1, typeRow.number, 2);
-        typeRow.getCell(1).font = { bold: true, italic: true };
-        typeRow.getCell(1).fill = {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: 'FFECF5FF' },
-        };
-        typeRow.getCell(1).alignment = { indent: 1 };
+        const typeCell = typeRow.getCell(1);
+        typeCell.font = { name: 'Calibri', bold: true, italic: true, color: { argb: 'FF2D6A4F' } };
+        typeCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEDF7F2' } };
+        typeCell.alignment = { indent: 1 };
 
         for (const meal of meals) {
           const mealRow = sheet.addRow({ meal: meal.mealName, qty: meal.totalQuantity });
+          mealRow.getCell(1).font = { name: 'Calibri' };
           mealRow.getCell(1).alignment = { indent: 2 };
+          mealRow.getCell(2).font = { name: 'Calibri', bold: true };
+          mealRow.getCell(2).alignment = { horizontal: 'center', vertical: 'middle' };
+          mealRow.eachCell({ includeEmpty: true }, (cell) => {
+            cell.border = { bottom: { style: 'thin', color: { argb: 'FFD4E8DC' } } };
+          });
         }
       }
 
@@ -317,30 +319,51 @@ export class ReportsService {
   ): void {
     const sheetName = this._formatShortDayLabel(date, lang);
     const sheet = workbook.addWorksheet(sheetName);
+    sheet.properties.defaultRowHeight = 18;
 
     const hasMultiQuantity = rows.some((r) => r.quantity > 1);
+    const colCount = hasMultiQuantity ? 3 : 2;
 
     if (hasMultiQuantity) {
       sheet.columns = [
         { header: t((k) => k.excel.columns.employeeName, lang), key: 'employee', width: 28 },
-        { header: t((k) => k.excel.columns.meal, lang), key: 'meal', width: 35 },
-        { header: t((k) => k.excel.columns.qty, lang), key: 'qty', width: 8 },
+        { header: t((k) => k.excel.columns.meal, lang), key: 'meal', width: 38 },
+        { header: t((k) => k.excel.columns.qty, lang), key: 'qty', width: 10 },
       ];
     } else {
       sheet.columns = [
         { header: t((k) => k.excel.columns.employeeName, lang), key: 'employee', width: 28 },
-        { header: t((k) => k.excel.columns.meal, lang), key: 'meal', width: 35 },
+        { header: t((k) => k.excel.columns.meal, lang), key: 'meal', width: 38 },
       ];
     }
 
-    sheet.getRow(1).font = { bold: true };
+    const headerRow = sheet.getRow(1);
+    headerRow.height = 24;
+    for (let i = 1; i <= colCount; i++) {
+      const cell = headerRow.getCell(i);
+      cell.font = { name: 'Calibri', bold: true, size: 11, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2D6A4F' } };
+      cell.alignment = { vertical: 'middle' };
+      cell.border = { bottom: { style: 'medium', color: { argb: 'FF1E4E38' } } };
+    }
 
+    let rowIndex = 0;
     for (const row of rows) {
-      if (hasMultiQuantity) {
-        sheet.addRow({ employee: row.employeeName, meal: row.mealName, qty: row.quantity });
-      } else {
-        sheet.addRow({ employee: row.employeeName, meal: row.mealName });
+      const dataRow = hasMultiQuantity
+        ? sheet.addRow({ employee: row.employeeName, meal: row.mealName, qty: row.quantity })
+        : sheet.addRow({ employee: row.employeeName, meal: row.mealName });
+
+      const stripeBg = rowIndex % 2 === 1 ? 'FFEDF7F2' : 'FFFFFFFF';
+      for (let i = 1; i <= colCount; i++) {
+        const cell = dataRow.getCell(i);
+        cell.font = { name: 'Calibri' };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: stripeBg } };
+        cell.border = { bottom: { style: 'thin', color: { argb: 'FFD4E8DC' } } };
       }
+      if (hasMultiQuantity) {
+        dataRow.getCell(3).alignment = { horizontal: 'center' };
+      }
+      rowIndex++;
     }
   }
 
