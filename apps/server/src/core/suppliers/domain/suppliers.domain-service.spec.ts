@@ -3,12 +3,12 @@ import { BusinessSupplier } from 'src/core/business-suppliers/domain/business-su
 import { Supplier } from './supplier.entity';
 import { SuppliersDomainService } from './suppliers.domain-service';
 
-function makeManagedSupplier(language: Language): Supplier {
-  return Supplier.reconstitute('s1', 'Test', SupplierType.Managed, null, [], 'b1', undefined, language);
+function makeManagedSupplier(language: Language): Supplier & { type: SupplierType.Managed } {
+  return Supplier.reconstitute('s1', 'Test', SupplierType.Managed, null, [], 'b1', undefined, language) as Supplier & { type: SupplierType.Managed };
 }
 
-function makeStandaloneSupplier(): Supplier {
-  return Supplier.reconstitute('s2', 'Test', SupplierType.Standalone, null, [], undefined, 'i1', Language.En);
+function makeStandaloneSupplier(): Supplier & { type: SupplierType.Standalone } {
+  return Supplier.reconstitute('s2', 'Test', SupplierType.Standalone, null, [], undefined, 'i1', Language.En) as Supplier & { type: SupplierType.Standalone };
 }
 
 function makeBusinessSupplier(language: Language): BusinessSupplier {

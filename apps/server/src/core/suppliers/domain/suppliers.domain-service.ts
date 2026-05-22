@@ -5,7 +5,6 @@ import { Supplier } from './supplier.entity';
 
 @Injectable()
 export class SuppliersDomainService {
-  resolveEmailLanguage(supplier: Supplier, businessSupplier?: BusinessSupplier): Language;
   resolveEmailLanguage(supplier: Supplier & { type: SupplierType.Managed }): Language;
   resolveEmailLanguage(
     supplier: Supplier & { type: SupplierType.Standalone },
