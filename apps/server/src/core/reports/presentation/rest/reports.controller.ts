@@ -1,3 +1,4 @@
+import { EmployeeRole, IdentityType } from '@food-up/shared';
 import { Body, Controller, Get, Post, Query, StreamableFile } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -11,7 +12,7 @@ import { CurrentIdentity } from 'src/core/auth/infrastructure/current-identity.d
 import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
 import { RequiredEmployeeRole } from 'src/core/employees/presentation/rest/employee-role.decorator';
 import { RequiredIdentityType } from 'src/core/identity/presentation/rest/identity-type.decorator';
-import { EmployeeRole, IdentityType } from '@food-up/shared';
+import { UserPreferencesService } from 'src/core/user-preferences/application/user-preferences.service';
 import { ReportsService } from '../../application/reports.service';
 import { SendReportDto } from './dto/send-report.dto';
 import { SupplierSendStatusResponseDto } from './dto/supplier-send-status-response.dto';
@@ -22,7 +23,10 @@ import { SupplierSendStatusResponseDto } from './dto/supplier-send-status-respon
 @RequiredIdentityType(IdentityType.Employee)
 @RequiredEmployeeRole(EmployeeRole.Manager)
 export class ReportsController {
-  constructor(private readonly _reportsService: ReportsService) {}
+  constructor(
+    private readonly _reportsService: ReportsService,
+    private readonly _preferencesService: UserPreferencesService,
+  ) {}
 
   @Get('export')
   @ApiOperation({ summary: 'Download XLSX order summary for a meal selection window' })
@@ -30,8 +34,10 @@ export class ReportsController {
   @ApiResponse({ status: 200, description: 'XLSX file download' })
   async exportXlsx(
     @Query('windowId') windowId: string,
+    @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<StreamableFile> {
-    const { buffer, filename } = await this._reportsService.generateXlsx(windowId);
+    const prefs = await this._preferencesService.getOrCreate(sub);
+    const { buffer, filename } = await this._reportsService.generateXlsx(windowId, prefs.language);
     return new StreamableFile(buffer, {
       disposition: `attachment; filename="${filename}"`,
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

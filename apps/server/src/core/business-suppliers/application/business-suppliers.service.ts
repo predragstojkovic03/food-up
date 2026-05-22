@@ -37,6 +37,13 @@ export class BusinessSuppliersService {
     return this._repository.delete(id);
   }
 
+  async findBySupplierAndBusiness(
+    supplierId: string,
+    businessId: string,
+  ): Promise<BusinessSupplier | null> {
+    return this._repository.findBySupplierAndBusiness(supplierId, businessId);
+  }
+
   async updateLanguageForPartner(
     supplierId: string,
     businessId: string,

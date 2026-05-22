@@ -3,6 +3,7 @@ import { ChangeRequestsModule } from 'src/core/change-requests/change-requests.m
 import { EmployeesModule } from 'src/core/employees/employees.module';
 import { MealSelectionWindowsModule } from 'src/core/meal-selection-windows/meal-selection-windows.module';
 import { ReportsModule } from 'src/core/reports/reports.module';
+import { UserPreferencesModule } from 'src/core/user-preferences/user-preferences.module';
 import { MailModule } from './mail/mail.module';
 import { BulkChangeRequestStatusProcessor } from './processors/bulk-change-request-status.processor';
 import { ChangeRequestStatusProcessor } from './processors/change-request-status.processor';
@@ -13,6 +14,7 @@ import { MealSelectionWindowOpenedProcessor } from './processors/meal-selection-
   imports: [
     MailModule,
     EmployeesModule,
+    UserPreferencesModule,
     MealSelectionWindowsModule,
     ReportsModule,
     ChangeRequestsModule,

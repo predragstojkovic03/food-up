@@ -1,10 +1,14 @@
+import { Language } from '@food-up/shared';
 import { Inject, Injectable } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
+import { BusinessSuppliersService } from 'src/core/business-suppliers/application/business-suppliers.service';
 import { ChangeRequestsQueryService } from 'src/core/change-requests/application/queries/change-requests-query.service';
+import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { IdentityService } from 'src/core/identity/application/identity.service';
 import { SuppliersService } from 'src/core/suppliers/application/suppliers.service';
 import { DomainEvents } from 'src/shared/application/domain-events/domain-events.decorator';
 import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
+import { t } from 'src/shared/i18n/i18n.helper';
 import {
   I_MAIL_SERVICE,
   IMailService,
@@ -74,6 +78,8 @@ export class ReportsService {
     private readonly _mailService: IMailService,
     private readonly _suppliersService: SuppliersService,
     private readonly _identityService: IdentityService,
+    private readonly _employeesService: EmployeesService,
+    private readonly _businessSuppliersService: BusinessSuppliersService,
     @Inject(I_LOGGER) private readonly _logger: ILogger,
   ) {}
 
@@ -83,6 +89,7 @@ export class ReportsService {
 
   async generateXlsx(
     windowId: string,
+    language: Language,
   ): Promise<{ buffer: Buffer; filename: string }> {
     const [rows, employeeRows] = await Promise.all([
       this._queryRepository.getByWindow(windowId),
@@ -97,13 +104,13 @@ export class ReportsService {
       sheet.addRow(['No meal selections found for this window.']);
     } else {
       for (const [supplierName, supplierRows] of supplierGroups) {
-        this._buildSupplierSheet(workbook, supplierName, supplierRows);
+        this._buildSupplierSheet(workbook, supplierName, supplierRows, language);
       }
     }
 
     const dateGroups = this._groupEmployeesByDate(employeeRows);
     for (const [date, dayRows] of dateGroups) {
-      this._buildDaySheet(workbook, date, dayRows);
+      this._buildDaySheet(workbook, date, dayRows, language);
     }
 
     const buffer = Buffer.from(await workbook.xlsx.writeBuffer());
@@ -163,8 +170,12 @@ export class ReportsService {
     supplierIds: string[],
     managerIdentityId: string,
   ): Promise<void> {
-    const identity = await this._identityService.findById(managerIdentityId);
+    const [identity, managerEmployee] = await Promise.all([
+      this._identityService.findById(managerIdentityId),
+      this._employeesService.findByIdentity(managerIdentityId),
+    ]);
     const managerEmail = identity?.email ?? null;
+    const businessId = managerEmployee.businessId;
 
     for (const supplierId of supplierIds) {
       const supplier = await this._suppliersService.findOne(supplierId);
@@ -175,6 +186,14 @@ export class ReportsService {
           ReportsService.name,
         );
         continue;
+      }
+
+      let lang: Language;
+      if (supplier.isManaged()) {
+        lang = supplier.language;
+      } else {
+        const bs = await this._businessSuppliersService.findBySupplierAndBusiness(supplierId, businessId);
+        lang = bs?.language ?? Language.En;
       }
 
       const rows = await this._queryRepository.getByWindowAndSupplier(
@@ -190,10 +209,10 @@ export class ReportsService {
       const isFirstSend = previousSend === null;
 
       const subject = isFirstSend
-        ? 'Order summary for your meals'
-        : 'Adjusted order summary for your meals';
+        ? t((k) => k.mail.orderSummary.subject, lang)
+        : t((k) => k.mail.orderSummary.subjectAdjusted, lang);
 
-      const html = this._renderHtmlTable(supplier.name, rows, isFirstSend);
+      const html = this._renderHtmlTable(supplier.name, rows, isFirstSend, lang);
 
       await this._mailService.send(supplier.email, subject, html, {
         cc: managerEmail ?? undefined,
@@ -217,13 +236,14 @@ export class ReportsService {
     supplierName: string,
     rows: OrderSummaryRow[],
     isFirstSend: boolean,
+    lang: Language,
   ): string {
     const intro = isFirstSend
-      ? `<p>Please find below the order summary for your meals.</p>`
-      : `<p><strong>This is an adjusted version of a previously sent order summary.</strong> The quantities below reflect the latest approved change requests.</p>`;
+      ? `<p>${t((k) => k.mail.orderSummary.intro, lang)}</p>`
+      : `<p><strong>${t((k) => k.mail.orderSummary.introAdjusted, lang)}</strong></p>`;
 
     if (rows.length === 0) {
-      return `${intro}<p>No orders for this window.</p>`;
+      return `${intro}<p>${t((k) => k.mail.orderSummary.noOrders, lang)}</p>`;
     }
 
     const rowsHtml = rows
@@ -237,7 +257,7 @@ export class ReportsService {
       ${intro}
       <h3>${supplierName}</h3>
       <table border="1" cellpadding="6" cellspacing="0">
-        <thead><tr><th>Date</th><th>Meal</th><th>Qty</th></tr></thead>
+        <thead><tr><th>${t((k) => k.mail.orderSummary.table.date, lang)}</th><th>${t((k) => k.mail.orderSummary.table.meal, lang)}</th><th>${t((k) => k.mail.orderSummary.table.qty, lang)}</th></tr></thead>
         <tbody>${rowsHtml}</tbody>
       </table>
     `;
@@ -247,6 +267,7 @@ export class ReportsService {
     workbook: ExcelJS.Workbook,
     supplierName: string,
     rows: OrderSummaryRow[],
+    lang: Language,
   ): void {
     const sheet = workbook.addWorksheet(supplierName.slice(0, 31));
     sheet.columns = [
@@ -257,7 +278,7 @@ export class ReportsService {
     const byDate = this._groupByDateAndType(rows);
 
     for (const [date, typeGroups] of byDate) {
-      const dayRow = sheet.addRow([this._formatDayLabel(date), '']);
+      const dayRow = sheet.addRow([this._formatDayLabel(date, lang), '']);
       sheet.mergeCells(dayRow.number, 1, dayRow.number, 2);
       dayRow.getCell(1).font = { bold: true, size: 11 };
       dayRow.getCell(1).fill = {
@@ -268,7 +289,7 @@ export class ReportsService {
       dayRow.getCell(1).alignment = { vertical: 'middle' };
 
       for (const [mealType, meals] of typeGroups) {
-        const typeRow = sheet.addRow([this._formatMealTypeLabel(mealType), '']);
+        const typeRow = sheet.addRow([this._formatMealTypeLabel(mealType, lang), '']);
         sheet.mergeCells(typeRow.number, 1, typeRow.number, 2);
         typeRow.getCell(1).font = { bold: true, italic: true };
         typeRow.getCell(1).fill = {
@@ -292,22 +313,23 @@ export class ReportsService {
     workbook: ExcelJS.Workbook,
     date: string,
     rows: EmployeeDaySelectionRow[],
+    lang: Language,
   ): void {
-    const sheetName = this._formatShortDayLabel(date);
+    const sheetName = this._formatShortDayLabel(date, lang);
     const sheet = workbook.addWorksheet(sheetName);
 
     const hasMultiQuantity = rows.some((r) => r.quantity > 1);
 
     if (hasMultiQuantity) {
       sheet.columns = [
-        { header: 'Employee', key: 'employee', width: 28 },
-        { header: 'Meal', key: 'meal', width: 35 },
-        { header: 'Qty', key: 'qty', width: 8 },
+        { header: t((k) => k.excel.columns.employeeName, lang), key: 'employee', width: 28 },
+        { header: t((k) => k.excel.columns.meal, lang), key: 'meal', width: 35 },
+        { header: t((k) => k.excel.columns.qty, lang), key: 'qty', width: 8 },
       ];
     } else {
       sheet.columns = [
-        { header: 'Employee', key: 'employee', width: 28 },
-        { header: 'Meal', key: 'meal', width: 35 },
+        { header: t((k) => k.excel.columns.employeeName, lang), key: 'employee', width: 28 },
+        { header: t((k) => k.excel.columns.meal, lang), key: 'meal', width: 35 },
       ];
     }
 
@@ -369,10 +391,11 @@ export class ReportsService {
     return map;
   }
 
-  private _formatDayLabel(date: string): string {
+  private _formatDayLabel(date: string, lang: Language): string {
+    const locale = lang === Language.Sr ? 'sr-Latn-RS' : 'en-US';
     const d = new Date(date + 'T00:00:00Z');
-    const dayName = d.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' });
-    const dateStr = d.toLocaleDateString('en-US', {
+    const dayName = d.toLocaleDateString(locale, { weekday: 'long', timeZone: 'UTC' });
+    const dateStr = d.toLocaleDateString(locale, {
       day: '2-digit',
       month: 'short',
       year: 'numeric',
@@ -381,25 +404,26 @@ export class ReportsService {
     return `${dayName}, ${dateStr}`;
   }
 
-  private _formatShortDayLabel(date: string): string {
+  private _formatShortDayLabel(date: string, lang: Language): string {
+    const locale = lang === Language.Sr ? 'sr-Latn-RS' : 'en-US';
     const d = new Date(date + 'T00:00:00Z');
-    const dayShort = d.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' });
+    const dayShort = d.toLocaleDateString(locale, { weekday: 'short', timeZone: 'UTC' });
     const day = String(d.getUTCDate()).padStart(2, '0');
     const month = String(d.getUTCMonth() + 1).padStart(2, '0');
     return `${dayShort} ${day}-${month}`;
   }
 
-  private _formatMealTypeLabel(mealType: string): string {
-    const labels: Record<string, string> = {
-      breakfast: 'Breakfasts',
-      lunch: 'Lunches',
-      dinner: 'Dinners',
-      bread: 'Breads',
-      soup: 'Soups',
-      salad: 'Salads',
-      dessert: 'Desserts',
-    };
-    return labels[mealType] ?? mealType.charAt(0).toUpperCase() + mealType.slice(1) + 's';
+  private _formatMealTypeLabel(mealType: string, lang: Language): string {
+    switch (mealType) {
+      case 'breakfast': return t((k) => k.excel.mealTypes.breakfast, lang);
+      case 'lunch':     return t((k) => k.excel.mealTypes.lunch, lang);
+      case 'dinner':    return t((k) => k.excel.mealTypes.dinner, lang);
+      case 'bread':     return t((k) => k.excel.mealTypes.bread, lang);
+      case 'soup':      return t((k) => k.excel.mealTypes.soup, lang);
+      case 'salad':     return t((k) => k.excel.mealTypes.salad, lang);
+      case 'dessert':   return t((k) => k.excel.mealTypes.dessert, lang);
+      default:          return mealType.charAt(0).toUpperCase() + mealType.slice(1) + 's';
+    }
   }
 
   private _buildFilename(): string {

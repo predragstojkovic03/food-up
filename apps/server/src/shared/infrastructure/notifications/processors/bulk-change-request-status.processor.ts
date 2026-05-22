@@ -4,7 +4,9 @@ import { Inject } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { BulkChangeRequestNotificationJobData } from 'src/core/change-requests/infrastructure/change-request-event-handler.service';
 import { EmployeesService } from 'src/core/employees/application/employees.service';
+import { UserPreferencesService } from 'src/core/user-preferences/application/user-preferences.service';
 import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
+import { t } from 'src/shared/i18n/i18n.helper';
 import { bullmqTelemetry } from '../bullmq-telemetry';
 import { I_MAIL_SERVICE, IMailService } from '../mail/mail.service.interface';
 import { BULK_CHANGE_REQUEST_QUEUE } from '../queue-names';
@@ -13,6 +15,7 @@ import { BULK_CHANGE_REQUEST_QUEUE } from '../queue-names';
 export class BulkChangeRequestStatusProcessor extends WorkerHost {
   constructor(
     private readonly _employeesService: EmployeesService,
+    private readonly _preferencesService: UserPreferencesService,
     @Inject(I_MAIL_SERVICE) private readonly _mailService: IMailService,
     @Inject(I_LOGGER) private readonly _logger: ILogger,
   ) {
@@ -30,6 +33,9 @@ export class BulkChangeRequestStatusProcessor extends WorkerHost {
     const employee = await this._employeesService.findOneEnriched(employeeId);
     if (!employee?.email) return;
 
+    const prefs = await this._preferencesService.getOrCreate(employee.identityId);
+    const lang = prefs.language;
+
     const approved = items.filter(
       (i) => i.status === ChangeRequestStatus.Approved,
     );
@@ -37,16 +43,21 @@ export class BulkChangeRequestStatusProcessor extends WorkerHost {
       (i) => i.status === ChangeRequestStatus.Rejected,
     );
 
-    const lines = ['<p>Your change requests have been processed:</p><ul>'];
-    if (approved.length)
-      lines.push(`<li>Approved: ${approved.length} request(s)</li>`);
-    if (rejected.length)
-      lines.push(`<li>Rejected: ${rejected.length} request(s)</li>`);
+    const intro = t((k) => k.mail.changeRequest.bulkProcessed.intro, lang);
+    const lines = [`<p>${intro}</p><ul>`];
+    if (approved.length) {
+      const approvedLine = t((k) => k.mail.changeRequest.bulkProcessed.approved, lang).replace('{{count}}', String(approved.length));
+      lines.push(`<li>${approvedLine}</li>`);
+    }
+    if (rejected.length) {
+      const rejectedLine = t((k) => k.mail.changeRequest.bulkProcessed.rejected, lang).replace('{{count}}', String(rejected.length));
+      lines.push(`<li>${rejectedLine}</li>`);
+    }
     lines.push('</ul>');
 
     await this._mailService.send(
       employee.email,
-      'Your change requests have been processed',
+      t((k) => k.mail.changeRequest.bulkProcessed.subject, lang),
       lines.join(''),
     );
 

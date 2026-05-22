@@ -1,12 +1,44 @@
-const sr = {
+import type en from './en';
+
+type StringValues<T> = { [K in keyof T]: T[K] extends string ? string : StringValues<T[K]> };
+
+const sr: StringValues<typeof en> = {
   mail: {
     mealWindow: {
       subject: 'Vaš prozor za izbor obroka je otvoren',
       body: 'Prozor za izbor obroka je sada otvoren. Prijavite se da biste napravili izbor.',
     },
     changeRequest: {
-      subject: 'Zahtev za promenu obroka podnet',
-      body: 'Vaš zahtev za promenu obroka je primljen i čeka na pregled.',
+      submitted: {
+        subject: 'Zahtev za promenu obroka podnet',
+        body: 'Vaš zahtev za promenu obroka je primljen i čeka na pregled.',
+      },
+      approved: {
+        subject: 'Vaš zahtev za promenu je odobren',
+        body: 'Vaš zahtev za promenu je odobren.',
+      },
+      rejected: {
+        subject: 'Vaš zahtev za promenu je odbijen',
+        body: 'Vaš zahtev za promenu je odbijen.',
+      },
+      bulkProcessed: {
+        subject: 'Vaši zahtevi za promenu su obrađeni',
+        intro: 'Vaši zahtevi za promenu su obrađeni:',
+        approved: 'Odobrenо: {{count}} zahtev(a)',
+        rejected: 'Odbijeno: {{count}} zahtev(a)',
+      },
+    },
+    orderSummary: {
+      subject: 'Pregled narudžbine za vaše obroke',
+      subjectAdjusted: 'Ažurirani pregled narudžbine za vaše obroke',
+      intro: 'U nastavku se nalazi pregled narudžbine za vaše obroke.',
+      introAdjusted: 'Ovo je ažurirana verzija prethodno poslatog pregleda narudžbine. Količine u nastavku odražavaju poslednje odobrene zahteve za promenu.',
+      noOrders: 'Nema narudžbina za ovaj prozor.',
+      table: {
+        date: 'Datum',
+        meal: 'Obrok',
+        qty: 'Kol.',
+      },
     },
   },
   excel: {
@@ -15,8 +47,18 @@ const sr = {
       meal: 'Obrok',
       mealType: 'Vrsta obroka',
       date: 'Datum',
+      qty: 'Kol.',
+    },
+    mealTypes: {
+      breakfast: 'Doručci',
+      lunch: 'Ručkovi',
+      dinner: 'Večere',
+      bread: 'Hlebovi',
+      soup: 'Supe',
+      salad: 'Salate',
+      dessert: 'Deserti',
     },
   },
-} as const;
+};
 
 export default sr;

@@ -4,7 +4,9 @@ import { Inject } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { ChangeRequestStatusNotificationJobData } from 'src/core/change-requests/infrastructure/change-request-event-handler.service';
 import { EmployeesService } from 'src/core/employees/application/employees.service';
+import { UserPreferencesService } from 'src/core/user-preferences/application/user-preferences.service';
 import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
+import { t } from 'src/shared/i18n/i18n.helper';
 import { bullmqTelemetry } from '../bullmq-telemetry';
 import { I_MAIL_SERVICE, IMailService } from '../mail/mail.service.interface';
 import { CHANGE_REQUEST_QUEUE } from '../queue-names';
@@ -13,6 +15,7 @@ import { CHANGE_REQUEST_QUEUE } from '../queue-names';
 export class ChangeRequestStatusProcessor extends WorkerHost {
   constructor(
     private readonly _employeesService: EmployeesService,
+    private readonly _preferencesService: UserPreferencesService,
     @Inject(I_MAIL_SERVICE) private readonly _mailService: IMailService,
     @Inject(I_LOGGER) private readonly _logger: ILogger,
   ) {
@@ -30,16 +33,18 @@ export class ChangeRequestStatusProcessor extends WorkerHost {
     const employee = await this._employeesService.findOneEnriched(employeeId);
     if (!employee?.email) return;
 
+    const prefs = await this._preferencesService.getOrCreate(employee.identityId);
+    const lang = prefs.language;
     const isApproved = status === ChangeRequestStatus.Approved;
 
     await this._mailService.send(
       employee.email,
       isApproved
-        ? 'Your change request has been approved'
-        : 'Your change request has been rejected',
+        ? t((k) => k.mail.changeRequest.approved.subject, lang)
+        : t((k) => k.mail.changeRequest.rejected.subject, lang),
       isApproved
-        ? '<p>Your change request has been approved.</p>'
-        : '<p>Your change request has been rejected.</p>',
+        ? `<p>${t((k) => k.mail.changeRequest.approved.body, lang)}</p>`
+        : `<p>${t((k) => k.mail.changeRequest.rejected.body, lang)}</p>`,
     );
 
     this._logger.log(

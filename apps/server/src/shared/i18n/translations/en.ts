@@ -5,8 +5,36 @@ export default {
       body: 'The meal selection window is now open. Please log in to make your selections.',
     },
     changeRequest: {
-      subject: 'Meal change request submitted',
-      body: 'Your meal change request has been received and is pending review.',
+      submitted: {
+        subject: 'Meal change request submitted',
+        body: 'Your meal change request has been received and is pending review.',
+      },
+      approved: {
+        subject: 'Your change request has been approved',
+        body: 'Your change request has been approved.',
+      },
+      rejected: {
+        subject: 'Your change request has been rejected',
+        body: 'Your change request has been rejected.',
+      },
+      bulkProcessed: {
+        subject: 'Your change requests have been processed',
+        intro: 'Your change requests have been processed:',
+        approved: 'Approved: {{count}} request(s)',
+        rejected: 'Rejected: {{count}} request(s)',
+      },
+    },
+    orderSummary: {
+      subject: 'Order summary for your meals',
+      subjectAdjusted: 'Adjusted order summary for your meals',
+      intro: 'Please find below the order summary for your meals.',
+      introAdjusted: 'This is an adjusted version of a previously sent order summary. The quantities below reflect the latest approved change requests.',
+      noOrders: 'No orders for this window.',
+      table: {
+        date: 'Date',
+        meal: 'Meal',
+        qty: 'Qty',
+      },
     },
   },
   excel: {
@@ -15,6 +43,16 @@ export default {
       meal: 'Meal',
       mealType: 'Meal type',
       date: 'Date',
+      qty: 'Qty',
+    },
+    mealTypes: {
+      breakfast: 'Breakfasts',
+      lunch: 'Lunches',
+      dinner: 'Dinners',
+      bread: 'Breads',
+      soup: 'Soups',
+      salad: 'Salads',
+      dessert: 'Desserts',
     },
   },
 } as const;
