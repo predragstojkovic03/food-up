@@ -4,6 +4,7 @@ import { MealType } from '@food-up/shared';
 import { Dices, SkipForward } from 'lucide-react';
 import { MenuItemOption, DaySelection } from '../types';
 import { MealTypeGroup } from './meal-type-group';
+import { useTranslation } from 'react-i18next';
 
 interface DayStepProps {
   date: string;
@@ -34,13 +35,14 @@ export function DayStep({
   onRandomizeDay,
   onRandomizeRemaining,
 }: DayStepProps) {
+  const { t } = useTranslation('meals');
   const availableTypes = TYPE_ORDER.filter((t) => (itemsByType[t]?.length ?? 0) > 0);
 
   return (
     <div className="space-y-5">
       {selection.skipped && (
         <div className="rounded-lg border border-dashed border-muted-foreground/30 bg-muted/40 px-4 py-3 text-sm text-muted-foreground text-center">
-          This day is skipped — no meals will be ordered
+          {t('dayStep.skippedMessage')}
         </div>
       )}
 
@@ -65,7 +67,7 @@ export function DayStep({
             onClick={onRandomizeDay}
           >
             <Dices className="size-4 mr-1.5" />
-            Randomize day
+            {t('dayStep.randomizeDay')}
           </Button>
           {hasRemainingDays && (
             <Button
@@ -75,7 +77,7 @@ export function DayStep({
               onClick={onRandomizeRemaining}
             >
               <Dices className="size-4 mr-1.5" />
-              Randomize rest
+              {t('dayStep.randomizeRest')}
             </Button>
           )}
         </div>
@@ -86,7 +88,7 @@ export function DayStep({
           onClick={onSkipDay}
         >
           <SkipForward className="size-4 mr-1.5" />
-          {selection.skipped ? 'Undo skip' : 'Skip this day'}
+          {selection.skipped ? t('dayStep.undoSkip') : t('dayStep.skipDay')}
         </Button>
       </div>
     </div>

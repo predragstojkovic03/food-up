@@ -24,6 +24,7 @@ import { ISupplierResponse, Language } from '@food-up/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, Pencil, Plus, Settings2, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 const QUERY_KEY = ['suppliers', 'in-house'];
@@ -38,6 +39,7 @@ function languageLabel(lang: Language): string {
 }
 
 export default function InHouseSuppliersPage() {
+  const { t } = useTranslation('suppliers');
   const { supplierService } = useServices();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -94,21 +96,21 @@ export default function InHouseSuppliersPage() {
     <div className='p-6'>
       <div className='flex items-center justify-between mb-6'>
         <div>
-          <h1 className='text-2xl font-bold mb-1'>In-House Suppliers</h1>
+          <h1 className='text-2xl font-bold mb-1'>{t('inHouse.title')}</h1>
           <p className='text-muted-foreground text-sm'>
-            Suppliers owned and managed by your business
+            {t('inHouse.subtitle')}
           </p>
         </div>
         <Button onClick={() => setShowCreatePanel(true)} className='gap-2'>
           <Plus size={16} />
-          New Supplier
+          {t('inHouse.newButton')}
         </Button>
       </div>
 
       {showCreatePanel && (
         <div className='mb-6 border rounded-lg p-5 bg-card'>
           <div className='flex items-center justify-between mb-4'>
-            <h2 className='font-semibold'>Create In-House Supplier</h2>
+            <h2 className='font-semibold'>{t('inHouse.createForm.title')}</h2>
             <button
               onClick={() => {
                 setShowCreatePanel(false);
@@ -124,11 +126,11 @@ export default function InHouseSuppliersPage() {
           <form onSubmit={handleCreate} className='flex gap-3 items-end'>
             <div className='flex-1'>
               <Label htmlFor='supplier-name' className='mb-1.5 block'>
-                Name
+                {t('inHouse.createForm.nameLabel')}
               </Label>
               <Input
                 id='supplier-name'
-                placeholder='Supplier name'
+                placeholder={t('inHouse.createForm.namePlaceholder')}
                 value={createName}
                 onChange={(e) => setCreateName(e.target.value)}
                 required
@@ -136,17 +138,17 @@ export default function InHouseSuppliersPage() {
             </div>
             <div className='flex-1'>
               <Label htmlFor='supplier-email' className='mb-1.5 block'>
-                Email
+                {t('inHouse.createForm.emailLabel')}
               </Label>
               <Input
                 id='supplier-email'
-                placeholder='Email'
+                placeholder={t('inHouse.createForm.emailLabel')}
                 value={createEmail}
                 onChange={(e) => setCreateEmail(e.target.value)}
               />
             </div>
             <div className='w-36'>
-              <Label className='mb-1.5 block'>Language</Label>
+              <Label className='mb-1.5 block'>{t('inHouse.createForm.languageLabel')}</Label>
               <Select
                 value={createLanguage}
                 onValueChange={(v) => setCreateLanguage(v as Language)}
@@ -167,12 +169,12 @@ export default function InHouseSuppliersPage() {
               </Select>
             </div>
             <Button type='submit' disabled={createSupplier.isPending}>
-              {createSupplier.isPending ? 'Creating…' : 'Create'}
+              {createSupplier.isPending ? t('actions.creating', { ns: 'common' }) : t('actions.create', { ns: 'common' })}
             </Button>
           </form>
           {createSupplier.isError && (
             <p className='mt-2 text-sm text-destructive'>
-              Failed to create supplier. Please try again.
+              {t('inHouse.createForm.error')}
             </p>
           )}
         </div>
@@ -180,21 +182,21 @@ export default function InHouseSuppliersPage() {
 
       <div className='border rounded-lg overflow-hidden'>
         <div className='grid grid-cols-[1fr_1fr_1fr_auto] text-xs font-medium text-muted-foreground bg-muted/40 px-4 py-2.5 border-b'>
-          <span>Name</span>
-          <span>Email</span>
-          <span>Language</span>
+          <span>{t('inHouse.createForm.nameLabel')}</span>
+          <span>{t('inHouse.table.emailHeader')}</span>
+          <span>{t('inHouse.table.languageHeader')}</span>
           <span />
         </div>
 
         {isLoading && (
           <div className='px-4 py-8 text-center text-muted-foreground text-sm'>
-            Loading suppliers…
+            {t('inHouse.table.loading')}
           </div>
         )}
 
         {!isLoading && suppliers.length === 0 && (
           <div className='px-4 py-8 text-center text-muted-foreground text-sm'>
-            No in-house suppliers yet. Create one to get started.
+            {t('inHouse.table.empty')}
           </div>
         )}
 
@@ -241,6 +243,7 @@ function SupplierRow({
   onRemove,
   onManage,
 }: SupplierRowProps) {
+  const { t } = useTranslation('suppliers');
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(supplier.name);
   const [email, setEmail] = useState(supplier.email ?? '');
@@ -326,7 +329,7 @@ function SupplierRow({
         <button
           onClick={onManage}
           className='p-1.5 text-muted-foreground hover:text-foreground transition-colors'
-          title='Manage meals & menu periods'
+          title={t('inHouse.row.manageTitle')}
         >
           <Settings2 size={15} />
         </button>
@@ -334,7 +337,7 @@ function SupplierRow({
           onClick={() => setEditing(true)}
           disabled={isRemoving}
           className='p-1.5 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-30'
-          title='Edit'
+          title={t('inHouse.row.editTitle')}
         >
           <Pencil size={15} />
         </button>
@@ -342,22 +345,20 @@ function SupplierRow({
           <AlertDialogTrigger
             disabled={isRemoving}
             className='p-1.5 text-muted-foreground hover:text-destructive transition-colors disabled:opacity-30'
-            title='Delete'
+            title={t('inHouse.row.deleteTitle')}
           >
             <Trash2 size={15} />
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete supplier</AlertDialogTitle>
+              <AlertDialogTitle>{t('inHouse.row.deleteDialog.title')}</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to delete{' '}
-                <span className='font-medium'>{supplier.name}</span>? This
-                action cannot be undone.
+                {t('inHouse.row.deleteDialog.description', { name: supplier.name })}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={onRemove}>Delete</AlertDialogAction>
+              <AlertDialogCancel>{t('actions.cancel', { ns: 'common' })}</AlertDialogCancel>
+              <AlertDialogAction onClick={onRemove}>{t('inHouse.row.deleteDialog.confirm')}</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

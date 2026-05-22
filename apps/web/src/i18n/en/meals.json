@@ -1,0 +1,99 @@
+{
+  "selectionFlow": {
+    "nextDay": "Next day",
+    "reviewSelections": "Review selections",
+    "selectMealHint": "Select at least one meal or skip this day to continue.",
+    "saveError": "Failed to save your selections. Please try again."
+  },
+  "dayStep": {
+    "skippedMessage": "This day is skipped — no meals will be ordered",
+    "randomizeDay": "Randomize day",
+    "randomizeRest": "Randomize rest",
+    "skipDay": "Skip this day",
+    "undoSkip": "Undo skip"
+  },
+  "progress": {
+    "day": "Day",
+    "of": "of",
+    "prevDay": "Previous day",
+    "exitSelection": "Exit selection"
+  },
+  "summary": {
+    "title": "Review your selections",
+    "subtitle": "Confirm to submit your meal choices.",
+    "skipped": "Skipped — no order",
+    "noMeals": "No meals selected",
+    "confirm": "Confirm selections",
+    "confirming": "Submitting…",
+    "editDay": "Edit this day"
+  },
+  "windows": {
+    "title": "Meal Selection Windows",
+    "subtitle": "Create time windows for employees to select their meals",
+    "newButton": "New Window",
+    "table": {
+      "deadlineHeader": "Selection Deadline",
+      "targetDatesHeader": "Target Dates",
+      "menuPeriodsHeader": "Menu Periods",
+      "statusHeader": "Status",
+      "empty": "No meal selection windows yet. Create one to let employees start selecting meals.",
+      "periodCount_one": "{{count}} period",
+      "periodCount_other": "{{count}} periods"
+    },
+    "actions": {
+      "unlock": "Unlock — allow employees to select",
+      "lock": "Lock — prevent new selections"
+    },
+    "unlockDialog": {
+      "title": "Notify employees?",
+      "description": "Do you want to notify employees that this meal selection window is now open?",
+      "noNotify": "No, just unlock",
+      "yesNotify": "Yes, notify"
+    },
+    "deleteDialog": {
+      "title": "Delete meal selection window",
+      "description": "This will permanently delete the window and all employee selections within it."
+    },
+    "detail": {
+      "loading": "Loading details…",
+      "menuItems": {
+        "mealHeader": "Meal",
+        "descriptionHeader": "Description",
+        "priceHeader": "Price",
+        "selectionsHeader": "Selections",
+        "empty": "No menu items found for this window's menu periods.",
+        "emptyForDate": "No menu items for this date."
+      },
+      "orderSummary": "Order Summary",
+      "download": "Download XLSX",
+      "sendToSuppliers": "Send to Suppliers",
+      "supplierTable": {
+        "supplierHeader": "Supplier",
+        "emailHeader": "Email",
+        "lastSentHeader": "Last sent",
+        "empty": "No supplier data for this window."
+      },
+      "sendButton_one": "Send to {{count}} supplier",
+      "sendButton_other": "Send to {{count}} suppliers",
+      "sendError": "Failed to send. Please try again."
+    },
+    "createForm": {
+      "title": "Create Meal Selection Window",
+      "menuPeriodsSection": "Menu Periods",
+      "menuPeriodsEmpty": "No menu periods available. Create menu periods under each supplier first.",
+      "menuPeriodUnavailableHint": "Some menu periods are unavailable because their end date is before the deadline or last target date.",
+      "opensLabel": "Selection Opens",
+      "closesLabel": "Selection Closes (Deadline)",
+      "datePlaceholder": "Pick date & time",
+      "targetDatesLabel": "Target Dates",
+      "targetDatesHint": "The meal dates employees are selecting for.",
+      "nextWorkWeek": "Next work week",
+      "editDates": "Edit dates",
+      "addDates": "Add dates",
+      "autoSendLabel": "Auto-send order summary to suppliers when the deadline passes",
+      "autoSendHint": "Only sends if no change requests have been approved.",
+      "lockedHint": "Windows are locked by default. Unlock when ready for employees.",
+      "error": "Failed to create window. Please try again."
+    }
+  }
+}

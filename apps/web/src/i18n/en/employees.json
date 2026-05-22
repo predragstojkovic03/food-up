@@ -1,0 +1,61 @@
+{
+  "home": {
+    "title": "Your meals",
+    "subtitle": "Select your meals for the upcoming days",
+    "empty": "No meal selection window available right now."
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Welcome to the manager panel."
+  },
+  "team": {
+    "title": "Employees",
+    "subtitle": "Manage your team members",
+    "inviteButton": "Invite Employee",
+    "invite": {
+      "panelHeading": "Send Invite",
+      "emailLabel": "Email address",
+      "emailPlaceholder": "employee@example.com",
+      "generating": "Generating…",
+      "generate": "Generate Link",
+      "shareText": "Share this link with",
+      "expiresText": "It expires on",
+      "inviteAnother": "Invite another",
+      "error": "Failed to create invite. Please try again."
+    },
+    "table": {
+      "nameHeader": "Name",
+      "emailHeader": "Email",
+      "roleHeader": "Role",
+      "statusHeader": "Status",
+      "empty": "No employees yet. Invite someone to get started.",
+      "you": "(you)"
+    },
+    "roles": {
+      "manager": "Manager",
+      "basic": "Basic"
+    },
+    "removeTitle": "Remove employee"
+  },
+  "windowStatus": {
+    "cardTitle": "Meal Selection",
+    "progress": "Progress",
+    "days": "days",
+    "yourSelections": "Your selections",
+    "noOrder": "No order",
+    "changeRequests": "Change requests",
+    "requestChange": "Request a change",
+    "editSelections": "Edit selections",
+    "continueSelecting": "Continue selecting",
+    "startSelecting": "Start selecting"
+  },
+  "changeRequest": {
+    "title": "Request a change",
+    "selectDay": "Select a day",
+    "noDaysAvailable": "No future days available for change requests.",
+    "selectMeal": "Select new meal",
+    "currently": "Currently:",
+    "currentBadge": "(current)",
+    "noMealsAvailable": "No meals available for this day."
+  }
+}

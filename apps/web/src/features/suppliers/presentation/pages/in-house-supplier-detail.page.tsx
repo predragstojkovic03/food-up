@@ -42,6 +42,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { z } from 'zod/v3';
 import { MenuPeriodBuilder } from './components/menu-period-builder/menu-period-builder';
@@ -57,6 +58,7 @@ const MEAL_TYPE_LABELS: Record<MealType, string> = {
 };
 
 export default function InHouseSupplierDetailPage() {
+  const { t } = useTranslation('suppliers');
   const { id: supplierId } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { supplierService } = useServices();
@@ -89,8 +91,8 @@ export default function InHouseSupplierDetailPage() {
 
       <Tabs defaultValue='meals'>
         <TabsList className='mb-4'>
-          <TabsTrigger value='meals'>Meals</TabsTrigger>
-          <TabsTrigger value='menu-periods'>Menu Periods</TabsTrigger>
+          <TabsTrigger value='meals'>{t('detail.mealsTab')}</TabsTrigger>
+          <TabsTrigger value='menu-periods'>{t('detail.menuPeriodsTab')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value='meals'>
@@ -116,6 +118,7 @@ const createMealSchema = z.object({
 type CreateMealFormValues = z.infer<typeof createMealSchema>;
 
 function MealsTab({ supplierId }: { supplierId: string }) {
+  const { t } = useTranslation('suppliers');
   const { mealService } = useServices();
   const queryClient = useQueryClient();
   const QUERY_KEY = ['meals', 'supplier', supplierId];
@@ -172,18 +175,18 @@ function MealsTab({ supplierId }: { supplierId: string }) {
     <div>
       <div className='flex items-center justify-between mb-4'>
         <p className='text-sm text-muted-foreground'>
-          Meals available from this supplier
+          {t('detail.meals.subtitle')}
         </p>
         <Button size='sm' onClick={() => setShowCreate(true)} className='gap-2'>
           <Plus size={14} />
-          Add Meal
+          {t('detail.meals.addButton')}
         </Button>
       </div>
 
       {showCreate && (
         <div className='mb-4 border rounded-lg p-4 bg-card'>
           <div className='flex items-center justify-between mb-3'>
-            <span className='font-medium text-sm'>New Meal</span>
+            <span className='font-medium text-sm'>{t('detail.meals.createForm.title')}</span>
             <button
               onClick={() => setShowCreate(false)}
               className='text-muted-foreground hover:text-foreground'
@@ -198,9 +201,9 @@ function MealsTab({ supplierId }: { supplierId: string }) {
                 name='name'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className='text-xs'>Name</FormLabel>
+                    <FormLabel className='text-xs'>{t('detail.meals.createForm.nameLabel')}</FormLabel>
                     <FormControl>
-                      <Input placeholder='Chicken sandwich' {...field} />
+                      <Input placeholder={t('detail.meals.createForm.namePlaceholder')} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -211,7 +214,7 @@ function MealsTab({ supplierId }: { supplierId: string }) {
                 name='type'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className='text-xs'>Type</FormLabel>
+                    <FormLabel className='text-xs'>{t('detail.meals.createForm.typeLabel')}</FormLabel>
                     <Select value={field.value} onValueChange={field.onChange}>
                       <FormControl>
                         <SelectTrigger>
@@ -233,9 +236,9 @@ function MealsTab({ supplierId }: { supplierId: string }) {
                 name='description'
                 render={({ field }) => (
                   <FormItem className='col-span-2'>
-                    <FormLabel className='text-xs'>Description</FormLabel>
+                    <FormLabel className='text-xs'>{t('detail.meals.createForm.descriptionLabel')}</FormLabel>
                     <FormControl>
-                      <Input placeholder='Brief description' {...field} />
+                      <Input placeholder={t('detail.meals.createForm.descriptionPlaceholder')} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -246,7 +249,7 @@ function MealsTab({ supplierId }: { supplierId: string }) {
                 name='price'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className='text-xs'>Price (optional)</FormLabel>
+                    <FormLabel className='text-xs'>{t('detail.meals.createForm.priceLabel')}</FormLabel>
                     <FormControl>
                       <Input type='number' step='0.01' min='0' placeholder='0.00' {...field} />
                     </FormControl>
@@ -256,11 +259,11 @@ function MealsTab({ supplierId }: { supplierId: string }) {
               />
               <div className='flex items-end'>
                 <Button type='submit' size='sm' disabled={createMeal.isPending}>
-                  {createMeal.isPending ? 'Creating…' : 'Create'}
+                  {createMeal.isPending ? t('actions.creating', { ns: 'common' }) : t('actions.create', { ns: 'common' })}
                 </Button>
               </div>
               {createMeal.isError && (
-                <p className='col-span-2 text-xs text-destructive'>Failed to create meal.</p>
+                <p className='col-span-2 text-xs text-destructive'>{t('detail.meals.createForm.error')}</p>
               )}
             </form>
           </Form>
@@ -269,9 +272,9 @@ function MealsTab({ supplierId }: { supplierId: string }) {
 
       <div className='border rounded-lg overflow-hidden'>
         <div className='grid grid-cols-[1fr_1fr_auto_auto] text-xs font-medium text-muted-foreground bg-muted/40 px-4 py-2.5 border-b'>
-          <span>Name</span>
-          <span>Description</span>
-          <span>Type</span>
+          <span>{t('detail.meals.table.nameHeader')}</span>
+          <span>{t('detail.meals.table.descriptionHeader')}</span>
+          <span>{t('detail.meals.table.typeHeader')}</span>
           <span />
         </div>
         {isLoading && (
@@ -288,7 +291,7 @@ function MealsTab({ supplierId }: { supplierId: string }) {
         )}
         {!isLoading && meals.length === 0 && (
           <div className='px-4 py-8 text-center text-muted-foreground text-sm'>
-            No meals yet.
+            {t('detail.meals.table.empty')}
           </div>
         )}
         {meals.map((meal) => (
@@ -320,6 +323,7 @@ interface MealRowProps {
 }
 
 function MealRow({ meal, isUpdating, isRemoving, onUpdate, onRemove }: MealRowProps) {
+  const { t } = useTranslation('suppliers');
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(meal.name);
   const [description, setDescription] = useState(meal.description);
@@ -414,15 +418,15 @@ function MealRow({ meal, isUpdating, isRemoving, onUpdate, onRemove }: MealRowPr
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete meal</AlertDialogTitle>
+              <AlertDialogTitle>{t('detail.meals.deleteDialog.title')}</AlertDialogTitle>
               <AlertDialogDescription>
-                Delete <span className='font-medium'>{meal.name}</span>? This
-                cannot be undone.
+                <span className='font-medium'>{meal.name}</span>{' '}
+                {t('detail.meals.deleteDialog.description')}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={onRemove}>Delete</AlertDialogAction>
+              <AlertDialogCancel>{t('actions.cancel', { ns: 'common' })}</AlertDialogCancel>
+              <AlertDialogAction onClick={onRemove}>{t('actions.delete', { ns: 'common' })}</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
@@ -440,6 +444,7 @@ const createPeriodSchema = z.object({
 type CreatePeriodFormValues = z.infer<typeof createPeriodSchema>;
 
 function MenuPeriodsTab({ supplierId }: { supplierId: string }) {
+  const { t } = useTranslation('suppliers');
   const { menuPeriodService, mealService } = useServices();
   const queryClient = useQueryClient();
   const QUERY_KEY = ['menu-periods', 'supplier', supplierId];
@@ -487,18 +492,18 @@ function MenuPeriodsTab({ supplierId }: { supplierId: string }) {
     <div>
       <div className='flex items-center justify-between mb-4'>
         <p className='text-sm text-muted-foreground'>
-          Define date ranges and assign meals to specific days
+          {t('detail.menuPeriods.subtitle')}
         </p>
         <Button size='sm' onClick={() => setShowCreate(true)} className='gap-2'>
           <Plus size={14} />
-          New Period
+          {t('detail.menuPeriods.newButton')}
         </Button>
       </div>
 
       {showCreate && (
         <div className='mb-4 border rounded-lg p-4 bg-card'>
           <div className='flex items-center justify-between mb-3'>
-            <span className='font-medium text-sm'>New Menu Period</span>
+            <span className='font-medium text-sm'>{t('detail.menuPeriods.createForm.title')}</span>
             <button
               onClick={() => setShowCreate(false)}
               className='text-muted-foreground hover:text-foreground'
@@ -513,9 +518,9 @@ function MenuPeriodsTab({ supplierId }: { supplierId: string }) {
                 name='startDate'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className='text-xs'>Start date</FormLabel>
+                    <FormLabel className='text-xs'>{t('detail.menuPeriods.createForm.startLabel')}</FormLabel>
                     <FormControl>
-                      <DatePicker value={field.value} onChange={field.onChange} placeholder='Pick start date' />
+                      <DatePicker value={field.value} onChange={field.onChange} placeholder={t('detail.menuPeriods.createForm.startPlaceholder')} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -526,22 +531,22 @@ function MenuPeriodsTab({ supplierId }: { supplierId: string }) {
                 name='endDate'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className='text-xs'>End date</FormLabel>
+                    <FormLabel className='text-xs'>{t('detail.menuPeriods.createForm.endLabel')}</FormLabel>
                     <FormControl>
-                      <DatePicker value={field.value} onChange={field.onChange} placeholder='Pick end date' />
+                      <DatePicker value={field.value} onChange={field.onChange} placeholder={t('detail.menuPeriods.createForm.endPlaceholder')} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
               <Button type='submit' size='sm' disabled={createPeriod.isPending || !createPeriodForm.watch('startDate') || !createPeriodForm.watch('endDate')}>
-                {createPeriod.isPending ? 'Creating…' : 'Create'}
+                {createPeriod.isPending ? t('actions.creating', { ns: 'common' }) : t('actions.create', { ns: 'common' })}
               </Button>
             </form>
           </Form>
           {createPeriod.isError && (
             <p className='mt-2 text-xs text-destructive'>
-              Failed to create period.
+              {t('detail.menuPeriods.createForm.error')}
             </p>
           )}
         </div>
@@ -550,12 +555,12 @@ function MenuPeriodsTab({ supplierId }: { supplierId: string }) {
       <div className='space-y-2'>
         {isLoading && (
           <div className='py-8 text-center text-muted-foreground text-sm'>
-            Loading…
+            {t('detail.menuPeriods.loading')}
           </div>
         )}
         {!isLoading && periods.length === 0 && (
           <div className='py-8 text-center text-muted-foreground text-sm'>
-            No menu periods yet.
+            {t('detail.menuPeriods.empty')}
           </div>
         )}
         {periods.map((period) => (
@@ -586,6 +591,7 @@ interface MenuPeriodRowProps {
 }
 
 function MenuPeriodRow({ period, meals, isRemoving, onRemove, onInvalidate }: MenuPeriodRowProps) {
+  const { t } = useTranslation('suppliers');
   const { menuItemService } = useServices();
   const queryClient = useQueryClient();
   const [expanded, setExpanded] = useState(false);
@@ -633,18 +639,17 @@ function MenuPeriodRow({ period, meals, isRemoving, onRemove, onInvalidate }: Me
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete menu period</AlertDialogTitle>
+              <AlertDialogTitle>{t('detail.menuPeriods.deleteDialog.title')}</AlertDialogTitle>
               <AlertDialogDescription>
-                Delete the period{' '}
                 <span className='font-medium'>
                   {period.startDate} → {period.endDate}
-                </span>
-                ? All menu items in it will also be removed.
+                </span>{' '}
+                {t('detail.menuPeriods.deleteDialog.description')}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={onRemove}>Delete</AlertDialogAction>
+              <AlertDialogCancel>{t('actions.cancel', { ns: 'common' })}</AlertDialogCancel>
+              <AlertDialogAction onClick={onRemove}>{t('actions.delete', { ns: 'common' })}</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

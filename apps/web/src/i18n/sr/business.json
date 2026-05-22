@@ -1,0 +1,13 @@
+{
+  "settings": {
+    "title": "Podešavanja firme",
+    "subtitle": "Konfigurišite podešavanja koja se primenjuju na celu vašu firmu.",
+    "communicationLanguage": {
+      "cardTitle": "Jezik komunikacije",
+      "label": "Jezik za Excel izvoz",
+      "hint": "Zaglavlja kolona i oznake u Excel izvozu koriste ovaj jezik.",
+      "success": "Podešavanja firme ažurirana.",
+      "error": "Ažuriranje nije uspelo. Pokušajte ponovo."
+    }
+  }
+}

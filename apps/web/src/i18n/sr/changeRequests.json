@@ -1,0 +1,18 @@
+{
+  "title": "Zahtevi za promenu",
+  "subtitle": "Prikaz zahteva za trenutni prozor izbora",
+  "subtitleNoWindow": "Nema aktivnog prozora izbora",
+  "selectedCount": "izabrano",
+  "table": {
+    "employeeHeader": "Zaposleni",
+    "dateHeader": "Datum",
+    "changeHeader": "Promena",
+    "statusHeader": "Status",
+    "empty": "Nema zahteva za promenu za ovaj prozor."
+  },
+  "actions": {
+    "approve": "Odobri",
+    "reject": "Odbij"
+  },
+  "noWindow": "Trenutno nema dostupnog prozora za izbor obroka."
+}

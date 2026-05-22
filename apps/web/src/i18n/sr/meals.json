@@ -1,0 +1,99 @@
+{
+  "selectionFlow": {
+    "nextDay": "Sledeći dan",
+    "reviewSelections": "Pregled izbora",
+    "selectMealHint": "Izaberite najmanje jedan obrok ili preskočite ovaj dan da biste nastavili.",
+    "saveError": "Nije moguće sačuvati vaše izbore. Pokušajte ponovo."
+  },
+  "dayStep": {
+    "skippedMessage": "Ovaj dan je preskočen — neće biti narudžbine",
+    "randomizeDay": "Nasumični izbor za dan",
+    "randomizeRest": "Nasumični izbor za ostatak",
+    "skipDay": "Preskoči ovaj dan",
+    "undoSkip": "Poništi preskakanje"
+  },
+  "progress": {
+    "day": "Dan",
+    "of": "od",
+    "prevDay": "Prethodni dan",
+    "exitSelection": "Izađi iz izbora"
+  },
+  "summary": {
+    "title": "Pregledajte svoje izbore",
+    "subtitle": "Potvrdite da biste poslali izbore obroka.",
+    "skipped": "Preskočeno — bez narudžbine",
+    "noMeals": "Nisu izabrani obroci",
+    "confirm": "Potvrdi izbore",
+    "confirming": "Slanje…",
+    "editDay": "Izmeni ovaj dan"
+  },
+  "windows": {
+    "title": "Prozori za izbor obroka",
+    "subtitle": "Kreirajte vremenske prozore za izbor obroka zaposlenih",
+    "newButton": "Novi prozor",
+    "table": {
+      "deadlineHeader": "Rok za izbor",
+      "targetDatesHeader": "Ciljni datumi",
+      "menuPeriodsHeader": "Periodi menija",
+      "statusHeader": "Status",
+      "empty": "Još nema prozora za izbor obroka. Kreirajte jedan da biste omogućili zaposlenima da počnu sa izborom.",
+      "periodCount_one": "{{count}} period",
+      "periodCount_other": "{{count}} perioda"
+    },
+    "actions": {
+      "unlock": "Otključaj — dozvoli zaposlenima da biraju",
+      "lock": "Zaključaj — spreci nove izbore"
+    },
+    "unlockDialog": {
+      "title": "Obavestiti zaposlene?",
+      "description": "Da li želite da obavestite zaposlene da je prozor za izbor obroka sada otvoren?",
+      "noNotify": "Ne, samo otključaj",
+      "yesNotify": "Da, obavesti"
+    },
+    "deleteDialog": {
+      "title": "Obriši prozor za izbor obroka",
+      "description": "Ovo će trajno obrisati prozor i sve izbore zaposlenih unutar njega."
+    },
+    "detail": {
+      "loading": "Učitavanje detalja…",
+      "menuItems": {
+        "mealHeader": "Obrok",
+        "descriptionHeader": "Opis",
+        "priceHeader": "Cena",
+        "selectionsHeader": "Izbori",
+        "empty": "Nisu pronađene stavke menija za periode menija ovog prozora.",
+        "emptyForDate": "Nema stavki menija za ovaj datum."
+      },
+      "orderSummary": "Pregled narudžbine",
+      "download": "Preuzmi XLSX",
+      "sendToSuppliers": "Pošalji dobavljačima",
+      "supplierTable": {
+        "supplierHeader": "Dobavljač",
+        "emailHeader": "Imejl",
+        "lastSentHeader": "Poslednje poslato",
+        "empty": "Nema podataka o dobavljačima za ovaj prozor."
+      },
+      "sendButton_one": "Pošalji {{count}} dobavljaču",
+      "sendButton_other": "Pošalji {{count}} dobavljačima",
+      "sendError": "Slanje nije uspelo. Pokušajte ponovo."
+    },
+    "createForm": {
+      "title": "Kreiraj prozor za izbor obroka",
+      "menuPeriodsSection": "Periodi menija",
+      "menuPeriodsEmpty": "Nema dostupnih perioda menija. Kreirajte periode menija kod svakog dobavljača.",
+      "menuPeriodUnavailableHint": "Neki periodi menija nisu dostupni jer im datum završetka prethodi roku ili poslednjem ciljnom datumu.",
+      "opensLabel": "Otvara se za izbor",
+      "closesLabel": "Zatvara se (rok)",
+      "datePlaceholder": "Izaberite datum i vreme",
+      "targetDatesLabel": "Ciljni datumi",
+      "targetDatesHint": "Datumi obroka koje zaposleni biraju.",
+      "nextWorkWeek": "Sledeća radna sedmica",
+      "editDates": "Izmeni datume",
+      "addDates": "Dodaj datume",
+      "autoSendLabel": "Automatski pošalji pregled narudžbine dobavljačima kada rok istekne",
+      "autoSendHint": "Šalje se samo ako nijedan zahtev za promenu nije odobren.",
+      "lockedHint": "Prozori su podrazumevano zaključani. Otključajte ih kada budete spremni za zaposlene.",
+      "error": "Nije moguće kreirati prozor. Pokušajte ponovo."
+    }
+  }
+}

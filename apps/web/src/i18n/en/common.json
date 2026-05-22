@@ -1,4 +1,8 @@
 {
+  "brand": {
+    "name": "FoodUp",
+    "tagline": "Meal management platform"
+  },
   "nav": {
     "dashboard": "Dashboard",
     "employees": "Employees",
@@ -15,15 +19,55 @@
     "save": "Save changes",
     "saving": "Saving…",
     "cancel": "Cancel",
+    "confirm": "Confirm",
     "create": "Create",
     "creating": "Creating…",
     "delete": "Delete",
+    "deleting": "Deleting…",
     "edit": "Edit",
-    "logout": "Logout"
+    "logout": "Logout",
+    "back": "← Back",
+    "copy": "Copy",
+    "copied": "Copied",
+    "apply": "Apply",
+    "send": "Send",
+    "sending": "Sending…",
+    "download": "Download",
+    "downloading": "Downloading…",
+    "submit": "Submit",
+    "submitting": "Submitting…",
+    "update": "Update",
+    "updating": "Updating…"
   },
   "language": {
     "label": "Language",
     "en": "English",
     "sr": "Srpski"
+  },
+  "status": {
+    "active": "Active",
+    "closed": "Closed",
+    "locked": "Locked",
+    "expired": "Expired",
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "revoked": "Revoked",
+    "suspended": "Suspended",
+    "noEmail": "No email",
+    "newData": "New data",
+    "never": "Never"
+  },
+  "dialog": {
+    "logout": {
+      "title": "Log out?",
+      "description": "You will be returned to the login screen.",
+      "confirm": "Log out"
+    },
+    "cancel": "Cancel"
+  },
+  "loading": "Loading…",
+  "errors": {
+    "downloadFailed": "Download failed."
   }
 }

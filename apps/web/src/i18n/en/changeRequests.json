@@ -1,0 +1,18 @@
+{
+  "title": "Change Requests",
+  "subtitle": "Showing requests for the current selection window",
+  "subtitleNoWindow": "No active selection window",
+  "selectedCount": "selected",
+  "table": {
+    "employeeHeader": "Employee",
+    "dateHeader": "Date",
+    "changeHeader": "Change",
+    "statusHeader": "Status",
+    "empty": "No change requests for this window."
+  },
+  "actions": {
+    "approve": "Approve",
+    "reject": "Reject"
+  },
+  "noWindow": "No meal selection window available right now."
+}

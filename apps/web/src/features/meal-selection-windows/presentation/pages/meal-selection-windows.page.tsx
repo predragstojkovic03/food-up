@@ -43,6 +43,7 @@ import {
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod/v3';
+import { useTranslation } from 'react-i18next';
 
 const WINDOWS_QUERY_KEY = ['meal-selection-windows', 'business'];
 
@@ -89,6 +90,7 @@ function getNextWorkWeek(afterDate: Date): string[] {
 }
 
 export default function MealSelectionWindowsPage() {
+  const { t } = useTranslation('meals');
   const { mealSelectionWindowService, supplierService, menuPeriodService } = useServices();
   const queryClient = useQueryClient();
 
@@ -150,23 +152,23 @@ export default function MealSelectionWindowsPage() {
 
   function getWindowStatus(w: IMealSelectionWindowResponse) {
     const expired = new Date(w.endTime) < new Date();
-    if (expired) return { label: 'Expired', cls: 'bg-muted text-muted-foreground' };
-    if (w.isLocked) return { label: 'Locked', cls: 'bg-warning/15 text-warning' };
-    return { label: 'Active', cls: 'bg-success/15 text-success' };
+    if (expired) return { label: t('status.expired', { ns: 'common' }), cls: 'bg-muted text-muted-foreground' };
+    if (w.isLocked) return { label: t('status.locked', { ns: 'common' }), cls: 'bg-warning/15 text-warning' };
+    return { label: t('status.active', { ns: 'common' }), cls: 'bg-success/15 text-success' };
   }
 
   return (
     <div className='p-6'>
       <div className='flex items-center justify-between mb-6'>
         <div>
-          <h1 className='text-2xl font-bold mb-1'>Meal Selection Windows</h1>
+          <h1 className='text-2xl font-bold mb-1'>{t('windows.title')}</h1>
           <p className='text-muted-foreground text-sm'>
-            Create time windows for employees to select their meals
+            {t('windows.subtitle')}
           </p>
         </div>
         <Button onClick={() => setShowCreatePanel(true)} className='gap-2'>
           <Plus size={16} />
-          New Window
+          {t('windows.newButton')}
         </Button>
       </div>
 
@@ -184,10 +186,10 @@ export default function MealSelectionWindowsPage() {
       <div className='border rounded-lg overflow-hidden'>
         <div className='grid grid-cols-[auto_1fr_auto_auto_auto_auto] text-xs font-medium text-muted-foreground bg-muted/40 px-4 py-2.5 border-b gap-4'>
           <span />
-          <span>Selection Deadline</span>
-          <span>Target Dates</span>
-          <span>Menu Periods</span>
-          <span>Status</span>
+          <span>{t('windows.table.deadlineHeader')}</span>
+          <span>{t('windows.table.targetDatesHeader')}</span>
+          <span>{t('windows.table.menuPeriodsHeader')}</span>
+          <span>{t('windows.table.statusHeader')}</span>
           <span />
         </div>
 
@@ -208,11 +210,7 @@ export default function MealSelectionWindowsPage() {
 
         {!isLoading && windows.length === 0 && (
           <div className='px-4 py-8 text-center text-muted-foreground text-sm'>
-            No meal selection windows yet.{' '}
-            <button onClick={() => setShowCreatePanel(true)} className='underline hover:text-foreground transition-colors'>
-              Create one
-            </button>{' '}
-            to let employees start selecting meals.
+            {t('windows.table.empty')}
           </div>
         )}
 
@@ -248,7 +246,7 @@ export default function MealSelectionWindowsPage() {
                 </div>
 
                 <span className='text-xs text-muted-foreground text-right'>
-                  {window.menuPeriodIds.length} period{window.menuPeriodIds.length !== 1 ? 's' : ''}
+                  {t('windows.table.periodCount', { count: window.menuPeriodIds.length })}
                 </span>
 
                 <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${status.cls}`}>
@@ -262,28 +260,28 @@ export default function MealSelectionWindowsPage() {
                         <AlertDialogTrigger asChild disabled={isToggling}>
                           <button
                             className='p-1.5 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-30'
-                            title='Unlock — allow employees to select'
+                            title={t('windows.actions.unlock')}
                           >
                             <LockOpen size={15} />
                           </button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Notify employees?</AlertDialogTitle>
+                            <AlertDialogTitle>{t('windows.unlockDialog.title')}</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Do you want to notify employees that this meal selection window is now open?
+                              {t('windows.unlockDialog.description')}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel
                               onClick={() => updateWindow.mutate({ id: window.id, isLocked: false, notifyEmployees: false })}
                             >
-                              No, just unlock
+                              {t('windows.unlockDialog.noNotify')}
                             </AlertDialogCancel>
                             <AlertDialogAction
                               onClick={() => updateWindow.mutate({ id: window.id, isLocked: false, notifyEmployees: true })}
                             >
-                              Yes, notify
+                              {t('windows.unlockDialog.yesNotify')}
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
@@ -293,7 +291,7 @@ export default function MealSelectionWindowsPage() {
                         onClick={() => updateWindow.mutate({ id: window.id, isLocked: true })}
                         disabled={isToggling}
                         className='p-1.5 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-30'
-                        title='Lock — prevent new selections'
+                        title={t('windows.actions.lock')}
                       >
                         <Lock size={15} />
                       </button>
@@ -309,15 +307,15 @@ export default function MealSelectionWindowsPage() {
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Delete meal selection window</AlertDialogTitle>
+                        <AlertDialogTitle>{t('windows.deleteDialog.title')}</AlertDialogTitle>
                         <AlertDialogDescription>
-                          This will permanently delete the window and all employee selections within it.
+                          {t('windows.deleteDialog.description')}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel>{t('actions.cancel', { ns: 'common' })}</AlertDialogCancel>
                         <AlertDialogAction onClick={() => removeWindow.mutate(window.id)}>
-                          Delete
+                          {t('actions.delete', { ns: 'common' })}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
@@ -349,6 +347,7 @@ interface WindowDetailsProps {
 }
 
 function WindowDetails({ windowId, endTime, targetDates }: WindowDetailsProps) {
+  const { t } = useTranslation('meals');
   const { mealSelectionWindowService, mealSelectionService, reportService } = useServices();
   const isExpired = new Date(endTime) < new Date();
 
@@ -381,7 +380,7 @@ function WindowDetails({ windowId, endTime, targetDates }: WindowDetailsProps) {
   if (isLoading) {
     return (
       <div className='px-8 py-4 bg-muted/10 border-t text-sm text-muted-foreground'>
-        Loading details…
+        {t('windows.detail.loading')}
       </div>
     );
   }
@@ -389,7 +388,7 @@ function WindowDetails({ windowId, endTime, targetDates }: WindowDetailsProps) {
   if (menuItems.length === 0) {
     return (
       <div className='px-8 py-4 bg-muted/10 border-t text-sm text-muted-foreground'>
-        No menu items found for this window's menu periods.
+        {t('windows.detail.menuItems.empty')}
       </div>
     );
   }
@@ -407,14 +406,14 @@ function WindowDetails({ windowId, endTime, targetDates }: WindowDetailsProps) {
             </h3>
 
             {items.length === 0 ? (
-              <p className='text-xs text-muted-foreground'>No menu items for this date.</p>
+              <p className='text-xs text-muted-foreground'>{t('windows.detail.menuItems.emptyForDate')}</p>
             ) : (
               <div className='grid grid-cols-[1fr_auto_auto_auto] text-xs text-muted-foreground font-medium border rounded-lg overflow-hidden'>
                 <div className='contents'>
-                  <span className='px-3 py-2 bg-muted/40 border-b'>Meal</span>
-                  <span className='px-3 py-2 bg-muted/40 border-b'>Description</span>
-                  <span className='px-3 py-2 bg-muted/40 border-b text-right'>Price</span>
-                  <span className='px-3 py-2 bg-muted/40 border-b text-right'>Selections</span>
+                  <span className='px-3 py-2 bg-muted/40 border-b'>{t('windows.detail.menuItems.mealHeader')}</span>
+                  <span className='px-3 py-2 bg-muted/40 border-b'>{t('windows.detail.menuItems.descriptionHeader')}</span>
+                  <span className='px-3 py-2 bg-muted/40 border-b text-right'>{t('windows.detail.menuItems.priceHeader')}</span>
+                  <span className='px-3 py-2 bg-muted/40 border-b text-right'>{t('windows.detail.menuItems.selectionsHeader')}</span>
                 </div>
                 {items.map((item) => {
                   const qty = quantityByMenuItemId[item.id] ?? 0;
@@ -446,11 +445,11 @@ function WindowDetails({ windowId, endTime, targetDates }: WindowDetailsProps) {
       <div className='space-y-3'>
         <div className='flex items-center justify-between'>
           <h3 className='text-xs font-semibold text-muted-foreground uppercase tracking-wide'>
-            Order Summary
+            {t('windows.detail.orderSummary')}
           </h3>
           <div className='flex items-center gap-2'>
             {downloadXlsx.isError && (
-              <span className='text-xs text-destructive'>Download failed.</span>
+              <span className='text-xs text-destructive'>{t('errors.downloadFailed', { ns: 'common' })}</span>
             )}
             <Button
               variant='outline'
@@ -460,7 +459,7 @@ function WindowDetails({ windowId, endTime, targetDates }: WindowDetailsProps) {
               className='gap-1.5 text-xs'
             >
               <Download size={13} />
-              {downloadXlsx.isPending ? 'Downloading…' : 'Download XLSX'}
+              {downloadXlsx.isPending ? t('actions.downloading', { ns: 'common' }) : t('windows.detail.download')}
             </Button>
           </div>
         </div>
@@ -474,6 +473,7 @@ function WindowDetails({ windowId, endTime, targetDates }: WindowDetailsProps) {
 // ─── Reports Panel (send-to-suppliers, expired windows only) ─────────────────
 
 function WindowReportsPanel({ windowId }: { windowId: string }) {
+  const { t } = useTranslation('meals');
   const { reportService } = useServices();
   const queryClient = useQueryClient();
 
@@ -519,20 +519,20 @@ function WindowReportsPanel({ windowId }: { windowId: string }) {
 
   if (statuses.length === 0) {
     return (
-      <p className='text-xs text-muted-foreground'>No supplier data for this window.</p>
+      <p className='text-xs text-muted-foreground'>{t('windows.detail.supplierTable.empty')}</p>
     );
   }
 
   return (
     <div className='space-y-3'>
-      <h4 className='text-xs font-medium text-muted-foreground'>Send to Suppliers</h4>
+      <h4 className='text-xs font-medium text-muted-foreground'>{t('windows.detail.sendToSuppliers')}</h4>
 
       <div className='border rounded-lg overflow-hidden'>
         <div className='grid grid-cols-[auto_1fr_1fr_1fr_auto] text-xs font-medium text-muted-foreground bg-muted/40 px-3 py-2 border-b gap-4'>
           <span />
-          <span>Supplier</span>
-          <span>Email</span>
-          <span>Last sent</span>
+          <span>{t('windows.detail.supplierTable.supplierHeader')}</span>
+          <span>{t('windows.detail.supplierTable.emailHeader')}</span>
+          <span>{t('windows.detail.supplierTable.lastSentHeader')}</span>
           <span />
         </div>
 
@@ -553,7 +553,7 @@ function WindowReportsPanel({ windowId }: { windowId: string }) {
 
               <span className='text-sm'>
                 {status.email ?? (
-                  <span className='text-muted-foreground'>No email</span>
+                  <span className='text-muted-foreground'>{t('status.noEmail', { ns: 'common' })}</span>
                 )}
               </span>
 
@@ -561,19 +561,19 @@ function WindowReportsPanel({ windowId }: { windowId: string }) {
                 {status.lastSentAt ? (
                   new Date(status.lastSentAt).toLocaleString()
                 ) : (
-                  <span className='text-muted-foreground'>Never</span>
+                  <span className='text-muted-foreground'>{t('status.never', { ns: 'common' })}</span>
                 )}
               </span>
 
               <span>
                 {status.hasNewDataSinceLastSend && (
                   <span className='text-xs px-2 py-0.5 rounded-full bg-warning/15 text-warning font-medium whitespace-nowrap'>
-                    New data
+                    {t('status.newData', { ns: 'common' })}
                   </span>
                 )}
                 {!status.canSend && !status.email && (
                   <span className='text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium whitespace-nowrap'>
-                    No email
+                    {t('status.noEmail', { ns: 'common' })}
                   </span>
                 )}
               </span>
@@ -591,12 +591,12 @@ function WindowReportsPanel({ windowId }: { windowId: string }) {
         >
           <Send size={13} />
           {sendMutation.isPending
-            ? 'Sending…'
-            : `Send to ${selectedIds.length} supplier${selectedIds.length !== 1 ? 's' : ''}`}
+            ? t('actions.sending', { ns: 'common' })
+            : t('windows.detail.sendButton', { count: selectedIds.length })}
         </Button>
 
         {sendMutation.isError && (
-          <p className='text-sm text-destructive'>Failed to send. Please try again.</p>
+          <p className='text-sm text-destructive'>{t('windows.detail.sendError')}</p>
         )}
       </div>
     </div>
@@ -637,6 +637,7 @@ function CreateWindowPanel({
   onSubmit,
   onClose,
 }: CreateWindowPanelProps) {
+  const { t } = useTranslation('meals');
   const form = useForm<CreateWindowFormValues>({
     resolver: zodResolver(createWindowSchema),
     defaultValues: {
@@ -702,7 +703,7 @@ function CreateWindowPanel({
   return (
     <div className='mb-6 border rounded-lg p-5 bg-card'>
       <div className='flex items-center justify-between mb-4'>
-        <h2 className='font-semibold'>Create Meal Selection Window</h2>
+        <h2 className='font-semibold'>{t('windows.createForm.title')}</h2>
         <button onClick={onClose} className='text-muted-foreground hover:text-foreground transition-colors'>
           <X size={16} />
         </button>
@@ -725,10 +726,10 @@ function CreateWindowPanel({
 
               return (
                 <FormItem>
-                  <FormLabel>Menu Periods</FormLabel>
+                  <FormLabel>{t('windows.createForm.menuPeriodsSection')}</FormLabel>
                   {menuPeriods.length === 0 ? (
                     <p className='text-sm text-muted-foreground'>
-                      No menu periods available. Create menu periods under each supplier first.
+                      {t('windows.createForm.menuPeriodsEmpty')}
                     </p>
                   ) : (
                     <>
@@ -760,7 +761,7 @@ function CreateWindowPanel({
                       </div>
                       {hasIncompatible && (
                         <p className='text-xs text-muted-foreground mt-1.5'>
-                          Some menu periods are unavailable because their end date is before the deadline or last target date.
+                          {t('windows.createForm.menuPeriodUnavailableHint')}
                         </p>
                       )}
                     </>
@@ -778,8 +779,8 @@ function CreateWindowPanel({
               name='startTime'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Selection Opens</FormLabel>
-                  <DateTimePicker value={field.value} onChange={field.onChange} placeholder='Pick date & time' />
+                  <FormLabel>{t('windows.createForm.opensLabel')}</FormLabel>
+                  <DateTimePicker value={field.value} onChange={field.onChange} placeholder={t('windows.createForm.datePlaceholder')} />
                   <FormMessage />
                 </FormItem>
               )}
@@ -789,8 +790,8 @@ function CreateWindowPanel({
               name='endTime'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Selection Closes (Deadline)</FormLabel>
-                  <DateTimePicker value={field.value} onChange={field.onChange} placeholder='Pick date & time' />
+                  <FormLabel>{t('windows.createForm.closesLabel')}</FormLabel>
+                  <DateTimePicker value={field.value} onChange={field.onChange} placeholder={t('windows.createForm.datePlaceholder')} />
                   <FormMessage />
                 </FormItem>
               )}
@@ -804,7 +805,7 @@ function CreateWindowPanel({
             render={() => (
               <FormItem>
                 <div className='flex items-center justify-between mb-2'>
-                  <FormLabel>Target Dates</FormLabel>
+                  <FormLabel>{t('windows.createForm.targetDatesLabel')}</FormLabel>
                   <Button
                     type='button'
                     variant='outline'
@@ -814,10 +815,10 @@ function CreateWindowPanel({
                     className='gap-1.5 h-7 text-xs'
                   >
                     <CalendarRange size={12} />
-                    Next work week
+                    {t('windows.createForm.nextWorkWeek')}
                   </Button>
                 </div>
-                <p className='text-xs text-muted-foreground mb-3'>The meal dates employees are selecting for.</p>
+                <p className='text-xs text-muted-foreground mb-3'>{t('windows.createForm.targetDatesHint')}</p>
 
                 {activeDates.length > 0 && (
                   <div className='flex flex-wrap gap-1.5 mb-3'>
@@ -845,7 +846,7 @@ function CreateWindowPanel({
                     className='text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1'
                   >
                     <Plus size={12} />
-                    {activeDates.length > 0 ? 'Edit dates' : 'Add dates'}
+                    {activeDates.length > 0 ? t('windows.createForm.editDates') : t('windows.createForm.addDates')}
                   </PopoverTrigger>
                   <PopoverContent className='w-auto p-0' align='start'>
                     <Calendar
@@ -854,8 +855,8 @@ function CreateWindowPanel({
                       onSelect={(dates) => setDraftDates(dates ?? [])}
                     />
                     <div className='flex justify-end gap-2 border-t px-3 py-2'>
-                      <Button type='button' variant='ghost' size='sm' onClick={() => setCalendarOpen(false)}>Cancel</Button>
-                      <Button type='button' size='sm' onClick={applyDraftDates}>Apply</Button>
+                      <Button type='button' variant='ghost' size='sm' onClick={() => setCalendarOpen(false)}>{t('actions.cancel', { ns: 'common' })}</Button>
+                      <Button type='button' size='sm' onClick={applyDraftDates}>{t('actions.apply', { ns: 'common' })}</Button>
                     </div>
                   </PopoverContent>
                 </Popover>
@@ -878,10 +879,10 @@ function CreateWindowPanel({
                 />
                 <div>
                   <Label htmlFor='notify-on-deadline' className='font-normal cursor-pointer'>
-                    Auto-send order summary to suppliers when the deadline passes
+                    {t('windows.createForm.autoSendLabel')}
                   </Label>
                   <p className='text-xs text-muted-foreground mt-0.5'>
-                    Only sends if no change requests have been approved.
+                    {t('windows.createForm.autoSendHint')}
                   </p>
                 </div>
               </div>
@@ -890,15 +891,15 @@ function CreateWindowPanel({
 
           <div className='flex gap-3 items-center'>
             <Button type='submit' disabled={isPending}>
-              {isPending ? 'Creating…' : 'Create Window'}
+              {isPending ? t('actions.creating', { ns: 'common' }) : t('windows.createForm.title')}
             </Button>
             <p className='text-xs text-muted-foreground'>
-              Windows are locked by default. Unlock when ready for employees.
+              {t('windows.createForm.lockedHint')}
             </p>
           </div>
 
           {isError && (
-            <p className='text-sm text-destructive'>Failed to create window. Please try again.</p>
+            <p className='text-sm text-destructive'>{t('windows.createForm.error')}</p>
           )}
         </form>
       </Form>

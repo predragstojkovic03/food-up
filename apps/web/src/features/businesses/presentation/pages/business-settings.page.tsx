@@ -12,6 +12,7 @@ import { useServices } from '@/shared/infrastructure/di/service.context';
 import { Language } from '@food-up/shared';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const LANGUAGE_OPTIONS: { value: Language; label: string }[] = [
   { value: Language.En, label: 'English' },
@@ -19,6 +20,7 @@ const LANGUAGE_OPTIONS: { value: Language; label: string }[] = [
 ];
 
 export default function BusinessSettingsPage() {
+  const { t } = useTranslation('business');
   const { businessService } = useServices();
   const [language, setLanguage] = useState<Language>(Language.En);
   const [feedback, setFeedback] = useState<{
@@ -35,31 +37,31 @@ export default function BusinessSettingsPage() {
       return { previousLanguage };
     },
     onSuccess: () => {
-      setFeedback({ type: 'success', message: 'Business settings updated.' });
+      setFeedback({ type: 'success', message: t('settings.communicationLanguage.success') });
     },
     onError: (_err, _lang, context) => {
       if (context) setLanguage(context.previousLanguage);
-      setFeedback({ type: 'error', message: 'Failed to update. Please try again.' });
+      setFeedback({ type: 'error', message: t('settings.communicationLanguage.error') });
     },
   });
 
   return (
     <div className='max-w-2xl space-y-6'>
       <div>
-        <h1 className='text-xl font-semibold'>Business Settings</h1>
+        <h1 className='text-xl font-semibold'>{t('settings.title')}</h1>
         <p className='text-sm text-muted-foreground mt-1'>
-          Configure settings that apply to your entire business.
+          {t('settings.subtitle')}
         </p>
       </div>
 
       <Card>
         <CardHeader className='px-6 pt-5 pb-0'>
-          <CardTitle className='text-base'>Communication Language</CardTitle>
+          <CardTitle className='text-base'>{t('settings.communicationLanguage.cardTitle')}</CardTitle>
         </CardHeader>
         <Separator className='mt-4' />
         <CardContent className='px-6 pt-4 pb-5 space-y-4'>
           <div className='space-y-2'>
-            <Label>Language for Excel exports</Label>
+            <Label>{t('settings.communicationLanguage.label')}</Label>
             <Select
               value={language}
               onValueChange={(v) => {
@@ -84,7 +86,7 @@ export default function BusinessSettingsPage() {
               </SelectContent>
             </Select>
             <p className='text-xs text-muted-foreground'>
-              Column headers and labels in Excel exports use this language.
+              {t('settings.communicationLanguage.hint')}
             </p>
           </div>
           {feedback && (

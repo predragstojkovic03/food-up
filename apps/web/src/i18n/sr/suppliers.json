@@ -1,0 +1,88 @@
+{
+  "inHouse": {
+    "title": "Interni dobavljači",
+    "subtitle": "Dobavljači u vlasništvu i upravljanju vaše firme",
+    "newButton": "Novi dobavljač",
+    "createForm": {
+      "title": "Kreiraj internog dobavljača",
+      "nameLabel": "Naziv",
+      "namePlaceholder": "Naziv dobavljača",
+      "emailLabel": "Imejl",
+      "languageLabel": "Jezik",
+      "error": "Nije moguće kreirati dobavljača. Pokušajte ponovo."
+    },
+    "table": {
+      "emailHeader": "Imejl",
+      "languageHeader": "Jezik",
+      "loading": "Učitavanje dobavljača…",
+      "empty": "Još nema internih dobavljača. Kreirajte jednog za početak."
+    },
+    "row": {
+      "manageTitle": "Upravljajte obrocima i periodima menija",
+      "editTitle": "Izmeni",
+      "deleteTitle": "Obriši",
+      "deleteDialog": {
+        "title": "Obriši dobavljača",
+        "description": "Da li ste sigurni da želite da obrišete {{name}}? Ova radnja se ne može poništiti.",
+        "confirm": "Obriši"
+      }
+    }
+  },
+  "detail": {
+    "mealsTab": "Obroci",
+    "menuPeriodsTab": "Periodi menija",
+    "meals": {
+      "subtitle": "Obroci dostupni od ovog dobavljača",
+      "addButton": "Dodaj obrok",
+      "createForm": {
+        "title": "Novi obrok",
+        "nameLabel": "Naziv",
+        "namePlaceholder": "Pileći sendvič",
+        "typeLabel": "Vrsta",
+        "descriptionLabel": "Opis",
+        "descriptionPlaceholder": "Kratak opis",
+        "priceLabel": "Cena (opciono)",
+        "error": "Nije moguće kreirati obrok."
+      },
+      "table": {
+        "nameHeader": "Naziv",
+        "descriptionHeader": "Opis",
+        "typeHeader": "Vrsta",
+        "empty": "Još nema obroka."
+      },
+      "deleteDialog": {
+        "title": "Obriši obrok",
+        "description": "Ova radnja se ne može poništiti."
+      }
+    },
+    "menuPeriods": {
+      "subtitle": "Definišite vremenske periode i dodelite obroke određenim danima",
+      "newButton": "Novi period",
+      "createForm": {
+        "title": "Novi period menija",
+        "startLabel": "Datum početka",
+        "startPlaceholder": "Izaberite datum početka",
+        "endLabel": "Datum završetka",
+        "endPlaceholder": "Izaberite datum završetka",
+        "error": "Nije moguće kreirati period."
+      },
+      "loading": "Učitavanje…",
+      "empty": "Još nema perioda menija.",
+      "deleteDialog": {
+        "title": "Obriši period menija",
+        "description": "Brisanjem ovog perioda uklonićete i sve stavke menija unutar njega."
+      }
+    }
+  },
+  "partners": {
+    "title": "Partnerski dobavljači",
+    "subtitle": "Nezavisni dobavljači sa kojima vaša firma sarađuje",
+    "table": {
+      "nameHeader": "Naziv",
+      "emailHeader": "Imejl",
+      "languageHeader": "Jezik",
+      "loading": "Učitavanje dobavljača…",
+      "empty": "Još nema partnerskih dobavljača."
+    }
+  }
+}

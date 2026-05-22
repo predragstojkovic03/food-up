@@ -1,0 +1,61 @@
+{
+  "home": {
+    "title": "Vaši obroci",
+    "subtitle": "Izaberite obroke za naredne dane",
+    "empty": "Trenutno nema dostupnog prozora za izbor obroka."
+  },
+  "dashboard": {
+    "title": "Kontrolna tabla",
+    "subtitle": "Dobrodošli na menadžerski panel."
+  },
+  "team": {
+    "title": "Zaposleni",
+    "subtitle": "Upravljajte članovima tima",
+    "inviteButton": "Pozovi zaposlenog",
+    "invite": {
+      "panelHeading": "Pošalji poziv",
+      "emailLabel": "Imejl adresa",
+      "emailPlaceholder": "zaposleni@primer.com",
+      "generating": "Generisanje…",
+      "generate": "Generiši link",
+      "shareText": "Podelite ovaj link sa",
+      "expiresText": "Ističe",
+      "inviteAnother": "Pozovi još jednog",
+      "error": "Nije moguće kreirati poziv. Pokušajte ponovo."
+    },
+    "table": {
+      "nameHeader": "Ime",
+      "emailHeader": "Imejl",
+      "roleHeader": "Uloga",
+      "statusHeader": "Status",
+      "empty": "Još nema zaposlenih. Pozovite nekoga za početak.",
+      "you": "(vi)"
+    },
+    "roles": {
+      "manager": "Menadžer",
+      "basic": "Osnovna"
+    },
+    "removeTitle": "Ukloni zaposlenog"
+  },
+  "windowStatus": {
+    "cardTitle": "Izbor obroka",
+    "progress": "Napredak",
+    "days": "dana",
+    "yourSelections": "Vaši izbori",
+    "noOrder": "Bez narudžbine",
+    "changeRequests": "Zahtevi za promenu",
+    "requestChange": "Zatražite promenu",
+    "editSelections": "Izmeni izbore",
+    "continueSelecting": "Nastavi sa izborom",
+    "startSelecting": "Počni sa izborom"
+  },
+  "changeRequest": {
+    "title": "Zatražite promenu",
+    "selectDay": "Izaberite dan",
+    "noDaysAvailable": "Nema dostupnih budućih dana za zahteve za promenu.",
+    "selectMeal": "Izaberite novi obrok",
+    "currently": "Trenutno:",
+    "currentBadge": "(trenutno)",
+    "noMealsAvailable": "Nema dostupnih obroka za ovaj dan."
+  }
+}

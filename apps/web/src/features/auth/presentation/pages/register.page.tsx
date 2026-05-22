@@ -24,6 +24,7 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { z } from 'zod/v3';
 
@@ -54,11 +55,12 @@ function AccountTypeSelector({
 }: {
   onSelect: (type: AccountType) => void;
 }) {
+  const { t } = useTranslation('auth');
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Create an account</CardTitle>
-        <CardDescription>What best describes you?</CardDescription>
+        <CardTitle>{t('register.title')}</CardTitle>
+        <CardDescription>{t('register.description')}</CardDescription>
       </CardHeader>
       <CardContent className='grid grid-cols-2 gap-3'>
         <button
@@ -66,9 +68,9 @@ function AccountTypeSelector({
           className='border-border hover:border-primary hover:bg-accent rounded-lg border-2 p-4 text-left transition-colors'
         >
           <div className='mb-1 text-2xl'>🧑‍💼</div>
-          <div className='font-semibold'>Employee</div>
+          <div className='font-semibold'>{t('register.employee.type')}</div>
           <p className='text-muted-foreground mt-1 text-xs'>
-            I work at a business and want to select meals.
+            {t('register.employee.typeDescription')}
           </p>
         </button>
         <button
@@ -76,16 +78,16 @@ function AccountTypeSelector({
           className='border-border hover:border-primary hover:bg-accent rounded-lg border-2 p-4 text-left transition-colors'
         >
           <div className='mb-1 text-2xl'>🍽️</div>
-          <div className='font-semibold'>Supplier</div>
+          <div className='font-semibold'>{t('register.supplier.type')}</div>
           <p className='text-muted-foreground mt-1 text-xs'>
-            I provide meals and manage menus for businesses.
+            {t('register.supplier.typeDescription')}
           </p>
         </button>
       </CardContent>
       <CardFooter className='justify-center text-sm'>
-        <span className='text-muted-foreground'>Already have an account?&nbsp;</span>
+        <span className='text-muted-foreground'>{t('register.alreadyHaveAccount')}&nbsp;</span>
         <Link to='/login' className='font-medium underline'>
-          Sign in
+          {t('register.signIn')}
         </Link>
       </CardFooter>
     </Card>
@@ -103,6 +105,7 @@ function EmployeeRegisterForm({
   inviteEmail: string;
   onBack: () => void;
 }) {
+  const { t } = useTranslation('auth');
   const navigate = useNavigate();
   const register = useRegisterEmployee();
 
@@ -125,11 +128,11 @@ function EmployeeRegisterForm({
             onClick={onBack}
             className='text-muted-foreground hover:text-foreground text-sm'
           >
-            ← Back
+            {t('actions.back', { ns: 'common' })}
           </button>
         </div>
-        <CardTitle>Employee registration</CardTitle>
-        <CardDescription>Create your employee account</CardDescription>
+        <CardTitle>{t('register.employee.formTitle')}</CardTitle>
+        <CardDescription>{t('register.employee.formDescription')}</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -139,9 +142,9 @@ function EmployeeRegisterForm({
               name='name'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Full name</FormLabel>
+                  <FormLabel>{t('register.fields.fullName')}</FormLabel>
                   <FormControl>
-                    <Input placeholder='Jane Doe' {...field} />
+                    <Input placeholder={t('register.employee.namePlaceholder')} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -152,7 +155,7 @@ function EmployeeRegisterForm({
               name='email'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>{t('register.fields.email')}</FormLabel>
                   <FormControl>
                     <Input type='email' readOnly {...field} />
                   </FormControl>
@@ -165,7 +168,7 @@ function EmployeeRegisterForm({
               name='password'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel>{t('login.password')}</FormLabel>
                   <FormControl>
                     <Input type='password' placeholder='••••••••' {...field} />
                   </FormControl>
@@ -175,11 +178,11 @@ function EmployeeRegisterForm({
             />
             {register.isError && (
               <p className='text-destructive text-sm'>
-                Registration failed. The invite link may be invalid or expired.
+                {t('register.employee.error')}
               </p>
             )}
             <Button type='submit' className='w-full' disabled={register.isPending}>
-              {register.isPending ? 'Creating account…' : 'Create account'}
+              {register.isPending ? t('register.actions.creating') : t('register.actions.create')}
             </Button>
           </form>
         </Form>
@@ -191,19 +194,19 @@ function EmployeeRegisterForm({
 // ── Invalid invite ─────────────────────────────────────────────────────────
 
 function InvalidInvite() {
+  const { t } = useTranslation('auth');
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Invalid invite link</CardTitle>
+        <CardTitle>{t('register.employee.invalidInviteTitle')}</CardTitle>
         <CardDescription>
-          Employee registration requires a valid invite link from your business
-          manager. Please ask them to generate one.
+          {t('register.employee.invalidInviteDescription')}
         </CardDescription>
       </CardHeader>
       <CardFooter className='justify-center text-sm'>
-        <span className='text-muted-foreground'>Already have an account?&nbsp;</span>
+        <span className='text-muted-foreground'>{t('register.alreadyHaveAccount')}&nbsp;</span>
         <Link to='/login' className='font-medium underline'>
-          Sign in
+          {t('register.signIn')}
         </Link>
       </CardFooter>
     </Card>
@@ -213,6 +216,7 @@ function InvalidInvite() {
 // ── Supplier form ──────────────────────────────────────────────────────────
 
 function SupplierRegisterForm({ onBack }: { onBack: () => void }) {
+  const { t } = useTranslation('auth');
   const navigate = useNavigate();
   const register = useRegisterSupplier();
 
@@ -235,11 +239,11 @@ function SupplierRegisterForm({ onBack }: { onBack: () => void }) {
             onClick={onBack}
             className='text-muted-foreground hover:text-foreground text-sm'
           >
-            ← Back
+            {t('actions.back', { ns: 'common' })}
           </button>
         </div>
-        <CardTitle>Supplier registration</CardTitle>
-        <CardDescription>Create your supplier account</CardDescription>
+        <CardTitle>{t('register.supplier.formTitle')}</CardTitle>
+        <CardDescription>{t('register.supplier.formDescription')}</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -249,9 +253,9 @@ function SupplierRegisterForm({ onBack }: { onBack: () => void }) {
               name='name'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Business name</FormLabel>
+                  <FormLabel>{t('register.supplier.businessNameLabel')}</FormLabel>
                   <FormControl>
-                    <Input placeholder='Tasty Catering Co.' {...field} />
+                    <Input placeholder={t('register.supplier.businessNamePlaceholder')} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -262,9 +266,9 @@ function SupplierRegisterForm({ onBack }: { onBack: () => void }) {
               name='email'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>{t('register.fields.email')}</FormLabel>
                   <FormControl>
-                    <Input type='email' placeholder='you@example.com' {...field} />
+                    <Input type='email' placeholder={t('login.emailPlaceholder')} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -275,7 +279,7 @@ function SupplierRegisterForm({ onBack }: { onBack: () => void }) {
               name='password'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel>{t('login.password')}</FormLabel>
                   <FormControl>
                     <Input type='password' placeholder='••••••••' {...field} />
                   </FormControl>
@@ -288,9 +292,9 @@ function SupplierRegisterForm({ onBack }: { onBack: () => void }) {
               name='contactInfo'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Contact info</FormLabel>
+                  <FormLabel>{t('register.supplier.contactLabel')}</FormLabel>
                   <FormControl>
-                    <Input placeholder='+1 555 000 0000 or address' {...field} />
+                    <Input placeholder={t('register.supplier.contactPlaceholder')} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -298,11 +302,11 @@ function SupplierRegisterForm({ onBack }: { onBack: () => void }) {
             />
             {register.isError && (
               <p className='text-destructive text-sm'>
-                Registration failed. Please try again.
+                {t('register.supplier.error')}
               </p>
             )}
             <Button type='submit' className='w-full' disabled={register.isPending}>
-              {register.isPending ? 'Creating account…' : 'Create account'}
+              {register.isPending ? t('register.actions.creating') : t('register.actions.create')}
             </Button>
           </form>
         </Form>

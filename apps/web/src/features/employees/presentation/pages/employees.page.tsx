@@ -11,6 +11,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, Copy, UserMinus, UserPlus, UserX, X } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { z } from 'zod/v3';
 
 const inviteSchema = z.object({
@@ -19,6 +20,7 @@ const inviteSchema = z.object({
 type InviteFormValues = z.infer<typeof inviteSchema>;
 
 export default function EmployeesPage() {
+  const { t } = useTranslation('employees');
   const { employeeService } = useServices();
   const queryClient = useQueryClient();
   const user = useAuthStore((s) => s.user);
@@ -85,12 +87,12 @@ export default function EmployeesPage() {
     <div className='p-6'>
       <div className='flex items-center justify-between mb-6'>
         <div>
-          <h1 className='text-2xl font-bold mb-1'>Employees</h1>
-          <p className='text-muted-foreground text-sm'>Manage your team members</p>
+          <h1 className='text-2xl font-bold mb-1'>{t('team.title')}</h1>
+          <p className='text-muted-foreground text-sm'>{t('team.subtitle')}</p>
         </div>
         <Button onClick={() => setShowInvitePanel(true)} className='gap-2'>
           <UserPlus size={16} />
-          Invite Employee
+          {t('team.inviteButton')}
         </Button>
       </div>
 
@@ -98,7 +100,7 @@ export default function EmployeesPage() {
       {showInvitePanel && (
         <div className='mb-6 border rounded-lg p-5 bg-card'>
           <div className='flex items-center justify-between mb-4'>
-            <h2 className='font-semibold'>Send Invite</h2>
+            <h2 className='font-semibold'>{t('team.invite.panelHeading')}</h2>
             <button
               onClick={closeInvitePanel}
               className='text-muted-foreground hover:text-foreground transition-colors'
@@ -115,24 +117,24 @@ export default function EmployeesPage() {
                   name='email'
                   render={({ field }) => (
                     <FormItem className='flex-1'>
-                      <FormLabel>Email address</FormLabel>
+                      <FormLabel>{t('team.invite.emailLabel')}</FormLabel>
                       <FormControl>
-                        <Input type='email' placeholder='employee@example.com' {...field} />
+                        <Input type='email' placeholder={t('team.invite.emailPlaceholder')} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 <Button type='submit' disabled={createInvite.isPending}>
-                  {createInvite.isPending ? 'Sending…' : 'Generate Link'}
+                  {createInvite.isPending ? t('team.invite.generating') : t('team.invite.generate')}
                 </Button>
               </form>
             </Form>
           ) : (
             <div className='space-y-3'>
               <p className='text-sm text-muted-foreground'>
-                Share this link with <span className='font-medium text-foreground'>{generatedInvite.email}</span>.
-                It expires on{' '}
+                {t('team.invite.shareText')} <span className='font-medium text-foreground'>{generatedInvite.email}</span>.
+                {' '}{t('team.invite.expiresText')}{' '}
                 <span className='font-medium text-foreground'>
                   {new Date(generatedInvite.expiresAt).toLocaleDateString()}
                 </span>
@@ -150,13 +152,13 @@ export default function EmployeesPage() {
                 </Button>
               </div>
               <Button variant='ghost' size='sm' onClick={() => setGeneratedInvite(null)}>
-                Invite another
+                {t('team.invite.inviteAnother')}
               </Button>
             </div>
           )}
 
           {createInvite.isError && (
-            <p className='mt-2 text-sm text-destructive'>Failed to create invite. Please try again.</p>
+            <p className='mt-2 text-sm text-destructive'>{t('team.invite.error')}</p>
           )}
         </div>
       )}
@@ -164,10 +166,10 @@ export default function EmployeesPage() {
       {/* Employee Table */}
       <div className='border rounded-lg overflow-hidden'>
         <div className='grid grid-cols-[1fr_1fr_auto_auto_auto] text-xs font-medium text-muted-foreground bg-muted/40 px-4 py-2.5 border-b'>
-          <span>Name</span>
-          <span>Email</span>
-          <span>Role</span>
-          <span>Status</span>
+          <span>{t('team.table.nameHeader')}</span>
+          <span>{t('team.table.emailHeader')}</span>
+          <span>{t('team.table.roleHeader')}</span>
+          <span>{t('team.table.statusHeader')}</span>
           <span />
         </div>
 
@@ -187,7 +189,7 @@ export default function EmployeesPage() {
 
         {!isLoading && employees.length === 0 && (
           <div className='px-4 py-8 text-center text-muted-foreground text-sm'>
-            No employees yet. Invite someone to get started.
+            {t('team.table.empty')}
           </div>
         )}
 
@@ -236,12 +238,13 @@ function EmployeeRow({
   onRemoveConfirm,
   onRemoveCancel,
 }: EmployeeRowProps) {
+  const { t } = useTranslation('employees');
   return (
     <div className='grid grid-cols-[1fr_1fr_auto_auto_auto] items-center px-4 py-3 border-b last:border-b-0 gap-4'>
       <div>
         <span className='text-sm font-medium'>{employee.name}</span>
         {isCurrentUser && (
-          <span className='ml-2 text-xs text-muted-foreground'>(you)</span>
+          <span className='ml-2 text-xs text-muted-foreground'>{t('team.table.you')}</span>
         )}
       </div>
 
@@ -256,8 +259,8 @@ function EmployeeRow({
           <SelectValue>{(v: string) => v === EmployeeRole.Manager ? 'Manager' : 'Basic'}</SelectValue>
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value={EmployeeRole.Manager} label="Manager">Manager</SelectItem>
-          <SelectItem value={EmployeeRole.Basic} label="Basic">Basic</SelectItem>
+          <SelectItem value={EmployeeRole.Manager} label={t('team.roles.manager')}>{t('team.roles.manager')}</SelectItem>
+          <SelectItem value={EmployeeRole.Basic} label={t('team.roles.basic')}>{t('team.roles.basic')}</SelectItem>
         </SelectContent>
       </Select>
 
@@ -273,12 +276,12 @@ function EmployeeRow({
         {employee.isActive ? (
           <>
             <UserMinus size={12} />
-            Active
+            {t('status.active', { ns: 'common' })}
           </>
         ) : (
           <>
             <UserPlus size={12} />
-            Suspended
+            {t('status.suspended', { ns: 'common' })}
           </>
         )}
       </button>
@@ -293,7 +296,7 @@ function EmployeeRow({
               onClick={onRemoveConfirm}
               disabled={isRemoving}
             >
-              {isRemoving ? '…' : 'Confirm'}
+              {isRemoving ? '…' : t('actions.confirm', { ns: 'common' })}
             </Button>
             <Button
               size='sm'
@@ -301,7 +304,7 @@ function EmployeeRow({
               className='h-7 text-xs px-2'
               onClick={onRemoveCancel}
             >
-              Cancel
+              {t('actions.cancel', { ns: 'common' })}
             </Button>
           </>
         ) : (
@@ -309,7 +312,7 @@ function EmployeeRow({
             onClick={onRemoveRequest}
             disabled={isCurrentUser || isUpdating || isRemoving}
             className='p-1.5 text-muted-foreground hover:text-destructive transition-colors disabled:opacity-30'
-            title='Remove employee'
+            title={t('team.removeTitle')}
           >
             <UserX size={15} />
           </button>

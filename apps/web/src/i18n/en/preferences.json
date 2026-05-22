@@ -1,6 +1,26 @@
 {
   "title": "Account settings",
   "subtitle": "Manage your profile and security preferences.",
+  "profile": {
+    "title": "Profile",
+    "nameLabel": "Name",
+    "namePlaceholder": "Your name",
+    "success": "Name updated successfully.",
+    "error": "Failed to update name. Please try again."
+  },
+  "security": {
+    "title": "Security",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm new password",
+    "passwordMismatch": "Passwords do not match",
+    "passwordMinLength": "Password must be at least 6 characters",
+    "wrongPassword": "Current password is incorrect.",
+    "error": "Failed to change password. Please try again.",
+    "success": "Password changed successfully.",
+    "submit": "Update password",
+    "submitting": "Updating…"
+  },
   "appearance": {
     "title": "Appearance",
     "theme": {

@@ -3,6 +3,7 @@ import { Separator } from '@/components/ui/separator';
 import { MealType } from '@food-up/shared';
 import { CheckCircle2, Pencil } from 'lucide-react';
 import { DaySelection, MenuItemOption } from '../types';
+import { useTranslation } from 'react-i18next';
 
 const TYPE_LABELS: Record<MealType, string> = {
   [MealType.Soup]: 'Soup',
@@ -45,14 +46,15 @@ export function SelectionSummary({
   onConfirm,
   isSubmitting,
 }: SelectionSummaryProps) {
+  const { t } = useTranslation('meals');
   const itemMap = new Map(allItems.map((i) => [i.id, i]));
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-semibold text-lg">Review your selections</h2>
+        <h2 className="font-semibold text-lg">{t('summary.title')}</h2>
         <p className="text-sm text-muted-foreground mt-1">
-          Confirm to submit your meal choices.
+          {t('summary.subtitle')}
         </p>
       </div>
 
@@ -66,17 +68,17 @@ export function SelectionSummary({
                 size="icon"
                 className="size-8 text-muted-foreground"
                 onClick={() => onEditDay(idx)}
-                aria-label="Edit this day"
+                aria-label={t('summary.editDay')}
               >
                 <Pencil className="size-3.5" />
               </Button>
             </div>
 
             {day.skipped ? (
-              <p className="text-xs text-muted-foreground italic">Skipped — no order</p>
+              <p className="text-xs text-muted-foreground italic">{t('summary.skipped')}</p>
             ) : (
               <div className="space-y-1.5">
-                {TYPE_ORDER.filter((t) => day.choices[t]).map((type) => {
+                {TYPE_ORDER.filter((type) => day.choices[type]).map((type) => {
                   const item = itemMap.get(day.choices[type]!);
                   return (
                     <div key={type} className="flex items-center justify-between gap-2 text-sm">
@@ -87,8 +89,8 @@ export function SelectionSummary({
                     </div>
                   );
                 })}
-                {TYPE_ORDER.every((t) => !day.choices[t]) && (
-                  <p className="text-xs text-muted-foreground italic">No meals selected</p>
+                {TYPE_ORDER.every((type) => !day.choices[type]) && (
+                  <p className="text-xs text-muted-foreground italic">{t('summary.noMeals')}</p>
                 )}
               </div>
             )}
@@ -105,7 +107,7 @@ export function SelectionSummary({
         disabled={isSubmitting}
       >
         <CheckCircle2 className="size-4 mr-2" />
-        {isSubmitting ? 'Submitting…' : 'Confirm selections'}
+        {isSubmitting ? t('summary.confirming') : t('summary.confirm')}
       </Button>
     </div>
   );

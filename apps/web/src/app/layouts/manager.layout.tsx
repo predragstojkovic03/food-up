@@ -54,6 +54,7 @@ import {
   Store,
   Users,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 const SUPPLIERS_PATHS = [
@@ -70,6 +71,7 @@ export default function ManagerLayout() {
   const { data: latestWindow } = useLatestBusinessWindow();
   const { data: pendingCount = 0 } = useWindowPendingCount(latestWindow?.id);
   const { data: employee } = useCurrentEmployee();
+  const { t } = useTranslation('common');
   const [logoutOpen, setLogoutOpen] = useState(false);
 
   const initials = employee?.name
@@ -96,7 +98,7 @@ export default function ManagerLayout() {
                     isActive={pathname === '/employee/manager'}
                   >
                     <LayoutDashboard />
-                    <span>Dashboard</span>
+                    <span>{t('nav.dashboard')}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
 
@@ -106,7 +108,7 @@ export default function ManagerLayout() {
                     isActive={pathname.startsWith('/employee/manager/employees')}
                   >
                     <Users />
-                    <span>Employees</span>
+                    <span>{t('nav.employees')}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
 
@@ -116,7 +118,7 @@ export default function ManagerLayout() {
                       render={<SidebarMenuButton isActive={suppliersOpen} className='group/collapsible' />}
                     >
                       <Store />
-                      <span>Suppliers</span>
+                      <span>{t('nav.suppliers')}</span>
                       <ChevronRight className='ml-auto transition-transform duration-200 ease-in-out group-data-[panel-open]/collapsible:rotate-90' />
                     </CollapsibleTrigger>
                     <CollapsibleContent>
@@ -126,7 +128,7 @@ export default function ManagerLayout() {
                             render={<NavLink to='/employee/manager/suppliers/in-house' />}
                             isActive={pathname.startsWith('/employee/manager/suppliers/in-house')}
                           >
-                            In-House Suppliers
+                            {t('nav.inHouseSuppliers')}
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
@@ -134,7 +136,7 @@ export default function ManagerLayout() {
                             render={<NavLink to='/employee/manager/suppliers/partners' />}
                             isActive={pathname.startsWith('/employee/manager/suppliers/partners')}
                           >
-                            Partner Suppliers
+                            {t('nav.partnerSuppliers')}
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       </SidebarMenuSub>
@@ -148,7 +150,7 @@ export default function ManagerLayout() {
                     isActive={pathname.startsWith('/employee/manager/meal-selection-windows')}
                   >
                     <CalendarRange />
-                    <span>Meal Selection Windows</span>
+                    <span>{t('nav.mealSelectionWindows')}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
 
@@ -158,7 +160,7 @@ export default function ManagerLayout() {
                     isActive={pathname.startsWith('/employee/manager/change-requests')}
                   >
                     <ClipboardList />
-                    <span>Change Requests</span>
+                    <span>{t('nav.changeRequests')}</span>
                     {pendingCount > 0 && (
                       <Badge className='ml-auto text-xs px-1.5 py-0'>{pendingCount}</Badge>
                     )}
@@ -171,7 +173,7 @@ export default function ManagerLayout() {
                     isActive={pathname.startsWith('/employee/manager/business')}
                   >
                     <Building2 />
-                    <span>Business Settings</span>
+                    <span>{t('nav.businessSettings')}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
 
@@ -185,7 +187,7 @@ export default function ManagerLayout() {
             <SidebarMenuItem>
               <DropdownMenu>
                 <DropdownMenuTrigger
-                  render={<SidebarMenuButton size='lg' tooltip={employee?.name ?? 'Profile'} />}
+                  render={<SidebarMenuButton size='lg' tooltip={employee?.name ?? t('nav.account')} />}
                 >
                   <Avatar className='size-7 shrink-0'>
                     <AvatarFallback className='text-xs font-semibold'>
@@ -207,12 +209,12 @@ export default function ManagerLayout() {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => navigate('/employee/manager/account')}>
                     <Settings size={15} className='mr-2' />
-                    Account
+                    {t('nav.account')}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem variant='destructive' onClick={() => setLogoutOpen(true)}>
                     <LogOut size={15} className='mr-2' />
-                    Logout
+                    {t('nav.logout')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -224,14 +226,14 @@ export default function ManagerLayout() {
       <AlertDialog open={logoutOpen} onOpenChange={setLogoutOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Logout</AlertDialogTitle>
+            <AlertDialogTitle>{t('dialog.logout.title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to log out?
+              {t('dialog.logout.description')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleLogout}>Logout</AlertDialogAction>
+            <AlertDialogCancel>{t('dialog.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleLogout}>{t('dialog.logout.confirm')}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -9,6 +9,7 @@ import { ChangeRequestStatus, IBulkUpdateChangeRequestStatusItem, IRichChangeReq
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Check, ClipboardList, X } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const STATUS_VARIANTS: Record<ChangeRequestStatus, 'default' | 'secondary' | 'destructive' | 'outline'> = {
   [ChangeRequestStatus.Pending]: 'outline',
@@ -17,22 +18,24 @@ const STATUS_VARIANTS: Record<ChangeRequestStatus, 'default' | 'secondary' | 'de
   [ChangeRequestStatus.Revoked]: 'secondary',
 };
 
-const STATUS_LABELS: Record<ChangeRequestStatus, string> = {
-  [ChangeRequestStatus.Pending]: 'Pending',
-  [ChangeRequestStatus.Approved]: 'Approved',
-  [ChangeRequestStatus.Rejected]: 'Rejected',
-  [ChangeRequestStatus.Revoked]: 'Revoked',
-};
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 }
 
 export default function ManagerChangeRequestsPage() {
+  const { t } = useTranslation('changeRequests');
   const queryClient = useQueryClient();
   const { changeRequestService } = useServices();
   const { data: window } = useLatestBusinessWindow();
   const { data: changeRequests = [], isLoading } = useWindowChangeRequests(window?.id);
+
+  const STATUS_LABELS: Record<ChangeRequestStatus, string> = {
+    [ChangeRequestStatus.Pending]: t('status.pending', { ns: 'common' }),
+    [ChangeRequestStatus.Approved]: t('status.approved', { ns: 'common' }),
+    [ChangeRequestStatus.Rejected]: t('status.rejected', { ns: 'common' }),
+    [ChangeRequestStatus.Revoked]: t('status.revoked', { ns: 'common' }),
+  };
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
@@ -87,17 +90,15 @@ export default function ManagerChangeRequestsPage() {
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold mb-1">Change Requests</h1>
+          <h1 className="text-2xl font-bold mb-1">{t('title')}</h1>
           <p className="text-muted-foreground text-sm">
-            {window
-              ? `Showing requests for the current selection window`
-              : 'No active selection window'}
+            {window ? t('subtitle') : t('subtitleNoWindow')}
           </p>
         </div>
 
         {selectedCount > 0 && (
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">{selectedCount} selected</span>
+            <span className="text-sm text-muted-foreground">{selectedCount} {t('selectedCount')}</span>
             <Button
               size="sm"
               variant="outline"
@@ -106,7 +107,7 @@ export default function ManagerChangeRequestsPage() {
               className="gap-1.5"
             >
               <X className="size-3.5" />
-              Reject
+              {t('actions.reject')}
             </Button>
             <Button
               size="sm"
@@ -115,7 +116,7 @@ export default function ManagerChangeRequestsPage() {
               className="gap-1.5"
             >
               <Check className="size-3.5" />
-              Approve
+              {t('actions.approve')}
             </Button>
           </div>
         )}
@@ -132,14 +133,14 @@ export default function ManagerChangeRequestsPage() {
       {!isLoading && !window && (
         <div className="flex flex-col items-center gap-3 py-16 text-center text-muted-foreground">
           <ClipboardList className="size-10" />
-          <p className="text-sm">No meal selection window available right now.</p>
+          <p className="text-sm">{t('noWindow')}</p>
         </div>
       )}
 
       {!isLoading && window && changeRequests.length === 0 && (
         <div className="flex flex-col items-center gap-3 py-16 text-center text-muted-foreground">
           <ClipboardList className="size-10" />
-          <p className="text-sm">No change requests for this window.</p>
+          <p className="text-sm">{t('table.empty')}</p>
         </div>
       )}
 
@@ -155,10 +156,10 @@ export default function ManagerChangeRequestsPage() {
             ) : (
               <span />
             )}
-            <span>Employee</span>
-            <span>Date</span>
-            <span>Change</span>
-            <span>Status</span>
+            <span>{t('table.employeeHeader')}</span>
+            <span>{t('table.dateHeader')}</span>
+            <span>{t('table.changeHeader')}</span>
+            <span>{t('table.statusHeader')}</span>
             <span />
           </div>
 
@@ -204,7 +205,7 @@ export default function ManagerChangeRequestsPage() {
                       onClick={() => handleSingleUpdate(cr, ChangeRequestStatus.Rejected)}
                       disabled={isPending}
                       className="p-1.5 text-muted-foreground hover:text-destructive transition-colors disabled:opacity-30"
-                      title="Reject"
+                      title={t('actions.reject')}
                     >
                       <X className="size-4" />
                     </button>
@@ -212,7 +213,7 @@ export default function ManagerChangeRequestsPage() {
                       onClick={() => handleSingleUpdate(cr, ChangeRequestStatus.Approved)}
                       disabled={isPending}
                       className="p-1.5 text-muted-foreground hover:text-primary transition-colors disabled:opacity-30"
-                      title="Approve"
+                      title={t('actions.approve')}
                     >
                       <Check className="size-4" />
                     </button>

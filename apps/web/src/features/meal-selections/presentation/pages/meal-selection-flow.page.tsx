@@ -6,6 +6,7 @@ import { MealType, IGetCurrentMealSelectionWindowResponse } from '@food-up/share
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { DayStep } from './components/day-step';
 import { FlowProgress } from './components/flow-progress';
 import { SelectionSummary } from './components/selection-summary';
@@ -55,6 +56,7 @@ function randomizeDay(
 }
 
 export default function MealSelectionFlowPage() {
+  const { t } = useTranslation('meals');
   const { windowId } = useParams<{ windowId: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -245,7 +247,7 @@ export default function MealSelectionFlowPage() {
       queryClient.invalidateQueries({ queryKey: ['meal-selection-windows', 'relevant'] });
       navigate('/employee');
     } catch {
-      setSubmitError('Failed to save your selections. Please try again.');
+      setSubmitError(t('selectionFlow.saveError'));
     } finally {
       setIsSubmitting(false);
     }
@@ -301,11 +303,11 @@ export default function MealSelectionFlowPage() {
           </div>
 
           <Button className="w-full" size="lg" onClick={handleNext} disabled={!isDayComplete}>
-            {step < totalDays - 1 ? 'Next day' : 'Review selections'}
+            {step < totalDays - 1 ? t('selectionFlow.nextDay') : t('selectionFlow.reviewSelections')}
           </Button>
           {!isDayComplete && (
             <p className="text-center text-xs text-muted-foreground -mt-4">
-              Select at least one meal or skip this day to continue.
+              {t('selectionFlow.selectMealHint')}
             </p>
           )}
         </>

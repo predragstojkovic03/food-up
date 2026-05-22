@@ -1,0 +1,88 @@
+{
+  "inHouse": {
+    "title": "In-House Suppliers",
+    "subtitle": "Suppliers owned and managed by your business",
+    "newButton": "New Supplier",
+    "createForm": {
+      "title": "Create In-House Supplier",
+      "nameLabel": "Name",
+      "namePlaceholder": "Supplier name",
+      "emailLabel": "Email",
+      "languageLabel": "Language",
+      "error": "Failed to create supplier. Please try again."
+    },
+    "table": {
+      "emailHeader": "Email",
+      "languageHeader": "Language",
+      "loading": "Loading suppliers…",
+      "empty": "No in-house suppliers yet. Create one to get started."
+    },
+    "row": {
+      "manageTitle": "Manage meals & menu periods",
+      "editTitle": "Edit",
+      "deleteTitle": "Delete",
+      "deleteDialog": {
+        "title": "Delete supplier",
+        "description": "Are you sure you want to delete {{name}}? This action cannot be undone.",
+        "confirm": "Delete"
+      }
+    }
+  },
+  "detail": {
+    "mealsTab": "Meals",
+    "menuPeriodsTab": "Menu Periods",
+    "meals": {
+      "subtitle": "Meals available from this supplier",
+      "addButton": "Add Meal",
+      "createForm": {
+        "title": "New Meal",
+        "nameLabel": "Name",
+        "namePlaceholder": "Chicken sandwich",
+        "typeLabel": "Type",
+        "descriptionLabel": "Description",
+        "descriptionPlaceholder": "Brief description",
+        "priceLabel": "Price (optional)",
+        "error": "Failed to create meal."
+      },
+      "table": {
+        "nameHeader": "Name",
+        "descriptionHeader": "Description",
+        "typeHeader": "Type",
+        "empty": "No meals yet."
+      },
+      "deleteDialog": {
+        "title": "Delete meal",
+        "description": "This cannot be undone."
+      }
+    },
+    "menuPeriods": {
+      "subtitle": "Define date ranges and assign meals to specific days",
+      "newButton": "New Period",
+      "createForm": {
+        "title": "New Menu Period",
+        "startLabel": "Start date",
+        "startPlaceholder": "Pick start date",
+        "endLabel": "End date",
+        "endPlaceholder": "Pick end date",
+        "error": "Failed to create period."
+      },
+      "loading": "Loading…",
+      "empty": "No menu periods yet.",
+      "deleteDialog": {
+        "title": "Delete menu period",
+        "description": "Deleting this period will also remove all menu items within it."
+      }
+    }
+  },
+  "partners": {
+    "title": "Partner Suppliers",
+    "subtitle": "Independent suppliers your business is partnered with",
+    "table": {
+      "nameHeader": "Name",
+      "emailHeader": "Email",
+      "languageHeader": "Language",
+      "loading": "Loading suppliers…",
+      "empty": "No partner suppliers yet."
+    }
+  }
+}

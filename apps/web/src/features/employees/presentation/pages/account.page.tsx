@@ -25,6 +25,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import { useCurrentEmployee } from '../../application/use-current-employee.hook';
 
@@ -40,29 +41,15 @@ const CAPABILITIES: AccountCapabilities = {
   canChangePassword: true,
 };
 
-const nameSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-});
-
-const passwordSchema = z
-  .object({
-    currentPassword: z
-      .string()
-      .min(6, 'Password must be at least 6 characters'),
-    newPassword: z.string().min(6, 'Password must be at least 6 characters'),
-    confirmPassword: z
-      .string()
-      .min(6, 'Password must be at least 6 characters'),
-  })
-  .refine((d) => d.newPassword === d.confirmPassword, {
-    message: 'Passwords do not match',
-    path: ['confirmPassword'],
-  });
-
-type NameFormValues = z.infer<typeof nameSchema>;
-type PasswordFormValues = z.infer<typeof passwordSchema>;
+type NameFormValues = { name: string };
+type PasswordFormValues = {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+};
 
 function ProfileSection() {
+  const { t } = useTranslation('preferences');
   const { employeeService } = useServices();
   const queryClient = useQueryClient();
   const { data: employee } = useCurrentEmployee();
@@ -70,6 +57,10 @@ function ProfileSection() {
     type: 'success' | 'error';
     message: string;
   } | null>(null);
+
+  const nameSchema = z.object({
+    name: z.string().min(1, t('profile.nameLabel') + ' is required'),
+  });
 
   const form = useForm<NameFormValues>({
     resolver: zodResolver(nameSchema),
@@ -80,12 +71,12 @@ function ProfileSection() {
     mutationFn: (data: NameFormValues) => employeeService.updateSelf(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employee', 'me'] });
-      setFeedback({ type: 'success', message: 'Name updated successfully.' });
+      setFeedback({ type: 'success', message: t('profile.success') });
     },
     onError: () => {
       setFeedback({
         type: 'error',
-        message: 'Failed to update name. Please try again.',
+        message: t('profile.error'),
       });
     },
   });
@@ -98,7 +89,7 @@ function ProfileSection() {
   return (
     <Card>
       <CardHeader className='px-6 pt-5 pb-0'>
-        <CardTitle className='text-base'>Profile</CardTitle>
+        <CardTitle className='text-base'>{t('profile.title')}</CardTitle>
       </CardHeader>
       <Separator className='mt-4' />
       <CardContent className='px-6 pt-4 pb-5'>
@@ -109,9 +100,9 @@ function ProfileSection() {
               name='name'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>{t('profile.nameLabel')}</FormLabel>
                   <FormControl>
-                    <Input placeholder='Your name' {...field} />
+                    <Input placeholder={t('profile.namePlaceholder')} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -129,7 +120,9 @@ function ProfileSection() {
               </p>
             )}
             <Button type='submit' disabled={mutation.isPending}>
-              {mutation.isPending ? 'Saving…' : 'Save changes'}
+              {mutation.isPending
+                ? t('actions.saving', { ns: 'common' })
+                : t('actions.save', { ns: 'common' })}
             </Button>
           </form>
         </Form>
@@ -139,11 +132,27 @@ function ProfileSection() {
 }
 
 function SecuritySection() {
+  const { t } = useTranslation('preferences');
   const { authService } = useServices();
   const [feedback, setFeedback] = useState<{
     type: 'success' | 'error';
     message: string;
   } | null>(null);
+
+  const passwordSchema = z
+    .object({
+      currentPassword: z
+        .string()
+        .min(6, t('security.passwordMinLength')),
+      newPassword: z.string().min(6, t('security.passwordMinLength')),
+      confirmPassword: z
+        .string()
+        .min(6, t('security.passwordMinLength')),
+    })
+    .refine((d) => d.newPassword === d.confirmPassword, {
+      message: t('security.passwordMismatch'),
+      path: ['confirmPassword'],
+    });
 
   const form = useForm<PasswordFormValues>({
     resolver: zodResolver(passwordSchema),
@@ -164,7 +173,7 @@ function SecuritySection() {
       form.reset();
       setFeedback({
         type: 'success',
-        message: 'Password changed successfully.',
+        message: t('security.success'),
       });
     },
     onError: (error: unknown) => {
@@ -175,8 +184,8 @@ function SecuritySection() {
       setFeedback({
         type: 'error',
         message: isWrongPassword
-          ? 'Current password is incorrect.'
-          : 'Failed to change password. Please try again.',
+          ? t('security.wrongPassword')
+          : t('security.error'),
       });
     },
   });
@@ -189,7 +198,7 @@ function SecuritySection() {
   return (
     <Card>
       <CardHeader className='px-6 pt-5 pb-0'>
-        <CardTitle className='text-base'>Security</CardTitle>
+        <CardTitle className='text-base'>{t('security.title')}</CardTitle>
       </CardHeader>
       <Separator className='mt-4' />
       <CardContent className='px-6 pt-4 pb-5'>
@@ -200,7 +209,7 @@ function SecuritySection() {
               name='currentPassword'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Current password</FormLabel>
+                  <FormLabel>{t('security.currentPassword')}</FormLabel>
                   <FormControl>
                     <Input type='password' placeholder='••••••••' {...field} />
                   </FormControl>
@@ -213,7 +222,7 @@ function SecuritySection() {
               name='newPassword'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>New password</FormLabel>
+                  <FormLabel>{t('security.newPassword')}</FormLabel>
                   <FormControl>
                     <Input type='password' placeholder='••••••••' {...field} />
                   </FormControl>
@@ -226,7 +235,7 @@ function SecuritySection() {
               name='confirmPassword'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Confirm new password</FormLabel>
+                  <FormLabel>{t('security.confirmPassword')}</FormLabel>
                   <FormControl>
                     <Input type='password' placeholder='••••••••' {...field} />
                   </FormControl>
@@ -246,7 +255,9 @@ function SecuritySection() {
               </p>
             )}
             <Button type='submit' disabled={mutation.isPending}>
-              {mutation.isPending ? 'Updating…' : 'Update password'}
+              {mutation.isPending
+                ? t('security.submitting')
+                : t('security.submit')}
             </Button>
           </form>
         </Form>
@@ -255,18 +266,8 @@ function SecuritySection() {
   );
 }
 
-const THEME_OPTIONS: { value: ThemePreference; label: string }[] = [
-  { value: ThemePreference.Light, label: 'Light' },
-  { value: ThemePreference.Dark, label: 'Dark' },
-  { value: ThemePreference.System, label: 'System' },
-];
-
-const LANGUAGE_OPTIONS: { value: Language; label: string }[] = [
-  { value: Language.En, label: 'English' },
-  { value: Language.Sr, label: 'Srpski' },
-];
-
 function AppearanceSection() {
+  const { t } = useTranslation('preferences');
   const { preferencesService } = useServices();
   const theme = usePreferencesStore((s) => s.theme);
   const setTheme = usePreferencesStore((s) => s.setTheme);
@@ -276,6 +277,17 @@ function AppearanceSection() {
     type: 'success' | 'error';
     message: string;
   } | null>(null);
+
+  const THEME_OPTIONS: { value: ThemePreference; label: string }[] = [
+    { value: ThemePreference.Light, label: t('appearance.theme.light') },
+    { value: ThemePreference.Dark, label: t('appearance.theme.dark') },
+    { value: ThemePreference.System, label: t('appearance.theme.system') },
+  ];
+
+  const LANGUAGE_OPTIONS: { value: Language; label: string }[] = [
+    { value: Language.En, label: 'English' },
+    { value: Language.Sr, label: 'Srpski' },
+  ];
 
   const themeMutation = useMutation<
     void,
@@ -293,14 +305,14 @@ function AppearanceSection() {
     onSuccess: () => {
       setFeedback({
         type: 'success',
-        message: 'Appearance updated successfully.',
+        message: t('appearance.success'),
       });
     },
     onError: (_err, _newTheme, context) => {
       if (context) setTheme(context.previousTheme);
       setFeedback({
         type: 'error',
-        message: 'Failed to update appearance. Please try again.',
+        message: t('appearance.error'),
       });
     },
   });
@@ -321,14 +333,14 @@ function AppearanceSection() {
     onSuccess: () => {
       setFeedback({
         type: 'success',
-        message: 'Appearance updated successfully.',
+        message: t('appearance.success'),
       });
     },
     onError: (_err, _newLanguage, context) => {
       if (context) setLanguage(context.previousLanguage);
       setFeedback({
         type: 'error',
-        message: 'Failed to update appearance. Please try again.',
+        message: t('appearance.error'),
       });
     },
   });
@@ -336,13 +348,13 @@ function AppearanceSection() {
   return (
     <Card>
       <CardHeader className='px-6 pt-5 pb-0'>
-        <CardTitle className='text-base'>Appearance</CardTitle>
+        <CardTitle className='text-base'>{t('appearance.title')}</CardTitle>
       </CardHeader>
       <Separator className='mt-4' />
       <CardContent className='px-6 pt-4 pb-5'>
         <div className='space-y-4'>
           <div className='space-y-2'>
-            <Label>Theme</Label>
+            <Label>{t('appearance.theme.label')}</Label>
             <Select
               value={theme}
               onValueChange={(v) => {
@@ -372,7 +384,7 @@ function AppearanceSection() {
             </Select>
           </div>
           <div className='space-y-2'>
-            <Label>Language</Label>
+            <Label>{t('appearance.language.label')}</Label>
             <Select
               value={language}
               onValueChange={(v) => {
@@ -419,13 +431,13 @@ function AppearanceSection() {
 }
 
 export default function AccountPage() {
+  const { t } = useTranslation('preferences');
+
   return (
     <div className='max-w-2xl space-y-6'>
       <div>
-        <h1 className='text-xl font-semibold'>Account settings</h1>
-        <p className='text-sm text-muted-foreground mt-1'>
-          Manage your profile and security preferences.
-        </p>
+        <h1 className='text-xl font-semibold'>{t('title')}</h1>
+        <p className='text-sm text-muted-foreground mt-1'>{t('subtitle')}</p>
       </div>
       {CAPABILITIES.canChangeName && <ProfileSection />}
       {CAPABILITIES.canChangePassword && <SecuritySection />}

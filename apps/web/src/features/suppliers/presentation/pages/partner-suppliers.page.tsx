@@ -8,6 +8,7 @@ import {
 import { useServices } from '@/shared/infrastructure/di/service.context';
 import { Language } from '@food-up/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 
 const QUERY_KEY = ['suppliers', 'partners'];
 
@@ -21,6 +22,7 @@ function languageLabel(lang: Language): string {
 }
 
 export default function PartnerSuppliersPage() {
+  const { t } = useTranslation('suppliers');
   const { supplierService } = useServices();
   const queryClient = useQueryClient();
 
@@ -38,28 +40,28 @@ export default function PartnerSuppliersPage() {
   return (
     <div className='p-6'>
       <div className='mb-6'>
-        <h1 className='text-2xl font-bold mb-1'>Partner Suppliers</h1>
+        <h1 className='text-2xl font-bold mb-1'>{t('partners.title')}</h1>
         <p className='text-muted-foreground text-sm'>
-          Independent suppliers your business is partnered with
+          {t('partners.subtitle')}
         </p>
       </div>
 
       <div className='border rounded-lg overflow-hidden'>
         <div className='grid grid-cols-[1fr_1fr_1fr] text-xs font-medium text-muted-foreground bg-muted/40 px-4 py-2.5 border-b'>
-          <span>Name</span>
-          <span>Email</span>
-          <span>Language</span>
+          <span>{t('partners.table.nameHeader')}</span>
+          <span>{t('partners.table.emailHeader')}</span>
+          <span>{t('partners.table.languageHeader')}</span>
         </div>
 
         {isLoading && (
           <div className='px-4 py-8 text-center text-muted-foreground text-sm'>
-            Loading suppliers…
+            {t('partners.table.loading')}
           </div>
         )}
 
         {!isLoading && suppliers.length === 0 && (
           <div className='px-4 py-8 text-center text-muted-foreground text-sm'>
-            No partner suppliers yet.
+            {t('partners.table.empty')}
           </div>
         )}
 

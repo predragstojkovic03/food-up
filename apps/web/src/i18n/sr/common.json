@@ -1,4 +1,8 @@
 {
+  "brand": {
+    "name": "FoodUp",
+    "tagline": "Platforma za upravljanje obrocima"
+  },
   "nav": {
     "dashboard": "Kontrolna tabla",
     "employees": "Zaposleni",
@@ -15,15 +19,55 @@
     "save": "Sačuvaj izmene",
     "saving": "Čuvanje…",
     "cancel": "Otkaži",
+    "confirm": "Potvrdi",
     "create": "Kreiraj",
     "creating": "Kreiranje…",
     "delete": "Obriši",
+    "deleting": "Brisanje…",
     "edit": "Izmeni",
-    "logout": "Odjava"
+    "logout": "Odjava",
+    "back": "← Nazad",
+    "copy": "Kopiraj",
+    "copied": "Kopirano",
+    "apply": "Primeni",
+    "send": "Pošalji",
+    "sending": "Slanje…",
+    "download": "Preuzmi",
+    "downloading": "Preuzimanje…",
+    "submit": "Pošalji",
+    "submitting": "Slanje…",
+    "update": "Ažuriraj",
+    "updating": "Ažuriranje…"
   },
   "language": {
     "label": "Jezik",
     "en": "English",
     "sr": "Srpski"
+  },
+  "status": {
+    "active": "Aktivan",
+    "closed": "Zatvoren",
+    "locked": "Zaključan",
+    "expired": "Istekao",
+    "pending": "Na čekanju",
+    "approved": "Odobren",
+    "rejected": "Odbijen",
+    "revoked": "Povučen",
+    "suspended": "Suspendovan",
+    "noEmail": "Bez imejla",
+    "newData": "Novi podaci",
+    "never": "Nikad"
+  },
+  "dialog": {
+    "logout": {
+      "title": "Odjaviti se?",
+      "description": "Bićete vraćeni na stranicu za prijavu.",
+      "confirm": "Odjavi se"
+    },
+    "cancel": "Otkaži"
+  },
+  "loading": "Učitavanje…",
+  "errors": {
+    "downloadFailed": "Preuzimanje nije uspelo."
   }
 }

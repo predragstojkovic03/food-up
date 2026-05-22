@@ -1,6 +1,26 @@
 {
   "title": "Podešavanja naloga",
   "subtitle": "Upravljajte profilom i bezbednosnim podešavanjima.",
+  "profile": {
+    "title": "Profil",
+    "nameLabel": "Ime",
+    "namePlaceholder": "Vaše ime",
+    "success": "Ime uspešno ažurirano.",
+    "error": "Nije moguće ažurirati ime. Pokušajte ponovo."
+  },
+  "security": {
+    "title": "Bezbednost",
+    "currentPassword": "Trenutna lozinka",
+    "newPassword": "Nova lozinka",
+    "confirmPassword": "Potvrdite novu lozinku",
+    "passwordMismatch": "Lozinke se ne podudaraju",
+    "passwordMinLength": "Lozinka mora imati najmanje 6 karaktera",
+    "wrongPassword": "Trenutna lozinka je netačna.",
+    "error": "Nije moguće promeniti lozinku. Pokušajte ponovo.",
+    "success": "Lozinka uspešno promenjena.",
+    "submit": "Promeni lozinku",
+    "submitting": "Ažuriranje…"
+  },
   "appearance": {
     "title": "Izgled",
     "theme": {

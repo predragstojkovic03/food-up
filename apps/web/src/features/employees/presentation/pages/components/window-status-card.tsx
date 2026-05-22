@@ -30,6 +30,7 @@ import {
   PlusCircle,
 } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { CreateChangeRequestDrawer } from './create-change-request-drawer';
 
@@ -104,6 +105,7 @@ export function WindowStatusCard({
   selections,
   changeRequests,
 }: WindowStatusCardProps) {
+  const { t } = useTranslation('employees');
   const navigate = useNavigate();
   const [selectionsOpen, setSelectionsOpen] = useState(false);
   const [changeRequestsOpen, setChangeRequestsOpen] = useState(false);
@@ -129,12 +131,12 @@ export function WindowStatusCard({
         <CardHeader className='pb-3'>
           <div className='flex items-center justify-between gap-2'>
             <CardTitle className='text-base font-semibold'>
-              Meal Selection
+              {t('windowStatus.cardTitle')}
             </CardTitle>
             {window.isActive ? (
-              <Badge variant='default'>Active</Badge>
+              <Badge variant='default'>{t('status.active', { ns: 'common' })}</Badge>
             ) : (
-              <Badge variant='secondary'>Closed</Badge>
+              <Badge variant='secondary'>{t('status.closed', { ns: 'common' })}</Badge>
             )}
           </div>
         </CardHeader>
@@ -171,9 +173,9 @@ export function WindowStatusCard({
           {/* Progress */}
           <div className='space-y-1.5'>
             <div className='flex justify-between text-xs text-muted-foreground'>
-              <span>Progress</span>
+              <span>{t('windowStatus.progress')}</span>
               <span>
-                {completedDays}/{totalDays} days
+                {completedDays}/{totalDays} {t('windowStatus.days')}
               </span>
             </div>
             <Progress value={progressPct} className='h-2' />
@@ -187,10 +189,10 @@ export function WindowStatusCard({
               onClick={() => navigate(`/employee/select/${window.id}`)}
             >
               {allDone
-                ? 'Edit selections'
+                ? t('windowStatus.editSelections')
                 : completedDays > 0
-                  ? 'Continue selecting'
-                  : 'Start selecting'}
+                  ? t('windowStatus.continueSelecting')
+                  : t('windowStatus.startSelecting')}
               <ChevronRight className='size-4 ml-1' />
             </Button>
           </CardFooter>
@@ -207,7 +209,7 @@ export function WindowStatusCard({
                 onOpenChange={setSelectionsOpen}
               >
                 <CollapsibleTrigger className='flex w-full items-center justify-between text-sm font-medium py-1'>
-                  Your selections
+                  {t('windowStatus.yourSelections')}
                   <ChevronDown
                     className={`size-4 text-muted-foreground transition-transform ${selectionsOpen ? 'rotate-180' : ''}`}
                   />
@@ -224,7 +226,7 @@ export function WindowStatusCard({
                         </p>
                         {daySelections.length === 0 ? (
                           <p className='text-xs text-muted-foreground italic'>
-                            No order
+                            {t('windowStatus.noOrder')}
                           </p>
                         ) : (
                           TYPE_ORDER.filter((t) =>
@@ -265,13 +267,13 @@ export function WindowStatusCard({
                 >
                   <CollapsibleTrigger className='flex w-full items-center justify-between text-sm font-medium py-1'>
                     <span className='flex items-center gap-2'>
-                      Change requests
+                      {t('windowStatus.changeRequests')}
                       {pendingCount > 0 && (
                         <Badge
                           variant='outline'
                           className='text-xs px-1.5 py-0'
                         >
-                          {pendingCount} pending
+                          {pendingCount} {t('status.pending', { ns: 'common' })}
                         </Badge>
                       )}
                     </span>
@@ -318,7 +320,7 @@ export function WindowStatusCard({
                   onClick={() => setCrSheetOpen(true)}
                 >
                   <PlusCircle className='size-4 mr-2' />
-                  Request a change
+                  {t('windowStatus.requestChange')}
                 </Button>
               </>
             )}

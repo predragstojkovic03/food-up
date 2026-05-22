@@ -1,0 +1,13 @@
+{
+  "settings": {
+    "title": "Business Settings",
+    "subtitle": "Configure settings that apply to your entire business.",
+    "communicationLanguage": {
+      "cardTitle": "Communication Language",
+      "label": "Language for Excel exports",
+      "hint": "Column headers and labels in Excel exports use this language.",
+      "success": "Business settings updated.",
+      "error": "Failed to update. Please try again."
+    }
+  }
+}

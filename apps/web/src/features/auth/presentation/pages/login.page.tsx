@@ -20,6 +20,7 @@ import { useLogin } from '@/features/auth/application/use-login.hook';
 import { useAuthStore } from '@/features/auth/presentation/state/auth.store';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { Link, Navigate } from 'react-router-dom';
 import { z } from 'zod/v3';
 
@@ -31,6 +32,7 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export default function LoginPage() {
+  const { t } = useTranslation('auth');
   const login = useLogin();
   const user = useAuthStore((s) => s.user);
 
@@ -50,8 +52,8 @@ export default function LoginPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Sign in</CardTitle>
-        <CardDescription>Enter your credentials to continue</CardDescription>
+        <CardTitle>{t('login.title')}</CardTitle>
+        <CardDescription>{t('login.description')}</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -61,11 +63,11 @@ export default function LoginPage() {
               name='email'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>{t('login.email')}</FormLabel>
                   <FormControl>
                     <Input
                       type='email'
-                      placeholder='you@example.com'
+                      placeholder={t('login.emailPlaceholder')}
                       {...field}
                     />
                   </FormControl>
@@ -78,7 +80,7 @@ export default function LoginPage() {
               name='password'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel>{t('login.password')}</FormLabel>
                   <FormControl>
                     <Input type='password' placeholder='••••••••' {...field} />
                   </FormControl>
@@ -88,21 +90,21 @@ export default function LoginPage() {
             />
             {login.isError && (
               <p className='text-destructive text-sm'>
-                Invalid email or password.
+                {t('login.error')}
               </p>
             )}
             <Button type='submit' className='w-full' disabled={login.isPending}>
-              {login.isPending ? 'Signing in…' : 'Sign in'}
+              {login.isPending ? t('login.submitting') : t('login.submit')}
             </Button>
           </form>
         </Form>
       </CardContent>
       <CardFooter className='justify-center text-sm'>
         <span className='text-muted-foreground'>
-          Don&apos;t have an account?&nbsp;
+          {t('login.noAccount')}&nbsp;
         </span>
         <Link to='/register' className='font-medium underline'>
-          Sign up
+          {t('login.signUp')}
         </Link>
       </CardFooter>
     </Card>
