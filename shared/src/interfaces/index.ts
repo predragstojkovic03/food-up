@@ -1,4 +1,5 @@
 export * from './auth';
+export * from './business';
 export * from './business-invite';
 export * from './change-request';
 export * from './employee';

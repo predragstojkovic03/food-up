@@ -17,6 +17,7 @@ export class BusinessTypeOrmMapper extends TypeOrmMapper<
       persistence.employees?.map((employee) => employee.id),
       persistence.businessSuppliers?.map((bs) => bs.supplier?.id),
       persistence.managedSuppliers?.map((supplier) => supplier.id),
+      persistence.language,
     );
   }
 
@@ -53,6 +54,7 @@ export class BusinessTypeOrmMapper extends TypeOrmMapper<
       persistence.contactEmail = domain.contactEmail;
     if (domain.contactPhone !== undefined)
       persistence.contactPhone = domain.contactPhone;
+    if (domain.language !== undefined) persistence.language = domain.language;
     return persistence;
   }
 }

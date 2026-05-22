@@ -1,3 +1,4 @@
+import { Language } from '@food-up/shared';
 import { Entity } from 'src/shared/domain/entity';
 import { generateId } from 'src/shared/domain/generate-id';
 
@@ -18,8 +19,9 @@ export class Business extends Entity {
     employeeIds: string[] = [],
     supplierIds: string[] = [],
     managedSupplierIds: string[] = [],
+    language: Language = Language.En,
   ): Business {
-    return new Business(
+    const b = new Business(
       id,
       name,
       contactEmail,
@@ -28,6 +30,8 @@ export class Business extends Entity {
       supplierIds,
       managedSupplierIds,
     );
+    b.language = language;
+    return b;
   }
 
   private constructor(
@@ -47,6 +51,7 @@ export class Business extends Entity {
     this.supplierIds = supplierIds;
     this.managedSupplierIds = managedSupplierIds;
     this.contactPhone = contactPhone;
+    this.language = Language.En;
   }
 
   readonly id: string;
@@ -56,4 +61,5 @@ export class Business extends Entity {
   employeeIds: string[];
   supplierIds: string[];
   managedSupplierIds: string[];
+  language: Language;
 }
