@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsOptional, IsString } from 'class-validator';
+import { IsEmail, IsEnum, IsOptional, IsString } from 'class-validator';
+import { Language } from '@food-up/shared';
 
 export class CreateManagedSupplierDto {
   @ApiProperty()
@@ -10,4 +11,8 @@ export class CreateManagedSupplierDto {
   @IsEmail()
   @IsOptional()
   email?: string;
+
+  @ApiProperty({ enum: Language })
+  @IsEnum(Language)
+  language: Language;
 }

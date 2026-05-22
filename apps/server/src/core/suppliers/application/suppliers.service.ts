@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { IdentityService } from 'src/core/identity/application/identity.service';
-import { EmployeeRole, IdentityType, SupplierType } from '@food-up/shared';
+import { EmployeeRole, IdentityType, Language, SupplierType } from '@food-up/shared';
 import { DomainEvents } from 'src/shared/application/domain-events/domain-events.decorator';
 import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
 import {
@@ -57,7 +57,7 @@ export class SuppliersService {
   @DomainEvents
   async createManagedSupplier(
     sub: string,
-    dto: { email?: string; name: string },
+    dto: { email?: string; name: string; language: Language },
   ) {
     const employee = await this._employeesService.findByIdentity(sub);
 
@@ -70,6 +70,7 @@ export class SuppliersService {
       dto.email ?? null,
       [employee.businessId],
       employee.businessId,
+      dto.language,
     );
 
     await this._repository.insert(supplier);
@@ -120,6 +121,7 @@ export class SuppliersService {
           'Not authorized to update this supplier.',
         );
       }
+      supplier.updateInfo(dto.name, dto.email);
     } else {
       const employee = await this._employeesService.findByIdentity(identityId);
       if (
@@ -134,9 +136,10 @@ export class SuppliersService {
           'Not authorized to update this supplier.',
         );
       }
+      supplier.updateInfo(dto.name, dto.email);
+      if (dto.language !== undefined) supplier.language = dto.language;
     }
 
-    supplier.updateInfo(dto.name, dto.email);
     await this._repository.update(id, supplier);
     this._logger.log(`Supplier updated: id=${id}`, SuppliersService.name);
 

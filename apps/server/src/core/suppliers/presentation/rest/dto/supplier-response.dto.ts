@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { SupplierType } from '@food-up/shared';
+import { Language, SupplierType } from '@food-up/shared';
 
 export class SupplierResponseDto {
   @ApiProperty()
@@ -26,4 +26,8 @@ export class SupplierResponseDto {
   @ApiPropertyOptional()
   @Expose()
   managingBusinessId?: string;
+
+  @ApiProperty({ enum: Language })
+  @Expose()
+  language: Language;
 }

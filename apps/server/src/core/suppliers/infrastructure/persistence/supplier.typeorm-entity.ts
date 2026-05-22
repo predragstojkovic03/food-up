@@ -15,7 +15,7 @@ import {
   OneToOne,
   PrimaryColumn,
 } from 'typeorm';
-import { SupplierType } from '@food-up/shared';
+import { Language, SupplierType } from '@food-up/shared';
 
 @Entity()
 export class Supplier {
@@ -30,6 +30,9 @@ export class Supplier {
 
   @Column('character varying', { length: 255, name: 'email', nullable: true })
   email: string | null;
+
+  @Column('enum', { enum: Language, default: Language.En })
+  language: Language;
 
   @OneToMany(
     () => BusinessSupplier,
