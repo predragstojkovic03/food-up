@@ -8,11 +8,32 @@ import { BusinessSupplierTypeOrmMapper } from './business-supplier-typeorm.mappe
 import { BusinessSupplier as BusinessSupplierPersistence } from './business-supplier.typeorm-entity';
 
 @Injectable()
-export class BusinessSuppliersTypeOrmRepository extends TypeOrmRepository<BusinessSupplier, BusinessSupplierPersistence> {
+export class BusinessSuppliersTypeOrmRepository extends TypeOrmRepository<
+  BusinessSupplier,
+  BusinessSupplierPersistence
+> {
   constructor(
     @InjectDataSource() dataSource: DataSource,
     transactionContext: TransactionContext,
   ) {
-    super(dataSource, BusinessSupplierPersistence, new BusinessSupplierTypeOrmMapper(), transactionContext);
+    super(
+      dataSource,
+      BusinessSupplierPersistence,
+      new BusinessSupplierTypeOrmMapper(),
+      transactionContext,
+    );
+  }
+
+  async findBySupplierAndBusiness(
+    supplierId: string,
+    businessId: string,
+  ): Promise<BusinessSupplier | null> {
+    const entity = await this._repository.findOne({
+      where: {
+        supplier: { id: supplierId },
+        business: { id: businessId },
+      },
+    });
+    return entity ? this._mapper.toDomain(entity) : null;
   }
 }

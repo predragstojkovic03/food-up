@@ -82,7 +82,7 @@ export default function InHouseSupplierDetailPage() {
         <div>
           <h1 className='text-2xl font-bold'>{supplier?.name ?? '…'}</h1>
           <p className='text-muted-foreground text-sm'>
-            {supplier?.contactInfo}
+            {supplier?.email}
           </p>
         </div>
       </div>

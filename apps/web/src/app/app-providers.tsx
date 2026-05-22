@@ -3,6 +3,7 @@ import { AuthService } from '@/features/auth/infrastructure/auth.service';
 import { useAuthStore } from '@/features/auth/presentation/state/auth.store';
 import { UserPreferencesService } from '@/features/user-preferences/infrastructure/user-preferences.service';
 import { useTheme } from '@/features/user-preferences/presentation/hooks/use-theme.hook';
+import { useLanguage, useLanguageInit } from '@/features/user-preferences/presentation/hooks/use-language.hook';
 import { BusinessService } from '@/features/businesses/infrastructure/business.service';
 import { EmployeeService } from '@/features/employees/infrastructure/employee.service';
 import { ChangeRequestService } from '@/features/change-requests/infrastructure/change-request.service';
@@ -64,12 +65,19 @@ function SessionGate({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
-export function AppProviders({ children }: { children: ReactNode }) {
+function ThemeAndLangSync() {
   useTheme();
+  useLanguage();
+  useLanguageInit();
+  return null;
+}
+
+export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <ServiceProvider value={services}>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
+          <ThemeAndLangSync />
           <SessionGate>{children}</SessionGate>
         </TooltipProvider>
         {import.meta.env.DEV && <ReactQueryDevtools />}

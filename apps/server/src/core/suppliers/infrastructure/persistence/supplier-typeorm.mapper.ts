@@ -2,10 +2,7 @@ import { TypeOrmMapper } from 'src/shared/infrastructure/typeorm.mapper';
 import { Supplier } from '../../domain/supplier.entity';
 import { Supplier as SupplierPersistence } from './supplier.typeorm-entity';
 
-export class SupplierTypeOrmMapper extends TypeOrmMapper<
-  Supplier,
-  SupplierPersistence
-> {
+export class SupplierTypeOrmMapper extends TypeOrmMapper<Supplier, SupplierPersistence> {
   toDomain(persistence: SupplierPersistence): Supplier {
     return Supplier.reconstitute(
       persistence.id,
@@ -15,6 +12,7 @@ export class SupplierTypeOrmMapper extends TypeOrmMapper<
       persistence?.businessSuppliers?.map((bs) => bs.business?.id) ?? [],
       persistence.managingBusinessId ?? undefined,
       persistence.identity?.id,
+      persistence.language,
     );
   }
 
@@ -24,19 +22,19 @@ export class SupplierTypeOrmMapper extends TypeOrmMapper<
     persistence.name = domain.name;
     persistence.type = domain.type;
     persistence.email = domain.email;
+    persistence.language = domain.language;
     persistence.managingBusinessId = domain.managingBusinessId ?? null;
     persistence.identity = { id: domain.identityId } as any;
     return persistence;
   }
 
-  toPersistencePartial(
-    domain: Partial<Supplier>,
-  ): Partial<SupplierPersistence> {
+  toPersistencePartial(domain: Partial<Supplier>): Partial<SupplierPersistence> {
     const persistence: Partial<SupplierPersistence> = {};
     if (domain.id !== undefined) persistence.id = domain.id;
     if (domain.name !== undefined) persistence.name = domain.name;
     if (domain.type !== undefined) persistence.type = domain.type;
     if (domain.email !== undefined) persistence.email = domain.email;
+    if (domain.language !== undefined) persistence.language = domain.language;
     if (domain.managingBusinessId !== undefined) {
       persistence.managingBusinessId = domain.managingBusinessId ?? null;
     }

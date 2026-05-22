@@ -58,14 +58,10 @@ export class SuppliersController {
   @ApiBearerAuth()
   @Post('managed')
   async createManagedSupplier(
-    @Body() { email, name }: CreateManagedSupplierDto,
+    @Body() { email, name, language }: CreateManagedSupplierDto,
     @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<SupplierResponseDto> {
-    const result = await this._suppliersService.createManagedSupplier(sub, {
-      email,
-      name,
-    });
-
+    const result = await this._suppliersService.createManagedSupplier(sub, { email, name, language });
     return this.toResponseDto(result);
   }
 
@@ -157,6 +153,7 @@ export class SuppliersController {
       email: entity.email,
       businessIds: entity.businessIds ?? [],
       managingBusinessId: entity.managingBusinessId,
+      language: entity.language,
     };
 
     return plainToInstance(SupplierResponseDto, response, {

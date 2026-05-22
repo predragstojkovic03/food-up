@@ -20,7 +20,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { usePreferencesStore } from '@/features/user-preferences/presentation/state/preferences.store';
 import { useServices } from '@/shared/infrastructure/di/service.context';
-import { ThemePreference } from '@food-up/shared';
+import { Language, ThemePreference } from '@food-up/shared';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -261,16 +261,23 @@ const THEME_OPTIONS: { value: ThemePreference; label: string }[] = [
   { value: ThemePreference.System, label: 'System' },
 ];
 
+const LANGUAGE_OPTIONS: { value: Language; label: string }[] = [
+  { value: Language.En, label: 'English' },
+  { value: Language.Sr, label: 'Srpski' },
+];
+
 function AppearanceSection() {
   const { preferencesService } = useServices();
   const theme = usePreferencesStore((s) => s.theme);
   const setTheme = usePreferencesStore((s) => s.setTheme);
+  const language = usePreferencesStore((s) => s.language);
+  const setLanguage = usePreferencesStore((s) => s.setLanguage);
   const [feedback, setFeedback] = useState<{
     type: 'success' | 'error';
     message: string;
   } | null>(null);
 
-  const mutation = useMutation<
+  const themeMutation = useMutation<
     void,
     Error,
     ThemePreference,
@@ -298,10 +305,33 @@ function AppearanceSection() {
     },
   });
 
-  function handleChange(newTheme: ThemePreference) {
-    setFeedback(null);
-    mutation.mutate(newTheme);
-  }
+  const languageMutation = useMutation<
+    void,
+    Error,
+    Language,
+    { previousLanguage: Language }
+  >({
+    mutationFn: (newLanguage: Language) =>
+      preferencesService.update({ language: newLanguage }),
+    onMutate: (newLanguage) => {
+      const previousLanguage = language;
+      setLanguage(newLanguage);
+      return { previousLanguage };
+    },
+    onSuccess: () => {
+      setFeedback({
+        type: 'success',
+        message: 'Appearance updated successfully.',
+      });
+    },
+    onError: (_err, _newLanguage, context) => {
+      if (context) setLanguage(context.previousLanguage);
+      setFeedback({
+        type: 'error',
+        message: 'Failed to update appearance. Please try again.',
+      });
+    },
+  });
 
   return (
     <Card>
@@ -315,8 +345,11 @@ function AppearanceSection() {
             <Label>Theme</Label>
             <Select
               value={theme}
-              onValueChange={(v) => handleChange(v as ThemePreference)}
-              disabled={mutation.isPending}
+              onValueChange={(v) => {
+                setFeedback(null);
+                themeMutation.mutate(v as ThemePreference);
+              }}
+              disabled={themeMutation.isPending}
             >
               <SelectTrigger className='w-full'>
                 <SelectValue>
@@ -327,6 +360,36 @@ function AppearanceSection() {
               </SelectTrigger>
               <SelectContent>
                 {THEME_OPTIONS.map((opt) => (
+                  <SelectItem
+                    key={opt.value}
+                    value={opt.value}
+                    label={opt.label}
+                  >
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className='space-y-2'>
+            <Label>Language</Label>
+            <Select
+              value={language}
+              onValueChange={(v) => {
+                setFeedback(null);
+                languageMutation.mutate(v as Language);
+              }}
+              disabled={languageMutation.isPending}
+            >
+              <SelectTrigger className='w-full'>
+                <SelectValue>
+                  {(v: string) =>
+                    LANGUAGE_OPTIONS.find((o) => o.value === v)?.label ?? v
+                  }
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {LANGUAGE_OPTIONS.map((opt) => (
                   <SelectItem
                     key={opt.value}
                     value={opt.value}

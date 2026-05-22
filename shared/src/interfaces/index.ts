@@ -1,4 +1,5 @@
 export * from './auth';
+export * from './business';
 export * from './business-invite';
 export * from './change-request';
 export * from './employee';
@@ -11,4 +12,3 @@ export * from './meal-selection-window';
 export * from './menu-period';
 export * from './reports';
 export * from './user-preferences';
-export * from './business';

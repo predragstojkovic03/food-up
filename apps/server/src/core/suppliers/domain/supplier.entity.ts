@@ -1,4 +1,4 @@
-import { SupplierType } from '@food-up/shared';
+import { Language, SupplierType } from '@food-up/shared';
 import { Entity } from 'src/shared/domain/entity';
 import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
 import { generateId } from 'src/shared/domain/generate-id';
@@ -9,23 +9,11 @@ import { SupplierNameChangedEvent } from './events/supplier-name-changed.event';
 import { SupplierRegisteredEvent } from './events/supplier-registered.event';
 
 export class Supplier extends Entity {
-  static register(
-    name: string,
-    email: string | null,
-    identityId: string,
-  ): Supplier {
+  static register(name: string, email: string | null, identityId: string): Supplier {
     const supplier = new Supplier(
-      generateId(),
-      name,
-      SupplierType.Standalone,
-      email,
-      [],
-      undefined,
-      identityId,
+      generateId(), name, SupplierType.Standalone, email, [], undefined, identityId, Language.En,
     );
-    supplier.addDomainEvent(
-      new SupplierRegisteredEvent(supplier.id, identityId),
-    );
+    supplier.addDomainEvent(new SupplierRegisteredEvent(supplier.id, identityId));
     return supplier;
   }
 
@@ -34,18 +22,12 @@ export class Supplier extends Entity {
     email: string | null,
     businessIds: string[],
     managingBusinessId: string,
+    language: Language = Language.En,
   ): Supplier {
     const supplier = new Supplier(
-      generateId(),
-      name,
-      SupplierType.Managed,
-      email,
-      businessIds,
-      managingBusinessId,
+      generateId(), name, SupplierType.Managed, email, businessIds, managingBusinessId, undefined, language,
     );
-    supplier.addDomainEvent(
-      new ManagedSupplierCreatedEvent(supplier.id, managingBusinessId),
-    );
+    supplier.addDomainEvent(new ManagedSupplierCreatedEvent(supplier.id, managingBusinessId));
     return supplier;
   }
 
@@ -57,16 +39,9 @@ export class Supplier extends Entity {
     businessIds: string[] = [],
     managingBusinessId?: string,
     identityId?: string,
+    language: Language = Language.En,
   ): Supplier {
-    return new Supplier(
-      id,
-      name,
-      type,
-      email,
-      businessIds,
-      managingBusinessId,
-      identityId,
-    );
+    return new Supplier(id, name, type, email, businessIds, managingBusinessId, identityId, language);
   }
 
   private constructor(
@@ -77,21 +52,15 @@ export class Supplier extends Entity {
     businessIds: string[] = [],
     managingBusinessId?: string,
     identityId?: string,
+    language: Language = Language.En,
   ) {
     super();
-
     if (type === SupplierType.Standalone && !identityId) {
-      throw new InvalidInputDataException(
-        'Identity ID is required for standalone suppliers',
-      );
+      throw new InvalidInputDataException('Identity ID is required for standalone suppliers');
     }
-
     if (type === SupplierType.Managed && !managingBusinessId) {
-      throw new InvalidInputDataException(
-        'Managing Business ID is required for managed suppliers',
-      );
+      throw new InvalidInputDataException('Managing Business ID is required for managed suppliers');
     }
-
     this._id = id;
     this._name = name;
     this._type = type;
@@ -99,6 +68,7 @@ export class Supplier extends Entity {
     this._businessIds = businessIds;
     this._managingBusinessId = managingBusinessId;
     this._identityId = identityId;
+    this._language = language;
   }
 
   private readonly _id: string;
@@ -108,66 +78,38 @@ export class Supplier extends Entity {
   private readonly _businessIds: string[];
   private readonly _managingBusinessId?: string;
   private readonly _identityId?: string;
+  private _language: Language;
 
-  get id(): string {
-    return this._id;
-  }
-
-  get name(): string {
-    return this._name;
-  }
-
+  get id(): string { return this._id; }
+  get name(): string { return this._name; }
   set name(value: string) {
     this._name = value;
     this.addDomainEvent(new SupplierNameChangedEvent(this.id, value));
   }
+  get type(): SupplierType { return this._type; }
+  get language(): Language { return this._language; }
+  set language(value: Language) { this._language = value; }
 
-  get type(): SupplierType {
-    return this._type;
-  }
-
-  isStandalone(): this is this & {
-    identityId: string;
-    managingBusinessId: undefined;
-  } {
+  isStandalone(): this is this & { identityId: string; managingBusinessId: undefined } {
     return this._type === SupplierType.Standalone;
   }
 
-  isManaged(): this is this & {
-    identityId: undefined;
-    managingBusinessId: string;
-  } {
+  isManaged(): this is this & { identityId: undefined; managingBusinessId: string } {
     return this._type === SupplierType.Managed;
   }
 
-  get email(): string | null {
-    return this._email;
-  }
-
+  get email(): string | null { return this._email; }
   set email(value: string | null) {
     this._email = value;
     this.addDomainEvent(new SupplierEmailChangedEvent(this.id, value));
   }
-
-  get businessIds(): string[] {
-    return this._businessIds;
-  }
-
-  get managingBusinessId(): string | undefined {
-    return this._managingBusinessId;
-  }
-
-  get identityId(): string | undefined {
-    return this._identityId;
-  }
+  get businessIds(): string[] { return this._businessIds; }
+  get managingBusinessId(): string | undefined { return this._managingBusinessId; }
+  get identityId(): string | undefined { return this._identityId; }
 
   updateInfo(name?: string, email?: string) {
-    if (name !== undefined) {
-      this.name = name;
-    }
-    if (email !== undefined) {
-      this.email = email;
-    }
+    if (name !== undefined) this.name = name;
+    if (email !== undefined) this.email = email;
     this.addDomainEvent(new SupplierInfoUpdatedEvent(this.id));
   }
 }

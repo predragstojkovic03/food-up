@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { Language } from '@food-up/shared';
 import { BusinessSupplier } from '../domain/business-supplier.entity';
 import {
   I_BUSINESS_SUPPLIERS_REPOSITORY,
@@ -34,5 +35,19 @@ export class BusinessSuppliersService {
 
   async delete(id: string): Promise<void> {
     return this._repository.delete(id);
+  }
+
+  async updateLanguageForPartner(
+    supplierId: string,
+    businessId: string,
+    language: Language,
+  ): Promise<void> {
+    const bs = await this._repository.findBySupplierAndBusiness(
+      supplierId,
+      businessId,
+    );
+    if (!bs) return;
+    bs.language = language;
+    await this._repository.update(bs.id, bs);
   }
 }

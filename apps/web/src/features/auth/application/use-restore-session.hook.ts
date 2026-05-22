@@ -12,6 +12,7 @@ export function useRestoreSession(): boolean {
   const { authService, preferencesService } = useServices();
   const setUser = useAuthStore((s) => s.setUser);
   const setTheme = usePreferencesStore((s) => s.setTheme);
+  const setLanguage = usePreferencesStore((s) => s.setLanguage);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -23,8 +24,9 @@ export function useRestoreSession(): boolean {
           try {
             const prefs = await preferencesService.get();
             setTheme(prefs.theme);
+            setLanguage(prefs.language);
           } catch {
-            // keep default System theme if preferences fetch fails
+            // keep defaults if preferences fetch fails
           }
         }
       })

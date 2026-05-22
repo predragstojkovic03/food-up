@@ -1,3 +1,4 @@
+import { Language } from '@food-up/shared';
 import { BusinessSupplier } from 'src/core/business-suppliers/infrastructure/persistence/business-supplier.typeorm-entity';
 import { Employee } from 'src/core/employees/infrastructure/persistence/employee.typeorm-entity';
 import { MealSelectionWindow } from 'src/core/meal-selection-windows/infrastructure/persistence/meal-selection-window.typeorm-entity';
@@ -17,6 +18,9 @@ export class Business {
 
   @Column('character varying', { length: 20, nullable: true })
   contactPhone?: string | null;
+
+  @Column('enum', { enum: Language, default: Language.En })
+  language: Language;
 
   @OneToMany(() => Employee, (employee) => employee.business, {
     onDelete: 'CASCADE',

@@ -1,4 +1,5 @@
 import { HttpClient } from '@/shared/infrastructure/http/http-client';
+import { IUpdateBusinessLanguage } from '@food-up/shared';
 import {
   IBusinessOption,
   IBusinessService,
@@ -9,5 +10,9 @@ export class BusinessService implements IBusinessService {
 
   findAll(): Promise<IBusinessOption[]> {
     return this.http.get<IBusinessOption[]>('/api/businesses');
+  }
+
+  updateLanguage(data: IUpdateBusinessLanguage): Promise<void> {
+    return this.http.patch<IUpdateBusinessLanguage, void>('/api/businesses/my', data);
   }
 }

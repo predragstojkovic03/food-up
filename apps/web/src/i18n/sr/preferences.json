@@ -1,0 +1,18 @@
+{
+  "title": "Podešavanja naloga",
+  "subtitle": "Upravljajte profilom i bezbednosnim podešavanjima.",
+  "appearance": {
+    "title": "Izgled",
+    "theme": {
+      "label": "Tema",
+      "light": "Svetla",
+      "dark": "Tamna",
+      "system": "Sistemska"
+    },
+    "language": {
+      "label": "Jezik"
+    },
+    "success": "Izgled uspešno ažuriran.",
+    "error": "Nije moguće ažurirati izgled. Pokušajte ponovo."
+  }
+}

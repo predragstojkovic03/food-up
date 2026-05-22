@@ -4,6 +4,7 @@ import { BusinessesModule } from '../businesses/businesses.module';
 import { EmployeesModule } from '../employees/employees.module';
 import { IdentityModule } from '../identity/identity.module';
 import { SuppliersService } from './application/suppliers.service';
+import { SuppliersDomainService } from './domain/suppliers.domain-service';
 import { SuppliersRepositoryProvider } from './infrastructure/suppliers.providers';
 import { SuppliersController } from './presentation/rest/suppliers.controller';
 
@@ -14,8 +15,8 @@ import { SuppliersController } from './presentation/rest/suppliers.controller';
     EmployeesModule,
     forwardRef(() => BusinessSuppliersModule),
   ],
-  providers: [SuppliersRepositoryProvider, SuppliersService],
-  exports: [SuppliersService],
+  providers: [SuppliersRepositoryProvider, SuppliersService, SuppliersDomainService],
+  exports: [SuppliersService, SuppliersDomainService],
   controllers: [SuppliersController],
 })
 export class SuppliersModule {}

@@ -1,3 +1,4 @@
+import { Language } from '@food-up/shared';
 import { Inject, Injectable } from '@nestjs/common';
 import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
 import { Business } from '../domain/business.entity';
@@ -36,5 +37,16 @@ export class BusinessesService {
 
   findOne(businessId: string): Promise<Business> {
     return this._repository.findOneByCriteriaOrThrow({ id: businessId });
+  }
+
+  async updateLanguage(businessId: string, language: Language): Promise<Business> {
+    const business = await this._repository.findOneByCriteriaOrThrow({ id: businessId });
+    business.language = language;
+    await this._repository.update(business.id, business);
+    this._logger.log(
+      `Business language updated: id=${businessId} language=${language}`,
+      BusinessesService.name,
+    );
+    return business;
   }
 }

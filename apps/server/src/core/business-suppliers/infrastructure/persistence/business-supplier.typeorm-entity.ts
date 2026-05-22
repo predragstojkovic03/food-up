@@ -1,6 +1,7 @@
+import { Language } from '@food-up/shared';
 import { Business } from 'src/core/businesses/infrastructure/persistence/business.typeorm-entity';
 import { Supplier } from 'src/core/suppliers/infrastructure/persistence/supplier.typeorm-entity';
-import { Entity, ManyToOne, PrimaryColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class BusinessSupplier {
@@ -16,4 +17,7 @@ export class BusinessSupplier {
     eager: true,
   })
   supplier: Supplier;
+
+  @Column('enum', { enum: Language, default: Language.En })
+  language: Language;
 }

@@ -4,6 +4,7 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
   Query,
   SerializeOptions,
@@ -16,6 +17,9 @@ import {
 } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 import { Public } from 'src/core/auth/infrastructure/public.decorator';
+import { CurrentIdentity } from 'src/core/auth/infrastructure/current-identity.decorator';
+import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
+import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { RequiredEmployeeRole } from 'src/core/employees/presentation/rest/employee-role.decorator';
 import { RequiredIdentityType } from 'src/core/identity/presentation/rest/identity-type.decorator';
 import { BusinessInvitesService } from '../../../business-invites/application/business-invites.service';
@@ -24,6 +28,7 @@ import { BusinessInviteResponseDto } from './dto/business-invite-response.dto';
 import { BusinessResponseDto } from './dto/business-response.dto';
 import { CreateBusinessInviteRequestDto } from './dto/create-business-invite.dto';
 import { CreateBusinessRequestDto } from './dto/create-business.dto';
+import { UpdateBusinessLanguageRequestDto } from './dto/update-business-language-request.dto';
 
 @ApiTags('Businesses')
 @Controller('businesses')
@@ -31,6 +36,7 @@ export class BusinessesController {
   constructor(
     private readonly _businessesService: BusinessesService,
     private readonly _businessInvitesService: BusinessInvitesService,
+    private readonly _employeesService: EmployeesService,
   ) {}
 
   @Post()
@@ -85,5 +91,20 @@ export class BusinessesController {
       body.email,
     );
     return plainToInstance(BusinessInviteResponseDto, invite);
+  }
+
+  @Patch('my')
+  @ApiOperation({ summary: "Update the current manager's business language" })
+  @ApiResponse({ status: 200, type: BusinessResponseDto })
+  @RequiredIdentityType(IdentityType.Employee)
+  @RequiredEmployeeRole(EmployeeRole.Manager)
+  @ApiBearerAuth()
+  async updateMyLanguage(
+    @Body() dto: UpdateBusinessLanguageRequestDto,
+    @CurrentIdentity() { sub }: JwtPayload,
+  ): Promise<BusinessResponseDto> {
+    const employee = await this._employeesService.findByIdentity(sub);
+    const business = await this._businessesService.updateLanguage(employee.businessId, dto.language);
+    return plainToInstance(BusinessResponseDto, business, { excludeExtraneousValues: true });
   }
 }
