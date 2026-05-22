@@ -1,6 +1,4 @@
-import type { Translations } from './en';
-
-const sr: Translations = {
+const sr = {
   mail: {
     mealWindow: {
       subject: 'Vaš prozor za izbor obroka je otvoren',
@@ -19,6 +17,6 @@ const sr: Translations = {
       date: 'Datum',
     },
   },
-};
+} as const;
 
 export default sr;

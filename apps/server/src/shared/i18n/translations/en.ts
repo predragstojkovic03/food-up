@@ -1,25 +1,4 @@
-export type Translations = {
-  mail: {
-    mealWindow: {
-      subject: string;
-      body: string;
-    };
-    changeRequest: {
-      subject: string;
-      body: string;
-    };
-  };
-  excel: {
-    columns: {
-      employeeName: string;
-      meal: string;
-      mealType: string;
-      date: string;
-    };
-  };
-};
-
-const en: Translations = {
+export default {
   mail: {
     mealWindow: {
       subject: 'Your meal selection window is open',
@@ -38,6 +17,4 @@ const en: Translations = {
       date: 'Date',
     },
   },
-};
-
-export default en;
+} as const;
