@@ -10,6 +10,9 @@ import { MealService } from '@/features/meals/infrastructure/meal.service';
 import { MenuItemService } from '@/features/menu-items/infrastructure/menu-item.service';
 import { MenuPeriodService } from '@/features/menu-periods/infrastructure/menu-period.service';
 import { SupplierService } from '@/features/suppliers/infrastructure/supplier.service';
+import { UserPreferencesService } from '@/features/user-preferences/infrastructure/user-preferences.service';
+import { useTheme } from '@/features/user-preferences/presentation/hooks/use-theme.hook';
+import { useLanguage, useLanguageInit } from '@/features/user-preferences/presentation/hooks/use-language.hook';
 import { ServiceProvider } from '@/shared/infrastructure/di/service.context';
 import { HttpClient } from '@/shared/infrastructure/http/http-client';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -33,6 +36,7 @@ const services = {
   mealSelectionService: new MealSelectionService(httpClient),
   changeRequestService: new ChangeRequestService(httpClient),
   reportService: new ReportService(httpClient),
+  preferencesService: new UserPreferencesService(httpClient),
 };
 
 function SessionGate({ children }: { children: ReactNode }) {
@@ -41,11 +45,19 @@ function SessionGate({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
+function ThemeAndLangSync() {
+  useTheme();
+  useLanguage();
+  useLanguageInit();
+  return null;
+}
+
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <ServiceProvider value={services}>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
+          <ThemeAndLangSync />
           <SessionGate>{children}</SessionGate>
         </TooltipProvider>
         {import.meta.env.DEV && <ReactQueryDevtools />}
