@@ -16,9 +16,15 @@ export class UserPreferencesController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current user preferences' })
   @ApiResponse({ status: 200, type: UserPreferencesResponseDto })
-  async getPreferences(@CurrentIdentity() identity: JwtPayload): Promise<UserPreferencesResponseDto> {
+  async getPreferences(
+    @CurrentIdentity() identity: JwtPayload,
+  ): Promise<UserPreferencesResponseDto> {
     const prefs = await this._service.getOrCreate(identity.sub);
-    return plainToInstance(UserPreferencesResponseDto, { theme: prefs.theme }, { excludeExtraneousValues: true });
+    return plainToInstance(
+      UserPreferencesResponseDto,
+      { theme: prefs.theme, language: prefs.language },
+      { excludeExtraneousValues: true },
+    );
   }
 
   @Patch()
@@ -29,7 +35,11 @@ export class UserPreferencesController {
     @CurrentIdentity() identity: JwtPayload,
     @Body() dto: UpdateUserPreferencesRequestDto,
   ): Promise<UserPreferencesResponseDto> {
-    const prefs = await this._service.update(identity.sub, dto.theme);
-    return plainToInstance(UserPreferencesResponseDto, { theme: prefs.theme }, { excludeExtraneousValues: true });
+    const prefs = await this._service.update(identity.sub, dto);
+    return plainToInstance(
+      UserPreferencesResponseDto,
+      { theme: prefs.theme, language: prefs.language },
+      { excludeExtraneousValues: true },
+    );
   }
 }

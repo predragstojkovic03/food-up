@@ -1,4 +1,4 @@
-import { ThemePreference } from '@food-up/shared';
+import { Language, ThemePreference } from '@food-up/shared';
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity('user_preferences')
@@ -11,4 +11,7 @@ export class UserPreferencesTypeOrmEntity {
 
   @Column('enum', { enum: ThemePreference, default: ThemePreference.System })
   theme: ThemePreference;
+
+  @Column('enum', { enum: Language, default: Language.En })
+  language: Language;
 }

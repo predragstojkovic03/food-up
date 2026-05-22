@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ThemePreference } from '@food-up/shared';
+import { Language, ThemePreference } from '@food-up/shared';
 import { UserPreferences } from '../domain/user-preferences.entity';
 import {
   I_USER_PREFERENCES_REPOSITORY,
@@ -20,9 +20,13 @@ export class UserPreferencesService {
     return this._repository.create(prefs);
   }
 
-  async update(identityId: string, theme: ThemePreference): Promise<UserPreferences> {
+  async update(
+    identityId: string,
+    dto: { theme?: ThemePreference; language?: Language },
+  ): Promise<UserPreferences> {
     const prefs = await this.getOrCreate(identityId);
-    prefs.theme = theme;
+    if (dto.theme !== undefined) prefs.theme = dto.theme;
+    if (dto.language !== undefined) prefs.language = dto.language;
     return this._repository.update(prefs);
   }
 }

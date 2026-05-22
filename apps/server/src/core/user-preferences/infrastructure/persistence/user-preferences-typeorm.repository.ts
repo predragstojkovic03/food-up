@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { ThemePreference } from '@food-up/shared';
 import { TransactionContext } from 'src/shared/infrastructure/transaction-context';
 import { DataSource, Repository } from 'typeorm';
 import { UserPreferences } from '../../domain/user-preferences.entity';
@@ -31,17 +30,26 @@ export class UserPreferencesTypeOrmRepository implements IUserPreferencesReposit
       id: prefs.id,
       identityId: prefs.identityId,
       theme: prefs.theme,
+      language: prefs.language,
     });
     const saved = await this._repo.save(entity);
     return this.toDomain(saved);
   }
 
   async update(prefs: UserPreferences): Promise<UserPreferences> {
-    await this._repo.update({ id: prefs.id }, { theme: prefs.theme });
+    await this._repo.update(
+      { id: prefs.id },
+      { theme: prefs.theme, language: prefs.language },
+    );
     return prefs;
   }
 
   private toDomain(entity: UserPreferencesTypeOrmEntity): UserPreferences {
-    return UserPreferences.reconstitute(entity.id, entity.identityId, entity.theme);
+    return UserPreferences.reconstitute(
+      entity.id,
+      entity.identityId,
+      entity.theme,
+      entity.language,
+    );
   }
 }

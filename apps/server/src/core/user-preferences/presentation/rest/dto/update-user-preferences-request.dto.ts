@@ -1,9 +1,15 @@
-import { IsEnum } from 'class-validator';
-import { IUpdateUserPreferences, ThemePreference } from '@food-up/shared';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsEnum, IsOptional } from 'class-validator';
+import { IUpdateUserPreferences, Language, ThemePreference } from '@food-up/shared';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateUserPreferencesRequestDto implements IUpdateUserPreferences {
-  @ApiProperty({ enum: ThemePreference })
+  @ApiPropertyOptional({ enum: ThemePreference })
   @IsEnum(ThemePreference)
-  theme: ThemePreference;
+  @IsOptional()
+  theme?: ThemePreference;
+
+  @ApiPropertyOptional({ enum: Language })
+  @IsEnum(Language)
+  @IsOptional()
+  language?: Language;
 }
