@@ -63,7 +63,7 @@ export abstract class TypeOrmRepository<
   async update(id: Entity['id'], entity: TDomain): Promise<TDomain> {
     await this._repository.update(
       { id } as unknown as FindOptionsWhere<TPersistence>,
-      this._mapper.toPersistence(entity) as any,
+      this._mapper.toPersistencePartial(entity) as any,
     );
     return entity;
   }
