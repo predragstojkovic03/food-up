@@ -12,14 +12,30 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useServices } from '@/shared/infrastructure/di/service.context';
-import { ISupplierResponse } from '@food-up/shared';
+import { ISupplierResponse, Language } from '@food-up/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, Pencil, Plus, Settings2, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const QUERY_KEY = ['suppliers', 'in-house'];
+
+const LANGUAGE_OPTIONS: { value: Language; label: string }[] = [
+  { value: Language.En, label: 'English' },
+  { value: Language.Sr, label: 'Srpski' },
+];
+
+function languageLabel(lang: Language): string {
+  return LANGUAGE_OPTIONS.find((o) => o.value === lang)?.label ?? lang;
+}
 
 export default function InHouseSuppliersPage() {
   const { supplierService } = useServices();
@@ -43,7 +59,8 @@ export default function InHouseSuppliersPage() {
     }: {
       id: string;
       name?: string;
-      contactInfo?: string;
+      email?: string;
+      language?: Language;
     }) => supplierService.update(id, data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: QUERY_KEY }),
   });
@@ -55,16 +72,18 @@ export default function InHouseSuppliersPage() {
 
   const [showCreatePanel, setShowCreatePanel] = useState(false);
   const [createName, setCreateName] = useState('');
-  const [createContact, setCreateContact] = useState('');
+  const [createEmail, setCreateEmail] = useState('');
+  const [createLanguage, setCreateLanguage] = useState<Language>(Language.En);
 
   function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     createSupplier.mutate(
-      { name: createName, contactInfo: createContact },
+      { name: createName, email: createEmail, language: createLanguage },
       {
         onSuccess: () => {
           setCreateName('');
-          setCreateContact('');
+          setCreateEmail('');
+          setCreateLanguage(Language.En);
           setShowCreatePanel(false);
         },
       },
@@ -94,7 +113,8 @@ export default function InHouseSuppliersPage() {
               onClick={() => {
                 setShowCreatePanel(false);
                 setCreateName('');
-                setCreateContact('');
+                setCreateEmail('');
+                setCreateLanguage(Language.En);
               }}
               className='text-muted-foreground hover:text-foreground transition-colors'
             >
@@ -115,16 +135,36 @@ export default function InHouseSuppliersPage() {
               />
             </div>
             <div className='flex-1'>
-              <Label htmlFor='supplier-contact' className='mb-1.5 block'>
-                Contact info
+              <Label htmlFor='supplier-email' className='mb-1.5 block'>
+                Email
               </Label>
               <Input
-                id='supplier-contact'
-                placeholder='Email or phone'
-                value={createContact}
-                onChange={(e) => setCreateContact(e.target.value)}
-                required
+                id='supplier-email'
+                placeholder='Email'
+                value={createEmail}
+                onChange={(e) => setCreateEmail(e.target.value)}
               />
+            </div>
+            <div className='w-36'>
+              <Label className='mb-1.5 block'>Language</Label>
+              <Select
+                value={createLanguage}
+                onValueChange={(v) => setCreateLanguage(v as Language)}
+                disabled={createSupplier.isPending}
+              >
+                <SelectTrigger className='w-full'>
+                  <SelectValue>
+                    {(v: string) => languageLabel(v as Language)}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {LANGUAGE_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value} label={opt.label}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <Button type='submit' disabled={createSupplier.isPending}>
               {createSupplier.isPending ? 'Creating…' : 'Create'}
@@ -139,9 +179,10 @@ export default function InHouseSuppliersPage() {
       )}
 
       <div className='border rounded-lg overflow-hidden'>
-        <div className='grid grid-cols-[1fr_1fr_auto] text-xs font-medium text-muted-foreground bg-muted/40 px-4 py-2.5 border-b'>
+        <div className='grid grid-cols-[1fr_1fr_1fr_auto] text-xs font-medium text-muted-foreground bg-muted/40 px-4 py-2.5 border-b'>
           <span>Name</span>
-          <span>Contact info</span>
+          <span>Email</span>
+          <span>Language</span>
           <span />
         </div>
 
@@ -187,7 +228,7 @@ interface SupplierRowProps {
   supplier: ISupplierResponse;
   isUpdating: boolean;
   isRemoving: boolean;
-  onUpdate: (data: { name?: string; contactInfo?: string }) => void;
+  onUpdate: (data: { name?: string; email?: string; language?: Language }) => void;
   onRemove: () => void;
   onManage: () => void;
 }
@@ -202,22 +243,24 @@ function SupplierRow({
 }: SupplierRowProps) {
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(supplier.name);
-  const [contactInfo, setContactInfo] = useState(supplier.contactInfo);
+  const [email, setEmail] = useState(supplier.email ?? '');
+  const [language, setLanguage] = useState<Language>(supplier.language);
 
   function handleSave() {
-    onUpdate({ name, contactInfo });
+    onUpdate({ name, email, language });
     setEditing(false);
   }
 
   function handleCancel() {
     setName(supplier.name);
-    setContactInfo(supplier.contactInfo);
+    setEmail(supplier.email ?? '');
+    setLanguage(supplier.language);
     setEditing(false);
   }
 
   if (editing) {
     return (
-      <div className='grid grid-cols-[1fr_1fr_auto] items-center px-4 py-3 border-b last:border-b-0 gap-4'>
+      <div className='grid grid-cols-[1fr_1fr_1fr_auto] items-center px-4 py-3 border-b last:border-b-0 gap-4'>
         <Input
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -225,11 +268,29 @@ function SupplierRow({
           disabled={isUpdating}
         />
         <Input
-          value={contactInfo}
-          onChange={(e) => setContactInfo(e.target.value)}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           className='h-8 text-sm'
           disabled={isUpdating}
         />
+        <Select
+          value={language}
+          onValueChange={(v) => setLanguage(v as Language)}
+          disabled={isUpdating}
+        >
+          <SelectTrigger className='h-8 text-sm w-full'>
+            <SelectValue>
+              {(v: string) => languageLabel(v as Language)}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {LANGUAGE_OPTIONS.map((opt) => (
+              <SelectItem key={opt.value} value={opt.value} label={opt.label}>
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <div className='flex items-center gap-1'>
           <button
             onClick={handleSave}
@@ -253,10 +314,13 @@ function SupplierRow({
   }
 
   return (
-    <div className='grid grid-cols-[1fr_1fr_auto] items-center px-4 py-3 border-b last:border-b-0 gap-4'>
+    <div className='grid grid-cols-[1fr_1fr_1fr_auto] items-center px-4 py-3 border-b last:border-b-0 gap-4'>
       <span className='text-sm font-medium'>{supplier.name}</span>
       <span className='text-sm text-muted-foreground'>
-        {supplier.contactInfo}
+        {supplier.email ?? '—'}
+      </span>
+      <span className='text-sm text-muted-foreground'>
+        {languageLabel(supplier.language)}
       </span>
       <div className='flex items-center gap-1'>
         <button
