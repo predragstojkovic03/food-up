@@ -6,4 +6,9 @@ export const I_BUSINESS_SUPPLIERS_REPOSITORY = Symbol(
 );
 
 export interface IBusinessSuppliersRepository
-  extends IRepository<BusinessSupplier> {}
+  extends IRepository<BusinessSupplier> {
+  findBySupplierAndBusiness(
+    supplierId: string,
+    businessId: string,
+  ): Promise<BusinessSupplier | null>;
+}

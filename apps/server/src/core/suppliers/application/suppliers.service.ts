@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { BusinessSuppliersService } from 'src/core/business-suppliers/application/business-suppliers.service';
 import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { IdentityService } from 'src/core/identity/application/identity.service';
 import { EmployeeRole, IdentityType, Language, SupplierType } from '@food-up/shared';
@@ -27,6 +28,7 @@ export class SuppliersService {
     @Inject(I_TRANSACTION_RUNNER)
     private readonly _transactionRunner: ITransactionRunner,
     @Inject(I_LOGGER) private readonly _logger: ILogger,
+    private readonly _businessSuppliersService: BusinessSuppliersService,
   ) {}
 
   @DomainEvents
@@ -122,6 +124,14 @@ export class SuppliersService {
         );
       }
       supplier.updateInfo(dto.name, dto.email);
+      if (dto.language !== undefined) {
+        const employee = await this._employeesService.findByIdentity(identityId);
+        await this._businessSuppliersService.updateLanguageForPartner(
+          id,
+          employee.businessId,
+          dto.language,
+        );
+      }
     } else {
       const employee = await this._employeesService.findByIdentity(identityId);
       if (

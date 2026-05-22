@@ -11,23 +11,29 @@ export class BusinessSupplierTypeOrmMapper extends TypeOrmMapper<
       persistence.id,
       persistence.business.id,
       persistence.supplier.id,
+      persistence.language,
     );
   }
 
   toPersistence(domain: BusinessSupplier): BusinessSupplierPersistence {
     const persistence = new BusinessSupplierPersistence();
     persistence.id = domain.id;
-    persistence.business = { id: domain.businessId } as any; // Assuming businessId is sufficient for persistence
-    persistence.supplier = { id: domain.supplierId } as any; // Assuming supplierId is sufficient for persistence
-
+    persistence.business = { id: domain.businessId } as any;
+    persistence.supplier = { id: domain.supplierId } as any;
+    persistence.language = domain.language;
     return persistence;
   }
 
-  toPersistencePartial(domain: Partial<BusinessSupplier>): Partial<BusinessSupplierPersistence> {
+  toPersistencePartial(
+    domain: Partial<BusinessSupplier>,
+  ): Partial<BusinessSupplierPersistence> {
     const persistence: Partial<BusinessSupplierPersistence> = {};
     if (domain.id !== undefined) persistence.id = domain.id;
-    if (domain.businessId !== undefined) persistence.business = { id: domain.businessId } as any;
-    if (domain.supplierId !== undefined) persistence.supplier = { id: domain.supplierId } as any;
+    if (domain.businessId !== undefined)
+      persistence.business = { id: domain.businessId } as any;
+    if (domain.supplierId !== undefined)
+      persistence.supplier = { id: domain.supplierId } as any;
+    if (domain.language !== undefined) persistence.language = domain.language;
     return persistence;
   }
 }
