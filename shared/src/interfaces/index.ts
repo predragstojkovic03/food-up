@@ -11,3 +11,4 @@ export * from './meal-selection-window';
 export * from './menu-period';
 export * from './reports';
 export * from './user-preferences';
+export * from './business';
