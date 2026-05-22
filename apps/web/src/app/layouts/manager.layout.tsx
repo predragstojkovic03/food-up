@@ -34,6 +34,7 @@ import { useLatestBusinessWindow } from '@/features/meal-selection-windows/appli
 import { useAuthStore } from '@/features/auth/presentation/state/auth.store';
 import { useServices } from '@/shared/infrastructure/di/service.context';
 import {
+  Building2,
   CalendarRange,
   ChevronRight,
   ClipboardList,
@@ -144,6 +145,16 @@ export default function ManagerLayout() {
                     {pendingCount > 0 && (
                       <Badge className='ml-auto text-xs px-1.5 py-0'>{pendingCount}</Badge>
                     )}
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    render={<NavLink to='/employee/manager/business' />}
+                    isActive={pathname.startsWith('/employee/manager/business')}
+                  >
+                    <Building2 />
+                    <span>Business Settings</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
 

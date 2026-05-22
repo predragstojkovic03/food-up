@@ -1,4 +1,5 @@
 import RequiredRoles from '@/features/auth/presentation/components/required-role';
+import BusinessSettingsPage from '@/features/businesses/presentation/pages/business-settings.page';
 import ManagerPage from '@/features/employees/presentation/pages/manager.page';
 import EmployeesPage from '@/features/employees/presentation/pages/employees.page';
 import EmployeeHomePage from '@/features/employees/presentation/pages/employee-home.page';
@@ -47,6 +48,7 @@ function App() {
           <Route path='meal-selection-windows' element={<MealSelectionWindowsPage />} />
           <Route path='change-requests' element={<ManagerChangeRequestsPage />} />
           <Route path='account' element={<AccountPage />} />
+          <Route path='business' element={<BusinessSettingsPage />} />
         </Route>
 
         {/* App routes */}
