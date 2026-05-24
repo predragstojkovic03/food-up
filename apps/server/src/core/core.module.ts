@@ -5,6 +5,7 @@ import { BusinessSuppliersModule } from './business-suppliers/business-suppliers
 import { BusinessesModule } from './businesses/businesses.module';
 import { ChangeRequestsModule } from './change-requests/change-requests.module';
 import { EmployeesModule } from './employees/employees.module';
+import { ExtraQuantitiesModule } from './extra-quantities/extra-quantities.module';
 import { IdentityModule } from './identity/identity.module';
 import { MealSelectionWindowsModule } from './meal-selection-windows/meal-selection-windows.module';
 import { MenuItemsModule } from './menu-items/menu-items.module';
@@ -29,6 +30,7 @@ import { UserPreferencesModule } from './user-preferences/user-preferences.modul
     SuppliersModule,
     ChangeRequestsModule,
     UserPreferencesModule,
+    ExtraQuantitiesModule,
   ],
 })
 export class CoreModule {}
