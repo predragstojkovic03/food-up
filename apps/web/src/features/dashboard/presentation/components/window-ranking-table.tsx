@@ -40,21 +40,21 @@ export function WindowRankingTable({ data, isLoading }: WindowRankingTableProps)
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>#</TableHead>
+                <TableHead className="pl-6">#</TableHead>
                 <TableHead>{t('dashboard.windowRanking.colWindow')}</TableHead>
                 <TableHead>{t('dashboard.windowRanking.colSuppliers')}</TableHead>
-                <TableHead className="text-right">{t('dashboard.windowRanking.colTotalCost')}</TableHead>
+                <TableHead className="text-right pr-6">{t('dashboard.windowRanking.colTotalCost')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {sorted.map((item, index) => (
                 <TableRow key={item.windowId}>
-                  <TableCell className="text-muted-foreground">{index + 1}</TableCell>
+                  <TableCell className="pl-6 text-muted-foreground">{index + 1}</TableCell>
                   <TableCell className="font-medium">{item.windowLabel}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     {item.supplierNames.join(', ')}
                   </TableCell>
-                  <TableCell className="text-right font-mono">
+                  <TableCell className="text-right pr-6 font-mono">
                     {formatRSD(item.totalCost)}
                   </TableCell>
                 </TableRow>
