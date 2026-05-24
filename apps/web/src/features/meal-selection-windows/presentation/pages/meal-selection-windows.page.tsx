@@ -67,11 +67,13 @@ import { useTranslation } from 'react-i18next';
 
 const WINDOWS_QUERY_KEY = ['meal-selection-windows', 'business'];
 
-const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-
-function formatDateWithWeekday(dateStr: string): string {
-  const d = new Date(dateStr + 'T00:00:00');
-  return `${WEEKDAYS[d.getDay()]}, ${d.toLocaleDateString()}`;
+function formatDateWithWeekday(dateStr: string, locale: string): string {
+  return new Date(dateStr + 'T00:00:00').toLocaleDateString(locale, {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'numeric',
+    year: 'numeric',
+  });
 }
 
 function dateToString(d: Date): string {
@@ -110,7 +112,8 @@ function getNextWorkWeek(afterDate: Date): string[] {
 }
 
 export default function MealSelectionWindowsPage() {
-  const { t } = useTranslation('meals');
+  const { t, i18n } = useTranslation('meals');
+  const locale = i18n.language === 'sr' ? 'sr-Latn-RS' : 'en-US';
   const { mealSelectionWindowService, supplierService, menuPeriodService } = useServices();
   const queryClient = useQueryClient();
 
@@ -253,14 +256,14 @@ export default function MealSelectionWindowsPage() {
                 <div className='flex items-center gap-2'>
                   <CalendarRange size={14} className='text-muted-foreground shrink-0' />
                   <span className='text-sm font-medium'>
-                    {new Date(window.startTime).toLocaleString()} – {new Date(window.endTime).toLocaleString()}
+                    {new Date(window.startTime).toLocaleString(locale)} – {new Date(window.endTime).toLocaleString(locale)}
                   </span>
                 </div>
 
                 <div className='flex flex-wrap gap-1 justify-end'>
                   {window.targetDates.map((d) => (
                     <span key={d} className='text-xs bg-muted px-1.5 py-0.5 rounded whitespace-nowrap'>
-                      {formatDateWithWeekday(d)}
+                      {formatDateWithWeekday(d, locale)}
                     </span>
                   ))}
                 </div>
@@ -1230,7 +1233,8 @@ function CreateWindowPanel({
   onSubmit,
   onClose,
 }: CreateWindowPanelProps) {
-  const { t } = useTranslation('meals');
+  const { t, i18n } = useTranslation('meals');
+  const locale = i18n.language === 'sr' ? 'sr-Latn-RS' : 'en-US';
   const form = useForm<CreateWindowFormValues>({
     resolver: zodResolver(createWindowSchema),
     defaultValues: {
@@ -1347,7 +1351,7 @@ function CreateWindowPanel({
                               }`}
                             >
                               {supplierNameById[mp.supplierId] ?? 'Supplier'} ·{' '}
-                              {formatDateWithWeekday(mp.startDate)} – {formatDateWithWeekday(mp.endDate)}
+                              {formatDateWithWeekday(mp.startDate, locale)} – {formatDateWithWeekday(mp.endDate, locale)}
                             </button>
                           );
                         })}
@@ -1420,7 +1424,7 @@ function CreateWindowPanel({
                         key={date}
                         className='inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-primary/10 text-primary border border-primary/20'
                       >
-                        {formatDateWithWeekday(date)}
+                        {formatDateWithWeekday(date, locale)}
                         <button
                           type='button'
                           onClick={() => removeDate(date)}
