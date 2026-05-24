@@ -9,16 +9,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { formatRSD } from '@/lib/utils';
 import { WindowRankingItem } from '../../domain/dashboard-service.interface';
 
 interface WindowRankingTableProps {
   data: WindowRankingItem[] | undefined;
   isLoading: boolean;
-}
-
-function formatCurrency(value: number | null | undefined): string {
-  if (value == null) return '—';
-  return value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 export function WindowRankingTable({ data, isLoading }: WindowRankingTableProps) {
@@ -59,7 +55,7 @@ export function WindowRankingTable({ data, isLoading }: WindowRankingTableProps)
                     {item.supplierNames.join(', ')}
                   </TableCell>
                   <TableCell className="text-right font-mono">
-                    {formatCurrency(item.totalCost)}
+                    {formatRSD(item.totalCost)}
                   </TableCell>
                 </TableRow>
               ))}

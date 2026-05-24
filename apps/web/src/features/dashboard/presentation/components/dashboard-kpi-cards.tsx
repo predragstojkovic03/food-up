@@ -2,16 +2,12 @@ import { TrendingDownIcon, TrendingUpIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { formatRSD } from '@/lib/utils';
 import { DashboardKpis } from '../../domain/dashboard-service.interface';
 
 interface DashboardKpiCardsProps {
   data: DashboardKpis | undefined;
   isLoading: boolean;
-}
-
-function formatCurrency(value: number | null | undefined): string {
-  if (value == null) return '—';
-  return value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function ChangeIndicator({ change }: { change: number | null }) {
@@ -62,7 +58,7 @@ export function DashboardKpiCards({ data, isLoading }: DashboardKpiCardsProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-2xl font-bold">{formatCurrency(data.totalSpend)}</p>
+          <p className="text-2xl font-bold">{formatRSD(data.totalSpend)}</p>
           <ChangeIndicator change={data.totalSpendChange} />
         </CardContent>
       </Card>
@@ -74,7 +70,7 @@ export function DashboardKpiCards({ data, isLoading }: DashboardKpiCardsProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-2xl font-bold">{formatCurrency(data.avgCostPerWindow)}</p>
+          <p className="text-2xl font-bold">{formatRSD(data.avgCostPerWindow)}</p>
           <ChangeIndicator change={data.avgCostPerWindowChange} />
         </CardContent>
       </Card>
@@ -90,7 +86,7 @@ export function DashboardKpiCards({ data, isLoading }: DashboardKpiCardsProps) {
             {data.topSupplier?.name ?? t('dashboard.kpi.noTopSupplier')}
           </p>
           {data.topSupplier && (
-            <p className="text-xs text-muted-foreground">{formatCurrency(data.topSupplier.totalCost)}</p>
+            <p className="text-xs text-muted-foreground">{formatRSD(data.topSupplier.totalCost)}</p>
           )}
         </CardContent>
       </Card>

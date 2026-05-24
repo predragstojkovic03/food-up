@@ -1,3 +1,4 @@
+import { formatRSD } from '@/lib/utils';
 import { MenuItemOption } from '../types';
 
 interface MealCardProps {
@@ -28,7 +29,7 @@ export function MealCard({ item, selected, onSelect }: MealCardProps) {
         <div className="flex flex-col items-end gap-1.5 shrink-0">
           {item.price != null && (
             <span className="text-xs font-medium text-muted-foreground">
-              {item.price.toFixed(2)} €
+              {formatRSD(item.price)}
             </span>
           )}
           <span

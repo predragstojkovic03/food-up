@@ -454,7 +454,7 @@ function WindowDetails({ windowId, endTime, targetDates }: WindowDetailsProps) {
                         {item.meal.description || '—'}
                       </span>
                       <span className='px-3 py-2.5 text-right border-b last:border-b-0'>
-                        {item.price != null ? `$${item.price.toFixed(2)}` : '—'}
+                        {item.price != null ? item.price.toLocaleString('sr-RS', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' RSD' : '—'}
                       </span>
                       <span className={`px-3 py-2.5 text-right font-medium border-b last:border-b-0 ${qty > 0 ? 'text-foreground' : 'text-muted-foreground'}`}>
                         {qty > 0 ? qty : '—'}
@@ -1182,14 +1182,14 @@ function CostSummarySection({ windowId }: { windowId: string }) {
             <React.Fragment key={row.supplierId}>
               <span className='text-foreground'>{row.supplierName}</span>
               <span className='font-semibold text-right'>
-                {row.totalCost.toLocaleString()} RSD
+                {row.totalCost.toLocaleString('sr-RS', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} RSD
               </span>
             </React.Fragment>
           ))}
         </div>
         <div className='border-t pt-2 grid grid-cols-[1fr_auto] gap-x-6 text-sm font-bold'>
           <span>{t('windows.detail.costSummary.total')}</span>
-          <span>{grandTotal.toLocaleString()} RSD</span>
+          <span>{grandTotal.toLocaleString('sr-RS', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} RSD</span>
         </div>
         <div className='text-[10px] text-muted-foreground mt-1.5'>
           {t('windows.detail.costSummary.disclaimer')}

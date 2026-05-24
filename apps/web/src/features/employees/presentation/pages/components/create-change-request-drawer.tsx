@@ -176,7 +176,7 @@ export function CreateChangeRequestDrawer({
                                 )}
                                 {item.price != null && (
                                   <span className="ml-auto text-xs text-muted-foreground float-right">
-                                    {item.price.toFixed(2)}
+                                    {item.price.toLocaleString('sr-RS', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} RSD
                                   </span>
                                 )}
                               </button>
