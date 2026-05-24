@@ -18,6 +18,7 @@ import { MailPreviewResponseDto } from './dto/mail-preview-response.dto';
 import { OrderSummarySendResponseDto } from './dto/order-summary-send-response.dto';
 import { SendReportDto } from './dto/send-report.dto';
 import { SupplierSendStatusResponseDto } from './dto/supplier-send-status-response.dto';
+import { WindowCostSummaryResponseDto } from './dto/window-cost-summary-response.dto';
 
 @ApiTags('Reports')
 @Controller('reports')
@@ -81,6 +82,17 @@ export class ReportsController {
     @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<void> {
     await this._reportsService.sendToSuppliers(dto.windowId, dto.suppliers, sub);
+  }
+
+  @Get('cost-summary')
+  @ApiOperation({ summary: 'Get estimated cost breakdown by supplier for a meal selection window' })
+  @ApiQuery({ name: 'windowId', required: true, type: String })
+  @ApiResponse({ status: 200, type: [WindowCostSummaryResponseDto] })
+  async getCostSummary(
+    @Query('windowId') windowId: string,
+  ): Promise<WindowCostSummaryResponseDto[]> {
+    const rows = await this._reportsService.getCostSummary(windowId);
+    return plainToInstance(WindowCostSummaryResponseDto, rows, { strategy: 'excludeAll' });
   }
 
   @Get('sends')

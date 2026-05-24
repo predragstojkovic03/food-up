@@ -1,4 +1,4 @@
-import { IOrderSummarySend, ISendReportItem, Language } from '@food-up/shared';
+import { IOrderSummarySend, ISendReportItem, IWindowCostSummary, Language } from '@food-up/shared';
 import { Inject, Injectable } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
 import { BusinessSuppliersService } from 'src/core/business-suppliers/application/business-suppliers.service';
@@ -249,6 +249,10 @@ export class ReportsService {
         ReportsService.name,
       );
     }
+  }
+
+  async getCostSummary(windowId: string): Promise<IWindowCostSummary[]> {
+    return this._queryRepository.getCostByWindow(windowId);
   }
 
   async getAllSends(windowId: string): Promise<IOrderSummarySend[]> {
