@@ -44,6 +44,13 @@ export default {
       mealType: 'Meal type',
       date: 'Date',
       qty: 'Qty',
+      soup: 'Soup',
+      bread: 'Bread',
+      dessert: 'Dessert',
+    },
+    daySheet: {
+      yes: 'Yes',
+      no: 'No',
     },
     mealTypes: {
       breakfast: 'Breakfasts',

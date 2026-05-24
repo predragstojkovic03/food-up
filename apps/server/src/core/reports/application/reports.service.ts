@@ -1,4 +1,4 @@
-import { Language } from '@food-up/shared';
+import { IOrderSummarySend, ISendReportItem, Language } from '@food-up/shared';
 import { Inject, Injectable } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
 import { BusinessSuppliersService } from 'src/core/business-suppliers/application/business-suppliers.service';
@@ -164,10 +164,48 @@ export class ReportsService {
     );
   }
 
+  async generatePreview(
+    windowId: string,
+    supplierId: string,
+    managerIdentityId: string,
+  ): Promise<{ subject: string; introText: string; html: string }> {
+    const [managerEmployee, supplier] = await Promise.all([
+      this._employeesService.findByIdentity(managerIdentityId),
+      this._suppliersService.findOne(supplierId),
+    ]);
+
+    const businessId = managerEmployee.businessId;
+    let lang: Language;
+    if (supplier.isManaged()) {
+      lang = supplier.language;
+    } else {
+      const bs = await this._businessSuppliersService.findBySupplierAndBusiness(supplierId, businessId);
+      lang = bs?.language ?? Language.En;
+    }
+
+    const [rows, previousSend] = await Promise.all([
+      this._queryRepository.getByWindowAndSupplier(windowId, supplierId),
+      this._sendsRepository.findLastByWindowAndSupplier(windowId, supplierId),
+    ]);
+    const isFirstSend = previousSend === null;
+
+    const subject = isFirstSend
+      ? t((k) => k.mail.orderSummary.subject, lang)
+      : t((k) => k.mail.orderSummary.subjectAdjusted, lang);
+
+    const introText = isFirstSend
+      ? t((k) => k.mail.orderSummary.intro, lang)
+      : t((k) => k.mail.orderSummary.introAdjusted, lang);
+
+    const html = this._renderHtmlTable(supplier.name, rows, introText, lang);
+
+    return { subject, introText, html };
+  }
+
   @DomainEvents
   async sendToSuppliers(
     windowId: string,
-    supplierIds: string[],
+    suppliers: ISendReportItem[],
     managerIdentityId: string,
   ): Promise<void> {
     const [identity, managerEmployee] = await Promise.all([
@@ -177,7 +215,7 @@ export class ReportsService {
     const managerEmail = identity?.email ?? null;
     const businessId = managerEmployee.businessId;
 
-    for (const supplierId of supplierIds) {
+    for (const { supplierId, subject, introText } of suppliers) {
       const supplier = await this._suppliersService.findOne(supplierId);
 
       if (!supplier.email) {
@@ -196,71 +234,90 @@ export class ReportsService {
         lang = bs?.language ?? Language.En;
       }
 
-      const rows = await this._queryRepository.getByWindowAndSupplier(
-        windowId,
-        supplierId,
-      );
-
-      const previousSend =
-        await this._sendsRepository.findLastByWindowAndSupplier(
-          windowId,
-          supplierId,
-        );
-      const isFirstSend = previousSend === null;
-
-      const subject = isFirstSend
-        ? t((k) => k.mail.orderSummary.subject, lang)
-        : t((k) => k.mail.orderSummary.subjectAdjusted, lang);
-
-      const html = this._renderHtmlTable(supplier.name, rows, isFirstSend, lang);
+      const rows = await this._queryRepository.getByWindowAndSupplier(windowId, supplierId);
+      const html = this._renderHtmlTable(supplier.name, rows, introText, lang);
 
       await this._mailService.send(supplier.email, subject, html, {
         cc: managerEmail ?? undefined,
       });
 
-      const send = OrderSummarySend.create(
-        windowId,
-        supplierId,
-        managerIdentityId,
-      );
+      const send = OrderSummarySend.create(windowId, supplierId, managerIdentityId, subject, html);
       await this._sendsRepository.insert(send);
 
       this._logger.log(
-        `Order summary sent: windowId=${windowId} supplierId=${supplierId} firstSend=${isFirstSend}`,
+        `Order summary sent: windowId=${windowId} supplierId=${supplierId}`,
         ReportsService.name,
       );
     }
   }
 
+  async getAllSends(windowId: string): Promise<IOrderSummarySend[]> {
+    const sends = await this._sendsRepository.findAllByWindow(windowId);
+    return Promise.all(
+      sends.map(async (send) => {
+        const supplier = await this._suppliersService.findOne(send.supplierId);
+        return {
+          id: send.id,
+          supplierId: send.supplierId,
+          supplierName: supplier.name,
+          subject: send.subject,
+          htmlContent: send.htmlContent,
+          sentAt: send.sentAt.toISOString(),
+        };
+      }),
+    );
+  }
+
   private _renderHtmlTable(
     supplierName: string,
     rows: OrderSummaryRow[],
-    isFirstSend: boolean,
+    introText: string,
     lang: Language,
   ): string {
-    const intro = isFirstSend
-      ? `<p>${t((k) => k.mail.orderSummary.intro, lang)}</p>`
-      : `<p><strong>${t((k) => k.mail.orderSummary.introAdjusted, lang)}</strong></p>`;
+    const intro = `<p>${introText}</p>`;
 
     if (rows.length === 0) {
       return `${intro}<p>${t((k) => k.mail.orderSummary.noOrders, lang)}</p>`;
     }
 
-    const rowsHtml = rows
-      .map(
-        (r) =>
-          `<tr><td>${r.date}</td><td>${r.mealName}</td><td>${r.totalQuantity}</td></tr>`,
-      )
-      .join('');
+    const byDate = this._groupByDateAndType(rows);
+    let body = '';
+
+    for (const [date, typeGroups] of byDate) {
+      body += `
+        <tr>
+          <td colspan="2" style="background:#2D6A4F;color:#ffffff;font-weight:bold;font-size:14px;padding:8px 12px;">
+            ${this._formatDayLabel(date, lang)}
+          </td>
+        </tr>`;
+
+      for (const [mealType, meals] of typeGroups) {
+        body += `
+          <tr>
+            <td colspan="2" style="background:#EDF7F2;color:#2D6A4F;font-style:italic;font-weight:bold;padding:5px 12px 5px 20px;">
+              ${this._formatMealTypeLabel(mealType, lang)}
+            </td>
+          </tr>`;
+
+        for (const meal of meals) {
+          body += `
+            <tr style="border-bottom:1px solid #D4E8DC;">
+              <td style="padding:5px 12px 5px 30px;">${meal.mealName}</td>
+              <td style="text-align:center;padding:5px 12px;font-weight:bold;width:50px;">${meal.totalQuantity}</td>
+            </tr>`;
+        }
+      }
+
+      body += `<tr><td colspan="2" style="padding:4px;"></td></tr>`;
+    }
 
     return `
       ${intro}
-      <h3>${supplierName}</h3>
-      <table border="1" cellpadding="6" cellspacing="0">
-        <thead><tr><th>${t((k) => k.mail.orderSummary.table.date, lang)}</th><th>${t((k) => k.mail.orderSummary.table.meal, lang)}</th><th>${t((k) => k.mail.orderSummary.table.qty, lang)}</th></tr></thead>
-        <tbody>${rowsHtml}</tbody>
-      </table>
-    `;
+      <h3 style="font-family:Calibri,Arial,sans-serif;">${supplierName}</h3>
+      <table border="0" cellpadding="0" cellspacing="0"
+             style="border-collapse:collapse;width:480px;font-family:Calibri,Arial,sans-serif;font-size:13px;">
+        ${body}
+      </table>`;
   }
 
   private _buildSupplierSheet(
@@ -321,25 +378,40 @@ export class ReportsService {
     const sheet = workbook.addWorksheet(sheetName);
     sheet.properties.defaultRowHeight = 18;
 
-    const hasMultiQuantity = rows.some((r) => r.quantity > 1);
-    const colCount = hasMultiQuantity ? 3 : 2;
+    const NONE = '/';
+    const YES = t((k) => k.excel.daySheet.yes, lang);
+    const NO = t((k) => k.excel.daySheet.no, lang);
+    const MAIN_TYPES = new Set(['lunch', 'dinner', 'breakfast', 'salad']);
 
-    if (hasMultiQuantity) {
-      sheet.columns = [
-        { header: t((k) => k.excel.columns.employeeName, lang), key: 'employee', width: 28 },
-        { header: t((k) => k.excel.columns.meal, lang), key: 'meal', width: 38 },
-        { header: t((k) => k.excel.columns.qty, lang), key: 'qty', width: 10 },
-      ];
-    } else {
-      sheet.columns = [
-        { header: t((k) => k.excel.columns.employeeName, lang), key: 'employee', width: 28 },
-        { header: t((k) => k.excel.columns.meal, lang), key: 'meal', width: 38 },
-      ];
+    // Pivot rows per employee: one row per person with typed columns
+    const byEmployee = new Map<string, { soup: string; meal: string; bread: string; dessert: string }>();
+    for (const row of rows) {
+      if (!byEmployee.has(row.employeeName)) {
+        byEmployee.set(row.employeeName, { soup: NONE, meal: NONE, bread: NO, dessert: NONE });
+      }
+      const pivot = byEmployee.get(row.employeeName)!;
+      if (row.mealType === 'soup') {
+        pivot.soup = row.mealName;
+      } else if (MAIN_TYPES.has(row.mealType)) {
+        pivot.meal = pivot.meal === NONE ? row.mealName : `${pivot.meal}, ${row.mealName}`;
+      } else if (row.mealType === 'bread') {
+        pivot.bread = YES;
+      } else if (row.mealType === 'dessert') {
+        pivot.dessert = row.mealName;
+      }
     }
+
+    sheet.columns = [
+      { header: t((k) => k.excel.columns.employeeName, lang), key: 'employee', width: 28 },
+      { header: t((k) => k.excel.columns.soup, lang),         key: 'soup',     width: 28 },
+      { header: t((k) => k.excel.columns.meal, lang),         key: 'meal',     width: 32 },
+      { header: t((k) => k.excel.columns.bread, lang),        key: 'bread',    width: 12 },
+      { header: t((k) => k.excel.columns.dessert, lang),      key: 'dessert',  width: 24 },
+    ];
 
     const headerRow = sheet.getRow(1);
     headerRow.height = 24;
-    for (let i = 1; i <= colCount; i++) {
+    for (let i = 1; i <= 5; i++) {
       const cell = headerRow.getCell(i);
       cell.font = { name: 'Calibri', bold: true, size: 11, color: { argb: 'FFFFFFFF' } };
       cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2D6A4F' } };
@@ -347,24 +419,24 @@ export class ReportsService {
       cell.border = { bottom: { style: 'medium', color: { argb: 'FF1E4E38' } } };
     }
 
-    let rowIndex = 0;
-    for (const row of rows) {
-      const dataRow = hasMultiQuantity
-        ? sheet.addRow({ employee: row.employeeName, meal: row.mealName, qty: row.quantity })
-        : sheet.addRow({ employee: row.employeeName, meal: row.mealName });
-
+    const sorted = [...byEmployee.entries()].sort(([a], [b]) => a.localeCompare(b));
+    sorted.forEach(([employeeName, pivot], rowIndex) => {
+      const dataRow = sheet.addRow({
+        employee: employeeName,
+        soup: pivot.soup,
+        meal: pivot.meal,
+        bread: pivot.bread,
+        dessert: pivot.dessert,
+      });
       const stripeBg = rowIndex % 2 === 1 ? 'FFEDF7F2' : 'FFFFFFFF';
-      for (let i = 1; i <= colCount; i++) {
+      for (let i = 1; i <= 5; i++) {
         const cell = dataRow.getCell(i);
         cell.font = { name: 'Calibri' };
         cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: stripeBg } };
         cell.border = { bottom: { style: 'thin', color: { argb: 'FFD4E8DC' } } };
       }
-      if (hasMultiQuantity) {
-        dataRow.getCell(3).alignment = { horizontal: 'center' };
-      }
-      rowIndex++;
-    }
+      dataRow.getCell(4).alignment = { horizontal: 'center' };
+    });
   }
 
   private _groupBySupplier(

@@ -8,7 +8,10 @@ export class MenuItem {
   @PrimaryColumn('character varying', { length: 26 })
   id: string;
 
-  @Column('decimal', { nullable: true })
+  @Column('decimal', {
+    nullable: true,
+    transformer: { from: (v: string | null) => (v != null ? Number(v) : null), to: (v) => v },
+  })
   price: number | null;
 
   @ManyToOne(() => MenuPeriod, { eager: true, onDelete: 'CASCADE' })

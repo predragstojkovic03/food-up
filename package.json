@@ -12,7 +12,8 @@
     "build:web": "npm run build --workspace=apps/web",
     "build:server": "npm run build --workspace=apps/server",
     "build": "npm run build:shared && npm run build:web && npm run build:server",
-    "start:prod": "npm run start:prod --workspace=apps/server"
+    "start:prod": "npm run start:prod --workspace=apps/server",
+    "seed:data": "npm run seed:data --workspace=apps/server --"
   },
   "workspaces": [
     "apps/*",

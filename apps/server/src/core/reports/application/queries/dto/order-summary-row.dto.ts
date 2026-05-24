@@ -11,5 +11,6 @@ export type EmployeeDaySelectionRow = {
   date: string;
   employeeName: string;
   mealName: string;
+  mealType: string;
   quantity: number;
 };

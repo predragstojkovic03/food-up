@@ -29,6 +29,8 @@ export class OrderSummarySendsTypeOrmRepository
     persistence.supplierId = entity.supplierId;
     persistence.sentAt = entity.sentAt;
     persistence.sentByEmployeeId = entity.sentByEmployeeId;
+    persistence.subject = entity.subject;
+    persistence.htmlContent = entity.htmlContent;
     await this._repository.save(persistence);
   }
 
@@ -49,6 +51,27 @@ export class OrderSummarySendsTypeOrmRepository
       record.supplierId,
       record.sentAt,
       record.sentByEmployeeId,
+      record.subject,
+      record.htmlContent,
+    );
+  }
+
+  async findAllByWindow(windowId: string): Promise<OrderSummarySendDomain[]> {
+    const records = await this._repository.find({
+      where: { windowId },
+      order: { sentAt: 'DESC' },
+    });
+
+    return records.map((r) =>
+      OrderSummarySendDomain.reconstitute(
+        r.id,
+        r.windowId,
+        r.supplierId,
+        r.sentAt,
+        r.sentByEmployeeId,
+        r.subject,
+        r.htmlContent,
+      ),
     );
   }
 }

@@ -7,6 +7,8 @@ export class OrderSummarySend extends Entity {
     windowId: string,
     supplierId: string,
     sentByEmployeeId: string,
+    subject: string,
+    htmlContent: string,
   ): OrderSummarySend {
     const entity = new OrderSummarySend(
       generateId(),
@@ -14,6 +16,8 @@ export class OrderSummarySend extends Entity {
       supplierId,
       new Date(),
       sentByEmployeeId,
+      subject,
+      htmlContent,
     );
     entity.addDomainEvent(
       new OrderSummarySentEvent(entity.id, windowId, supplierId),
@@ -27,8 +31,10 @@ export class OrderSummarySend extends Entity {
     supplierId: string,
     sentAt: Date,
     sentByEmployeeId: string,
+    subject: string,
+    htmlContent: string,
   ): OrderSummarySend {
-    return new OrderSummarySend(id, windowId, supplierId, sentAt, sentByEmployeeId);
+    return new OrderSummarySend(id, windowId, supplierId, sentAt, sentByEmployeeId, subject, htmlContent);
   }
 
   private constructor(
@@ -37,6 +43,8 @@ export class OrderSummarySend extends Entity {
     public readonly supplierId: string,
     public readonly sentAt: Date,
     public readonly sentByEmployeeId: string,
+    public readonly subject: string,
+    public readonly htmlContent: string,
   ) {
     super();
   }

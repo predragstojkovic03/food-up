@@ -1,6 +1,8 @@
 import type en from './en';
 
-type StringValues<T> = { [K in keyof T]: T[K] extends string ? string : StringValues<T[K]> };
+type StringValues<T> = {
+  [K in keyof T]: T[K] extends string ? string : StringValues<T[K]>;
+};
 
 const sr: StringValues<typeof en> = {
   mail: {
@@ -32,7 +34,8 @@ const sr: StringValues<typeof en> = {
       subject: 'Pregled narudžbine za vaše obroke',
       subjectAdjusted: 'Ažurirani pregled narudžbine za vaše obroke',
       intro: 'U nastavku se nalazi pregled narudžbine za vaše obroke.',
-      introAdjusted: 'Ovo je ažurirana verzija prethodno poslatog pregleda narudžbine. Količine u nastavku odražavaju poslednje odobrene zahteve za promenu.',
+      introAdjusted:
+        'Ovo je ažurirana verzija prethodno poslatog pregleda narudžbine. Količine u nastavku odražavaju poslednje odobrene zahteve za promenu.',
       noOrders: 'Nema narudžbina za ovaj prozor.',
       table: {
         date: 'Datum',
@@ -48,12 +51,19 @@ const sr: StringValues<typeof en> = {
       mealType: 'Vrsta obroka',
       date: 'Datum',
       qty: 'Kol.',
+      soup: 'Čorba',
+      bread: 'Hleb',
+      dessert: 'Desert',
+    },
+    daySheet: {
+      yes: 'Da',
+      no: 'Ne',
     },
     mealTypes: {
       breakfast: 'Doručci',
       lunch: 'Ručkovi',
       dinner: 'Večere',
-      bread: 'Hlebovi',
+      bread: 'Hleb',
       soup: 'Supe',
       salad: 'Salate',
       dessert: 'Deserti',

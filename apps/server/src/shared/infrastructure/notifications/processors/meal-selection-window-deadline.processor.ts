@@ -84,9 +84,20 @@ export class MealSelectionWindowDeadlineProcessor extends WorkerHost {
 
     const uniqueSupplierIds = [...new Set(rows.map((r) => r.supplierId))];
 
+    const suppliers = await Promise.all(
+      uniqueSupplierIds.map(async (supplierId) => {
+        const { subject, introText } = await this._reportsService.generatePreview(
+          mealSelectionWindowId,
+          supplierId,
+          managerIdentityId,
+        );
+        return { supplierId, subject, introText };
+      }),
+    );
+
     await this._reportsService.sendToSuppliers(
       mealSelectionWindowId,
-      uniqueSupplierIds,
+      suppliers,
       managerIdentityId,
     );
 

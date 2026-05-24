@@ -13,26 +13,36 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DateTimePicker } from '@/components/ui/datetime-picker';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Form, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useServices } from '@/shared/infrastructure/di/service.context';
 import {
+  IMailPreview,
   IMealSelectionResponse,
   IMealSelectionWindowResponse,
   IMenuPeriodResponse,
+  IOrderSummarySend,
   ISupplierSendStatus,
   IWindowMenuItemResponse,
 } from '@food-up/shared';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   CalendarRange,
   ChevronDown,
   ChevronRight,
   Download,
+  Eye,
   Lock,
   LockOpen,
   Plus,
@@ -40,7 +50,7 @@ import {
   Trash2,
   X,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod/v3';
 import { useTranslation } from 'react-i18next';
@@ -478,28 +488,35 @@ function WindowReportsPanel({ windowId }: { windowId: string }) {
   const queryClient = useQueryClient();
 
   const SEND_STATUS_KEY = ['reports', 'send-status', windowId];
+  const SENDS_KEY = ['reports', 'sends', windowId];
 
   const { data: statuses = [], isLoading } = useQuery<ISupplierSendStatus[]>({
     queryKey: SEND_STATUS_KEY,
     queryFn: () => reportService.getSendStatus(windowId),
   });
 
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-
-  const sendMutation = useMutation({
-    mutationFn: (supplierIds: string[]) =>
-      reportService.sendToSuppliers(windowId, supplierIds),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: SEND_STATUS_KEY });
-      setSelectedIds([]);
-    },
+  const { data: sends = [] } = useQuery<IOrderSummarySend[]>({
+    queryKey: SENDS_KEY,
+    queryFn: () => reportService.getSends(windowId),
   });
+
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   function toggleSupplier(supplierId: string) {
     setSelectedIds((prev) =>
       prev.includes(supplierId) ? prev.filter((id) => id !== supplierId) : [...prev, supplierId],
     );
   }
+
+  function handleSendSuccess() {
+    queryClient.invalidateQueries({ queryKey: SEND_STATUS_KEY });
+    queryClient.invalidateQueries({ queryKey: SENDS_KEY });
+    setSelectedIds([]);
+    setDialogOpen(false);
+  }
+
+  const supplierNameById = Object.fromEntries(statuses.map((s) => [s.supplierId, s.supplierName]));
 
   if (isLoading) {
     return (
@@ -524,82 +541,345 @@ function WindowReportsPanel({ windowId }: { windowId: string }) {
   }
 
   return (
-    <div className='space-y-3'>
-      <h4 className='text-xs font-medium text-muted-foreground'>{t('windows.detail.sendToSuppliers')}</h4>
+    <div className='space-y-4'>
+      <div className='space-y-3'>
+        <h4 className='text-xs font-medium text-muted-foreground'>{t('windows.detail.sendToSuppliers')}</h4>
 
-      <div className='border rounded-lg overflow-hidden'>
-        <div className='grid grid-cols-[auto_1fr_1fr_1fr_auto] text-xs font-medium text-muted-foreground bg-muted/40 px-3 py-2 border-b gap-4'>
-          <span />
-          <span>{t('windows.detail.supplierTable.supplierHeader')}</span>
-          <span>{t('windows.detail.supplierTable.emailHeader')}</span>
-          <span>{t('windows.detail.supplierTable.lastSentHeader')}</span>
-          <span />
+        <div className='border rounded-lg overflow-hidden'>
+          <div className='grid grid-cols-[auto_1fr_1fr_1fr_auto] text-xs font-medium text-muted-foreground bg-muted/40 px-3 py-2 border-b gap-4'>
+            <span />
+            <span>{t('windows.detail.supplierTable.supplierHeader')}</span>
+            <span>{t('windows.detail.supplierTable.emailHeader')}</span>
+            <span>{t('windows.detail.supplierTable.lastSentHeader')}</span>
+            <span />
+          </div>
+
+          {statuses.map((status) => {
+            const isChecked = selectedIds.includes(status.supplierId);
+            return (
+              <div
+                key={status.supplierId}
+                className='grid grid-cols-[auto_1fr_1fr_1fr_auto] items-center px-3 py-2.5 border-b last:border-b-0 gap-4 hover:bg-muted/10 transition-colors'
+              >
+                <Checkbox
+                  checked={isChecked}
+                  disabled={!status.canSend}
+                  onCheckedChange={() => toggleSupplier(status.supplierId)}
+                />
+
+                <span className='text-sm font-medium'>{status.supplierName}</span>
+
+                <span className='text-sm'>
+                  {status.email ?? (
+                    <span className='text-muted-foreground'>{t('status.noEmail', { ns: 'common' })}</span>
+                  )}
+                </span>
+
+                <span className='text-sm'>
+                  {status.lastSentAt ? (
+                    new Date(status.lastSentAt).toLocaleString()
+                  ) : (
+                    <span className='text-muted-foreground'>{t('status.never', { ns: 'common' })}</span>
+                  )}
+                </span>
+
+                <span>
+                  {status.hasNewDataSinceLastSend && (
+                    <span className='text-xs px-2 py-0.5 rounded-full bg-warning/15 text-warning font-medium whitespace-nowrap'>
+                      {t('status.newData', { ns: 'common' })}
+                    </span>
+                  )}
+                  {!status.canSend && !status.email && (
+                    <span className='text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium whitespace-nowrap'>
+                      {t('status.noEmail', { ns: 'common' })}
+                    </span>
+                  )}
+                </span>
+              </div>
+            );
+          })}
         </div>
 
-        {statuses.map((status) => {
-          const isChecked = selectedIds.includes(status.supplierId);
-          return (
-            <div
-              key={status.supplierId}
-              className='grid grid-cols-[auto_1fr_1fr_1fr_auto] items-center px-3 py-2.5 border-b last:border-b-0 gap-4 hover:bg-muted/10 transition-colors'
-            >
-              <Checkbox
-                checked={isChecked}
-                disabled={!status.canSend}
-                onCheckedChange={() => toggleSupplier(status.supplierId)}
-              />
-
-              <span className='text-sm font-medium'>{status.supplierName}</span>
-
-              <span className='text-sm'>
-                {status.email ?? (
-                  <span className='text-muted-foreground'>{t('status.noEmail', { ns: 'common' })}</span>
-                )}
-              </span>
-
-              <span className='text-sm'>
-                {status.lastSentAt ? (
-                  new Date(status.lastSentAt).toLocaleString()
-                ) : (
-                  <span className='text-muted-foreground'>{t('status.never', { ns: 'common' })}</span>
-                )}
-              </span>
-
-              <span>
-                {status.hasNewDataSinceLastSend && (
-                  <span className='text-xs px-2 py-0.5 rounded-full bg-warning/15 text-warning font-medium whitespace-nowrap'>
-                    {t('status.newData', { ns: 'common' })}
-                  </span>
-                )}
-                {!status.canSend && !status.email && (
-                  <span className='text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium whitespace-nowrap'>
-                    {t('status.noEmail', { ns: 'common' })}
-                  </span>
-                )}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-
-      <div className='flex items-center gap-3'>
         <Button
           size='sm'
-          disabled={selectedIds.length === 0 || sendMutation.isPending}
-          onClick={() => sendMutation.mutate(selectedIds)}
+          disabled={selectedIds.length === 0}
+          onClick={() => setDialogOpen(true)}
           className='gap-1.5'
         >
           <Send size={13} />
-          {sendMutation.isPending
-            ? t('actions.sending', { ns: 'common' })
-            : t('windows.detail.sendButton', { count: selectedIds.length })}
+          {t('windows.detail.sendButton', { count: selectedIds.length })}
         </Button>
-
-        {sendMutation.isError && (
-          <p className='text-sm text-destructive'>{t('windows.detail.sendError')}</p>
-        )}
       </div>
+
+      <SentEmailsHistory sends={sends} />
+
+      <SendPreviewDialog
+        open={dialogOpen}
+        windowId={windowId}
+        supplierIds={selectedIds}
+        supplierNameById={supplierNameById}
+        onClose={() => setDialogOpen(false)}
+        onSuccess={handleSendSuccess}
+      />
     </div>
+  );
+}
+
+// ─── Send Preview Dialog helpers ─────────────────────────────────────────────
+
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+const LIGHT_DOC_WRAP = (body: string) =>
+  `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="color-scheme" content="light"><style>html,body{background:#fff;color:#000;margin:0;padding:12px;font-family:Calibri,Arial,sans-serif;font-size:13px;}</style></head><body>${body}</body></html>`;
+
+function buildPreviewDoc(baseHtml: string, currentIntroText: string): string {
+  // The backend fragment always starts with <p>${introText}</p>.
+  // Replace it with the current (possibly edited) intro text so the preview stays live.
+  const updated = baseHtml.replace(/<p>[^<]*<\/p>/, `<p>${escapeHtml(currentIntroText)}</p>`);
+  return LIGHT_DOC_WRAP(updated);
+}
+
+// ─── Send Preview Dialog ──────────────────────────────────────────────────────
+
+interface SendPreviewDialogProps {
+  open: boolean;
+  windowId: string;
+  supplierIds: string[];
+  supplierNameById: Record<string, string>;
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+function SendPreviewDialog({
+  open,
+  windowId,
+  supplierIds,
+  supplierNameById,
+  onClose,
+  onSuccess,
+}: SendPreviewDialogProps) {
+  const { reportService } = useServices();
+  const [activeId, setActiveId] = useState(supplierIds[0] ?? '');
+  const [edits, setEdits] = useState<Record<string, { subject?: string; introText?: string }>>({});
+  const [isSending, setIsSending] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (open) {
+      setActiveId(supplierIds[0] ?? '');
+      setEdits({});
+      setSendError(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  const previewQueries = useQueries({
+    queries: supplierIds.map((id) => ({
+      queryKey: ['reports', 'preview', windowId, id],
+      queryFn: () => reportService.getPreview(windowId, id),
+      enabled: open && supplierIds.length > 0,
+      staleTime: 0,
+    })),
+  }) as { data?: IMailPreview; isLoading: boolean; isError: boolean }[];
+
+  function getField(supplierId: string, field: 'subject' | 'introText'): string {
+    const idx = supplierIds.indexOf(supplierId);
+    return edits[supplierId]?.[field] ?? previewQueries[idx]?.data?.[field] ?? '';
+  }
+
+  function setField(supplierId: string, field: 'subject' | 'introText', value: string) {
+    setEdits((prev) => ({
+      ...prev,
+      [supplierId]: { ...prev[supplierId], [field]: value },
+    }));
+  }
+
+  async function handleSendAll() {
+    setIsSending(true);
+    setSendError(null);
+    try {
+      await reportService.sendToSuppliers(
+        windowId,
+        supplierIds.map((id) => ({
+          supplierId: id,
+          subject: getField(id, 'subject'),
+          introText: getField(id, 'introText'),
+        })),
+      );
+      onSuccess();
+    } catch {
+      setSendError('Failed to send. Please try again.');
+    } finally {
+      setIsSending(false);
+    }
+  }
+
+  const activeIdx = supplierIds.indexOf(activeId);
+  const activeQuery = previewQueries[activeIdx];
+  const allLoaded = previewQueries.length > 0 && previewQueries.every((q) => !q.isLoading);
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
+      <DialogContent className='w-[calc(100vw-2rem)] sm:max-w-5xl h-[85vh] flex flex-col p-0 gap-0'>
+        <DialogHeader className='px-6 pt-5 pb-3 border-b shrink-0'>
+          <DialogTitle>Preview &amp; Send</DialogTitle>
+        </DialogHeader>
+
+        <div className='flex flex-1 overflow-hidden'>
+          {/* Supplier list */}
+          <div className='w-44 border-r flex flex-col shrink-0 overflow-y-auto'>
+            {supplierIds.map((id, idx) => {
+              const q = previewQueries[idx];
+              return (
+                <button
+                  key={id}
+                  type='button'
+                  onClick={() => setActiveId(id)}
+                  className={`text-left px-4 py-3 text-sm border-b last:border-b-0 transition-colors ${
+                    id === activeId ? 'bg-muted font-medium' : 'hover:bg-muted/50'
+                  }`}
+                >
+                  <div className='truncate'>{supplierNameById[id] ?? id}</div>
+                  <div className='text-xs text-muted-foreground mt-0.5'>
+                    {q.isLoading ? 'Loading…' : q.isError ? 'Error' : 'Ready'}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Preview panel */}
+          <div className='flex-1 min-w-0 overflow-y-auto p-5 space-y-4'>
+            {activeQuery?.isLoading && (
+              <div className='space-y-3'>
+                <Skeleton className='h-9 w-full' />
+                <Skeleton className='h-20 w-full' />
+                <Skeleton className='h-64 w-full' />
+              </div>
+            )}
+
+            {activeQuery?.isError && (
+              <p className='text-sm text-destructive'>Failed to load preview for this supplier.</p>
+            )}
+
+            {activeQuery?.data && !activeQuery.isLoading && (
+              <>
+                <div className='space-y-1.5'>
+                  <Label htmlFor='preview-subject' className='text-xs font-medium'>Subject</Label>
+                  <Input
+                    id='preview-subject'
+                    value={getField(activeId, 'subject')}
+                    onChange={(e) => setField(activeId, 'subject', e.target.value)}
+                  />
+                </div>
+
+                <div className='space-y-1.5'>
+                  <Label htmlFor='preview-intro' className='text-xs font-medium'>Intro paragraph</Label>
+                  <textarea
+                    id='preview-intro'
+                    rows={3}
+                    value={getField(activeId, 'introText')}
+                    onChange={(e) => setField(activeId, 'introText', e.target.value)}
+                    className='w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none'
+                  />
+                </div>
+
+                <Separator />
+
+                <div>
+                  <p className='text-xs font-medium text-muted-foreground mb-2'>Email preview</p>
+                  <iframe
+                    srcDoc={buildPreviewDoc(activeQuery.data.html, getField(activeId, 'introText'))}
+                    className='w-full border rounded min-h-80'
+                    title='Email preview'
+                    sandbox='allow-same-origin'
+                  />
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
+        <div className='border-t px-6 py-3 flex items-center justify-between shrink-0'>
+          <div>
+            {sendError && <p className='text-sm text-destructive'>{sendError}</p>}
+          </div>
+          <div className='flex gap-2'>
+            <Button variant='outline' onClick={onClose} disabled={isSending}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSendAll}
+              disabled={isSending || !allLoaded}
+              className='gap-1.5'
+            >
+              <Send size={13} />
+              {isSending
+                ? 'Sending…'
+                : `Send to ${supplierIds.length} supplier${supplierIds.length !== 1 ? 's' : ''}`}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─── Sent Emails History ──────────────────────────────────────────────────────
+
+function SentEmailsHistory({ sends }: { sends: IOrderSummarySend[] }) {
+  const [viewingSend, setViewingSend] = useState<IOrderSummarySend | null>(null);
+
+  if (sends.length === 0) return null;
+
+  return (
+    <>
+      <div>
+        <h4 className='text-xs font-medium text-muted-foreground mb-2'>Sent emails history</h4>
+        <div className='border rounded-lg overflow-hidden'>
+          {sends.map((send) => (
+            <div
+              key={send.id}
+              className='flex items-center px-4 py-2.5 border-b last:border-b-0 gap-4 hover:bg-muted/10 transition-colors'
+            >
+              <span className='text-sm font-medium flex-1'>{send.supplierName}</span>
+              <span className='text-sm text-muted-foreground whitespace-nowrap'>
+                {new Date(send.sentAt).toLocaleString()}
+              </span>
+              <Button
+                variant='ghost'
+                size='sm'
+                onClick={() => setViewingSend(send)}
+                className='gap-1.5 h-7 text-xs'
+              >
+                <Eye size={12} />
+                View
+              </Button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <Dialog open={viewingSend !== null} onOpenChange={(o) => { if (!o) setViewingSend(null); }}>
+        <DialogContent className='w-[calc(100vw-2rem)] sm:max-w-3xl h-[80vh] flex flex-col gap-3'>
+          <DialogHeader>
+            <DialogTitle>{viewingSend?.supplierName}</DialogTitle>
+            <p className='text-sm text-muted-foreground'>{viewingSend?.subject}</p>
+            <p className='text-xs text-muted-foreground'>
+              {viewingSend ? new Date(viewingSend.sentAt).toLocaleString() : ''}
+            </p>
+          </DialogHeader>
+          <iframe
+            srcDoc={viewingSend ? LIGHT_DOC_WRAP(viewingSend.htmlContent) : ''}
+            className='flex-1 border rounded'
+            title='Sent email'
+            sandbox='allow-same-origin'
+          />
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 

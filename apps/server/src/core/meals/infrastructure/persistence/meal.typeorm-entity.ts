@@ -20,7 +20,12 @@ export class Meal {
   @ManyToOne(() => Supplier, (supplier) => supplier.meals, { eager: true })
   supplier: Supplier;
 
-  @Column('numeric', { precision: 10, scale: 2, nullable: true })
+  @Column('numeric', {
+    precision: 10,
+    scale: 2,
+    nullable: true,
+    transformer: { from: (v: string | null) => (v != null ? Number(v) : undefined), to: (v) => v },
+  })
   price?: number;
 
   @OneToMany(() => MenuItem, (menuItem) => menuItem.meal)

@@ -16,4 +16,10 @@ export class OrderSummarySend {
 
   @Column('character varying', { length: 26 })
   sentByEmployeeId: string;
+
+  @Column('varchar', { length: 500, default: '' })
+  subject: string;
+
+  @Column('text', { default: '' })
+  htmlContent: string;
 }

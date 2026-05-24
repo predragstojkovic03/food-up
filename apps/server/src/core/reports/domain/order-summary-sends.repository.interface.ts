@@ -10,4 +10,5 @@ export interface IOrderSummarySendsRepository {
     windowId: string,
     supplierId: string,
   ): Promise<OrderSummarySend | null>;
+  findAllByWindow(windowId: string): Promise<OrderSummarySend[]>;
 }

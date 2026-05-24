@@ -77,6 +77,7 @@ export class OrderSummaryQueryTypeOrmRepository
         date: r.date instanceof Date ? r.date.toISOString().slice(0, 10) : String(r.date),
         employeeName: r.employeeName,
         mealName: r.mealName,
+        mealType: r.mealType,
         quantity: Number(r.quantity),
       }))
       .sort((a, b) => {
@@ -204,6 +205,7 @@ export class OrderSummaryQueryTypeOrmRepository
         'ms.date AS "date"',
         'e.name AS "employeeName"',
         'm.name AS "mealName"',
+        'm.type AS "mealType"',
         'COALESCE(ms.quantity, 1) AS "quantity"',
       ])
       .where('ms.mealSelectionWindowId = :windowId', { windowId })
@@ -237,6 +239,7 @@ export class OrderSummaryQueryTypeOrmRepository
         'ms.date AS "date"',
         'e.name AS "employeeName"',
         'm.name AS "mealName"',
+        'm.type AS "mealType"',
         'COALESCE(cr.newQuantity, 1) AS "quantity"',
       ])
       .where('ms.mealSelectionWindowId = :windowId', { windowId })
@@ -255,6 +258,7 @@ export class OrderSummaryQueryTypeOrmRepository
         'mi.day AS "date"',
         'e.name AS "employeeName"',
         'm.name AS "mealName"',
+        'm.type AS "mealType"',
         'COALESCE(cr.newQuantity, 1) AS "quantity"',
       ])
       .where('cr.mealSelectionWindowId = :windowId', { windowId })
@@ -314,5 +318,6 @@ type EmployeeRawRow = {
   date: string | Date;
   employeeName: string;
   mealName: string;
+  mealType: string;
   quantity: string | number;
 };

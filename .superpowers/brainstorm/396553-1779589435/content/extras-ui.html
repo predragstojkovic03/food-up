@@ -1,0 +1,82 @@
+<h2>Extra quantities — window detail panel layout</h2>
+<p class="subtitle">How the section looks inside an expanded (expired) window. Scroll down to see the cost summary.</p>
+
+<div class="mockup">
+  <div class="mockup-header">Window: 26–30 May 2026 · Expired</div>
+  <div class="mockup-body" style="font-size:12px;padding:16px;background:#fff;">
+
+    <!-- existing sections (greyed) -->
+    <div style="color:#94a3b8;margin-bottom:12px;font-size:11px;">[ Menu items table — existing ]</div>
+    <div style="border-top:1px solid #e2e8f0;margin-bottom:12px;"></div>
+
+    <!-- order summary header -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#64748b;">Order summary</span>
+      <button style="font-size:10px;border:1px solid #e2e8f0;border-radius:4px;padding:3px 8px;background:#fff;cursor:pointer;">⬇ Download XLSX</button>
+    </div>
+
+    <!-- NEW: extra quantities section -->
+    <div style="border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;margin-bottom:12px;">
+      <div style="background:#f8fafc;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e2e8f0;">
+        <span style="font-size:11px;font-weight:600;">Additional quantities <span style="font-weight:400;color:#64748b;">(guests / visitors)</span></span>
+        <button style="font-size:10px;border:1px solid #e2e8f0;border-radius:4px;padding:3px 8px;background:#fff;cursor:pointer;">+ Add row</button>
+      </div>
+
+      <!-- column headers -->
+      <div style="display:grid;grid-template-columns:160px 1fr 100px 60px 28px;gap:8px;padding:6px 12px;font-size:10px;color:#64748b;font-weight:600;background:#fafafa;border-bottom:1px solid #f1f5f9;">
+        <span>Guest name <span style="color:#94a3b8;">(optional)</span></span>
+        <span>Meal</span>
+        <span>Date</span>
+        <span>Qty</span>
+        <span></span>
+      </div>
+
+      <!-- row 1: named guest -->
+      <div style="display:grid;grid-template-columns:160px 1fr 100px 60px 28px;gap:8px;padding:6px 12px;align-items:center;border-bottom:1px solid #f1f5f9;">
+        <input style="border:1px solid #e2e8f0;border-radius:4px;padding:3px 6px;font-size:11px;width:100%;" value="Jovan Knežević" />
+        <div style="border:1px solid #e2e8f0;border-radius:4px;padding:3px 8px;font-size:11px;background:#f9fafb;color:#374151;">Sarma — Pasulj d.o.o.</div>
+        <div style="font-size:11px;color:#374151;">pon, 26.5</div>
+        <input style="border:1px solid #e2e8f0;border-radius:4px;padding:3px 6px;font-size:11px;width:100%;text-align:center;" value="1" />
+        <button style="border:none;background:none;color:#94a3b8;cursor:pointer;font-size:14px;">×</button>
+      </div>
+
+      <!-- row 2: anonymous -->
+      <div style="display:grid;grid-template-columns:160px 1fr 100px 60px 28px;gap:8px;padding:6px 12px;align-items:center;border-bottom:1px solid #f1f5f9;">
+        <input style="border:1px solid #e2e8f0;border-radius:4px;padding:3px 6px;font-size:11px;width:100%;color:#94a3b8;" placeholder="— anonymous —" />
+        <div style="border:1px solid #e2e8f0;border-radius:4px;padding:3px 8px;font-size:11px;background:#f9fafb;color:#374151;">Pasulj čorba — Pasulj d.o.o.</div>
+        <div style="font-size:11px;color:#374151;">uto, 27.5</div>
+        <input style="border:1px solid #e2e8f0;border-radius:4px;padding:3px 6px;font-size:11px;width:100%;text-align:center;" value="3" />
+        <button style="border:none;background:none;color:#94a3b8;cursor:pointer;font-size:14px;">×</button>
+      </div>
+
+      <!-- empty state note -->
+      <div style="padding:6px 12px 8px;font-size:10px;color:#94a3b8;font-style:italic;">
+        Named guests appear as individual rows in the XLSX day sheets. Anonymous extras are counted in summary totals only.
+      </div>
+    </div>
+
+    <!-- NEW: cost summary -->
+    <div style="border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;margin-bottom:12px;">
+      <div style="background:#f8fafc;padding:8px 12px;border-bottom:1px solid #e2e8f0;">
+        <span style="font-size:11px;font-weight:600;">Estimated cost</span>
+        <span style="font-size:10px;color:#64748b;margin-left:6px;">(employee selections + additional quantities)</span>
+      </div>
+      <div style="padding:8px 12px;">
+        <div style="display:grid;grid-template-columns:1fr auto;gap:4px;font-size:11px;margin-bottom:6px;">
+          <span style="color:#374151;">Pasulj d.o.o.</span>
+          <span style="font-weight:600;">12,400 RSD</span>
+          <span style="color:#374151;">Menza Beograd</span>
+          <span style="font-weight:600;">8,950 RSD</span>
+        </div>
+        <div style="border-top:1px solid #e2e8f0;padding-top:6px;display:grid;grid-template-columns:1fr auto;font-size:12px;font-weight:700;">
+          <span>Total</span>
+          <span>21,350 RSD</span>
+        </div>
+        <div style="font-size:10px;color:#94a3b8;margin-top:4px;">Items without a price are excluded from this estimate.</div>
+      </div>
+    </div>
+
+    <!-- existing: send to suppliers -->
+    <div style="color:#94a3b8;font-size:11px;">[ Send to suppliers section — existing ]</div>
+  </div>
+</div>

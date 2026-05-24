@@ -14,6 +14,8 @@ import { RequiredEmployeeRole } from 'src/core/employees/presentation/rest/emplo
 import { RequiredIdentityType } from 'src/core/identity/presentation/rest/identity-type.decorator';
 import { UserPreferencesService } from 'src/core/user-preferences/application/user-preferences.service';
 import { ReportsService } from '../../application/reports.service';
+import { MailPreviewResponseDto } from './dto/mail-preview-response.dto';
+import { OrderSummarySendResponseDto } from './dto/order-summary-send-response.dto';
 import { SendReportDto } from './dto/send-report.dto';
 import { SupplierSendStatusResponseDto } from './dto/supplier-send-status-response.dto';
 
@@ -57,6 +59,20 @@ export class ReportsController {
     });
   }
 
+  @Get('preview')
+  @ApiOperation({ summary: 'Generate email preview for a supplier' })
+  @ApiQuery({ name: 'windowId', required: true, type: String })
+  @ApiQuery({ name: 'supplierId', required: true, type: String })
+  @ApiResponse({ status: 200, type: MailPreviewResponseDto })
+  async getPreview(
+    @Query('windowId') windowId: string,
+    @Query('supplierId') supplierId: string,
+    @CurrentIdentity() { sub }: JwtPayload,
+  ): Promise<MailPreviewResponseDto> {
+    const preview = await this._reportsService.generatePreview(windowId, supplierId, sub);
+    return plainToInstance(MailPreviewResponseDto, { supplierId, ...preview }, { strategy: 'excludeAll' });
+  }
+
   @Post('send')
   @ApiOperation({ summary: 'Send order summary email to selected suppliers' })
   @ApiResponse({ status: 201, description: 'Emails sent' })
@@ -64,6 +80,17 @@ export class ReportsController {
     @Body() dto: SendReportDto,
     @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<void> {
-    await this._reportsService.sendToSuppliers(dto.windowId, dto.supplierIds, sub);
+    await this._reportsService.sendToSuppliers(dto.windowId, dto.suppliers, sub);
+  }
+
+  @Get('sends')
+  @ApiOperation({ summary: 'Get all sent order summaries for a meal selection window' })
+  @ApiQuery({ name: 'windowId', required: true, type: String })
+  @ApiResponse({ status: 200, type: [OrderSummarySendResponseDto] })
+  async getAllSends(
+    @Query('windowId') windowId: string,
+  ): Promise<OrderSummarySendResponseDto[]> {
+    const sends = await this._reportsService.getAllSends(windowId);
+    return plainToInstance(OrderSummarySendResponseDto, sends, { strategy: 'excludeAll' });
   }
 }
