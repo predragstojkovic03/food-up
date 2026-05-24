@@ -1,5 +1,6 @@
 import { CacheModule } from '@nestjs/cache-manager';
 import { Module, Provider } from '@nestjs/common';
+import { BusinessesModule } from '../businesses/businesses.module';
 import { EmployeesModule } from '../employees/employees.module';
 import { DashboardQueryService } from './application/dashboard-query.service';
 import { I_DASHBOARD_QUERY_REPOSITORY } from './application/queries/dashboard-query-repository.interface';
@@ -12,7 +13,7 @@ const DashboardQueryRepositoryProvider: Provider = {
 };
 
 @Module({
-  imports: [CacheModule.register({ ttl: 300_000 }), EmployeesModule],
+  imports: [CacheModule.register({ ttl: 300_000 }), EmployeesModule, BusinessesModule],
   controllers: [DashboardController],
   providers: [DashboardQueryRepositoryProvider, DashboardQueryService],
 })

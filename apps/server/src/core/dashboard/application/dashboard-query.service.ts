@@ -1,4 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
+import { Language } from '@food-up/shared';
 import {
   I_DASHBOARD_QUERY_REPOSITORY,
   IDashboardQueryRepository,
@@ -34,23 +35,26 @@ export class DashboardQueryService {
     from: string,
     to: string,
     businessId: string,
+    language: Language,
   ): Promise<SupplierBreakdownItemDto[]> {
-    return this._repository.getSupplierBreakdown(from, to, businessId);
+    return this._repository.getSupplierBreakdown(from, to, businessId, language);
   }
 
   getChangeRequestCounts(
     from: string,
     to: string,
     businessId: string,
+    language: Language,
   ): Promise<ChangeRequestTrendItemDto[]> {
-    return this._repository.getChangeRequestCounts(from, to, businessId);
+    return this._repository.getChangeRequestCounts(from, to, businessId, language);
   }
 
   getWindowRanking(
     from: string,
     to: string,
     businessId: string,
+    language: Language,
   ): Promise<WindowRankingItemDto[]> {
-    return this._repository.getWindowRanking(from, to, businessId);
+    return this._repository.getWindowRanking(from, to, businessId, language);
   }
 }

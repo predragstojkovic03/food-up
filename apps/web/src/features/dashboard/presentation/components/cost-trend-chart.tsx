@@ -17,14 +17,15 @@ interface CostTrendChartProps {
   onGroupByChange: (groupBy: GroupBy) => void;
 }
 
-const chartConfig: ChartConfig = {
-  totalCost: {
-    color: 'var(--chart-1)',
-  },
-};
-
 export function CostTrendChart({ data, isLoading, groupBy, onGroupByChange }: CostTrendChartProps) {
   const { t } = useTranslation('employees');
+
+  const chartConfig: ChartConfig = {
+    totalCost: {
+      label: t('dashboard.costTrend.totalCost'),
+      color: 'var(--chart-1)',
+    },
+  };
 
   return (
     <Card>

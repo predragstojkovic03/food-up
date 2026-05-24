@@ -65,7 +65,7 @@ export function SupplierBreakdownChart({ data, isLoading }: SupplierBreakdownCha
               <XAxis dataKey="windowLabel" tickLine={false} axisLine={false} tick={{ fontSize: 10 }} />
               <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11 }} width={50} />
               <ChartTooltip content={<ChartTooltipContent />} />
-              <Legend />
+              <Legend formatter={(value) => <span className="ml-1">{value}</span>} />
               {supplierNames.map((name, i) => (
                 <Bar
                   key={name}

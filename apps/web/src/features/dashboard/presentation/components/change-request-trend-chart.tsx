@@ -10,12 +10,6 @@ import {
 } from '@/components/ui/chart';
 import { ChangeRequestTrendItem } from '../../domain/dashboard-service.interface';
 
-const chartConfig: ChartConfig = {
-  count: {
-    color: 'var(--chart-2)',
-  },
-};
-
 interface ChangeRequestTrendChartProps {
   data: ChangeRequestTrendItem[] | undefined;
   isLoading: boolean;
@@ -23,6 +17,13 @@ interface ChangeRequestTrendChartProps {
 
 export function ChangeRequestTrendChart({ data, isLoading }: ChangeRequestTrendChartProps) {
   const { t } = useTranslation('employees');
+
+  const chartConfig: ChartConfig = {
+    count: {
+      label: t('dashboard.changeRequestTrend.count'),
+      color: 'var(--chart-2)',
+    },
+  };
 
   const sorted = data
     ? [...data].sort((a, b) => a.windowStart.localeCompare(b.windowStart))

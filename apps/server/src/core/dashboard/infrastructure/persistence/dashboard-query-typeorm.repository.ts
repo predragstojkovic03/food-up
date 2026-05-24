@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { ChangeRequestStatus } from '@food-up/shared';
+import { ChangeRequestStatus, Language } from '@food-up/shared';
 import {
   GroupBy,
   IDashboardQueryRepository,
@@ -12,13 +12,14 @@ import { SupplierBreakdownItemDto } from '../../application/dto/supplier-breakdo
 import { ChangeRequestTrendItemDto } from '../../application/dto/change-request-trend-item.dto';
 import { WindowRankingItemDto } from '../../application/dto/window-ranking-item.dto';
 
-function buildWindowLabel(targetDates: string[]): string {
+function buildWindowLabel(targetDates: string[], language: Language): string {
   if (!targetDates.length) return 'Unknown';
-  const first = new Date(targetDates[0]);
-  const last = new Date(targetDates[targetDates.length - 1]);
-  const fmtDay = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-  return first.getMonth() === last.getMonth()
-    ? `${first.getDate()}–${last.getDate()} ${first.toLocaleDateString('en-GB', { month: 'short' })}`
+  const locale = language === Language.Sr ? 'sr-Latn-RS' : 'en-GB';
+  const first = new Date(targetDates[0] + 'T00:00:00Z');
+  const last = new Date(targetDates[targetDates.length - 1] + 'T00:00:00Z');
+  const fmtDay = (d: Date) => d.toLocaleDateString(locale, { day: 'numeric', month: 'short', timeZone: 'UTC' });
+  return first.getUTCMonth() === last.getUTCMonth()
+    ? `${first.getUTCDate()}–${last.getUTCDate()} ${first.toLocaleDateString(locale, { month: 'short', timeZone: 'UTC' })}`
     : `${fmtDay(first)} – ${fmtDay(last)}`;
 }
 
@@ -139,7 +140,7 @@ export class DashboardQueryTypeOrmRepository implements IDashboardQueryRepositor
     }));
   }
 
-  async getSupplierBreakdown(from: string, to: string, businessId: string): Promise<SupplierBreakdownItemDto[]> {
+  async getSupplierBreakdown(from: string, to: string, businessId: string, language: Language): Promise<SupplierBreakdownItemDto[]> {
     const approved = ChangeRequestStatus.Approved;
     const rows = await this._dataSource.query<{
       window_id: string;
@@ -216,7 +217,7 @@ export class DashboardQueryTypeOrmRepository implements IDashboardQueryRepositor
       if (!windowMap.has(r.window_id)) {
         windowMap.set(r.window_id, {
           windowId: r.window_id,
-          windowLabel: buildWindowLabel(dates),
+          windowLabel: buildWindowLabel(dates, language),
           windowStart: dates[0] ?? '',
           suppliers: [],
         });
@@ -230,7 +231,7 @@ export class DashboardQueryTypeOrmRepository implements IDashboardQueryRepositor
     return [...windowMap.values()];
   }
 
-  async getChangeRequestCounts(from: string, to: string, businessId: string): Promise<ChangeRequestTrendItemDto[]> {
+  async getChangeRequestCounts(from: string, to: string, businessId: string, language: Language): Promise<ChangeRequestTrendItemDto[]> {
     const rows = await this._dataSource.query<{
       window_id: string;
       target_dates: string[];
@@ -255,14 +256,14 @@ export class DashboardQueryTypeOrmRepository implements IDashboardQueryRepositor
       const dates = Array.isArray(r.target_dates) ? r.target_dates : [r.target_dates];
       return {
         windowId: r.window_id,
-        windowLabel: buildWindowLabel(dates),
+        windowLabel: buildWindowLabel(dates, language),
         windowStart: dates[0] ?? '',
         count: Number(r.count),
       };
     });
   }
 
-  async getWindowRanking(from: string, to: string, businessId: string): Promise<WindowRankingItemDto[]> {
+  async getWindowRanking(from: string, to: string, businessId: string, language: Language): Promise<WindowRankingItemDto[]> {
     const approved = ChangeRequestStatus.Approved;
     const costRows = await this._dataSource.query<{
       window_id: string;
@@ -337,7 +338,7 @@ export class DashboardQueryTypeOrmRepository implements IDashboardQueryRepositor
       const dates = Array.isArray(r.target_dates) ? r.target_dates : [r.target_dates];
       return {
         windowId: r.window_id,
-        windowLabel: buildWindowLabel(dates),
+        windowLabel: buildWindowLabel(dates, language),
         startDate: dates[0] ?? '',
         endDate: dates[dates.length - 1] ?? '',
         supplierNames: r.supplier_names ? r.supplier_names.split(', ') : [],

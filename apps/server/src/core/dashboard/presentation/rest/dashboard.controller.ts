@@ -6,6 +6,7 @@ import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagg
 import { plainToInstance } from 'class-transformer';
 import { CurrentIdentity } from 'src/core/auth/infrastructure/current-identity.decorator';
 import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
+import { BusinessesService } from 'src/core/businesses/application/businesses.service';
 import { RequiredEmployeeRole } from 'src/core/employees/presentation/rest/employee-role.decorator';
 import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { RequiredIdentityType } from 'src/core/identity/presentation/rest/identity-type.decorator';
@@ -29,6 +30,7 @@ export class DashboardController {
   constructor(
     private readonly _dashboardService: DashboardQueryService,
     private readonly _employeesService: EmployeesService,
+    private readonly _businessesService: BusinessesService,
   ) {}
 
   @Get('kpis')
@@ -66,7 +68,8 @@ export class DashboardController {
     @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<SupplierBreakdownItemResponseDto[]> {
     const employee = await this._employeesService.findByIdentity(sub);
-    const data = await this._dashboardService.getSupplierBreakdown(from, to, employee.businessId);
+    const business = await this._businessesService.findOne(employee.businessId);
+    const data = await this._dashboardService.getSupplierBreakdown(from, to, employee.businessId, business.language);
     return plainToInstance(SupplierBreakdownItemResponseDto, data, TO_INSTANCE);
   }
 
@@ -79,7 +82,8 @@ export class DashboardController {
     @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<ChangeRequestTrendItemResponseDto[]> {
     const employee = await this._employeesService.findByIdentity(sub);
-    const data = await this._dashboardService.getChangeRequestCounts(from, to, employee.businessId);
+    const business = await this._businessesService.findOne(employee.businessId);
+    const data = await this._dashboardService.getChangeRequestCounts(from, to, employee.businessId, business.language);
     return plainToInstance(ChangeRequestTrendItemResponseDto, data, TO_INSTANCE);
   }
 
@@ -92,7 +96,8 @@ export class DashboardController {
     @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<WindowRankingItemResponseDto[]> {
     const employee = await this._employeesService.findByIdentity(sub);
-    const data = await this._dashboardService.getWindowRanking(from, to, employee.businessId);
+    const business = await this._businessesService.findOne(employee.businessId);
+    const data = await this._dashboardService.getWindowRanking(from, to, employee.businessId, business.language);
     return plainToInstance(WindowRankingItemResponseDto, data, TO_INSTANCE);
   }
 }
