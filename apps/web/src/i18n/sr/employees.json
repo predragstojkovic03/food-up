@@ -6,7 +6,46 @@
   },
   "dashboard": {
     "title": "Kontrolna tabla",
-    "subtitle": "Dobrodošli na menadžerski panel."
+    "subtitle": "Dobrodošli na menadžerski panel.",
+    "dateRange": {
+      "label": "Vremenski opseg",
+      "last30": "Poslednjih 30 dana",
+      "last3m": "Poslednja 3 meseca",
+      "last6m": "Poslednjih 6 meseci",
+      "custom": "Prilagođeno",
+      "apply": "Primeni"
+    },
+    "kpi": {
+      "totalSpend": "Ukupni troškovi",
+      "avgCostPerWindow": "Prosek po prozoru",
+      "topSupplier": "Vodeći dobavljač",
+      "changeRequests": "Zahtevi za promenu",
+      "noTopSupplier": "Nema podataka",
+      "vsPrev": "u odnosu na preth. period"
+    },
+    "costTrend": {
+      "title": "Trend troškova",
+      "weekly": "Nedeljno",
+      "monthly": "Mesečno",
+      "totalCost": "Ukupni troškovi",
+      "noData": "Nema podataka za izabrani period"
+    },
+    "supplierBreakdown": {
+      "title": "Troškovi po dobavljaču",
+      "noData": "Nema podataka za izabrani period"
+    },
+    "changeRequestTrend": {
+      "title": "Zahtevi za promenu po prozoru",
+      "count": "Broj",
+      "noData": "Nema podataka za izabrani period"
+    },
+    "windowRanking": {
+      "title": "Rang prozora po trošku",
+      "colWindow": "Prozor",
+      "colSuppliers": "Dobavljači",
+      "colTotalCost": "Ukupni trošak",
+      "noData": "Nema podataka za izabrani period"
+    }
   },
   "team": {
     "title": "Zaposleni",

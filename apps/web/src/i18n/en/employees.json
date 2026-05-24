@@ -6,7 +6,46 @@
   },
   "dashboard": {
     "title": "Dashboard",
-    "subtitle": "Welcome to the manager panel."
+    "subtitle": "Welcome to the manager panel.",
+    "dateRange": {
+      "label": "Date range",
+      "last30": "Last 30 days",
+      "last3m": "Last 3 months",
+      "last6m": "Last 6 months",
+      "custom": "Custom",
+      "apply": "Apply"
+    },
+    "kpi": {
+      "totalSpend": "Total Spend",
+      "avgCostPerWindow": "Avg Cost / Window",
+      "topSupplier": "Top Supplier",
+      "changeRequests": "Change Requests",
+      "noTopSupplier": "No data",
+      "vsPrev": "vs previous period"
+    },
+    "costTrend": {
+      "title": "Cost Trend",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "totalCost": "Total Cost",
+      "noData": "No data for selected period"
+    },
+    "supplierBreakdown": {
+      "title": "Cost by Supplier",
+      "noData": "No data for selected period"
+    },
+    "changeRequestTrend": {
+      "title": "Change Requests by Window",
+      "count": "Count",
+      "noData": "No data for selected period"
+    },
+    "windowRanking": {
+      "title": "Window Ranking by Cost",
+      "colWindow": "Window",
+      "colSuppliers": "Suppliers",
+      "colTotalCost": "Total Cost",
+      "noData": "No data for selected period"
+    }
   },
   "team": {
     "title": "Employees",
