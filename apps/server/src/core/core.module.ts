@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from './auth/auth.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 import { BusinessInvitesModule } from './business-invites/business-invites.module';
 import { BusinessSuppliersModule } from './business-suppliers/business-suppliers.module';
 import { BusinessesModule } from './businesses/businesses.module';
@@ -30,6 +31,7 @@ import { UserPreferencesModule } from './user-preferences/user-preferences.modul
     ChangeRequestsModule,
     UserPreferencesModule,
     ExtraQuantitiesModule,
+    DashboardModule,
   ],
 })
 export class CoreModule {}
