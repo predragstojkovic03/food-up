@@ -12,7 +12,7 @@ import { ChangeRequestTrendItem } from '../../domain/dashboard-service.interface
 
 const chartConfig: ChartConfig = {
   count: {
-    color: 'hsl(var(--chart-2))',
+    color: 'var(--chart-2)',
   },
 };
 

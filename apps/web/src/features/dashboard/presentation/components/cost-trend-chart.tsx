@@ -19,7 +19,7 @@ interface CostTrendChartProps {
 
 const chartConfig: ChartConfig = {
   totalCost: {
-    color: 'hsl(var(--chart-1))',
+    color: 'var(--chart-1)',
   },
 };
 
