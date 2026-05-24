@@ -15,8 +15,8 @@ import { WindowRankingItemDto } from '../../application/dto/window-ranking-item.
 function buildWindowLabel(targetDates: string[], language: Language): string {
   if (!targetDates.length) return 'Unknown';
   const locale = language === Language.Sr ? 'sr-Latn-RS' : 'en-GB';
-  const first = new Date(targetDates[0] + 'T00:00:00Z');
-  const last = new Date(targetDates[targetDates.length - 1] + 'T00:00:00Z');
+  const first = new Date(targetDates[0]);
+  const last = new Date(targetDates[targetDates.length - 1]);
   const fmtDay = (d: Date) => d.toLocaleDateString(locale, { day: 'numeric', month: 'short', timeZone: 'UTC' });
   return first.getUTCMonth() === last.getUTCMonth()
     ? `${first.getUTCDate()}–${last.getUTCDate()} ${first.toLocaleDateString(locale, { month: 'short', timeZone: 'UTC' })}`
