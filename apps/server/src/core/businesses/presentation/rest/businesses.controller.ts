@@ -93,6 +93,18 @@ export class BusinessesController {
     return plainToInstance(BusinessInviteResponseDto, invite);
   }
 
+  @Get('my')
+  @ApiOperation({ summary: "Get the current manager's business" })
+  @ApiResponse({ status: 200, type: BusinessResponseDto })
+  @RequiredIdentityType(IdentityType.Employee)
+  @RequiredEmployeeRole(EmployeeRole.Manager)
+  @ApiBearerAuth()
+  async getMy(@CurrentIdentity() { sub }: JwtPayload): Promise<BusinessResponseDto> {
+    const employee = await this._employeesService.findByIdentity(sub);
+    const business = await this._businessesService.findOne(employee.businessId);
+    return plainToInstance(BusinessResponseDto, business, { excludeExtraneousValues: true });
+  }
+
   @Patch('my')
   @ApiOperation({ summary: "Update the current manager's business language" })
   @ApiResponse({ status: 200, type: BusinessResponseDto })
