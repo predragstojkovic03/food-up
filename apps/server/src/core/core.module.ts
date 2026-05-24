@@ -27,7 +27,6 @@ import { UserPreferencesModule } from './user-preferences/user-preferences.modul
     ReportsModule,
     IdentityModule,
     AuthModule,
-    SuppliersModule,
     ChangeRequestsModule,
     UserPreferencesModule,
     ExtraQuantitiesModule,

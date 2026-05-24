@@ -4,6 +4,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Post,
   Query,
@@ -28,13 +30,13 @@ import { ExtraQuantityResponseDto } from './dto/extra-quantity-response.dto';
 @RequiredIdentityType(IdentityType.Employee)
 @RequiredEmployeeRole(EmployeeRole.Manager)
 export class ExtraQuantitiesController {
-  constructor(private readonly _service: ExtraQuantitiesService) {}
+  constructor(private readonly _extraQuantitiesService: ExtraQuantitiesService) {}
 
   @Post()
   @ApiOperation({ summary: 'Add an extra quantity for a guest' })
   @ApiResponse({ status: 201, type: ExtraQuantityResponseDto })
   async add(@Body() dto: CreateExtraQuantityDto): Promise<ExtraQuantityResponseDto> {
-    const entity = await this._service.add(
+    const entity = await this._extraQuantitiesService.add(
       dto.windowId,
       dto.menuItemId,
       dto.quantity,
@@ -44,10 +46,11 @@ export class ExtraQuantitiesController {
   }
 
   @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Remove an extra quantity row' })
-  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 204 })
   async remove(@Param('id') id: string): Promise<void> {
-    return this._service.remove(id);
+    return this._extraQuantitiesService.remove(id);
   }
 
   @Get()
@@ -55,7 +58,7 @@ export class ExtraQuantitiesController {
   @ApiQuery({ name: 'windowId', required: true, type: String })
   @ApiResponse({ status: 200, type: [ExtraQuantityResponseDto] })
   async findByWindow(@Query('windowId') windowId: string): Promise<ExtraQuantityResponseDto[]> {
-    const entities = await this._service.findByWindow(windowId);
+    const entities = await this._extraQuantitiesService.findByWindow(windowId);
     return plainToInstance(ExtraQuantityResponseDto, entities, { strategy: 'excludeAll' });
   }
 }
