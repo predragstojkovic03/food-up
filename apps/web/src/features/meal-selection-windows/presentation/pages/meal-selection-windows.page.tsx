@@ -27,14 +27,17 @@ import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useServices } from '@/shared/infrastructure/di/service.context';
 import {
+  IExtraQuantity,
   IMailPreview,
   IMealSelectionResponse,
   IMealSelectionWindowResponse,
   IMenuPeriodResponse,
   IOrderSummarySend,
   ISupplierSendStatus,
+  IWindowCostSummary,
   IWindowMenuItemResponse,
 } from '@food-up/shared';
+import React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -474,6 +477,16 @@ function WindowDetails({ windowId, endTime, targetDates }: WindowDetailsProps) {
           </div>
         </div>
 
+        {isExpired && (
+          <ExtraQuantitiesSection
+            windowId={windowId}
+            menuItems={menuItems}
+            targetDates={targetDates}
+          />
+        )}
+
+        {isExpired && <CostSummarySection windowId={windowId} />}
+
         {isExpired && <WindowReportsPanel windowId={windowId} />}
       </div>
     </div>
@@ -880,6 +893,271 @@ function SentEmailsHistory({ sends }: { sends: IOrderSummarySend[] }) {
         </DialogContent>
       </Dialog>
     </>
+  );
+}
+
+// ─── Extra Quantities Section ─────────────────────────────────────────────────
+
+interface ExtraQuantitiesSectionProps {
+  windowId: string;
+  menuItems: IWindowMenuItemResponse[];
+  targetDates: string[];
+}
+
+function ExtraQuantitiesSection({ windowId, menuItems, targetDates }: ExtraQuantitiesSectionProps) {
+  const { t } = useTranslation('meals');
+  const { extraQuantityService } = useServices();
+  const queryClient = useQueryClient();
+
+  const EXTRAS_KEY = ['extra-quantities', windowId];
+  const COST_KEY = ['reports', 'cost-summary', windowId];
+
+  const { data: extras = [] } = useQuery<IExtraQuantity[]>({
+    queryKey: EXTRAS_KEY,
+    queryFn: () => extraQuantityService.getByWindow(windowId),
+  });
+
+  const [showForm, setShowForm] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(targetDates[0] ?? '');
+  const [selectedMenuItemId, setSelectedMenuItemId] = useState('');
+  const [guestName, setGuestName] = useState('');
+  const [qty, setQty] = useState(1);
+
+  const filteredItems = menuItems.filter((i) => i.day === selectedDate);
+
+  function resetForm() {
+    setShowForm(false);
+    setSelectedDate(targetDates[0] ?? '');
+    setSelectedMenuItemId('');
+    setGuestName('');
+    setQty(1);
+  }
+
+  function handleDateChange(date: string) {
+    setSelectedDate(date);
+    setSelectedMenuItemId('');
+  }
+
+  const addMutation = useMutation({
+    mutationFn: () =>
+      extraQuantityService.add({
+        windowId,
+        menuItemId: selectedMenuItemId,
+        quantity: qty,
+        guestName: guestName.trim() || undefined,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: EXTRAS_KEY });
+      queryClient.invalidateQueries({ queryKey: COST_KEY });
+      resetForm();
+    },
+  });
+
+  const removeMutation = useMutation({
+    mutationFn: (id: string) => extraQuantityService.remove(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: EXTRAS_KEY });
+      queryClient.invalidateQueries({ queryKey: COST_KEY });
+    },
+  });
+
+  function formatDate(isoDate: string): string {
+    return new Date(isoDate + 'T00:00:00').toLocaleDateString();
+  }
+
+  return (
+    <div className='border rounded-lg overflow-hidden'>
+      <div className='bg-muted/40 px-3 py-2 flex items-center justify-between border-b'>
+        <span className='text-xs font-semibold'>
+          {t('windows.detail.extras.title')}{' '}
+          <span className='font-normal text-muted-foreground'>
+            ({t('windows.detail.extras.subtitle')})
+          </span>
+        </span>
+        {!showForm && (
+          <Button variant='outline' size='sm' className='text-xs h-7' onClick={() => setShowForm(true)}>
+            {t('windows.detail.extras.addRow')}
+          </Button>
+        )}
+      </div>
+
+      {extras.length > 0 && (
+        <>
+          <div className='grid grid-cols-[140px_1fr_50px_32px] gap-2 px-3 py-1.5 text-[10px] font-semibold text-muted-foreground bg-muted/20 border-b'>
+            <span>
+              {t('windows.detail.extras.guestNameHeader')}{' '}
+              <span className='font-normal'>({t('windows.detail.extras.guestNameOptional')})</span>
+            </span>
+            <span>{t('windows.detail.extras.mealHeader')}</span>
+            <span className='text-center'>{t('windows.detail.extras.qtyHeader')}</span>
+            <span />
+          </div>
+          {extras.map((extra) => (
+            <div
+              key={extra.id}
+              className='grid grid-cols-[140px_1fr_50px_32px] gap-2 px-3 py-2 items-center border-b last:border-b-0 text-xs'
+            >
+              {extra.guestName ? (
+                <span className='text-foreground'>{extra.guestName}</span>
+              ) : (
+                <span className='text-muted-foreground italic'>—</span>
+              )}
+              <div>
+                <div className='font-medium'>{menuItems.find((i) => i.id === extra.menuItemId)?.meal.name ?? '—'}</div>
+                <div className='text-[10px] text-muted-foreground'>
+                  {menuItems.find((i) => i.id === extra.menuItemId)?.supplierName ?? ''}{' '}
+                  · {formatDate(menuItems.find((i) => i.id === extra.menuItemId)?.day ?? '')}
+                </div>
+              </div>
+              <span className='text-center font-semibold'>{extra.quantity}</span>
+              <button
+                className='text-muted-foreground hover:text-destructive transition-colors text-base leading-none'
+                onClick={() => removeMutation.mutate(extra.id)}
+                disabled={removeMutation.isPending}
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </>
+      )}
+
+      {showForm && (
+        <div className='bg-green-50 dark:bg-green-950/20 border-b border-green-200 dark:border-green-900 px-3 py-2.5'>
+          <div className='text-[10px] font-semibold text-green-800 dark:text-green-300 mb-2'>
+            {t('windows.detail.extras.newRowTitle')}
+          </div>
+          <div className='grid grid-cols-[140px_110px_1fr_60px_32px] gap-2 items-start'>
+            <div>
+              <div className='text-[9px] text-muted-foreground mb-1'>
+                {t('windows.detail.extras.guestNameHeader')} ({t('windows.detail.extras.guestNameOptional')})
+              </div>
+              <Input
+                className='h-7 text-xs'
+                placeholder={t('windows.detail.extras.guestNamePlaceholder')}
+                value={guestName}
+                onChange={(e) => setGuestName(e.target.value)}
+              />
+            </div>
+            <div>
+              <div className='text-[9px] text-muted-foreground mb-1'>{t('windows.detail.extras.dateLabel')}</div>
+              <select
+                className='w-full h-7 border border-input rounded-md px-2 text-xs bg-background'
+                value={selectedDate}
+                onChange={(e) => handleDateChange(e.target.value)}
+              >
+                {targetDates.map((d) => (
+                  <option key={d} value={d}>
+                    {formatDate(d)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <div className='text-[9px] text-muted-foreground mb-1'>
+                {t('windows.detail.extras.mealLabel')}{' '}
+                <span className='text-muted-foreground/60'>
+                  {t('windows.detail.extras.mealFilteredHint', { date: formatDate(selectedDate) })}
+                </span>
+              </div>
+              <select
+                className='w-full h-7 border border-input rounded-md px-2 text-xs bg-background'
+                value={selectedMenuItemId}
+                onChange={(e) => setSelectedMenuItemId(e.target.value)}
+              >
+                <option value=''>—</option>
+                {filteredItems.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.meal.name} — {item.supplierName}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <div className='text-[9px] text-muted-foreground mb-1'>{t('windows.detail.extras.qtyLabel')}</div>
+              <Input
+                type='number'
+                min={1}
+                className='h-7 text-xs text-center'
+                value={qty}
+                onChange={(e) => setQty(Math.max(1, parseInt(e.target.value) || 1))}
+              />
+            </div>
+            <div className='pt-4'>
+              <button
+                className='text-muted-foreground hover:text-destructive text-base leading-none'
+                onClick={resetForm}
+              >
+                ×
+              </button>
+            </div>
+          </div>
+          <div className='flex gap-2 mt-2'>
+            <Button
+              size='sm'
+              className='h-7 text-xs'
+              disabled={!selectedMenuItemId || addMutation.isPending}
+              onClick={() => addMutation.mutate()}
+            >
+              {t('windows.detail.extras.saveRow')}
+            </Button>
+            <Button variant='outline' size='sm' className='h-7 text-xs' onClick={resetForm}>
+              {t('actions.cancel', { ns: 'common' })}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      <div className='px-3 py-2 text-[10px] text-muted-foreground italic'>
+        {t('windows.detail.extras.hint')}
+      </div>
+    </div>
+  );
+}
+
+// ─── Cost Summary Section ─────────────────────────────────────────────────────
+
+function CostSummarySection({ windowId }: { windowId: string }) {
+  const { t } = useTranslation('meals');
+  const { reportService } = useServices();
+
+  const { data: costSummary = [] } = useQuery<IWindowCostSummary[]>({
+    queryKey: ['reports', 'cost-summary', windowId],
+    queryFn: () => reportService.getCostSummary(windowId),
+  });
+
+  if (costSummary.length === 0) return null;
+
+  const grandTotal = costSummary.reduce((sum, row) => sum + row.totalCost, 0);
+
+  return (
+    <div className='border rounded-lg overflow-hidden'>
+      <div className='bg-muted/40 px-3 py-2 border-b'>
+        <span className='text-xs font-semibold'>{t('windows.detail.costSummary.title')}</span>
+        <span className='text-[10px] text-muted-foreground ml-2'>
+          ({t('windows.detail.costSummary.subtitle')})
+        </span>
+      </div>
+      <div className='px-3 py-2.5'>
+        <div className='grid grid-cols-[1fr_auto] gap-x-6 gap-y-1 text-xs mb-2'>
+          {costSummary.map((row) => (
+            <React.Fragment key={row.supplierId}>
+              <span className='text-foreground'>{row.supplierName}</span>
+              <span className='font-semibold text-right'>
+                {row.totalCost.toLocaleString()} RSD
+              </span>
+            </React.Fragment>
+          ))}
+        </div>
+        <div className='border-t pt-2 grid grid-cols-[1fr_auto] gap-x-6 text-sm font-bold'>
+          <span>{t('windows.detail.costSummary.total')}</span>
+          <span>{grandTotal.toLocaleString()} RSD</span>
+        </div>
+        <div className='text-[10px] text-muted-foreground mt-1.5'>
+          {t('windows.detail.costSummary.disclaimer')}
+        </div>
+      </div>
+    </div>
   );
 }
 
