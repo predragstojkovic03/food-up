@@ -28,6 +28,8 @@ export interface ICurrentWindowMenuItem {
   id: string;
   day: string;
   price?: number;
+  supplierId: string;
+  supplierName: string;
   meal: IWindowMenuItemMeal;
 }
 
@@ -35,6 +37,8 @@ export interface IWindowMenuItemResponse {
   id: string;
   day: string;
   price?: number;
+  supplierId: string;
+  supplierName: string;
   meal: IWindowMenuItemMeal;
 }
 
