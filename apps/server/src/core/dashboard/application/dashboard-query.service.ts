@@ -27,8 +27,9 @@ export class DashboardQueryService {
     to: string,
     groupBy: GroupBy,
     businessId: string,
+    language: Language,
   ): Promise<CostTrendItemDto[]> {
-    return this._repository.getCostTrend(from, to, groupBy, businessId);
+    return this._repository.getCostTrend(from, to, groupBy, businessId, language);
   }
 
   getSupplierBreakdown(

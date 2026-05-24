@@ -55,7 +55,8 @@ export class DashboardController {
     @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<CostTrendItemResponseDto[]> {
     const employee = await this._employeesService.findByIdentity(sub);
-    const data = await this._dashboardService.getCostTrend(from, to, groupBy ?? 'monthly', employee.businessId);
+    const business = await this._businessesService.findOne(employee.businessId);
+    const data = await this._dashboardService.getCostTrend(from, to, groupBy ?? 'monthly', employee.businessId, business.language);
     return plainToInstance(CostTrendItemResponseDto, data, TO_INSTANCE);
   }
 

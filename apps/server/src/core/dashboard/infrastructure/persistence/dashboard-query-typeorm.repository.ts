@@ -67,7 +67,7 @@ export class DashboardQueryTypeOrmRepository implements IDashboardQueryRepositor
     };
   }
 
-  async getCostTrend(from: string, to: string, groupBy: GroupBy, businessId: string): Promise<CostTrendItemDto[]> {
+  async getCostTrend(from: string, to: string, groupBy: GroupBy, businessId: string, language: Language): Promise<CostTrendItemDto[]> {
     const granularity = groupBy === 'weekly' ? 'week' : 'month';
     const approved = ChangeRequestStatus.Approved;
     const rows = await this._dataSource.query<{ period: string; total_cost: string }[]>(
@@ -135,7 +135,7 @@ export class DashboardQueryTypeOrmRepository implements IDashboardQueryRepositor
 
     return rows.map((r) => ({
       period: r.period,
-      label: this._formatPeriodLabel(r.period, groupBy),
+      label: this._formatPeriodLabel(r.period, groupBy, language),
       totalCost: Number(r.total_cost),
     }));
   }
@@ -459,13 +459,13 @@ export class DashboardQueryTypeOrmRepository implements IDashboardQueryRepositor
     return Number(row?.count ?? 0);
   }
 
-  private _formatPeriodLabel(period: string, groupBy: GroupBy): string {
+  private _formatPeriodLabel(period: string, groupBy: GroupBy, language: Language): string {
+    const locale = language === Language.Sr ? 'sr-Latn-RS' : 'en-GB';
     const date = new Date(period);
     if (groupBy === 'monthly') {
-      return date.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
+      return date.toLocaleDateString(locale, { month: 'short', year: 'numeric', timeZone: 'UTC' });
     }
-    const end = new Date(date);
-    end.setDate(end.getDate() + 6);
-    return `${date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} – ${end.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`;
+    const end = new Date(date.getTime() + 6 * 86_400_000);
+    return `${date.toLocaleDateString(locale, { day: 'numeric', month: 'short', timeZone: 'UTC' })} – ${end.toLocaleDateString(locale, { day: 'numeric', month: 'short', timeZone: 'UTC' })}`;
   }
 }
