@@ -158,6 +158,45 @@ Extras are merged into supplier totals in `getByWindowAndSupplier`. The email ta
 
 ---
 
+## i18n
+
+All new UI strings go through the existing `react-i18next` system. The window detail page uses `useTranslation('meals')`, so new keys live under `windows.detail` in `apps/web/src/i18n/en/meals.json` and `apps/web/src/i18n/sr/meals.json`.
+
+Generic action words (`cancel`, `save`) already exist in `common.json` — reuse them. No backend i18n changes are needed (guest names are user-supplied data, not translated strings).
+
+### New keys in `windows.detail`
+
+**`extras` namespace:**
+
+| Key | English | Serbian |
+|---|---|---|
+| `extras.title` | Additional quantities | Dodatne količine |
+| `extras.subtitle` | guests / visitors | gosti / posetioci |
+| `extras.guestNameHeader` | Guest name | Ime gosta |
+| `extras.guestNameOptional` | optional | opciono |
+| `extras.mealHeader` | Meal | Obrok |
+| `extras.qtyHeader` | Qty | Kol. |
+| `extras.addRow` | + Add row | + Dodaj red |
+| `extras.newRowTitle` | New row | Novi red |
+| `extras.dateLabel` | Date | Datum |
+| `extras.mealLabel` | Meal | Obrok |
+| `extras.mealFilteredHint` | (filtered to {{date}}) | (filtrirano na {{date}}) |
+| `extras.qtyLabel` | Qty | Kol. |
+| `extras.guestNamePlaceholder` | e.g. Ana Marković | npr. Ana Marković |
+| `extras.saveRow` | Save row | Sačuvaj red |
+| `extras.hint` | Named guests appear as individual rows in XLSX day sheets. Anonymous extras are counted in summary totals only. | Imenovani gosti pojavljuju se kao pojedinačni redovi u dnevnim listovima XLSX-a. Anonimni dodaci broje se samo u zbiru. |
+
+**`costSummary` namespace:**
+
+| Key | English | Serbian |
+|---|---|---|
+| `costSummary.title` | Estimated cost | Procena troškova |
+| `costSummary.subtitle` | employee selections + additional quantities | izbori zaposlenih + dodatne količine |
+| `costSummary.total` | Total | Ukupno |
+| `costSummary.disclaimer` | Items without a price are excluded from this estimate. | Stavke bez cene nisu uključene u ovu procenu. |
+
+---
+
 ## Verification
 
 1. Run `npm run start:dev`.
