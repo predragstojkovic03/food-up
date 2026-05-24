@@ -1,4 +1,5 @@
 import { IAuthService } from '@/features/auth/domain/auth-service.interface';
+import { IExtraQuantityService } from '@/features/extra-quantities/domain/extra-quantity-service.interface';
 import { IBusinessService } from '@/features/businesses/domain/business-service.interface';
 import { IChangeRequestService } from '@/features/change-requests/domain/change-request-service.interface';
 import { IEmployeeService } from '@/features/employees/domain/employee-service.interface';
@@ -24,4 +25,5 @@ export interface ServiceContainer {
   changeRequestService: IChangeRequestService;
   reportService: IReportService;
   preferencesService: IUserPreferencesService;
+  extraQuantityService: IExtraQuantityService;
 }

@@ -13,6 +13,7 @@ import { MealSelectionWindowService } from '@/features/meal-selection-windows/in
 import { MealService } from '@/features/meals/infrastructure/meal.service';
 import { MenuItemService } from '@/features/menu-items/infrastructure/menu-item.service';
 import { MenuPeriodService } from '@/features/menu-periods/infrastructure/menu-period.service';
+import { ExtraQuantityService } from '@/features/extra-quantities/infrastructure/extra-quantity.service';
 import { SupplierService } from '@/features/suppliers/infrastructure/supplier.service';
 import { ServiceProvider } from '@/shared/infrastructure/di/service.context';
 import { tokenStore } from '@/shared/infrastructure/auth/token-store';
@@ -57,6 +58,7 @@ const services = {
   changeRequestService: new ChangeRequestService(httpClient),
   reportService: new ReportService(httpClient),
   preferencesService: new UserPreferencesService(httpClient),
+  extraQuantityService: new ExtraQuantityService(httpClient),
 };
 
 function SessionGate({ children }: { children: ReactNode }) {

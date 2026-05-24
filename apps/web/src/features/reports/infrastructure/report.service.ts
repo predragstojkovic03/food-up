@@ -1,4 +1,4 @@
-import { IMailPreview, IOrderSummarySend, ISendReport, ISendReportItem, ISupplierSendStatus } from '@food-up/shared';
+import { IMailPreview, IOrderSummarySend, ISendReport, ISendReportItem, ISupplierSendStatus, IWindowCostSummary } from '@food-up/shared';
 import { HttpClient } from '@/shared/infrastructure/http/http-client';
 import { IReportService } from '../domain/report-service.interface';
 
@@ -23,5 +23,9 @@ export class ReportService implements IReportService {
 
   downloadXlsx(windowId: string): Promise<void> {
     return this.http.download(`/api/reports/export?windowId=${windowId}`);
+  }
+
+  getCostSummary(windowId: string): Promise<IWindowCostSummary[]> {
+    return this.http.get<IWindowCostSummary[]>(`/api/reports/cost-summary?windowId=${windowId}`);
   }
 }
