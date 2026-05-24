@@ -23,6 +23,13 @@ import { Form, FormField, FormItem, FormLabel, FormMessage } from '@/components/
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useServices } from '@/shared/infrastructure/di/service.context';
@@ -1041,17 +1048,18 @@ function ExtraQuantitiesSection({ windowId, menuItems, targetDates }: ExtraQuant
             </div>
             <div>
               <div className='text-[9px] text-muted-foreground mb-1'>{t('windows.detail.extras.dateLabel')}</div>
-              <select
-                className='w-full h-7 border border-input rounded-md px-2 text-xs bg-background'
-                value={selectedDate}
-                onChange={(e) => handleDateChange(e.target.value)}
-              >
-                {targetDates.map((d) => (
-                  <option key={d} value={d}>
-                    {formatDate(d)}
-                  </option>
-                ))}
-              </select>
+              <Select value={selectedDate} onValueChange={handleDateChange}>
+                <SelectTrigger size='sm' className='w-full text-xs'>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {targetDates.map((d) => (
+                    <SelectItem key={d} value={d}>
+                      {formatDate(d)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <div className='text-[9px] text-muted-foreground mb-1'>
@@ -1060,18 +1068,18 @@ function ExtraQuantitiesSection({ windowId, menuItems, targetDates }: ExtraQuant
                   {t('windows.detail.extras.mealFilteredHint', { date: formatDate(selectedDate) })}
                 </span>
               </div>
-              <select
-                className='w-full h-7 border border-input rounded-md px-2 text-xs bg-background'
-                value={selectedMenuItemId}
-                onChange={(e) => setSelectedMenuItemId(e.target.value)}
-              >
-                <option value=''>—</option>
-                {filteredItems.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.meal.name} — {item.supplierName}
-                  </option>
-                ))}
-              </select>
+              <Select value={selectedMenuItemId} onValueChange={setSelectedMenuItemId}>
+                <SelectTrigger size='sm' className='w-full text-xs'>
+                  <SelectValue placeholder='—' />
+                </SelectTrigger>
+                <SelectContent>
+                  {filteredItems.map((item) => (
+                    <SelectItem key={item.id} value={item.id}>
+                      {item.meal.name} — {item.supplierName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <div className='text-[9px] text-muted-foreground mb-1'>{t('windows.detail.extras.qtyLabel')}</div>
