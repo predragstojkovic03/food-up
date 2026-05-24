@@ -10,8 +10,8 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { useServices } from '@/shared/infrastructure/di/service.context';
 import { Language } from '@food-up/shared';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const LANGUAGE_OPTIONS: { value: Language; label: string }[] = [
@@ -22,7 +22,7 @@ const LANGUAGE_OPTIONS: { value: Language; label: string }[] = [
 export default function BusinessSettingsPage() {
   const { t } = useTranslation('business');
   const { businessService } = useServices();
-  const [language, setLanguage] = useState<Language>(Language.En);
+  const queryClient = useQueryClient();
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const { data: myBusiness } = useQuery({
@@ -30,26 +30,21 @@ export default function BusinessSettingsPage() {
     queryFn: () => businessService.getMy(),
   });
 
-  useEffect(() => {
-    if (myBusiness) setLanguage(myBusiness.language);
-  }, [myBusiness]);
-
-  const mutation = useMutation<void, Error, Language, { previousLanguage: Language }>({
+  const mutation = useMutation<void, Error, Language>({
     mutationFn: (newLanguage) =>
       businessService.updateLanguage({ language: newLanguage }),
-    onMutate: (newLanguage) => {
-      const previousLanguage = language;
-      setLanguage(newLanguage);
-      return { previousLanguage };
-    },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['businesses', 'my'] });
       setFeedback({ type: 'success', message: t('settings.communicationLanguage.success') });
     },
-    onError: (_err, _lang, context) => {
-      if (context) setLanguage(context.previousLanguage);
+    onError: () => {
       setFeedback({ type: 'error', message: t('settings.communicationLanguage.error') });
     },
   });
+
+  const language = mutation.isPending
+    ? mutation.variables
+    : (myBusiness?.language ?? Language.En);
 
   return (
     <div className='max-w-2xl space-y-6'>
