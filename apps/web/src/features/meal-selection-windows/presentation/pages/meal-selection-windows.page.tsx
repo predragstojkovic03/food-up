@@ -61,7 +61,7 @@ import {
   Trash2,
   X,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod/v3';
 import { useTranslation } from 'react-i18next';
@@ -643,6 +643,7 @@ function WindowReportsPanel({ windowId }: { windowId: string }) {
       <SentEmailsHistory sends={sends} />
 
       <SendPreviewDialog
+        key={dialogOpen ? windowId : 'closed'}
         open={dialogOpen}
         windowId={windowId}
         supplierIds={selectedIds}
@@ -695,15 +696,6 @@ function SendPreviewDialog({
   const [edits, setEdits] = useState<Record<string, { subject?: string; introText?: string }>>({});
   const [isSending, setIsSending] = useState(false);
   const [hasSendError, setHasSendError] = useState(false);
-
-  useEffect(() => {
-    if (open) {
-      setActiveId(supplierIds[0] ?? '');
-      setEdits({});
-      setHasSendError(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
 
   const previewQueries = useQueries({
     queries: supplierIds.map((id) => ({
