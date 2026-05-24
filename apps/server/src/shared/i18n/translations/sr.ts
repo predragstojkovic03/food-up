@@ -33,7 +33,7 @@ const sr: StringValues<typeof en> = {
     orderSummary: {
       subject: 'Pregled narudžbine za vaše obroke',
       subjectAdjusted: 'Ažurirani pregled narudžbine za vaše obroke',
-      intro: 'U nastavku se nalazi pregled narudžbine za vaše obroke.',
+      intro: 'Poštovani, u nastavku mejla nalazi se pregled narudžbina.',
       introAdjusted:
         'Ovo je ažurirana verzija prethodno poslatog pregleda narudžbine. Količine u nastavku odražavaju poslednje odobrene zahteve za promenu.',
       noOrders: 'Nema narudžbina za ovaj prozor.',

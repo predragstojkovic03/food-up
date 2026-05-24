@@ -1,10 +1,12 @@
 import { IOrderSummarySend, ISendReportItem, IWindowCostSummary, Language } from '@food-up/shared';
 import { Inject, Injectable } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
+import { BusinessesService } from 'src/core/businesses/application/businesses.service';
 import { BusinessSuppliersService } from 'src/core/business-suppliers/application/business-suppliers.service';
 import { ChangeRequestsQueryService } from 'src/core/change-requests/application/queries/change-requests-query.service';
 import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { IdentityService } from 'src/core/identity/application/identity.service';
+import { MealSelectionWindowsService } from 'src/core/meal-selection-windows/application/meal-selection-windows.service';
 import { SuppliersService } from 'src/core/suppliers/application/suppliers.service';
 import { DomainEvents } from 'src/shared/application/domain-events/domain-events.decorator';
 import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
@@ -80,6 +82,8 @@ export class ReportsService {
     private readonly _identityService: IdentityService,
     private readonly _employeesService: EmployeesService,
     private readonly _businessSuppliersService: BusinessSuppliersService,
+    private readonly _windowsService: MealSelectionWindowsService,
+    private readonly _businessesService: BusinessesService,
     @Inject(I_LOGGER) private readonly _logger: ILogger,
   ) {}
 
@@ -169,12 +173,15 @@ export class ReportsService {
     supplierId: string,
     managerIdentityId: string,
   ): Promise<{ subject: string; introText: string; html: string }> {
-    const [managerEmployee, supplier] = await Promise.all([
+    const [managerEmployee, supplier, window] = await Promise.all([
       this._employeesService.findByIdentity(managerIdentityId),
       this._suppliersService.findOne(supplierId),
+      this._windowsService.findOne(windowId),
     ]);
 
     const businessId = managerEmployee.businessId;
+    const business = await this._businessesService.findOne(businessId);
+
     let lang: Language;
     if (supplier.isManaged()) {
       lang = supplier.language;
@@ -189,9 +196,12 @@ export class ReportsService {
     ]);
     const isFirstSend = previousSend === null;
 
+    const sortedDates = [...window.targetDates].sort();
+    const from = this._formatSubjectDate(sortedDates[0]);
+    const to = this._formatSubjectDate(sortedDates[sortedDates.length - 1]);
     const subject = isFirstSend
-      ? t((k) => k.mail.orderSummary.subject, lang)
-      : t((k) => k.mail.orderSummary.subjectAdjusted, lang);
+      ? this._buildSubject(business.name, from, to, lang)
+      : this._buildSubjectAdjusted(business.name, from, to, lang);
 
     const introText = isFirstSend
       ? t((k) => k.mail.orderSummary.intro, lang)
@@ -523,6 +533,23 @@ export class ReportsService {
       case 'dessert':   return t((k) => k.excel.mealTypes.dessert, lang);
       default:          return mealType.charAt(0).toUpperCase() + mealType.slice(1) + 's';
     }
+  }
+
+  private _formatSubjectDate(isoDate: string): string {
+    const [year, month, day] = isoDate.split('-');
+    return `${day}.${month}.${year}`;
+  }
+
+  private _buildSubject(businessName: string, from: string, to: string, lang: Language): string {
+    return lang === Language.Sr
+      ? `${businessName} - Narudžbine za period ${from} - ${to}`
+      : `${businessName} - Orders for the period ${from} - ${to}`;
+  }
+
+  private _buildSubjectAdjusted(businessName: string, from: string, to: string, lang: Language): string {
+    return lang === Language.Sr
+      ? `${businessName} - Ažurirane narudžbine za period ${from} - ${to}`
+      : `${businessName} - Updated orders for the period ${from} - ${to}`;
   }
 
   private _buildFilename(): string {

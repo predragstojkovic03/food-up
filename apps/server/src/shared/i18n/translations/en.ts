@@ -27,7 +27,7 @@ export default {
     orderSummary: {
       subject: 'Order summary for your meals',
       subjectAdjusted: 'Adjusted order summary for your meals',
-      intro: 'Please find below the order summary for your meals.',
+      intro: 'Dear Sir/Madam, please find the order summary below.',
       introAdjusted: 'This is an adjusted version of a previously sent order summary. The quantities below reflect the latest approved change requests.',
       noOrders: 'No orders for this window.',
       table: {

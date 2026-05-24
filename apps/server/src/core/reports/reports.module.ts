@@ -1,9 +1,11 @@
 import { Module, Provider } from '@nestjs/common';
 import { MailModule } from 'src/shared/infrastructure/notifications/mail/mail.module';
+import { BusinessesModule } from '../businesses/businesses.module';
 import { BusinessSuppliersModule } from '../business-suppliers/business-suppliers.module';
 import { ChangeRequestsModule } from '../change-requests/change-requests.module';
 import { EmployeesModule } from '../employees/employees.module';
 import { IdentityModule } from '../identity/identity.module';
+import { MealSelectionWindowsModule } from '../meal-selection-windows/meal-selection-windows.module';
 import { SuppliersModule } from '../suppliers/suppliers.module';
 import { UserPreferencesModule } from '../user-preferences/user-preferences.module';
 import { I_ORDER_SUMMARY_QUERY_REPOSITORY } from './application/queries/order-summary-query-repository.interface';
@@ -24,7 +26,7 @@ const OrderSummarySendsRepositoryProvider: Provider = {
 };
 
 @Module({
-  imports: [MailModule, SuppliersModule, IdentityModule, ChangeRequestsModule, EmployeesModule, BusinessSuppliersModule, UserPreferencesModule],
+  imports: [MailModule, SuppliersModule, IdentityModule, ChangeRequestsModule, EmployeesModule, BusinessSuppliersModule, UserPreferencesModule, MealSelectionWindowsModule, BusinessesModule],
   controllers: [ReportsController],
   providers: [
     OrderSummaryQueryRepositoryProvider,
