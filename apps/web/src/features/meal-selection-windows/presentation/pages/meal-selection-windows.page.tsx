@@ -912,7 +912,8 @@ interface ExtraQuantitiesSectionProps {
 }
 
 function ExtraQuantitiesSection({ windowId, menuItems, targetDates }: ExtraQuantitiesSectionProps) {
-  const { t } = useTranslation('meals');
+  const { t, i18n } = useTranslation('meals');
+  const locale = i18n.language === 'sr' ? 'sr-Latn-RS' : 'en-US';
   const { extraQuantityService } = useServices();
   const queryClient = useQueryClient();
 
@@ -931,6 +932,7 @@ function ExtraQuantitiesSection({ windowId, menuItems, targetDates }: ExtraQuant
   const [qty, setQty] = useState(1);
 
   const filteredItems = menuItems.filter((i) => i.day === selectedDate);
+  const selectedMealItem = filteredItems.find((i) => i.id === selectedMenuItemId);
 
   function resetForm() {
     setShowForm(false);
@@ -969,7 +971,16 @@ function ExtraQuantitiesSection({ windowId, menuItems, targetDates }: ExtraQuant
   });
 
   function formatDate(isoDate: string): string {
-    return new Date(isoDate + 'T00:00:00').toLocaleDateString();
+    return new Date(isoDate + 'T00:00:00').toLocaleDateString(locale);
+  }
+
+  function formatDateFull(isoDate: string): string {
+    return new Date(isoDate + 'T00:00:00').toLocaleDateString(locale, {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'numeric',
+      year: 'numeric',
+    });
   }
 
   return (
@@ -1050,12 +1061,12 @@ function ExtraQuantitiesSection({ windowId, menuItems, targetDates }: ExtraQuant
               <div className='text-[9px] text-muted-foreground mb-1'>{t('windows.detail.extras.dateLabel')}</div>
               <Select value={selectedDate} onValueChange={handleDateChange}>
                 <SelectTrigger size='sm' className='w-full text-xs'>
-                  <SelectValue />
+                  <SelectValue>{selectedDate ? formatDateFull(selectedDate) : ''}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {targetDates.map((d) => (
                     <SelectItem key={d} value={d}>
-                      {formatDateWithWeekday(d)}
+                      {formatDateFull(d)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -1070,7 +1081,11 @@ function ExtraQuantitiesSection({ windowId, menuItems, targetDates }: ExtraQuant
               </div>
               <Select value={selectedMenuItemId} onValueChange={setSelectedMenuItemId}>
                 <SelectTrigger size='sm' className='w-full text-xs'>
-                  <SelectValue placeholder='—' />
+                  <SelectValue placeholder='—'>
+                    {selectedMenuItemId && selectedMealItem
+                      ? `${selectedMealItem.meal.name} — ${selectedMealItem.supplierName}`
+                      : undefined}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {filteredItems.map((item) => (
