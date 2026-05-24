@@ -16,7 +16,7 @@ function formatCurrency(value: number | null | undefined): string {
 
 function ChangeIndicator({ change }: { change: number | null }) {
   const { t } = useTranslation('employees');
-  if (change === null) return null;
+  if (change == null) return null;
   const positive = change >= 0;
   return (
     <p className={`flex items-center gap-1 text-xs ${positive ? 'text-green-600' : 'text-red-500'}`}>
