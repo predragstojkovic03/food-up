@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { format, subDays, subMonths } from 'date-fns';
+import { format, startOfYear, subDays, subMonths } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import { DateRange } from 'react-day-picker';
 import { useTranslation } from 'react-i18next';
@@ -8,7 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-type Preset = 'last30' | 'last3m' | 'last6m' | 'custom';
+type Preset = 'last30' | 'last3m' | 'last6m' | 'ytd' | 'custom';
 
 interface DashboardDateRangePickerProps {
   from: Date;
@@ -30,7 +30,8 @@ export function DashboardDateRangePicker({ from, to, onChange }: DashboardDateRa
   function applyPreset(preset: Exclude<Preset, 'custom'>) {
     if (preset === 'last30') onChange(subDays(today, 29), today);
     else if (preset === 'last3m') onChange(subMonths(today, 3), today);
-    else onChange(subMonths(today, 6), today);
+    else if (preset === 'last6m') onChange(subMonths(today, 6), today);
+    else onChange(startOfYear(today), today);
   }
 
   function handleApply() {
@@ -41,9 +42,10 @@ export function DashboardDateRangePicker({ from, to, onChange }: DashboardDateRa
   }
 
   const activePreset = (): Preset => {
-    const diff = Math.round((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24));
     const endIsToday = isoDate(to) === isoDate(today);
     if (!endIsToday) return 'custom';
+    if (isoDate(from) === isoDate(startOfYear(today))) return 'ytd';
+    const diff = Math.round((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24));
     if (diff === 29) return 'last30';
     if (diff >= 89 && diff <= 92) return 'last3m';
     if (diff >= 179 && diff <= 184) return 'last6m';
@@ -54,7 +56,7 @@ export function DashboardDateRangePicker({ from, to, onChange }: DashboardDateRa
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {(['last30', 'last3m', 'last6m'] as const).map((p) => (
+      {(['last30', 'last3m', 'last6m', 'ytd'] as const).map((p) => (
         <Button
           key={p}
           variant={current === p ? 'default' : 'outline'}
