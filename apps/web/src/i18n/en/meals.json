@@ -75,7 +75,30 @@
       },
       "sendButton_one": "Send to {{count}} supplier",
       "sendButton_other": "Send to {{count}} suppliers",
-      "sendError": "Failed to send. Please try again."
+      "sendError": "Failed to send. Please try again.",
+      "extras": {
+        "title": "Additional quantities",
+        "subtitle": "guests / visitors",
+        "guestNameHeader": "Guest name",
+        "guestNameOptional": "optional",
+        "mealHeader": "Meal",
+        "qtyHeader": "Qty",
+        "addRow": "+ Add row",
+        "newRowTitle": "New row",
+        "dateLabel": "Date",
+        "mealLabel": "Meal",
+        "mealFilteredHint": "(filtered to {{date}})",
+        "qtyLabel": "Qty",
+        "guestNamePlaceholder": "e.g. Ana Marković",
+        "saveRow": "Save row",
+        "hint": "Named guests appear as individual rows in XLSX day sheets. Anonymous extras are counted in summary totals only."
+      },
+      "costSummary": {
+        "title": "Estimated cost",
+        "subtitle": "employee selections + additional quantities",
+        "total": "Total",
+        "disclaimer": "Items without a price are excluded from this estimate."
+      }
     },
     "createForm": {
       "title": "Create Meal Selection Window",

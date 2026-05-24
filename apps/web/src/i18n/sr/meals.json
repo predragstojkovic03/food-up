@@ -75,7 +75,30 @@
       },
       "sendButton_one": "Pošalji {{count}} dobavljaču",
       "sendButton_other": "Pošalji {{count}} dobavljačima",
-      "sendError": "Slanje nije uspelo. Pokušajte ponovo."
+      "sendError": "Slanje nije uspelo. Pokušajte ponovo.",
+      "extras": {
+        "title": "Dodatne količine",
+        "subtitle": "gosti / posetioci",
+        "guestNameHeader": "Ime gosta",
+        "guestNameOptional": "opciono",
+        "mealHeader": "Obrok",
+        "qtyHeader": "Kol.",
+        "addRow": "+ Dodaj red",
+        "newRowTitle": "Novi red",
+        "dateLabel": "Datum",
+        "mealLabel": "Obrok",
+        "mealFilteredHint": "(filtrirano na {{date}})",
+        "qtyLabel": "Kol.",
+        "guestNamePlaceholder": "npr. Ana Marković",
+        "saveRow": "Sačuvaj red",
+        "hint": "Imenovani gosti pojavljuju se kao pojedinačni redovi u dnevnim listovima XLSX-a. Anonimni dodaci broje se samo u zbiru."
+      },
+      "costSummary": {
+        "title": "Procena troškova",
+        "subtitle": "izbori zaposlenih + dodatne količine",
+        "total": "Ukupno",
+        "disclaimer": "Stavke bez cene nisu uključene u ovu procenu."
+      }
     },
     "createForm": {
       "title": "Kreiraj prozor za izbor obroka",
