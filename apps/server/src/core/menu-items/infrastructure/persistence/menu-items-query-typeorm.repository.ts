@@ -28,7 +28,8 @@ export class MenuItemsQueryTypeOrmRepository
     const menuItems = await this._repository
       .createQueryBuilder('menuItem')
       .leftJoinAndSelect('menuItem.meal', 'meal')
-      .leftJoin('menuItem.menuPeriod', 'menuPeriod')
+      .leftJoinAndSelect('menuItem.menuPeriod', 'menuPeriod')
+      .leftJoinAndSelect('menuPeriod.supplier', 'supplier')
       .where('menuPeriod.id IN (:...menuPeriodIds)', { menuPeriodIds })
       .getMany();
 
@@ -36,6 +37,8 @@ export class MenuItemsQueryTypeOrmRepository
       id: menuItem.id,
       day: menuItem.day,
       price: menuItem.price ?? undefined,
+      supplierId: menuItem.menuPeriod.supplierId,
+      supplierName: menuItem.menuPeriod.supplier.name,
       meal: {
         name: menuItem.meal.name,
         description: menuItem.meal.description,

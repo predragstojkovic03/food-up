@@ -11,6 +11,8 @@ export class MenuItem implements ICurrentWindowMenuItem {
   @Expose() id: string;
   @Expose() day: string;
   @Expose() price?: number;
+  @Expose() supplierId: string;
+  @Expose() supplierName: string;
 
   @Expose()
   @Type(() => MealDto)

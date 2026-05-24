@@ -10,5 +10,7 @@ export type MenuItemWithMealDto = {
   id: string;
   day: string;
   price?: number;
+  supplierId: string;
+  supplierName: string;
   meal: MealDto;
 };

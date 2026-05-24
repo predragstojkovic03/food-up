@@ -11,6 +11,8 @@ export class WindowMenuItemResponseDto implements IWindowMenuItemResponse {
   @Expose() id: string;
   @Expose() day: string;
   @Expose() price?: number;
+  @Expose() supplierId: string;
+  @Expose() supplierName: string;
 
   @Expose()
   @Type(() => WindowMenuItemMealDto)
