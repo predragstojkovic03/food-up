@@ -98,6 +98,22 @@
         "subtitle": "izbori zaposlenih + dodatne količine",
         "total": "Ukupno",
         "disclaimer": "Stavke bez cene nisu uključene u ovu procenu."
+      },
+      "sentHistory": {
+        "title": "Istorija poslatih mejlova",
+        "viewButton": "Pogledaj"
+      },
+      "previewDialog": {
+        "title": "Pregled i slanje",
+        "loading": "Učitavanje…",
+        "error": "Greška",
+        "ready": "Spreman",
+        "subjectLabel": "Naslov",
+        "introLabel": "Uvodni paragraf",
+        "previewLabel": "Pregled mejla",
+        "sending": "Slanje…",
+        "sendAll_one": "Pošalji {{count}} dobavljaču",
+        "sendAll_other": "Pošalji {{count}} dobavljačima"
       }
     },
     "createForm": {

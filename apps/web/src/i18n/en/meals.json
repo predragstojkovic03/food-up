@@ -98,6 +98,22 @@
         "subtitle": "employee selections + additional quantities",
         "total": "Total",
         "disclaimer": "Items without a price are excluded from this estimate."
+      },
+      "sentHistory": {
+        "title": "Sent emails history",
+        "viewButton": "View"
+      },
+      "previewDialog": {
+        "title": "Preview & Send",
+        "loading": "Loading…",
+        "error": "Error",
+        "ready": "Ready",
+        "subjectLabel": "Subject",
+        "introLabel": "Intro paragraph",
+        "previewLabel": "Email preview",
+        "sending": "Sending…",
+        "sendAll_one": "Send to {{count}} supplier",
+        "sendAll_other": "Send to {{count}} suppliers"
       }
     },
     "createForm": {

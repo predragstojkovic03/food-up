@@ -367,7 +367,8 @@ interface WindowDetailsProps {
 }
 
 function WindowDetails({ windowId, endTime, targetDates }: WindowDetailsProps) {
-  const { t } = useTranslation('meals');
+  const { t, i18n } = useTranslation('meals');
+  const locale = i18n.language === 'sr' ? 'sr-Latn-RS' : 'en-US';
   const { mealSelectionWindowService, mealSelectionService, reportService } = useServices();
   const isExpired = new Date(endTime) < new Date();
 
@@ -417,12 +418,16 @@ function WindowDetails({ windowId, endTime, targetDates }: WindowDetailsProps) {
     <div className='bg-muted/10 border-t px-8 py-4 space-y-5'>
       {targetDates.map((date) => {
         const items = itemsByDate[date] ?? [];
-        const weekday = WEEKDAYS[new Date(date + 'T00:00:00').getDay()];
 
         return (
           <div key={date}>
             <h3 className='text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2'>
-              {weekday} — {new Date(date + 'T00:00:00').toLocaleDateString()}
+              {new Date(date + 'T00:00:00').toLocaleDateString(locale, {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'numeric',
+                year: 'numeric',
+              })}
             </h3>
 
             {items.length === 0 ? (
@@ -680,17 +685,18 @@ function SendPreviewDialog({
   onClose,
   onSuccess,
 }: SendPreviewDialogProps) {
+  const { t } = useTranslation('meals');
   const { reportService } = useServices();
   const [activeId, setActiveId] = useState(supplierIds[0] ?? '');
   const [edits, setEdits] = useState<Record<string, { subject?: string; introText?: string }>>({});
   const [isSending, setIsSending] = useState(false);
-  const [sendError, setSendError] = useState<string | null>(null);
+  const [hasSendError, setHasSendError] = useState(false);
 
   useEffect(() => {
     if (open) {
       setActiveId(supplierIds[0] ?? '');
       setEdits({});
-      setSendError(null);
+      setHasSendError(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
@@ -718,7 +724,7 @@ function SendPreviewDialog({
 
   async function handleSendAll() {
     setIsSending(true);
-    setSendError(null);
+    setHasSendError(false);
     try {
       await reportService.sendToSuppliers(
         windowId,
@@ -730,7 +736,7 @@ function SendPreviewDialog({
       );
       onSuccess();
     } catch {
-      setSendError('Failed to send. Please try again.');
+      setHasSendError(true);
     } finally {
       setIsSending(false);
     }
@@ -744,7 +750,7 @@ function SendPreviewDialog({
     <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
       <DialogContent className='w-[calc(100vw-2rem)] sm:max-w-5xl h-[85vh] flex flex-col p-0 gap-0'>
         <DialogHeader className='px-6 pt-5 pb-3 border-b shrink-0'>
-          <DialogTitle>Preview &amp; Send</DialogTitle>
+          <DialogTitle>{t('windows.detail.previewDialog.title')}</DialogTitle>
         </DialogHeader>
 
         <div className='flex flex-1 overflow-hidden'>
@@ -763,7 +769,11 @@ function SendPreviewDialog({
                 >
                   <div className='truncate'>{supplierNameById[id] ?? id}</div>
                   <div className='text-xs text-muted-foreground mt-0.5'>
-                    {q.isLoading ? 'Loading…' : q.isError ? 'Error' : 'Ready'}
+                    {q.isLoading
+                      ? t('windows.detail.previewDialog.loading')
+                      : q.isError
+                        ? t('windows.detail.previewDialog.error')
+                        : t('windows.detail.previewDialog.ready')}
                   </div>
                 </button>
               );
@@ -787,7 +797,7 @@ function SendPreviewDialog({
             {activeQuery?.data && !activeQuery.isLoading && (
               <>
                 <div className='space-y-1.5'>
-                  <Label htmlFor='preview-subject' className='text-xs font-medium'>Subject</Label>
+                  <Label htmlFor='preview-subject' className='text-xs font-medium'>{t('windows.detail.previewDialog.subjectLabel')}</Label>
                   <Input
                     id='preview-subject'
                     value={getField(activeId, 'subject')}
@@ -796,7 +806,7 @@ function SendPreviewDialog({
                 </div>
 
                 <div className='space-y-1.5'>
-                  <Label htmlFor='preview-intro' className='text-xs font-medium'>Intro paragraph</Label>
+                  <Label htmlFor='preview-intro' className='text-xs font-medium'>{t('windows.detail.previewDialog.introLabel')}</Label>
                   <textarea
                     id='preview-intro'
                     rows={3}
@@ -809,7 +819,7 @@ function SendPreviewDialog({
                 <Separator />
 
                 <div>
-                  <p className='text-xs font-medium text-muted-foreground mb-2'>Email preview</p>
+                  <p className='text-xs font-medium text-muted-foreground mb-2'>{t('windows.detail.previewDialog.previewLabel')}</p>
                   <iframe
                     srcDoc={buildPreviewDoc(activeQuery.data.html, getField(activeId, 'introText'))}
                     className='w-full border rounded min-h-80'
@@ -824,11 +834,11 @@ function SendPreviewDialog({
 
         <div className='border-t px-6 py-3 flex items-center justify-between shrink-0'>
           <div>
-            {sendError && <p className='text-sm text-destructive'>{sendError}</p>}
+            {hasSendError && <p className='text-sm text-destructive'>{t('windows.detail.sendError')}</p>}
           </div>
           <div className='flex gap-2'>
             <Button variant='outline' onClick={onClose} disabled={isSending}>
-              Cancel
+              {t('actions.cancel', { ns: 'common' })}
             </Button>
             <Button
               onClick={handleSendAll}
@@ -837,8 +847,8 @@ function SendPreviewDialog({
             >
               <Send size={13} />
               {isSending
-                ? 'Sending…'
-                : `Send to ${supplierIds.length} supplier${supplierIds.length !== 1 ? 's' : ''}`}
+                ? t('windows.detail.previewDialog.sending')
+                : t('windows.detail.previewDialog.sendAll', { count: supplierIds.length })}
             </Button>
           </div>
         </div>
@@ -850,6 +860,8 @@ function SendPreviewDialog({
 // ─── Sent Emails History ──────────────────────────────────────────────────────
 
 function SentEmailsHistory({ sends }: { sends: IOrderSummarySend[] }) {
+  const { t, i18n } = useTranslation('meals');
+  const locale = i18n.language === 'sr' ? 'sr-Latn-RS' : 'en-US';
   const [viewingSend, setViewingSend] = useState<IOrderSummarySend | null>(null);
 
   if (sends.length === 0) return null;
@@ -857,7 +869,7 @@ function SentEmailsHistory({ sends }: { sends: IOrderSummarySend[] }) {
   return (
     <>
       <div>
-        <h4 className='text-xs font-medium text-muted-foreground mb-2'>Sent emails history</h4>
+        <h4 className='text-xs font-medium text-muted-foreground mb-2'>{t('windows.detail.sentHistory.title')}</h4>
         <div className='border rounded-lg overflow-hidden'>
           {sends.map((send) => (
             <div
@@ -866,7 +878,7 @@ function SentEmailsHistory({ sends }: { sends: IOrderSummarySend[] }) {
             >
               <span className='text-sm font-medium flex-1'>{send.supplierName}</span>
               <span className='text-sm text-muted-foreground whitespace-nowrap'>
-                {new Date(send.sentAt).toLocaleString()}
+                {new Date(send.sentAt).toLocaleString(locale)}
               </span>
               <Button
                 variant='ghost'
@@ -875,7 +887,7 @@ function SentEmailsHistory({ sends }: { sends: IOrderSummarySend[] }) {
                 className='gap-1.5 h-7 text-xs'
               >
                 <Eye size={12} />
-                View
+                {t('windows.detail.sentHistory.viewButton')}
               </Button>
             </div>
           ))}
@@ -888,7 +900,7 @@ function SentEmailsHistory({ sends }: { sends: IOrderSummarySend[] }) {
             <DialogTitle>{viewingSend?.supplierName}</DialogTitle>
             <p className='text-sm text-muted-foreground'>{viewingSend?.subject}</p>
             <p className='text-xs text-muted-foreground'>
-              {viewingSend ? new Date(viewingSend.sentAt).toLocaleString() : ''}
+              {viewingSend ? new Date(viewingSend.sentAt).toLocaleString(locale) : ''}
             </p>
           </DialogHeader>
           <iframe
