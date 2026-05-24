@@ -55,7 +55,7 @@ export function WindowRankingTable({ data, isLoading }: WindowRankingTableProps)
                     {item.supplierNames.join(', ')}
                   </TableCell>
                   <TableCell className="text-right pr-6 font-mono">
-                    {formatRSD(item.totalCost)}
+                    {item.totalCost.toLocaleString('sr-RS', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </TableCell>
                 </TableRow>
               ))}

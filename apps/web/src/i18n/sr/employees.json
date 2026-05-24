@@ -44,7 +44,7 @@
       "title": "Rang prozora po trošku",
       "colWindow": "Prozor",
       "colSuppliers": "Dobavljači",
-      "colTotalCost": "Ukupni trošak",
+      "colTotalCost": "Ukupni trošak (RSD)",
       "noData": "Nema podataka za izabrani period"
     }
   },

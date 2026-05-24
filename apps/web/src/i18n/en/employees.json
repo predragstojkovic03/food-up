@@ -44,7 +44,7 @@
       "title": "Window Ranking by Cost",
       "colWindow": "Window",
       "colSuppliers": "Suppliers",
-      "colTotalCost": "Total Cost",
+      "colTotalCost": "Total Cost (RSD)",
       "noData": "No data for selected period"
     }
   },
