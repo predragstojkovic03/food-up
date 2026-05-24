@@ -1,14 +1,14 @@
 import { useState } from 'react';
-import { format, subDays, subMonths } from 'date-fns';
+import { endOfMonth, format, startOfMonth, subDays, subMonths } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import { DateRange } from 'react-day-picker';
 import { useTranslation } from 'react-i18next';
-import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-type Preset = 'last30' | 'last3m' | 'last6m' | 'custom';
+type Preset = 'thisMonth' | 'last30' | 'last3m' | 'custom';
 
 interface DashboardDateRangePickerProps {
   from: Date;
@@ -27,13 +27,14 @@ export function DashboardDateRangePicker({ from, to, onChange }: DashboardDateRa
 
   const today = new Date();
 
-  function applyPreset(preset: Preset) {
-    const end = today;
-    let start: Date;
-    if (preset === 'last30') start = subDays(today, 29);
-    else if (preset === 'last3m') start = subMonths(today, 3);
-    else start = subMonths(today, 6);
-    onChange(start, end);
+  function applyPreset(preset: Exclude<Preset, 'custom'>) {
+    if (preset === 'thisMonth') {
+      onChange(startOfMonth(today), endOfMonth(today));
+    } else if (preset === 'last30') {
+      onChange(subDays(today, 29), today);
+    } else {
+      onChange(subMonths(today, 3), today);
+    }
   }
 
   function handleApply() {
@@ -44,12 +45,14 @@ export function DashboardDateRangePicker({ from, to, onChange }: DashboardDateRa
   }
 
   const activePreset = (): Preset => {
+    const fromIso = isoDate(from);
+    const toIso = isoDate(to);
+    if (fromIso === isoDate(startOfMonth(today)) && toIso === isoDate(endOfMonth(today))) return 'thisMonth';
     const diff = Math.round((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24));
-    const endIsToday = isoDate(to) === isoDate(today);
+    const endIsToday = toIso === isoDate(today);
     if (!endIsToday) return 'custom';
     if (diff === 29) return 'last30';
     if (diff >= 89 && diff <= 92) return 'last3m';
-    if (diff >= 179 && diff <= 184) return 'last6m';
     return 'custom';
   };
 
@@ -57,7 +60,7 @@ export function DashboardDateRangePicker({ from, to, onChange }: DashboardDateRa
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {(['last30', 'last3m', 'last6m'] as const).map((p) => (
+      {(['thisMonth', 'last30', 'last3m'] as const).map((p) => (
         <Button
           key={p}
           variant={current === p ? 'default' : 'outline'}
@@ -88,7 +91,6 @@ export function DashboardDateRangePicker({ from, to, onChange }: DashboardDateRa
             selected={draft}
             onSelect={(range) => setDraft(range ?? { from: undefined, to: undefined })}
             numberOfMonths={2}
-            disabled={{ after: today }}
           />
           <div className="flex justify-end border-t p-2">
             <Button size="sm" disabled={!draft.from || !draft.to} onClick={handleApply}>

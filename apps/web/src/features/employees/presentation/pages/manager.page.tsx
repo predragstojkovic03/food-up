@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { format, subDays } from 'date-fns';
+import { endOfMonth, format, startOfMonth } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { useServices } from '@/shared/infrastructure/di/service.context';
@@ -20,8 +20,8 @@ export default function ManagerPage() {
   const { dashboardService } = useServices();
 
   const today = new Date();
-  const [from, setFrom] = useState<Date>(() => subDays(today, 29));
-  const [to, setTo] = useState<Date>(() => today);
+  const [from, setFrom] = useState<Date>(() => startOfMonth(today));
+  const [to, setTo] = useState<Date>(() => endOfMonth(today));
   const [groupBy, setGroupBy] = useState<GroupBy>('monthly');
 
   const fromIso = toIso(from);
