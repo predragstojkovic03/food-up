@@ -101,7 +101,8 @@ export class OrderSummaryQueryTypeOrmRepository
   }
 
   async getCostByWindow(windowId: string): Promise<CostByWindowRow[]> {
-    const result = await this._dataSource.query<
+    const manager = this._transactionContext.getManager();
+    const result = await (manager ?? this._dataSource).query<
       { supplierId: string; supplierName: string; totalCost: string }[]
     >(
       `
@@ -326,7 +327,7 @@ export class OrderSummaryQueryTypeOrmRepository
       .innerJoin('mi.meal', 'm')
       .select([
         'mi.day AS "date"',
-        'eq.guestName AS "employeeName"',
+        "eq.guestName || ' (guest)' AS \"employeeName\"",
         'm.name AS "mealName"',
         'm.type AS "mealType"',
         'eq.quantity AS "quantity"',
