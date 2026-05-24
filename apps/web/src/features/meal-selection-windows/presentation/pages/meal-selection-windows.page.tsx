@@ -1034,7 +1034,7 @@ function ExtraQuantitiesSection({ windowId, menuItems, targetDates }: ExtraQuant
           <div className='text-[10px] font-semibold text-green-800 dark:text-green-300 mb-2'>
             {t('windows.detail.extras.newRowTitle')}
           </div>
-          <div className='grid grid-cols-[140px_110px_1fr_60px_32px] gap-2 items-start'>
+          <div className='grid grid-cols-[140px_170px_1fr_60px_32px] gap-2 items-start'>
             <div>
               <div className='text-[9px] text-muted-foreground mb-1'>
                 {t('windows.detail.extras.guestNameHeader')} ({t('windows.detail.extras.guestNameOptional')})
@@ -1055,7 +1055,7 @@ function ExtraQuantitiesSection({ windowId, menuItems, targetDates }: ExtraQuant
                 <SelectContent>
                   {targetDates.map((d) => (
                     <SelectItem key={d} value={d}>
-                      {formatDate(d)}
+                      {formatDateWithWeekday(d)}
                     </SelectItem>
                   ))}
                 </SelectContent>
