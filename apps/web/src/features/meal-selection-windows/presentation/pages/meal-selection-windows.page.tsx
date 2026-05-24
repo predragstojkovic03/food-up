@@ -31,6 +31,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { formatRSD } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useServices } from '@/shared/infrastructure/di/service.context';
 import {
@@ -454,7 +455,7 @@ function WindowDetails({ windowId, endTime, targetDates }: WindowDetailsProps) {
                         {item.meal.description || '—'}
                       </span>
                       <span className='px-3 py-2.5 text-right border-b last:border-b-0'>
-                        {item.price != null ? item.price.toLocaleString('sr-RS', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' RSD' : '—'}
+                        {formatRSD(item.price)}
                       </span>
                       <span className={`px-3 py-2.5 text-right font-medium border-b last:border-b-0 ${qty > 0 ? 'text-foreground' : 'text-muted-foreground'}`}>
                         {qty > 0 ? qty : '—'}
@@ -1182,14 +1183,14 @@ function CostSummarySection({ windowId }: { windowId: string }) {
             <React.Fragment key={row.supplierId}>
               <span className='text-foreground'>{row.supplierName}</span>
               <span className='font-semibold text-right'>
-                {row.totalCost.toLocaleString('sr-RS', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} RSD
+                {formatRSD(row.totalCost)}
               </span>
             </React.Fragment>
           ))}
         </div>
         <div className='border-t pt-2 grid grid-cols-[1fr_auto] gap-x-6 text-sm font-bold'>
           <span>{t('windows.detail.costSummary.total')}</span>
-          <span>{grandTotal.toLocaleString('sr-RS', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} RSD</span>
+          <span>{formatRSD(grandTotal)}</span>
         </div>
         <div className='text-[10px] text-muted-foreground mt-1.5'>
           {t('windows.detail.costSummary.disclaimer')}

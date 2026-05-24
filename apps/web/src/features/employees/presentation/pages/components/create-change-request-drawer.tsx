@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { formatRSD } from '@/lib/utils';
 import { Drawer, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useServices } from '@/shared/infrastructure/di/service.context';
@@ -176,7 +177,7 @@ export function CreateChangeRequestDrawer({
                                 )}
                                 {item.price != null && (
                                   <span className="ml-auto text-xs text-muted-foreground float-right">
-                                    {item.price.toLocaleString('sr-RS', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} RSD
+                                    {formatRSD(item.price)}
                                   </span>
                                 )}
                               </button>
