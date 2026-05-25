@@ -6,6 +6,7 @@ import { ChangeRequestStatus } from '@food-up/shared';
 import { ChangeRequestApprovedEvent } from '../domain/events/change-request-approved.event';
 import { ChangeRequestRejectedEvent } from '../domain/events/change-request-rejected.event';
 import { ChangeRequestBulkStatusUpdatedEvent } from '../domain/events/change-request-bulk-status-updated.event';
+import { ChangeRequestRevokedEvent } from '../domain/events/change-request-revoked.event';
 import {
   BULK_CHANGE_REQUEST_QUEUE,
   CHANGE_REQUEST_QUEUE,
@@ -38,6 +39,11 @@ export class ChangeRequestEventHandler {
   @OnEvent(ChangeRequestRejectedEvent.EVENT_NAME)
   async handleRejected(event: ChangeRequestRejectedEvent): Promise<void> {
     await this._changeRequestQueue.add('notify', event.payload);
+  }
+
+  @OnEvent(ChangeRequestRevokedEvent.EVENT_NAME)
+  async handleRevoked(_event: ChangeRequestRevokedEvent): Promise<void> {
+    // no notification sent on employee self-revoke
   }
 
   @OnEvent(ChangeRequestBulkStatusUpdatedEvent.EVENT_NAME)
