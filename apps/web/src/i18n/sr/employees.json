@@ -89,6 +89,14 @@
     "continueSelecting": "Nastavi sa izborom",
     "startSelecting": "Počni sa izborom"
   },
+  "mealTypes": {
+    "Breakfast": "Doručak",
+    "Soup": "Čorba",
+    "Lunch": "Glavni obrok",
+    "Dinner": "Večera",
+    "Salad": "Salata",
+    "Dessert": "Desert"
+  },
   "changeRequest": {
     "title": "Zatražite promenu",
     "selectDay": "Izaberite dan",

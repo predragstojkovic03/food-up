@@ -89,6 +89,14 @@
     "continueSelecting": "Continue selecting",
     "startSelecting": "Start selecting"
   },
+  "mealTypes": {
+    "Breakfast": "Breakfast",
+    "Soup": "Soup",
+    "Lunch": "Main",
+    "Dinner": "Dinner",
+    "Salad": "Salad",
+    "Dessert": "Dessert"
+  },
   "changeRequest": {
     "title": "Request a change",
     "selectDay": "Select a day",

@@ -28,8 +28,8 @@ const TYPE_LABELS: Record<MealType, string> = {
   [MealType.Dessert]: 'Dessert',
 };
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+function formatDate(iso: string, locale: string): string {
+  return new Date(iso).toLocaleDateString(locale, { weekday: 'long', month: 'short', day: 'numeric' });
 }
 
 interface CreateChangeRequestDrawerProps {
@@ -45,7 +45,7 @@ export function CreateChangeRequestDrawer({
   open,
   onOpenChange,
 }: CreateChangeRequestDrawerProps) {
-  const { t } = useTranslation('employees');
+  const { t, i18n } = useTranslation('employees');
   const { mealSelectionWindowService, changeRequestService } = useServices();
   const queryClient = useQueryClient();
 
@@ -148,6 +148,7 @@ export function CreateChangeRequestDrawer({
                 <div className="flex flex-col gap-1.5">
                   {futureDates.map((date) => (
                     <button
+                      type="button"
                       key={date}
                       onClick={() => handleDaySelect(date)}
                       className={`w-full text-left px-3 py-2.5 rounded-lg border text-sm transition-colors ${
@@ -156,7 +157,7 @@ export function CreateChangeRequestDrawer({
                           : 'border-border bg-card hover:bg-muted'
                       }`}
                     >
-                      {formatDate(date)}
+                      {formatDate(date, i18n.language)}
                     </button>
                   ))}
                 </div>
@@ -190,7 +191,7 @@ export function CreateChangeRequestDrawer({
 
                         return (
                           <div key={type} className="space-y-1.5">
-                            <p className="text-xs text-muted-foreground font-medium">{TYPE_LABELS[type]}</p>
+                            <p className="text-xs text-muted-foreground font-medium">{t(`mealTypes.${type}`)}</p>
 
                             {/* Current selection — non-interactive */}
                             <div className="w-full px-3 py-2.5 rounded-lg border border-border bg-muted text-sm flex justify-between items-center opacity-60">
@@ -203,9 +204,10 @@ export function CreateChangeRequestDrawer({
                               const isSelected = pending?.newMenuItemId === item.id;
                               return (
                                 <button
+                                  type="button"
                                   key={item.id}
                                   onClick={() => handleToggleItem(sel.id, item.id)}
-                                  className={`w-full text-left px-3 py-2.5 rounded-lg border text-sm transition-colors ${
+                                  className={`w-full text-left px-3 py-2.5 rounded-lg border text-sm transition-colors flex justify-between items-center ${
                                     isSelected
                                       ? 'border-primary bg-primary/5 font-medium'
                                       : 'border-border bg-card hover:bg-muted'
@@ -213,7 +215,7 @@ export function CreateChangeRequestDrawer({
                                 >
                                   <span>{item.meal.name}</span>
                                   {item.price != null && (
-                                    <span className="ml-auto text-xs text-muted-foreground float-right">
+                                    <span className="ml-auto text-xs text-muted-foreground">
                                       {formatRSD(item.price)}
                                     </span>
                                   )}
@@ -223,6 +225,7 @@ export function CreateChangeRequestDrawer({
 
                             {/* Remove row */}
                             <button
+                              type="button"
                               onClick={() => handleRemove(sel.id)}
                               className={`w-full text-left px-3 py-2.5 rounded-lg border text-sm transition-colors ${
                                 pending?.clearSelection
@@ -230,7 +233,7 @@ export function CreateChangeRequestDrawer({
                                   : 'border-border bg-card hover:bg-muted text-muted-foreground'
                               }`}
                             >
-                              {t('changeRequest.removeType', { type: TYPE_LABELS[type] })}
+                              {t('changeRequest.removeType', { type: t(`mealTypes.${type}`) })}
                             </button>
                           </div>
                         );
