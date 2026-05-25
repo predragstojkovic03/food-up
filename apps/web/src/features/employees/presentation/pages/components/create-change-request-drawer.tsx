@@ -17,6 +17,7 @@ const TYPE_ORDER: MealType[] = [
   MealType.Dinner,
   MealType.Salad,
   MealType.Dessert,
+  MealType.Bread,
 ];
 
 
