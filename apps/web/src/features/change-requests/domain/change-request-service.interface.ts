@@ -10,4 +10,5 @@ export interface IChangeRequestService {
   getPendingCount(windowId: string): Promise<number>;
   create(data: ICreateChangeRequest): Promise<IRichChangeRequest>;
   bulkUpdateStatus(data: IBulkUpdateChangeRequestStatus): Promise<void>;
+  revoke(id: string): Promise<void>;
 }

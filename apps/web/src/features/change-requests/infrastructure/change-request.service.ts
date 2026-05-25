@@ -37,4 +37,8 @@ export class ChangeRequestService implements IChangeRequestService {
       data,
     );
   }
+
+  revoke(id: string): Promise<void> {
+    return this.http.patch<Record<string, never>, void>(`/api/change-requests/${id}/revoke`, {});
+  }
 }

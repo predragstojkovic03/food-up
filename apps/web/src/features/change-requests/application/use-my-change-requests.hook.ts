@@ -1,5 +1,5 @@
 import { useServices } from '@/shared/infrastructure/di/service.context';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export function useMyChangeRequests() {
   const { changeRequestService } = useServices();
@@ -7,5 +7,17 @@ export function useMyChangeRequests() {
   return useQuery({
     queryKey: ['change-requests', 'my'],
     queryFn: () => changeRequestService.getMy(),
+  });
+}
+
+export function useRevokeChangeRequest() {
+  const { changeRequestService } = useServices();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => changeRequestService.revoke(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['change-requests', 'my'] });
+    },
   });
 }
