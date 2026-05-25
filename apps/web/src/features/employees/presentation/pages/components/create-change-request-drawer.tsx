@@ -19,14 +19,6 @@ const TYPE_ORDER: MealType[] = [
   MealType.Dessert,
 ];
 
-const TYPE_LABELS: Record<MealType, string> = {
-  [MealType.Breakfast]: 'Breakfast',
-  [MealType.Soup]: 'Soup',
-  [MealType.Lunch]: 'Main',
-  [MealType.Dinner]: 'Dinner',
-  [MealType.Salad]: 'Salad',
-  [MealType.Dessert]: 'Dessert',
-};
 
 function formatDate(iso: string, locale: string): string {
   return new Date(iso).toLocaleDateString(locale, { weekday: 'long', month: 'short', day: 'numeric' });
