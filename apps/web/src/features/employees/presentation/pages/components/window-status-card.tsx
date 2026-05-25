@@ -1,3 +1,13 @@
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,6 +25,7 @@ import {
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useRevokeChangeRequest } from '@/features/change-requests/application/use-my-change-requests.hook';
 import {
   ChangeRequestStatus,
   IMyMealSelectionResponse,
@@ -110,6 +121,9 @@ export function WindowStatusCard({
   const [selectionsOpen, setSelectionsOpen] = useState(false);
   const [changeRequestsOpen, setChangeRequestsOpen] = useState(false);
   const [crSheetOpen, setCrSheetOpen] = useState(false);
+  const [revokeTargetId, setRevokeTargetId] = useState<string | null>(null);
+
+  const { mutate: revokeChangeRequest } = useRevokeChangeRequest();
 
   const submittedDates = new Set(selections.map((s) => s.date));
   const totalDays = window.targetDates.length;
@@ -297,12 +311,23 @@ export function WindowStatusCard({
                             {cr.requestedMeal?.name ?? '—'}
                           </p>
                         </div>
-                        <Badge
-                          variant={STATUS_VARIANTS[cr.status]}
-                          className='text-xs shrink-0'
-                        >
-                          {STATUS_LABELS[cr.status]}
-                        </Badge>
+                        <div className='flex items-center gap-1.5 shrink-0'>
+                          <Badge
+                            variant={STATUS_VARIANTS[cr.status]}
+                            className='text-xs'
+                          >
+                            {STATUS_LABELS[cr.status]}
+                          </Badge>
+                          {cr.status === ChangeRequestStatus.Pending && (
+                            <button
+                              type='button'
+                              onClick={() => setRevokeTargetId(cr.id)}
+                              className='text-xs px-2 py-0.5 rounded border border-destructive/50 bg-destructive/5 text-destructive hover:bg-destructive/10 transition-colors'
+                            >
+                              {t('changeRequest.revokeButton')}
+                            </button>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </CollapsibleContent>
@@ -334,6 +359,47 @@ export function WindowStatusCard({
         open={crSheetOpen}
         onOpenChange={setCrSheetOpen}
       />
+
+      {(() => {
+        const cr = changeRequests.find((c) => c.id === revokeTargetId);
+        const dialogBody = cr
+          ? cr.clearSelection
+            ? t('changeRequest.revokeDialog.bodyClear', {
+                mealType: cr.currentMeal?.name ?? t('changeRequest.revokeDialog.noMeal'),
+                date: cr.date ? formatDate(cr.date) : '—',
+              })
+            : t('changeRequest.revokeDialog.bodyChange', {
+                currentMeal: cr.currentMeal?.name ?? t('changeRequest.revokeDialog.noMeal'),
+                newMeal: cr.requestedMeal?.name ?? t('changeRequest.revokeDialog.noMeal'),
+                date: cr.date ? formatDate(cr.date) : '—',
+              })
+          : '';
+
+        return (
+          <AlertDialog open={revokeTargetId !== null} onOpenChange={(open) => { if (!open) setRevokeTargetId(null); }}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t('changeRequest.revokeDialog.title')}</AlertDialogTitle>
+                <AlertDialogDescription>{dialogBody}</AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>{t('changeRequest.revokeDialog.cancel')}</AlertDialogCancel>
+                <AlertDialogAction
+                  className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
+                  onClick={() => {
+                    if (revokeTargetId) {
+                      revokeChangeRequest(revokeTargetId);
+                      setRevokeTargetId(null);
+                    }
+                  }}
+                >
+                  {t('changeRequest.revokeDialog.confirm')}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        );
+      })()}
     </>
   );
 }
