@@ -151,6 +151,18 @@ export class ChangeRequestsController {
     await this._changeRequestsService.updateStatus(id, user.sub, status);
   }
 
+  @ApiOperation({ summary: 'Revoke a change request (employee self-service)' })
+  @ApiResponse({ status: 200 })
+  @RequiredIdentityType(IdentityTypeEnum.Employee)
+  @ApiBearerAuth()
+  @Patch(':id/revoke')
+  async revoke(
+    @Param('id') id: string,
+    @CurrentIdentity() user: JwtPayload,
+  ): Promise<void> {
+    await this._changeRequestsService.revoke(id, user.sub);
+  }
+
   @ApiOperation({ summary: 'Delete a change request' })
   @ApiResponse({ status: 204 })
   @RequiredEmployeeRole(EmployeeRole.Manager)
