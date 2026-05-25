@@ -90,12 +90,13 @@
     "startSelecting": "Start selecting"
   },
   "mealTypes": {
-    "Breakfast": "Breakfast",
-    "Soup": "Soup",
-    "Lunch": "Main",
-    "Dinner": "Dinner",
-    "Salad": "Salad",
-    "Dessert": "Dessert"
+    "breakfast": "Breakfast",
+    "soup": "Soup",
+    "lunch": "Main",
+    "dinner": "Dinner",
+    "salad": "Salad",
+    "dessert": "Dessert",
+    "bread": "Bread"
   },
   "changeRequest": {
     "title": "Request a change",

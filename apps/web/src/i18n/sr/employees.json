@@ -90,12 +90,13 @@
     "startSelecting": "Počni sa izborom"
   },
   "mealTypes": {
-    "Breakfast": "Doručak",
-    "Soup": "Čorba",
-    "Lunch": "Glavni obrok",
-    "Dinner": "Večera",
-    "Salad": "Salata",
-    "Dessert": "Desert"
+    "breakfast": "Doručak",
+    "soup": "Čorba",
+    "lunch": "Glavni obrok",
+    "dinner": "Večera",
+    "salad": "Salata",
+    "dessert": "Desert",
+    "bread": "Hleb"
   },
   "changeRequest": {
     "title": "Zatražite promenu",
