@@ -96,6 +96,20 @@
     "selectMeal": "Izaberite novi obrok",
     "currently": "Trenutno:",
     "currentBadge": "(trenutno)",
-    "noMealsAvailable": "Nema dostupnih obroka za ovaj dan."
+    "noMealsAvailable": "Nema dostupnih obroka za ovaj dan.",
+    "selectChanges": "Izaberite promene",
+    "noSelectionsForDay": "Nema izbora obroka za ovaj dan.",
+    "removeType": "Ukloni {{type}}",
+    "submitError": "Nije moguće podneti promene. Pokušajte ponovo.",
+    "submitCount": "Podnesi {{count}} promenu/e",
+    "revokeButton": "Opozovi",
+    "revokeDialog": {
+      "title": "Opozvati zahtev za promenu?",
+      "bodyChange": "Ovo će otkazati vaš zahtev za promenu {{currentMeal}} u {{newMeal}} {{date}}. Vaš originalni izbor će ostati.",
+      "bodyClear": "Ovo će otkazati vaš zahtev za uklanjanje {{mealType}} {{date}}. Vaš originalni izbor će ostati.",
+      "cancel": "Zadrži",
+      "confirm": "Opozovi",
+      "noMeal": "vaš obrok"
+    }
   }
 }

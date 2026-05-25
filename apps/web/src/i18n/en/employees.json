@@ -96,6 +96,20 @@
     "selectMeal": "Select new meal",
     "currently": "Currently:",
     "currentBadge": "(current)",
-    "noMealsAvailable": "No meals available for this day."
+    "noMealsAvailable": "No meals available for this day.",
+    "selectChanges": "Select your changes",
+    "noSelectionsForDay": "No meal selections for this day.",
+    "removeType": "Remove {{type}}",
+    "submitError": "Failed to submit changes. Please try again.",
+    "submitCount": "Submit {{count}} change(s)",
+    "revokeButton": "Revoke",
+    "revokeDialog": {
+      "title": "Revoke change request?",
+      "bodyChange": "This will cancel your pending request to change {{currentMeal}} to {{newMeal}} on {{date}}. Your original selection will remain.",
+      "bodyClear": "This will cancel your pending request to remove {{mealType}} on {{date}}. Your original selection will remain.",
+      "cancel": "Keep it",
+      "confirm": "Revoke",
+      "noMeal": "your meal"
+    }
   }
 }
