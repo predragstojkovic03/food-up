@@ -245,6 +245,23 @@ export class ChangeRequestsService {
     );
   }
 
+  @DomainEvents
+  async revoke(id: string, identityId: string): Promise<void> {
+    const employee = await this._employeesService.findByIdentity(identityId);
+
+    const changeRequest = await this._repository.findOneByCriteriaOrThrow({ id });
+
+    if (changeRequest.employeeId !== employee.id) {
+      throw new UnauthorizedException(
+        'Employee can only revoke their own change requests.',
+      );
+    }
+
+    changeRequest.changeStatus(ChangeRequestStatus.Revoked, employee.id, new Date());
+    await this._repository.update(id, changeRequest);
+    this._logger.log(`Change request revoked: id=${id}`, ChangeRequestsService.name);
+  }
+
   async delete(id: string): Promise<void> {
     await this._repository.delete(id);
     this._logger.log(`Change request deleted: id=${id}`, ChangeRequestsService.name);
