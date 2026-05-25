@@ -251,6 +251,7 @@ export class ChangeRequestsService {
 
     const changeRequest = await this._repository.findOneByCriteriaOrThrow({ id });
 
+    // Two-step fetch+check (not folded into repository criteria) to surface UnauthorizedException, not NotFoundException.
     if (changeRequest.employeeId !== employee.id) {
       throw new UnauthorizedException(
         'Employee can only revoke their own change requests.',
@@ -259,7 +260,7 @@ export class ChangeRequestsService {
 
     changeRequest.changeStatus(ChangeRequestStatus.Revoked, employee.id, new Date());
     await this._repository.update(id, changeRequest);
-    this._logger.log(`Change request revoked: id=${id}`, ChangeRequestsService.name);
+    this._logger.log(`Change request revoked: id=${id} employeeId=${employee.id}`, ChangeRequestsService.name);
   }
 
   async delete(id: string): Promise<void> {
