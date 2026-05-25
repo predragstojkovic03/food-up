@@ -6,6 +6,7 @@ import { ChangeRequestStatus } from '@food-up/shared';
 import { ChangeRequestApprovedEvent } from './events/change-request-approved.event';
 import { ChangeRequestCreatedEvent } from './events/change-request-created.event';
 import { ChangeRequestRejectedEvent } from './events/change-request-rejected.event';
+import { ChangeRequestRevokedEvent } from './events/change-request-revoked.event';
 import { ChangeRequestSelectionUpdatedEvent } from './events/change-request-selection-updated.event';
 
 export class ChangeRequest extends Entity {
@@ -160,12 +161,20 @@ export class ChangeRequest extends Entity {
           status: ChangeRequestStatus.Approved,
         }),
       );
-    } else {
+    } else if (status === ChangeRequestStatus.Rejected) {
       this.addDomainEvent(
         new ChangeRequestRejectedEvent({
           changeRequestId: this.id,
           employeeId: this.employeeId,
           status: ChangeRequestStatus.Rejected,
+        }),
+      );
+    } else {
+      this.addDomainEvent(
+        new ChangeRequestRevokedEvent({
+          changeRequestId: this.id,
+          employeeId: this.employeeId,
+          status: ChangeRequestStatus.Revoked,
         }),
       );
     }
