@@ -79,6 +79,7 @@ export class MealSelectionsTypeOrmRepository
       .innerJoin('ms.menuItem', 'existingMi')
       .innerJoin('existingMi.meal', 'existingMeal')
       .innerJoin(MenuItem, 'newMi', 'newMi.id = :newMenuItemId', { newMenuItemId })
+      // meal_id is the FK TypeORM derives from the `meal` relation via SnakeNamingStrategy
       .innerJoin(Meal, 'newMeal', 'newMeal.id = newMi.meal_id')
       .where('ms.employeeId = :employeeId', { employeeId })
       .andWhere('ms.mealSelectionWindowId = :windowId', { windowId })
