@@ -14,5 +14,6 @@
     "approve": "Approve",
     "reject": "Reject"
   },
-  "noWindow": "No meal selection window available right now."
+  "noWindow": "No meal selection window available right now.",
+  "noSelection": "No selection"
 }

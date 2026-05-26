@@ -99,6 +99,17 @@
         "total": "Ukupno",
         "disclaimer": "Stavke bez cene nisu uključene u ovu procenu."
       },
+      "dailyOverview": {
+        "triggerLabel": "Pogledaj narudžbine",
+        "dialogTitle": "Narudžbine za {{date}}",
+        "colEmployee": "Zaposleni",
+        "colMeals": "Naručeni obroci",
+        "colStatus": "Status",
+        "statusOrdered": "Naručeno",
+        "statusSkipped": "Preskočeno",
+        "noMeals": "—",
+        "loadingError": "Nije moguće učitati pregled narudžbina."
+      },
       "sentHistory": {
         "title": "Istorija poslatih mejlova",
         "viewButton": "Pogledaj"

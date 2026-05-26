@@ -83,11 +83,18 @@
     "days": "dana",
     "yourSelections": "Vaši izbori",
     "noOrder": "Bez narudžbine",
+    "noSelection": "Bez izbora",
     "changeRequests": "Zahtevi za promenu",
     "requestChange": "Zatražite promenu",
     "editSelections": "Izmeni izbore",
     "continueSelecting": "Nastavi sa izborom",
-    "startSelecting": "Počni sa izborom"
+    "startSelecting": "Počni sa izborom",
+    "deadline": {
+      "passed": "Rok je istekao",
+      "daysHoursRemaining": "{{days}}d {{hours}}h preostalo",
+      "hoursRemaining": "{{hours}}h preostalo",
+      "minutesRemaining": "{{minutes}}min preostalo"
+    }
   },
   "mealTypes": {
     "breakfast": "Doručak",

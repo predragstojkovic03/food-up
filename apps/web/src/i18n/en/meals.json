@@ -99,6 +99,17 @@
         "total": "Total",
         "disclaimer": "Items without a price are excluded from this estimate."
       },
+      "dailyOverview": {
+        "triggerLabel": "View orders",
+        "dialogTitle": "Orders for {{date}}",
+        "colEmployee": "Employee",
+        "colMeals": "Meals ordered",
+        "colStatus": "Status",
+        "statusOrdered": "Ordered",
+        "statusSkipped": "Skipped",
+        "noMeals": "—",
+        "loadingError": "Failed to load order overview."
+      },
       "sentHistory": {
         "title": "Sent emails history",
         "viewButton": "View"

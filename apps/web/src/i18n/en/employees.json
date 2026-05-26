@@ -83,11 +83,18 @@
     "days": "days",
     "yourSelections": "Your selections",
     "noOrder": "No order",
+    "noSelection": "No selection",
     "changeRequests": "Change requests",
     "requestChange": "Request a change",
     "editSelections": "Edit selections",
     "continueSelecting": "Continue selecting",
-    "startSelecting": "Start selecting"
+    "startSelecting": "Start selecting",
+    "deadline": {
+      "passed": "Deadline passed",
+      "daysHoursRemaining": "{{days}}d {{hours}}h remaining",
+      "hoursRemaining": "{{hours}}h remaining",
+      "minutesRemaining": "{{minutes}}m remaining"
+    }
   },
   "mealTypes": {
     "breakfast": "Breakfast",

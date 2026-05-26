@@ -14,5 +14,6 @@
     "approve": "Odobri",
     "reject": "Odbij"
   },
-  "noWindow": "Trenutno nema dostupnog prozora za izbor obroka."
+  "noWindow": "Trenutno nema dostupnog prozora za izbor obroka.",
+  "noSelection": "Bez izbora"
 }
