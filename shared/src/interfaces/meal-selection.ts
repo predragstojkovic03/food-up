@@ -34,3 +34,16 @@ export interface IUpdateMealSelection {
   menuItemId?: string | null;
   quantity?: number | null;
 }
+
+export interface IWindowDailyOverviewMeal {
+  name: string;
+  type: MealType;
+}
+
+export interface IWindowDailyOverviewItem {
+  employeeId: string;
+  employeeName: string;
+  date: string;
+  status: 'ordered' | 'skipped' | 'no_record';
+  meals: IWindowDailyOverviewMeal[];
+}
