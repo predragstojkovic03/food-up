@@ -23,4 +23,9 @@ export interface IMealSelectionsRepository extends IRepository<MealSelection> {
     employeeId: string,
     windowId: string,
   ): Promise<RichMealSelection[]>;
+  existsByEmployeeWindowWithSameMealTypeAndDateAs(
+    employeeId: string,
+    windowId: string,
+    newMenuItemId: string,
+  ): Promise<boolean>;
 }

@@ -148,4 +148,16 @@ export class MealSelectionsService {
     await this._repository.delete(id);
     this._logger.log(`Meal selection deleted: id=${id}`, MealSelectionsService.name);
   }
+
+  existsByEmployeeWindowWithSameMealTypeAndDateAs(
+    employeeId: string,
+    windowId: string,
+    newMenuItemId: string,
+  ): Promise<boolean> {
+    return this._repository.existsByEmployeeWindowWithSameMealTypeAndDateAs(
+      employeeId,
+      windowId,
+      newMenuItemId,
+    );
+  }
 }

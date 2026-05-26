@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
+import { Meal } from 'src/core/meals/infrastructure/persistence/meal.typeorm-entity';
+import { MenuItem } from 'src/core/menu-items/infrastructure/persistence/menu-item.typeorm-entity';
 import { TransactionContext } from 'src/shared/infrastructure/transaction-context';
 import { TypeOrmRepository } from 'src/shared/infrastructure/typeorm.repository';
 import { DataSource } from 'typeorm';
@@ -65,5 +67,24 @@ export class MealSelectionsTypeOrmRepository
         ? { name: e.menuItem.meal.name, type: e.menuItem.meal.type }
         : null,
     }));
+  }
+
+  async existsByEmployeeWindowWithSameMealTypeAndDateAs(
+    employeeId: string,
+    windowId: string,
+    newMenuItemId: string,
+  ): Promise<boolean> {
+    const count = await this._repository
+      .createQueryBuilder('ms')
+      .innerJoin('ms.menuItem', 'existingMi')
+      .innerJoin('existingMi.meal', 'existingMeal')
+      .innerJoin(MenuItem, 'newMi', 'newMi.id = :newMenuItemId', { newMenuItemId })
+      .innerJoin(Meal, 'newMeal', 'newMeal.id = newMi.meal_id')
+      .where('ms.employeeId = :employeeId', { employeeId })
+      .andWhere('ms.mealSelectionWindowId = :windowId', { windowId })
+      .andWhere('ms.date = newMi.day')
+      .andWhere('existingMeal.type = newMeal.type')
+      .getCount();
+    return count > 0;
   }
 }
