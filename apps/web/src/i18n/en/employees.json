@@ -108,6 +108,7 @@
     "noMealsAvailable": "No meals available for this day.",
     "selectChanges": "Select your changes",
     "noSelectionsForDay": "No meal selections for this day.",
+    "notYetOrdered": "Not yet ordered",
     "removeType": "Remove {{type}}",
     "submitError": "Failed to submit changes. Please try again.",
     "submitCount": "Submit {{count}} change(s)",
