@@ -44,6 +44,7 @@ export function CreateChangeRequestDrawer({
 
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const [pendingChanges, setPendingChanges] = useState<Record<string, PendingChange>>({});
+  const [pendingAdditions, setPendingAdditions] = useState<Partial<Record<MealType, string>>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -62,17 +63,37 @@ export function CreateChangeRequestDrawer({
 
   const dayMenuItems = selectedDay ? menuItems.filter((m) => m.day === selectedDay) : [];
 
+  const orderedTypes = new Set(
+    daySelections.map((s) => s.meal?.type).filter((t): t is MealType => t !== undefined),
+  );
+  const addableTypes = TYPE_ORDER.filter(
+    (type) => !orderedTypes.has(type) && dayMenuItems.some((m) => m.meal.type === type),
+  );
+
   function handleDaySelect(date: string) {
     setSelectedDay(date);
     setPendingChanges({});
+    setPendingAdditions({});
     setSubmitError(null);
   }
 
   function handleClose() {
     setSelectedDay(null);
     setPendingChanges({});
+    setPendingAdditions({});
     setSubmitError(null);
     onOpenChange(false);
+  }
+
+  function handleToggleAddition(mealType: MealType, menuItemId: string) {
+    setPendingAdditions((prev) => {
+      if (prev[mealType] === menuItemId) {
+        const next = { ...prev };
+        delete next[mealType];
+        return next;
+      }
+      return { ...prev, [mealType]: menuItemId };
+    });
   }
 
   function handleToggleItem(mealSelectionId: string, menuItemId: string) {
@@ -98,7 +119,7 @@ export function CreateChangeRequestDrawer({
   }
 
   async function handleSubmit() {
-    if (Object.keys(pendingChanges).length === 0) return;
+    if (pendingCount === 0) return;
     setIsSubmitting(true);
     setSubmitError(null);
     try {
@@ -110,6 +131,13 @@ export function CreateChangeRequestDrawer({
           clearSelection: change.clearSelection,
         });
       }
+      for (const [, menuItemId] of Object.entries(pendingAdditions)) {
+        await changeRequestService.create({
+          mealSelectionWindowId: window.id,
+          newMenuItemId: menuItemId,
+          newQuantity: 1,
+        });
+      }
       queryClient.invalidateQueries({ queryKey: ['change-requests', 'my'] });
       handleClose();
     } catch {
@@ -119,7 +147,8 @@ export function CreateChangeRequestDrawer({
     }
   }
 
-  const pendingCount = Object.keys(pendingChanges).length;
+  const pendingCount =
+    Object.keys(pendingChanges).length + Object.keys(pendingAdditions).length;
 
   return (
     <Drawer open={open} onOpenChange={(isOpen) => { if (!isOpen) handleClose(); }}>
@@ -169,7 +198,7 @@ export function CreateChangeRequestDrawer({
                     <Skeleton className="h-14 w-full rounded-lg" />
                     <Skeleton className="h-14 w-full rounded-lg" />
                   </div>
-                ) : daySelections.length === 0 ? (
+                ) : daySelections.length === 0 && addableTypes.length === 0 ? (
                   <p className="text-sm text-muted-foreground italic">{t('changeRequest.noSelectionsForDay')}</p>
                 ) : (
                   <div className="space-y-4">
@@ -231,6 +260,49 @@ export function CreateChangeRequestDrawer({
                           </div>
                         );
                       })}
+
+                    {addableTypes.length > 0 && (
+                      <div className="space-y-4 mt-2">
+                        {addableTypes.map((type) => {
+                          const items = dayMenuItems.filter((m) => m.meal.type === type);
+                          const pendingItemId = pendingAdditions[type];
+                          return (
+                            <div key={type} className="space-y-1.5">
+                              <p className="text-xs text-muted-foreground font-medium">
+                                {t(`mealTypes.${type}`)}
+                              </p>
+                              <div className="w-full px-3 py-2.5 rounded-lg border border-dashed border-border bg-muted/30 text-sm opacity-60">
+                                <span className="text-muted-foreground italic">
+                                  {t('changeRequest.notYetOrdered')}
+                                </span>
+                              </div>
+                              {items.map((item) => {
+                                const isSelected = pendingItemId === item.id;
+                                return (
+                                  <button
+                                    type="button"
+                                    key={item.id}
+                                    onClick={() => handleToggleAddition(type, item.id)}
+                                    className={`w-full text-left px-3 py-2.5 rounded-lg border text-sm transition-colors flex justify-between items-center ${
+                                      isSelected
+                                        ? 'border-primary bg-primary/5 font-medium'
+                                        : 'border-border bg-card hover:bg-muted'
+                                    }`}
+                                  >
+                                    <span>{item.meal.name}</span>
+                                    {item.price != null && (
+                                      <span className="ml-auto text-xs text-muted-foreground">
+                                        {formatRSD(item.price)}
+                                      </span>
+                                    )}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
