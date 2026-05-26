@@ -23,7 +23,7 @@ export function DailyOrderDialog({
   onClose,
 }: DailyOrderDialogProps) {
   const { t } = useTranslation('meals');
-  const { data: items = [], isError } = useWindowDailyOverview(windowId);
+  const { data: items = [], isError, isLoading } = useWindowDailyOverview(windowId);
 
   const dayItems = date ? items.filter((item) => item.date === date) : [];
 
@@ -59,9 +59,23 @@ export function DailyOrderDialog({
                 </tr>
               </thead>
               <tbody>
-                {dayItems.map((item) => (
-                  <DailyOrderRow key={item.employeeId} item={item} />
-                ))}
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={3} className='px-3 py-4 text-center text-sm text-muted-foreground'>
+                      {t('windows.detail.loading')}
+                    </td>
+                  </tr>
+                ) : dayItems.length === 0 ? (
+                  <tr>
+                    <td colSpan={3} className='px-3 py-4 text-center text-sm text-muted-foreground'>
+                      {t('windows.detail.menuItems.emptyForDate')}
+                    </td>
+                  </tr>
+                ) : (
+                  dayItems.map((item) => (
+                    <DailyOrderRow key={item.employeeId} item={item} />
+                  ))
+                )}
               </tbody>
             </table>
           </div>
