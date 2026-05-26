@@ -20,6 +20,8 @@ import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
 import { RequiredEmployeeRole } from 'src/core/employees/presentation/rest/employee-role.decorator';
 import { RequiredIdentityType } from 'src/core/identity/presentation/rest/identity-type.decorator';
 import { MealSelectionsService } from '../../application/meal-selections.service';
+import { MealSelectionOverviewQueryService } from '../../application/queries/meal-selection-overview-query.service';
+import { WindowDailyOverviewItemDto } from '../../application/queries/dto/window-daily-overview-item.dto';
 import { MealSelection } from '../../domain/meal-selection.entity';
 import { CreateMealSelectionDto } from './dto/create-meal-selection.dto';
 import { MealSelectionResponseDto } from './dto/meal-selection-response.dto';
@@ -29,7 +31,10 @@ import { UpdateMealSelectionDto } from './dto/update-meal-selection.dto';
 @ApiTags('MealSelections')
 @Controller('meal-selections')
 export class MealSelectionsController {
-  constructor(private readonly _mealSelectionsService: MealSelectionsService) {}
+  constructor(
+    private readonly _mealSelectionsService: MealSelectionsService,
+    private readonly _overviewQueryService: MealSelectionOverviewQueryService,
+  ) {}
 
   @ApiOperation({ summary: 'Create a new meal selection' })
   @ApiResponse({
@@ -37,7 +42,6 @@ export class MealSelectionsController {
     description: 'Meal selection created',
     type: MealSelectionResponseDto,
   })
-  // ...removed global guard...
   @RequiredIdentityType(IdentityType.Employee)
   @ApiBearerAuth()
   @Post()
@@ -77,6 +81,20 @@ export class MealSelectionsController {
     return result.map((e) => this.toResponseDto(e));
   }
 
+  @RequiredIdentityType(IdentityType.Employee)
+  @RequiredEmployeeRole(EmployeeRole.Manager)
+  @ApiBearerAuth()
+  @Get('window/:windowId/daily-overview')
+  @ApiOperation({
+    summary: 'Get per-employee daily order overview for a window (manager view)',
+  })
+  @ApiResponse({ status: 200, description: 'List of per-employee per-day overview items' })
+  async getDailyOverview(
+    @Param('windowId') windowId: string,
+  ): Promise<WindowDailyOverviewItemDto[]> {
+    return this._overviewQueryService.getDailyOverview(windowId);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get a meal selection by ID' })
   @ApiResponse({
@@ -98,7 +116,6 @@ export class MealSelectionsController {
     type: MealSelectionResponseDto,
   })
   @ApiResponse({ status: 404, description: 'Meal selection not found' })
-  // ...removed global guard...
   @RequiredIdentityType(IdentityType.Employee)
   @ApiBearerAuth()
   @Patch(':id')
@@ -131,10 +148,7 @@ export class MealSelectionsController {
   ): Promise<MyMealSelectionResponseDto[]> {
     return plainToInstance(
       MyMealSelectionResponseDto,
-      await this._mealSelectionsService.findMySelectionsForWindow(
-        sub,
-        windowId,
-      ),
+      await this._mealSelectionsService.findMySelectionsForWindow(sub, windowId),
     );
   }
 
