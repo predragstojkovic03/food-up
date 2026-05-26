@@ -78,5 +78,7 @@ describe('ChangeRequestsService.create() — late addition', () => {
         newQuantity: 1,
       }),
     ).resolves.not.toThrow();
+
+    expect(mockRepository.insert).toHaveBeenCalledTimes(1);
   });
 });

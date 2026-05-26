@@ -81,9 +81,9 @@ export class ChangeRequestsService {
         );
       }
     } else {
-      if (!dto.newMenuItemId) {
+      if (!dto.newMenuItemId || dto.newQuantity == null) {
         throw new InvalidInputDataException(
-          'Late selection requests require newMenuItemId.',
+          'Late selection requests require newMenuItemId and newQuantity.',
         );
       }
       const alreadyHasType =
