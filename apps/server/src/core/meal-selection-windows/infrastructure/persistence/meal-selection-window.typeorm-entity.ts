@@ -4,6 +4,7 @@ import { MenuPeriod } from 'src/core/menu-periods/infrastructure/persistence/men
 import {
   Column,
   Entity,
+  Index,
   JoinTable,
   ManyToMany,
   ManyToOne,
@@ -22,6 +23,7 @@ export class MealSelectionWindow {
   @Column('timestamp with time zone')
   endTime: Date;
 
+  @Index('IDX_meal_selection_window_business_id')
   @ManyToOne(() => Business, (business) => business.mealSelectionWindows, {
     onDelete: 'CASCADE',
     eager: true,

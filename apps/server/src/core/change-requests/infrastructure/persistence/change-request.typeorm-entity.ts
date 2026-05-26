@@ -1,7 +1,8 @@
+import { Employee } from 'src/core/employees/infrastructure/persistence/employee.typeorm-entity';
 import { MealSelection } from 'src/core/meal-selections/infrastructure/persistence/meal-selection.typeorm-entity';
 import { MealSelectionWindow } from 'src/core/meal-selection-windows/infrastructure/persistence/meal-selection-window.typeorm-entity';
 import { MenuItem } from 'src/core/menu-items/infrastructure/persistence/menu-item.typeorm-entity';
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import { ChangeRequestStatus } from '@food-up/shared';
 
 @Entity()
@@ -9,8 +10,13 @@ export class ChangeRequest {
   @PrimaryColumn('character varying', { length: 26 })
   id: string;
 
-  @Column('character varying', { length: 26 })
+  @Index('IDX_change_request_employee_id')
+  @Column('character varying', { length: 26, name: 'employee_id' })
   employeeId: string;
+
+  @ManyToOne(() => Employee, { nullable: false })
+  @JoinColumn({ name: 'employee_id' })
+  employee: Employee;
 
   @Column('character varying', { length: 26, name: 'meal_selection_window_id' })
   mealSelectionWindowId: string;
@@ -39,11 +45,16 @@ export class ChangeRequest {
   @Column('boolean', { default: false })
   clearSelection: boolean;
 
+  @Index('IDX_change_request_status')
   @Column('enum', { enum: ChangeRequestStatus })
   status: ChangeRequestStatus;
 
-  @Column('character varying', { length: 26, nullable: true })
+  @Column('character varying', { length: 26, nullable: true, name: 'approved_by' })
   approvedBy: string | null;
+
+  @ManyToOne(() => Employee, { nullable: true })
+  @JoinColumn({ name: 'approved_by' })
+  approver: Employee | null;
 
   @Column('timestamp', { nullable: true })
   approvedAt: Date | null;

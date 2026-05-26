@@ -3,10 +3,8 @@ import { Business } from 'src/core/businesses/infrastructure/persistence/busines
 import { Identity } from 'src/core/identity/infrastructure/persistence/identity.typeorm-entity';
 import { Meal } from 'src/core/meals/infrastructure/persistence/meal.typeorm-entity';
 import { MenuPeriod } from 'src/core/menu-periods/infrastructure/persistence/menu-period.typeorm-entity';
-import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
 import {
-  BeforeInsert,
-  BeforeUpdate,
+  Check,
   Column,
   Entity,
   JoinColumn,
@@ -18,6 +16,7 @@ import {
 import { Language, SupplierType } from '@food-up/shared';
 
 @Entity()
+@Check(`type != '${SupplierType.Standalone}' OR identity_id IS NOT NULL`)
 export class Supplier {
   @PrimaryColumn('character varying', { length: 26 })
   id: string;
@@ -70,11 +69,4 @@ export class Supplier {
   @OneToMany(() => MenuPeriod, (menuPeriod) => menuPeriod.supplier)
   menuPeriods: MenuPeriod[];
 
-  @BeforeInsert()
-  @BeforeUpdate()
-  validateIdentity() {
-    if (this.type === SupplierType.Standalone && !this.identity) {
-      throw new InvalidInputDataException('Identity type must be Supplier');
-    }
-  }
 }
