@@ -77,7 +77,7 @@ export class ChangeRequestsQueryTypeOrmRepository
         'employee.name AS "employeeName"',
         'cr.mealSelectionWindowId AS "mealSelectionWindowId"',
         'cr.mealSelectionId AS "mealSelectionId"',
-        'mealSelection.date AS date',
+        'COALESCE(mealSelection.date, newMenuItem.day) AS date',
         'currentMeal.name AS "currentMealName"',
         'currentMeal.type AS "currentMealType"',
         'newMeal.name AS "newMealName"',

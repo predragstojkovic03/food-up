@@ -81,15 +81,20 @@ export class ChangeRequestsService {
         );
       }
     } else {
-      const existingSelection =
-        await this._mealSelectionsService.findByEmployeeAndWindow(
+      if (!dto.newMenuItemId) {
+        throw new InvalidInputDataException(
+          'Late selection requests require newMenuItemId.',
+        );
+      }
+      const alreadyHasType =
+        await this._mealSelectionsService.existsByEmployeeWindowWithSameMealTypeAndDateAs(
           employee.id,
           mealSelectionWindow.id,
+          dto.newMenuItemId,
         );
-
-      if (existingSelection) {
+      if (alreadyHasType) {
         throw new InvalidInputDataException(
-          'Employee already has a meal selection for this window. Reference it via mealSelectionId instead.',
+          'Employee already has a selection of this meal type for this date. Reference it via mealSelectionId instead.',
         );
       }
     }
