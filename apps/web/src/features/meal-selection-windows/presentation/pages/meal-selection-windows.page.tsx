@@ -59,8 +59,11 @@ import {
   Plus,
   Send,
   Trash2,
+  Users,
   X,
 } from 'lucide-react';
+import { DailyOrderDialog } from './components/daily-order-dialog';
+import { useWindowDailyOverview } from '@/features/meal-selections/application/use-window-daily-overview.hook';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod/v3';
@@ -386,6 +389,18 @@ function WindowDetails({ windowId, endTime, targetDates }: WindowDetailsProps) {
     queryFn: () => mealSelectionService.getByWindow(windowId),
   });
 
+  const [openDate, setOpenDate] = useState<string | null>(null);
+  useWindowDailyOverview(windowId); // pre-fetch so Dialog opens instantly
+
+  const openDateFormatted = openDate
+    ? new Date(openDate + 'T00:00:00').toLocaleDateString(locale, {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'numeric',
+        year: 'numeric',
+      })
+    : '';
+
   const downloadXlsx = useMutation({
     mutationFn: () => reportService.downloadXlsx(windowId),
   });
@@ -425,14 +440,24 @@ function WindowDetails({ windowId, endTime, targetDates }: WindowDetailsProps) {
 
         return (
           <div key={date}>
-            <h3 className='text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2'>
-              {new Date(date + 'T00:00:00').toLocaleDateString(locale, {
-                weekday: 'long',
-                day: 'numeric',
-                month: 'numeric',
-                year: 'numeric',
-              })}
-            </h3>
+            <div className='flex items-center justify-between mb-2'>
+              <h3 className='text-xs font-semibold text-muted-foreground uppercase tracking-wide'>
+                {new Date(date + 'T00:00:00').toLocaleDateString(locale, {
+                  weekday: 'long',
+                  day: 'numeric',
+                  month: 'numeric',
+                  year: 'numeric',
+                })}
+              </h3>
+              <button
+                type='button'
+                onClick={() => setOpenDate(date)}
+                className='p-1 text-muted-foreground hover:text-foreground transition-colors'
+                title={t('windows.detail.dailyOverview.triggerLabel')}
+              >
+                <Users className='size-4' />
+              </button>
+            </div>
 
             {items.length === 0 ? (
               <p className='text-xs text-muted-foreground'>{t('windows.detail.menuItems.emptyForDate')}</p>
@@ -505,6 +530,13 @@ function WindowDetails({ windowId, endTime, targetDates }: WindowDetailsProps) {
 
         {isExpired && <WindowReportsPanel windowId={windowId} />}
       </div>
+
+      <DailyOrderDialog
+        windowId={windowId}
+        date={openDate}
+        formattedDate={openDateFormatted}
+        onClose={() => setOpenDate(null)}
+      />
     </div>
   );
 }
