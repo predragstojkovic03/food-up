@@ -4,6 +4,7 @@ import {
   IMealSelectionResponse,
   IMyMealSelectionResponse,
   IUpdateMealSelection,
+  IWindowDailyOverviewItem,
 } from '@food-up/shared';
 import { IMealSelectionService } from '../domain/meal-selection-service.interface';
 
@@ -16,6 +17,12 @@ export class MealSelectionService implements IMealSelectionService {
 
   getMySelectionsForWindow(windowId: string): Promise<IMyMealSelectionResponse[]> {
     return this.http.get<IMyMealSelectionResponse[]>(`/api/meal-selections/my/window/${windowId}`);
+  }
+
+  getDailyOverview(windowId: string): Promise<IWindowDailyOverviewItem[]> {
+    return this.http.get<IWindowDailyOverviewItem[]>(
+      `/api/meal-selections/window/${windowId}/daily-overview`,
+    );
   }
 
   create(data: ICreateMealSelection): Promise<IMealSelectionResponse> {
