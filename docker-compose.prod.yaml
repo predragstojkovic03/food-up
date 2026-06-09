@@ -2,12 +2,14 @@ version: '3.8'
 
 services:
   app:
-    container_name: food-up-app
     image: food-up-app-prod:1.0.0
     build:
       context: .
       dockerfile: Dockerfile.prod
       target: production
+    restart: unless-stopped
+    deploy:
+      replicas: ${APP_REPLICAS:-2}
     environment:
       DB_NAME: ${POSTGRES_DB}
       DB_USER: ${POSTGRES_USER}
@@ -17,19 +19,36 @@ services:
       NODE_ENV: production
       PORT: ${SERVER_PORT}
       ORM_SYNC: false
-      VIRTUAL_HOST: yourdomain.com
-      LETSENCRYPT_HOST: yourdomain.com
-      LETSENCRYPT_EMAIL: your@email.com
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ACCESS_EXPIRY: ${JWT_ACCESS_EXPIRY}
+      JWT_REFRESH_EXPIRY_DAYS: ${JWT_REFRESH_EXPIRY_DAYS}
+      MAIL_FROM: ${MAIL_FROM}
+      WEB_APP_URL: ${WEB_APP_URL}
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      VIRTUAL_HOST: ${DOMAIN}
+      VIRTUAL_PORT: 3000
+      LETSENCRYPT_HOST: ${DOMAIN}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
     networks:
       - shared-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     depends_on:
-      - postgres
-    volumes:
-      - pg:/var/lib/postgresql/data
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
 
   postgres:
     image: postgres:17.4-alpine
     container_name: food-up-postgres
+    restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -38,6 +57,20 @@ services:
       - shared-network
     volumes:
       - pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:8-alpine
+    container_name: food-up-redis
+    restart: unless-stopped
+    networks:
+      - shared-network
+    volumes:
+      - redis:/data
 
   nginx-proxy:
     image: nginxproxy/nginx-proxy:alpine
@@ -47,9 +80,9 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - /etc/nginx/certs
-      - /etc/nginx/vhost.d
-      - /usr/share/nginx/html
+      - nginx-certs:/etc/nginx/certs
+      - nginx-vhost:/etc/nginx/vhost.d
+      - nginx-html:/usr/share/nginx/html
       - /var/run/docker.sock:/tmp/docker.sock:ro
     networks:
       - shared-network
@@ -60,20 +93,37 @@ services:
     restart: unless-stopped
     environment:
       NGINX_PROXY_CONTAINER: nginx-proxy
-      DEFAULT_EMAIL: your@email.com
+      DEFAULT_EMAIL: ${LETSENCRYPT_EMAIL}
     volumes:
-      - /etc/nginx/certs
-      - /etc/nginx/vhost.d
-      - /usr/share/nginx/html
+      - nginx-certs:/etc/nginx/certs
+      - nginx-vhost:/etc/nginx/vhost.d
+      - nginx-html:/usr/share/nginx/html
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - shared-network
     depends_on:
       - nginx-proxy
 
+  autoheal:
+    image: willfarrell/autoheal:latest
+    container_name: food-up-autoheal
+    restart: unless-stopped
+    environment:
+      AUTOHEAL_CONTAINER_LABEL: all
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
 networks:
   shared-network:
 
 volumes:
   pg:
+    driver: local
+  redis:
+    driver: local
+  nginx-certs:
+    driver: local
+  nginx-vhost:
+    driver: local
+  nginx-html:
     driver: local

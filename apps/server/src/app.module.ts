@@ -2,6 +2,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ServeStaticModule } from '@nestjs/serve-static';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { LoggerModule as PinoLoggerModule } from 'nestjs-pino';
 import { join } from 'path';
@@ -13,7 +14,7 @@ import { CoreModule } from './core/core.module';
 import { HealthModule } from './health/health.module';
 import { EmployeeRoleGuard } from './core/employees/presentation/rest/employee-role.guard';
 import { IdentityTypeGuard } from './core/identity/presentation/rest/identity-type.guard';
-import { EnvironmentVariables } from './env.validation';
+import { EnvironmentVariables, NodeEnv } from './env.validation';
 import {
   I_CONFIG_SERVICE,
   IConfigService,
@@ -70,6 +71,27 @@ import { TransactionModule } from './shared/infrastructure/transaction/transacti
           level: (label: string) => ({ level: label }),
         },
       },
+    }),
+    ServeStaticModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: IConfigService<EnvironmentVariables, true>) =>
+        configService.get('NODE_ENV') === NodeEnv.Production
+          ? [
+              {
+                rootPath: join(
+                  __dirname,
+                  '..',
+                  '..',
+                  '..',
+                  'apps',
+                  'web',
+                  'dist',
+                ),
+                exclude: ['/api/(.*)'],
+              },
+            ]
+          : [],
+      inject: [I_CONFIG_SERVICE],
     }),
     EventEmitterModule.forRoot({ wildcard: true }),
     BullModule.forRootAsync({
