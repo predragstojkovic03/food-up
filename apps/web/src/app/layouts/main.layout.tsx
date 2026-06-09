@@ -1,57 +1,46 @@
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/features/auth/presentation/state/auth.store';
-import { useServices } from '@/shared/infrastructure/di/service.context';
-import { LogOut, UtensilsCrossed } from 'lucide-react';
+import { useCurrentEmployee } from '@/features/employees/application/use-current-employee.hook';
+import { UserMenuDropdown } from '@/features/employees/presentation/components/user-menu-dropdown';
+import { EmployeeRole, IdentityType } from '@food-up/shared';
+import { UtensilsCrossed } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Link, Outlet } from 'react-router-dom';
+
+const HOME_PATH: Record<IdentityType, string> = {
+  [IdentityType.Employee]: '/employee',
+  [IdentityType.Supplier]: '/supplier',
+  [IdentityType.Business]: '/business',
+  [IdentityType.Admin]: '/admin',
+};
 
 export default function MainLayout() {
   const { t } = useTranslation('common');
-  const { authService } = useServices();
-  const clearUser = useAuthStore((s) => s.clearUser);
-  const navigate = useNavigate();
-
-  async function handleLogout() {
-    await authService.logout();
-    clearUser();
-    navigate('/login');
-  }
+  const user = useAuthStore((s) => s.user);
+  const homePath = user ? HOME_PATH[user.type] : '/';
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <header className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex h-14 items-center justify-between px-4 max-w-lg mx-auto w-full">
-          <div className="flex items-center gap-2">
+          <Link to={homePath} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <UtensilsCrossed className="size-5 text-primary" />
             <span className="font-semibold text-base">{t('brand.name')}</span>
+          </Link>
+          <div className="flex items-center gap-2">
+            {user?.type === IdentityType.Employee && <ManagerPanelLink />}
+            <UserMenuDropdown
+              accountPath='/employee/account'
+              renderTrigger={({ initials }) => (
+                <Button variant='ghost' size='sm' className='rounded-full p-1'>
+                  <Avatar className='size-7'>
+                    <AvatarFallback className='text-xs font-semibold'>{initials}</AvatarFallback>
+                  </Avatar>
+                </Button>
+              )}
+            />
           </div>
-          <AlertDialog>
-            <AlertDialogTrigger className="rounded-md p-2 hover:bg-muted transition-colors text-muted-foreground hover:text-foreground">
-              <LogOut className="size-4" />
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t('dialog.logout.title')}</AlertDialogTitle>
-                <AlertDialogDescription>
-                  {t('dialog.logout.description')}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>{t('dialog.cancel')}</AlertDialogCancel>
-                <AlertDialogAction onClick={handleLogout}>{t('dialog.logout.confirm')}</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
         </div>
       </header>
 
@@ -59,5 +48,16 @@ export default function MainLayout() {
         <Outlet />
       </main>
     </div>
+  );
+}
+
+function ManagerPanelLink() {
+  const { t } = useTranslation('common');
+  const { data: employee } = useCurrentEmployee();
+  if (employee?.role !== EmployeeRole.Manager) return null;
+  return (
+    <Button variant='outline' size='sm' asChild>
+      <Link to='/employee/manager'>{t('nav.managerPanel')}</Link>
+    </Button>
   );
 }

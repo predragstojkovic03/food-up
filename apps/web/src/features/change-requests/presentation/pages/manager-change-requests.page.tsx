@@ -19,12 +19,14 @@ const STATUS_VARIANTS: Record<ChangeRequestStatus, 'default' | 'secondary' | 'de
 };
 
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+const LOCALE: Record<string, string> = { en: 'en-US', sr: 'sr-Latn' };
+
+function formatDate(iso: string, language: string): string {
+  return new Date(iso).toLocaleDateString(LOCALE[language] ?? language, { weekday: 'short', month: 'short', day: 'numeric' });
 }
 
 export default function ManagerChangeRequestsPage() {
-  const { t } = useTranslation('changeRequests');
+  const { t, i18n } = useTranslation('changeRequests');
   const queryClient = useQueryClient();
   const { changeRequestService } = useServices();
   const { data: window } = useLatestBusinessWindow();
@@ -184,12 +186,12 @@ export default function ManagerChangeRequestsPage() {
                 <span className="text-sm font-medium truncate">{cr.employeeName}</span>
 
                 <span className="text-sm text-muted-foreground">
-                  {cr.date ? formatDate(cr.date) : '—'}
+                  {cr.date ? formatDate(cr.date, i18n.language) : '—'}
                 </span>
 
                 <div className="min-w-0">
                   <p className="text-sm truncate">
-                    <span className="text-muted-foreground">{cr.currentMeal?.name ?? 'No selection'}</span>
+                    <span className="text-muted-foreground">{cr.currentMeal?.name ?? t('noSelection')}</span>
                     <span className="mx-1.5 text-muted-foreground">→</span>
                     <span className="font-medium">{cr.requestedMeal?.name ?? '—'}</span>
                   </p>

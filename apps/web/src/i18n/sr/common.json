@@ -13,7 +13,9 @@
     "changeRequests": "Zahtevi za promenu",
     "businessSettings": "Podešavanja firme",
     "account": "Nalog",
-    "logout": "Odjava"
+    "logout": "Odjava",
+    "orderMeals": "Naruči obroke",
+    "managerPanel": "Panel menadžera"
   },
   "actions": {
     "save": "Sačuvaj izmene",

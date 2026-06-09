@@ -44,6 +44,7 @@ import {
   ISupplierSendStatus,
   IWindowCostSummary,
   IWindowMenuItemResponse,
+  MealType,
 } from '@food-up/shared';
 import React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -417,6 +418,22 @@ function WindowDetails({ windowId, endTime, targetDates }: WindowDetailsProps) {
     return acc;
   }, {});
 
+  const MEAL_TYPE_ORDER: MealType[] = [
+    MealType.Breakfast,
+    MealType.Soup,
+    MealType.Lunch,
+    MealType.Salad,
+    MealType.Dinner,
+    MealType.Bread,
+    MealType.Dessert,
+  ];
+
+  const openDateMealTypes = openDate
+    ? MEAL_TYPE_ORDER.filter((type) =>
+        (itemsByDate[openDate] ?? []).some((item) => item.meal.type === type),
+      )
+    : [];
+
   if (isLoading) {
     return (
       <div className='px-8 py-4 bg-muted/10 border-t text-sm text-muted-foreground'>
@@ -535,6 +552,7 @@ function WindowDetails({ windowId, endTime, targetDates }: WindowDetailsProps) {
         windowId={windowId}
         date={openDate}
         formattedDate={openDateFormatted}
+        availableMealTypes={openDateMealTypes}
         onClose={() => setOpenDate(null)}
       />
     </div>

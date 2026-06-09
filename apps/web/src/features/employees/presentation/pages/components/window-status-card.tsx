@@ -41,7 +41,7 @@ import {
   PlusCircle,
 } from 'lucide-react';
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { TFunction, useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { CreateChangeRequestDrawer } from './create-change-request-drawer';
 
@@ -64,13 +64,6 @@ const TYPE_ORDER: MealType[] = [
   MealType.Dessert,
 ];
 
-const STATUS_LABELS: Record<ChangeRequestStatus, string> = {
-  [ChangeRequestStatus.Pending]: 'Pending',
-  [ChangeRequestStatus.Approved]: 'Approved',
-  [ChangeRequestStatus.Rejected]: 'Rejected',
-  [ChangeRequestStatus.Revoked]: 'Revoked',
-};
-
 const STATUS_VARIANTS: Record<
   ChangeRequestStatus,
   'default' | 'secondary' | 'destructive' | 'outline'
@@ -87,24 +80,26 @@ interface WindowStatusCardProps {
   changeRequests: IRichChangeRequest[];
 }
 
-function formatDeadline(endTime: string): string {
+function formatDeadline(endTime: string, t: TFunction): string {
   const end = new Date(endTime);
   const now = new Date();
   const diffMs = end.getTime() - now.getTime();
 
-  if (diffMs <= 0) return 'Deadline passed';
+  if (diffMs <= 0) return t('windowStatus.deadline.passed');
 
   const diffH = Math.floor(diffMs / (1000 * 60 * 60));
   const diffD = Math.floor(diffH / 24);
 
-  if (diffD > 0) return `${diffD}d ${diffH % 24}h remaining`;
-  if (diffH > 0) return `${diffH}h remaining`;
+  if (diffD > 0) return t('windowStatus.deadline.daysHoursRemaining', { days: diffD, hours: diffH % 24 });
+  if (diffH > 0) return t('windowStatus.deadline.hoursRemaining', { hours: diffH });
   const diffM = Math.floor(diffMs / (1000 * 60));
-  return `${diffM}m remaining`;
+  return t('windowStatus.deadline.minutesRemaining', { minutes: diffM });
 }
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', {
+const LOCALE: Record<string, string> = { en: 'en-US', sr: 'sr-Latn' };
+
+function formatDate(iso: string, language: string): string {
+  return new Date(iso).toLocaleDateString(LOCALE[language] ?? language, {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
@@ -116,7 +111,7 @@ export function WindowStatusCard({
   selections,
   changeRequests,
 }: WindowStatusCardProps) {
-  const { t } = useTranslation('employees');
+  const { t, i18n } = useTranslation('employees');
   const navigate = useNavigate();
   const [selectionsOpen, setSelectionsOpen] = useState(false);
   const [changeRequestsOpen, setChangeRequestsOpen] = useState(false);
@@ -144,12 +139,12 @@ export function WindowStatusCard({
     ? revokeTarget.clearSelection
       ? t('changeRequest.revokeDialog.bodyClear', {
           mealType: revokeTarget.currentMeal?.name ?? t('changeRequest.revokeDialog.noMeal'),
-          date: revokeTarget.date ? formatDate(revokeTarget.date) : '—',
+          date: revokeTarget.date ? formatDate(revokeTarget.date, i18n.language) : '—',
         })
       : t('changeRequest.revokeDialog.bodyChange', {
           currentMeal: revokeTarget.currentMeal?.name ?? t('changeRequest.revokeDialog.noMeal'),
           newMeal: revokeTarget.requestedMeal?.name ?? t('changeRequest.revokeDialog.noMeal'),
-          date: revokeTarget.date ? formatDate(revokeTarget.date) : '—',
+          date: revokeTarget.date ? formatDate(revokeTarget.date, i18n.language) : '—',
         })
     : '';
 
@@ -173,7 +168,7 @@ export function WindowStatusCard({
           {/* Deadline */}
           <div className='flex items-center gap-2 text-sm text-muted-foreground'>
             <Clock className='size-4 shrink-0' />
-            <span>{formatDeadline(window.endTime)}</span>
+            <span>{formatDeadline(window.endTime, t)}</span>
           </div>
 
           {/* Target dates */}
@@ -191,7 +186,7 @@ export function WindowStatusCard({
                         : 'bg-muted border-border text-muted-foreground'
                     }`}
                   >
-                    {formatDate(date)}
+                    {formatDate(date, i18n.language)}
                   </span>
                 );
               })}
@@ -250,7 +245,7 @@ export function WindowStatusCard({
                     return (
                       <div key={date} className='space-y-1'>
                         <p className='text-xs font-medium text-muted-foreground'>
-                          {formatDate(date)}
+                          {formatDate(date, i18n.language)}
                         </p>
                         {daySelections.length === 0 ? (
                           <p className='text-xs text-muted-foreground italic'>
@@ -320,7 +315,7 @@ export function WindowStatusCard({
                             {cr.date ? formatDate(cr.date) : '—'}
                           </p>
                           <p className='text-xs text-muted-foreground truncate'>
-                            {cr.currentMeal?.name ?? 'No selection'}
+                            {cr.currentMeal?.name ?? t('windowStatus.noSelection')}
                             {' → '}
                             {cr.requestedMeal?.name ?? '—'}
                           </p>
@@ -330,7 +325,7 @@ export function WindowStatusCard({
                             variant={STATUS_VARIANTS[cr.status]}
                             className='text-xs'
                           >
-                            {STATUS_LABELS[cr.status]}
+                            {t(`status.${cr.status}`, { ns: 'common' })}
                           </Badge>
                           {cr.status === ChangeRequestStatus.Pending && (
                             <Button

@@ -74,6 +74,15 @@ function App() {
           />
 
           <Route
+            path='employee/account'
+            element={
+              <RequiredRoles types={[IdentityType.Employee]}>
+                <AccountPage />
+              </RequiredRoles>
+            }
+          />
+
+          <Route
             path='supplier'
             element={
               <RequiredRoles types={[IdentityType.Supplier]}>

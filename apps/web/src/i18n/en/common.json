@@ -13,7 +13,9 @@
     "changeRequests": "Change Requests",
     "businessSettings": "Business Settings",
     "account": "Account",
-    "logout": "Logout"
+    "logout": "Logout",
+    "orderMeals": "Order meals",
+    "managerPanel": "Manager panel"
   },
   "actions": {
     "save": "Save changes",

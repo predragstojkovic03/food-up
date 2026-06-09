@@ -1,14 +1,3 @@
-import { useState } from 'react';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -16,13 +5,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import {
   Sidebar,
   SidebarContent,
@@ -37,25 +19,24 @@ import {
   SidebarMenuSubItem,
   SidebarProvider,
   SidebarTrigger,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import { useWindowPendingCount } from '@/features/change-requests/application/use-window-change-requests.hook';
-import { useCurrentEmployee } from '@/features/employees/application/use-current-employee.hook';
 import { useLatestBusinessWindow } from '@/features/meal-selection-windows/application/use-latest-business-window.hook';
-import { useAuthStore } from '@/features/auth/presentation/state/auth.store';
-import { useServices } from '@/shared/infrastructure/di/service.context';
+import { UserMenuDropdown } from '@/features/employees/presentation/components/user-menu-dropdown';
 import {
   Building2,
   CalendarRange,
   ChevronRight,
   ClipboardList,
   LayoutDashboard,
-  LogOut,
-  Settings,
   Store,
   Users,
+  Utensils,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 
 const SUPPLIERS_PATHS = [
   '/employee/manager/suppliers/in-house',
@@ -64,25 +45,10 @@ const SUPPLIERS_PATHS = [
 
 export default function ManagerLayout() {
   const { pathname } = useLocation();
-  const navigate = useNavigate();
-  const { authService } = useServices();
-  const clearUser = useAuthStore((s) => s.clearUser);
   const suppliersOpen = SUPPLIERS_PATHS.some((p) => pathname.startsWith(p));
   const { data: latestWindow } = useLatestBusinessWindow();
   const { data: pendingCount = 0 } = useWindowPendingCount(latestWindow?.id);
-  const { data: employee } = useCurrentEmployee();
   const { t } = useTranslation('common');
-  const [logoutOpen, setLogoutOpen] = useState(false);
-
-  const initials = employee?.name
-    ? employee.name.charAt(0).toUpperCase()
-    : '?';
-
-  async function handleLogout() {
-    await authService.logout();
-    clearUser();
-    navigate('/login');
-  }
 
   return (
     <SidebarProvider>
@@ -180,64 +146,46 @@ export default function ManagerLayout() {
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
+
+          <SidebarGroup className='mt-auto'>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    render={<NavLink to='/employee' />}
+                    isActive={pathname === '/employee'}
+                  >
+                    <Utensils />
+                    <span>{t('nav.orderMeals')}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
         </SidebarContent>
 
         <SidebarFooter>
           <SidebarMenu>
             <SidebarMenuItem>
-              <DropdownMenu>
-                <DropdownMenuTrigger
-                  render={<SidebarMenuButton size='lg' tooltip={employee?.name ?? t('nav.account')} />}
-                >
-                  <Avatar className='size-7 shrink-0'>
-                    <AvatarFallback className='text-xs font-semibold'>
-                      {initials}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className='truncate font-semibold'>{employee?.name ?? '…'}</span>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent side='top' align='start' className='w-60'>
-                  <div className='flex items-center gap-3 px-3 py-2'>
-                    <Avatar className='size-10 shrink-0'>
-                      <AvatarFallback className='font-semibold'>{initials}</AvatarFallback>
+              <UserMenuDropdown
+                accountPath='/employee/manager/account'
+                contentSide='top'
+                contentAlign='start'
+                renderTrigger={({ name, initials }) => (
+                  <SidebarMenuButton size='lg' tooltip={name ?? t('nav.account')}>
+                    <Avatar className='size-7 shrink-0'>
+                      <AvatarFallback className='text-xs font-semibold'>{initials}</AvatarFallback>
                     </Avatar>
-                    <div className='flex min-w-0 flex-col'>
-                      <span className='truncate text-sm font-semibold'>{employee?.name}</span>
-                      <span className='truncate text-xs text-muted-foreground'>{employee?.email}</span>
-                    </div>
-                  </div>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate('/employee/manager/account')}>
-                    <Settings size={15} className='mr-2' />
-                    {t('nav.account')}
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem variant='destructive' onClick={() => setLogoutOpen(true)}>
-                    <LogOut size={15} className='mr-2' />
-                    {t('nav.logout')}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    <span className='truncate font-semibold'>{name ?? '…'}</span>
+                  </SidebarMenuButton>
+                )}
+              />
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarFooter>
       </Sidebar>
 
-      <AlertDialog open={logoutOpen} onOpenChange={setLogoutOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t('dialog.logout.title')}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t('dialog.logout.description')}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t('dialog.cancel')}</AlertDialogCancel>
-            <AlertDialogAction onClick={handleLogout}>{t('dialog.logout.confirm')}</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
+      <MobileNavCloser />
       <main className='flex flex-col flex-1 overflow-auto'>
         <header className='flex items-center h-12 px-4 border-b shrink-0'>
           <SidebarTrigger />
@@ -248,4 +196,13 @@ export default function ManagerLayout() {
       </main>
     </SidebarProvider>
   );
+}
+
+function MobileNavCloser() {
+  const { setOpenMobile } = useSidebar();
+  const { pathname } = useLocation();
+  useEffect(() => {
+    setOpenMobile(false);
+  }, [pathname, setOpenMobile]);
+  return null;
 }
