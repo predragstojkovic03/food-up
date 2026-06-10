@@ -10,9 +10,11 @@ export class CreateMealDto {
   @ApiProperty({
     example: 'Grilled chicken with lettuce',
     description: 'Description of the meal',
+    required: false,
   })
   @IsString()
-  description: string;
+  @IsOptional()
+  description?: string;
 
   @ApiProperty({
     example: MealType.Lunch,

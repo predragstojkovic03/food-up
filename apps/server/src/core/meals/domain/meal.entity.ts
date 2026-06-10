@@ -5,7 +5,7 @@ import { generateId } from 'src/shared/domain/generate-id';
 export class Meal extends Entity {
   static create(
     name: string,
-    description: string,
+    description: string | undefined,
     type: MealType,
     supplierId: string,
     price?: number,
@@ -16,18 +16,18 @@ export class Meal extends Entity {
   static reconstitute(
     id: string,
     name: string,
-    description: string,
+    description: string | null | undefined,
     type: MealType,
     supplierId: string,
     price?: number,
   ): Meal {
-    return new Meal(id, name, description, type, supplierId, price);
+    return new Meal(id, name, description ?? undefined, type, supplierId, price);
   }
 
   private constructor(
     public readonly id: string,
     public name: string,
-    public description: string,
+    public description: string | undefined,
     public type: MealType,
     public readonly supplierId: string,
     public price?: number,

@@ -10,7 +10,7 @@ export class MealTypeOrmMapper extends TypeOrmMapper<
     return MealDomain.reconstitute(
       persistence.id,
       persistence.name,
-      persistence.description,
+      persistence.description ?? undefined,
       persistence.type,
       persistence.supplier?.id,
       persistence.price,

@@ -13,8 +13,10 @@ export class MealResponseDto {
   @ApiProperty({
     example: 'Grilled chicken with lettuce',
     description: 'Description of the meal',
+    required: false,
+    nullable: true,
   })
-  description: string;
+  description?: string;
 
   @ApiProperty({
     example: MealType.Lunch,

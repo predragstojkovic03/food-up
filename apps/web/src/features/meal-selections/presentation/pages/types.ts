@@ -3,7 +3,7 @@ import { MealType } from '@food-up/shared';
 export interface MenuItemOption {
   id: string;
   name: string;
-  description: string;
+  description?: string;
   type: MealType;
   price?: number;
 }

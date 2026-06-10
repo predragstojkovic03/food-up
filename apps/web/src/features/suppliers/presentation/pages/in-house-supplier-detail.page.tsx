@@ -111,7 +111,7 @@ export default function InHouseSupplierDetailPage() {
 
 const createMealSchema = z.object({
   name: z.string().min(1, 'Name is required'),
-  description: z.string().min(1, 'Description is required'),
+  description: z.string().optional(),
   type: z.nativeEnum(MealType),
   price: z.string().optional(),
 });
@@ -157,7 +157,7 @@ function MealsTab({ supplierId }: { supplierId: string }) {
     createMeal.mutate(
       {
         name: values.name,
-        description: values.description,
+        description: values.description || undefined,
         type: values.type,
         price: values.price ? Number(values.price) : undefined,
         supplierId,
@@ -326,17 +326,17 @@ function MealRow({ meal, isUpdating, isRemoving, onUpdate, onRemove }: MealRowPr
   const { t } = useTranslation('suppliers');
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(meal.name);
-  const [description, setDescription] = useState(meal.description);
+  const [description, setDescription] = useState(meal.description ?? '');
   const [type, setType] = useState<MealType>(meal.type);
 
   function handleSave() {
-    onUpdate({ name, description, type });
+    onUpdate({ name, description: description || undefined, type });
     setEditing(false);
   }
 
   function handleCancel() {
     setName(meal.name);
-    setDescription(meal.description);
+    setDescription(meal.description ?? '');
     setType(meal.type);
     setEditing(false);
   }
@@ -396,7 +396,7 @@ function MealRow({ meal, isUpdating, isRemoving, onUpdate, onRemove }: MealRowPr
     <div className='grid grid-cols-[1fr_1fr_auto_auto] items-center px-4 py-3 border-b last:border-b-0 gap-3'>
       <span className='text-sm font-medium'>{meal.name}</span>
       <span className='text-sm text-muted-foreground truncate'>
-        {meal.description}
+        {meal.description ?? <span className='italic'>—</span>}
       </span>
       <span className='text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground'>
         {MEAL_TYPE_LABELS[meal.type]}

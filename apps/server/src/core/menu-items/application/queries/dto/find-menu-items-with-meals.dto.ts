@@ -2,7 +2,7 @@ import { MealType } from '@food-up/shared';
 
 type MealDto = {
   name: string;
-  description: string;
+  description?: string;
   type: MealType;
 };
 
