@@ -1,5 +1,5 @@
 import { BullModule } from '@nestjs/bullmq';
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { bullmqTelemetry } from 'src/shared/infrastructure/notifications/bullmq-telemetry';
 import {
   MEAL_WINDOW_QUEUE,
@@ -17,7 +17,7 @@ import { MealSelectionWindowsController } from './presentation/rest/meal-selecti
   imports: [
     MenuPeriodsModule,
     EmployeesModule,
-    MenuItemsModule,
+    forwardRef(() => MenuItemsModule),
     BullModule.registerQueue(
       { name: MEAL_WINDOW_QUEUE, telemetry: bullmqTelemetry },
       { name: WINDOW_DEADLINE_QUEUE, telemetry: bullmqTelemetry },

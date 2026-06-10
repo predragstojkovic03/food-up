@@ -1,4 +1,5 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
+import { MealSelectionWindowsModule } from '../meal-selection-windows/meal-selection-windows.module';
 import { MealsModule } from '../meals/meals.module';
 import { MenuPeriodsModule } from '../menu-periods/menu-periods.module';
 import { MenuItemsService } from './application/menu-items.service';
@@ -9,7 +10,7 @@ import { MenuItemsQueryTypeOrmRepository } from './infrastructure/persistence/me
 import { MenuItemsController } from './presentation/rest/menu-items.controller';
 
 @Module({
-  imports: [MealsModule, MenuPeriodsModule],
+  imports: [MealsModule, MenuPeriodsModule, forwardRef(() => MealSelectionWindowsModule)],
   controllers: [MenuItemsController],
   providers: [
     MenuItemsRepositoryProvide,

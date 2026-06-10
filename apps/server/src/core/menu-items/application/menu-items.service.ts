@@ -1,7 +1,9 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { MealSelectionWindowsService } from 'src/core/meal-selection-windows/application/meal-selection-windows.service';
 import { MealsService } from 'src/core/meals/application/meals.service';
 import { MenuPeriodsService } from 'src/core/menu-periods/application/menu-periods.service';
 import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
+import { InvalidOperationException } from 'src/shared/domain/exceptions/invalid-operation.exception';
 import { MenuItem } from '../domain/menu-item.entity';
 import {
   I_MENU_ITEMS_REPOSITORY,
@@ -18,6 +20,8 @@ export class MenuItemsService {
     private readonly _menuItemsQueryService: MenuItemsQueryService,
     private readonly _mealsService: MealsService,
     private readonly _menuPeriodsService: MenuPeriodsService,
+    @Inject(forwardRef(() => MealSelectionWindowsService))
+    private readonly _mealSelectionWindowsService: MealSelectionWindowsService,
   ) {}
 
   async create(dto: {
@@ -79,6 +83,14 @@ export class MenuItemsService {
     const menuItem = await this.findOne(id);
 
     if (dto.price !== undefined) {
+      const locked = await this._mealSelectionWindowsService.existsActiveByMenuPeriodId(
+        menuItem.menuPeriodId,
+      );
+      if (locked) {
+        throw new InvalidOperationException(
+          'Cannot change price while a meal selection window referencing this menu period is active.',
+        );
+      }
       menuItem.price = dto.price;
     }
 
