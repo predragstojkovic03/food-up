@@ -42,8 +42,8 @@ services:
       retries: 3
       start_period: 30s
     depends_on:
-      postgres:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
       redis:
         condition: service_started
       otel-lgtm:
@@ -66,6 +66,20 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  migrate:
+    image: ghcr.io/golang-migrate/migrate:latest
+    volumes:
+      - ./apps/server/migrations:/migrations
+    command:
+      - "-path=/migrations"
+      - "-database=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable"
+      - "up"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - shared-network
 
   redis:
     image: redis:8-alpine
