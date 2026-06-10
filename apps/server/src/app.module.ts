@@ -87,7 +87,7 @@ import { TransactionModule } from './shared/infrastructure/transaction/transacti
                   'web',
                   'dist',
                 ),
-                exclude: ['/api/(.*)'],
+                exclude: ['/api*'],
               },
             ]
           : [],
