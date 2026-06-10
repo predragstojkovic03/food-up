@@ -28,6 +28,11 @@ describe('MealSelection', () => {
       const ms = MealSelection.reconstitute('id-1', 'emp-1', 'win-1', '2026-01-01', 'mi-1', 2, null);
       expect(ms.price).toBeNull();
     });
+
+    it('reconstitutes with null price when price not provided', () => {
+      const ms = MealSelection.reconstitute('id-1', 'emp-1', 'win-1', '2026-01-01', 'mi-1', 2);
+      expect(ms.price).toBeNull();
+    });
   });
 
   describe('update()', () => {
@@ -47,6 +52,12 @@ describe('MealSelection', () => {
       const ms = MealSelection.reconstitute('id-1', 'emp-1', 'win-1', '2026-01-01', 'mi-1', 2, 9.99);
       ms.update(undefined, 3, undefined);
       expect(ms.price).toBe(9.99);
+    });
+
+    it('updates price when only price changes (no menuItemId change)', () => {
+      const ms = MealSelection.reconstitute('id-1', 'emp-1', 'win-1', '2026-01-01', 'mi-1', 2, 9.99);
+      ms.update(undefined, undefined, 25.00);
+      expect(ms.price).toBe(25.00);
     });
   });
 });
