@@ -62,8 +62,8 @@ export class MealSelectionWindowsTypeOrmRepository
       .createQueryBuilder('msw')
       .innerJoin('msw.menuPeriods', 'mp')
       .where('mp.id = :menuPeriodId', { menuPeriodId })
-      .andWhere('msw.endTime > :now', { now: new Date() })
-      .andWhere('msw.isLocked = false')
+      .andWhere('msw.endTime >= :now', { now: new Date() })
+      .andWhere('msw.isLocked = :isLocked', { isLocked: false })
       .getCount();
     return count > 0;
   }
