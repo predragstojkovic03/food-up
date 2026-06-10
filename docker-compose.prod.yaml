@@ -68,7 +68,7 @@ services:
       retries: 5
 
   migrate:
-    image: ghcr.io/golang-migrate/migrate:latest
+    image: migrate/migrate:latest
     volumes:
       - ./apps/server/migrations:/migrations
     command:

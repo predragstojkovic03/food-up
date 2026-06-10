@@ -30,7 +30,7 @@ ps:
 
 migrate-create:
 	docker run --rm -v $(PWD)/apps/server/migrations:/migrations \
-		ghcr.io/golang-migrate/migrate:latest \
+		migrate/migrate:latest \
 		create -ext sql -dir /migrations -seq $(name)
 
 migrate-up:
