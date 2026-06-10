@@ -15,3 +15,15 @@ DROP TABLE IF EXISTS employee CASCADE;
 DROP TABLE IF EXISTS supplier CASCADE;
 DROP TABLE IF EXISTS identity CASCADE;
 DROP TABLE IF EXISTS business CASCADE;
+
+DROP TYPE IF EXISTS public.business_language_enum CASCADE;
+DROP TYPE IF EXISTS public.business_supplier_language_enum CASCADE;
+DROP TYPE IF EXISTS public.change_request_status_enum CASCADE;
+DROP TYPE IF EXISTS public.employee_role_enum CASCADE;
+DROP TYPE IF EXISTS public.identity_type_enum CASCADE;
+DROP TYPE IF EXISTS public.meal_type_enum CASCADE;
+DROP TYPE IF EXISTS public.report_type_enum CASCADE;
+DROP TYPE IF EXISTS public.supplier_language_enum CASCADE;
+DROP TYPE IF EXISTS public.supplier_type_enum CASCADE;
+DROP TYPE IF EXISTS public.user_preferences_language_enum CASCADE;
+DROP TYPE IF EXISTS public.user_preferences_theme_enum CASCADE;

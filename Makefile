@@ -7,6 +7,7 @@ COMPOSE = docker compose -f docker-compose.prod.yaml
 
 deploy:
 	git pull
+	$(COMPOSE) run --rm migrate
 	$(COMPOSE) up -d --build --no-deps app
 
 up:
