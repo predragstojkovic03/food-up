@@ -49,3 +49,64 @@ describe('ChangeRequest.changeStatus', () => {
     expect(() => cr.changeStatus(ChangeRequestStatus.Rejected, 'manager-1', new Date())).toThrow();
   });
 });
+
+describe('ChangeRequest price snapshot', () => {
+  describe('create()', () => {
+    it('initialises price as null', () => {
+      const cr = ChangeRequest.create('emp-1', 'win-1', 'mi-1', 1, 'sel-1');
+      expect(cr.price).toBeNull();
+    });
+  });
+
+  describe('reconstitute()', () => {
+    it('restores a non-null price', () => {
+      const cr = ChangeRequest.reconstitute(
+        'cr-1', 'emp-1', 'win-1', 'mi-1', 1,
+        ChangeRequestStatus.Approved, 'sel-1', false, 'mgr-1', new Date(), 12.50,
+      );
+      expect(cr.price).toBe(12.50);
+    });
+
+    it('restores a null price', () => {
+      const cr = ChangeRequest.reconstitute(
+        'cr-1', 'emp-1', 'win-1', 'mi-1', 1,
+        ChangeRequestStatus.Approved, 'sel-1', false, 'mgr-1', new Date(), null,
+      );
+      expect(cr.price).toBeNull();
+    });
+
+    it('defaults price to null when argument is omitted', () => {
+      const cr = ChangeRequest.reconstitute(
+        'cr-1', 'emp-1', 'win-1', 'mi-1', 1,
+        ChangeRequestStatus.Pending, 'sel-1',
+      );
+      expect(cr.price).toBeNull();
+    });
+  });
+
+  describe('changeStatus()', () => {
+    it('stores price when approved with a non-null price', () => {
+      const cr = makePendingCR();
+      cr.changeStatus(ChangeRequestStatus.Approved, 'mgr-1', new Date(), 9.99);
+      expect(cr.price).toBe(9.99);
+    });
+
+    it('stores null price when approved with explicit null (clearSelection CR)', () => {
+      const cr = makePendingCR();
+      cr.changeStatus(ChangeRequestStatus.Approved, 'mgr-1', new Date(), null);
+      expect(cr.price).toBeNull();
+    });
+
+    it('stores null price when rejected (no price argument)', () => {
+      const cr = makePendingCR();
+      cr.changeStatus(ChangeRequestStatus.Rejected, 'mgr-1', new Date());
+      expect(cr.price).toBeNull();
+    });
+
+    it('stores null price when revoked (no price argument)', () => {
+      const cr = makePendingCR();
+      cr.changeStatus(ChangeRequestStatus.Revoked, 'emp-1', new Date());
+      expect(cr.price).toBeNull();
+    });
+  });
+});

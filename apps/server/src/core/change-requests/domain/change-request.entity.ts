@@ -29,6 +29,7 @@ export class ChangeRequest extends Entity {
       clearSelection,
       null,
       null,
+      null,
     );
     changeRequest.addDomainEvent(new ChangeRequestCreatedEvent(changeRequest.id));
     return changeRequest;
@@ -45,6 +46,7 @@ export class ChangeRequest extends Entity {
     clearSelection?: boolean,
     approvedBy?: string | null,
     approvedAt?: Date | null,
+    price?: number | null,
   ): ChangeRequest {
     return new ChangeRequest(
       id,
@@ -57,6 +59,7 @@ export class ChangeRequest extends Entity {
       clearSelection,
       approvedBy,
       approvedAt,
+      price ?? null,
     );
   }
 
@@ -71,6 +74,7 @@ export class ChangeRequest extends Entity {
     clearSelection?: boolean,
     approvedBy?: string | null,
     approvedAt?: Date | null,
+    price: number | null = null,
   ) {
     super();
     this.id = id;
@@ -83,6 +87,7 @@ export class ChangeRequest extends Entity {
     this.approvedBy = approvedBy ?? null;
     this.approvedAt = approvedAt ?? null;
     this.clearSelection = clearSelection;
+    this.price = price;
 
     if (newQuantity !== null && newQuantity <= 0) {
       throw new InvalidInputDataException(
@@ -138,6 +143,7 @@ export class ChangeRequest extends Entity {
     status: ChangeRequestStatus,
     approvedBy: string,
     date: Date,
+    price?: number | null,
   ) {
     if (this.status !== ChangeRequestStatus.Pending) {
       throw new InvalidOperationException(
@@ -148,6 +154,7 @@ export class ChangeRequest extends Entity {
     this.status = status;
     this.approvedBy = approvedBy;
     this.approvedAt = date;
+    this.price = price ?? null;
 
     if (status === ChangeRequestStatus.Approved) {
       this.addDomainEvent(
@@ -190,4 +197,5 @@ export class ChangeRequest extends Entity {
   approvedBy: string | null;
   approvedAt: Date | null;
   clearSelection?: boolean;
+  price: number | null;
 }
