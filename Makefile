@@ -1,6 +1,9 @@
+-include .env
+export
+
 COMPOSE = docker compose -f docker-compose.prod.yaml
 
-.PHONY: deploy up down restart logs shell ps
+.PHONY: deploy up down restart logs shell ps migrate-create migrate-up migrate-down
 
 deploy:
 	git pull
@@ -23,3 +26,17 @@ shell:
 
 ps:
 	$(COMPOSE) ps
+
+migrate-create:
+	docker run --rm -v $(PWD)/apps/server/migrations:/migrations \
+		ghcr.io/golang-migrate/migrate:latest \
+		create -ext sql -dir /migrations -seq $(name)
+
+migrate-up:
+	$(COMPOSE) run --rm migrate
+
+migrate-down:
+	$(COMPOSE) run --rm migrate \
+		-path=/migrations \
+		-database="postgres://$${POSTGRES_USER}:$${POSTGRES_PASSWORD}@postgres:$${POSTGRES_PORT}/$${POSTGRES_DB}?sslmode=disable" \
+		down 1
