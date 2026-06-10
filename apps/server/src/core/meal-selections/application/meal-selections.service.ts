@@ -46,6 +46,7 @@ export class MealSelectionsService {
       );
     }
 
+    let menuItemPrice: number | null = null;
     if (dto.menuItemId) {
       const menuItem = await this._menuItemsService.findOne(dto.menuItemId);
 
@@ -54,6 +55,8 @@ export class MealSelectionsService {
           `Menu item ${dto.menuItemId} does not belong to any menu period of window ${dto.mealSelectionWindowId}`,
         );
       }
+
+      menuItemPrice = menuItem.price;
     }
 
     const mealSelection = MealSelection.create(
@@ -62,6 +65,7 @@ export class MealSelectionsService {
       dto.date,
       dto.menuItemId,
       dto.quantity,
+      menuItemPrice,
     );
 
     await this._repository.insert(mealSelection);
@@ -126,6 +130,7 @@ export class MealSelectionsService {
       );
     }
 
+    let menuItemPrice: number | null | undefined = undefined;
     if (dto.menuItemId) {
       const menuItem = await this._menuItemsService.findOne(dto.menuItemId);
 
@@ -134,9 +139,13 @@ export class MealSelectionsService {
           `Menu item ${dto.menuItemId} does not belong to any menu period of window ${mealSelection.mealSelectionWindowId}`,
         );
       }
+
+      menuItemPrice = menuItem.price;
+    } else if (dto.menuItemId === null) {
+      menuItemPrice = null;
     }
 
-    mealSelection.update(dto.menuItemId, dto.quantity);
+    mealSelection.update(dto.menuItemId, dto.quantity, menuItemPrice);
 
     await this._repository.update(id, mealSelection);
     this._logger.log(`Meal selection updated: id=${id}`, MealSelectionsService.name);
