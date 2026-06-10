@@ -83,7 +83,7 @@ Implementation queries `meal_selection_window` joined to its `menu_period_ids` j
 ```typescript
 const locked = await this._mealSelectionWindowsService.existsActiveByMenuPeriodId(menuItem.menuPeriodId);
 if (locked) {
-  throw new InvalidInputDataException(
+  throw new InvalidOperationException(
     'Cannot change price while a meal selection window referencing this menu period is active.',
   );
 }
