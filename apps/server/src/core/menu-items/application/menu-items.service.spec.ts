@@ -48,6 +48,8 @@ describe('MenuItemsService.update()', () => {
     await expect(
       service.update(menuItemId, { price: 15.00 }),
     ).resolves.not.toThrow();
+
+    expect(mockRepository.update).toHaveBeenCalledTimes(1);
   });
 
   it('skips active-window check when price not in dto', async () => {
