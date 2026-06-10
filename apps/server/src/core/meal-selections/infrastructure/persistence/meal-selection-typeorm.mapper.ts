@@ -15,6 +15,7 @@ export class MealSelectionTypeOrmMapper extends TypeOrmMapper<
       persistence.date,
       persistence.menuItem?.id ?? undefined,
       persistence.quantity ?? undefined,
+      persistence.price ?? null,
     );
   }
 
@@ -28,6 +29,7 @@ export class MealSelectionTypeOrmMapper extends TypeOrmMapper<
     persistence.mealSelectionWindow = { id: domain.mealSelectionWindowId } as any;
     persistence.date = domain.date;
     persistence.quantity = domain.quantity ?? null;
+    persistence.price = domain.price;
     return persistence;
   }
 
@@ -45,6 +47,7 @@ export class MealSelectionTypeOrmMapper extends TypeOrmMapper<
         : null;
     if (domain.mealSelectionWindowId !== undefined)
       persistence.mealSelectionWindow = { id: domain.mealSelectionWindowId } as any;
+    if (domain.price !== undefined) persistence.price = domain.price ?? null;
     return persistence;
   }
 }

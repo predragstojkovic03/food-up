@@ -40,6 +40,17 @@ export class MealSelection {
   @Column('int', { nullable: true })
   quantity: number | null;
 
+  @Column('numeric', {
+    precision: 10,
+    scale: 2,
+    nullable: true,
+    transformer: {
+      from: (v: string | null) => (v != null ? Number(v) : null),
+      to: (v) => v,
+    },
+  })
+  price: number | null;
+
   @Index('IDX_meal_selection_date')
   @Column('date')
   date: string;

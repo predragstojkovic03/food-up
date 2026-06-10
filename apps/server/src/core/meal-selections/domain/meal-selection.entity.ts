@@ -12,6 +12,7 @@ export class MealSelection extends Entity {
     date: string,
     menuItemId?: string,
     quantity?: number,
+    price: number | null = null,
   ): MealSelection {
     const mealSelection = new MealSelection(
       generateId(),
@@ -20,6 +21,7 @@ export class MealSelection extends Entity {
       date,
       menuItemId,
       quantity,
+      price,
     );
 
     mealSelection.addDomainEvent(
@@ -36,6 +38,7 @@ export class MealSelection extends Entity {
     date: string,
     menuItemId?: string,
     quantity?: number | null,
+    price: number | null = null,
   ): MealSelection {
     return new MealSelection(
       id,
@@ -44,6 +47,7 @@ export class MealSelection extends Entity {
       date,
       menuItemId,
       quantity ?? undefined,
+      price,
     );
   }
 
@@ -54,6 +58,7 @@ export class MealSelection extends Entity {
     date: string,
     menuItemId?: string,
     quantity?: number,
+    price: number | null = null,
   ) {
     super();
 
@@ -63,6 +68,7 @@ export class MealSelection extends Entity {
     this._date = date;
     this._menuItemId = menuItemId;
     this._quantity = quantity;
+    this._price = price;
   }
 
   private readonly _id: string;
@@ -71,6 +77,7 @@ export class MealSelection extends Entity {
   private readonly _mealSelectionWindowId: string;
   private _quantity: number | undefined;
   private readonly _date: string;
+  private _price: number | null;
 
   get id(): string {
     return this._id;
@@ -106,14 +113,22 @@ export class MealSelection extends Entity {
     return this._date;
   }
 
-  // menuItemId: undefined = don't change, null = set to skip (clear), string = change to this item
-  // quantity:   undefined = don't change, null = set to skip (clear)
-  update(menuItemId?: string | null, quantity?: number | null) {
+  get price(): number | null {
+    return this._price;
+  }
+
+  // menuItemId: undefined = don't change, null = clear selection, string = change to this item
+  // quantity:   undefined = don't change, null = clear
+  // price:      undefined = don't change, null = clear, number = set
+  update(menuItemId?: string | null, quantity?: number | null, price?: number | null) {
     if (menuItemId !== undefined) {
       this.menuItemId = menuItemId ?? undefined;
     }
     if (quantity !== undefined) {
       this.quantity = quantity ?? undefined;
+    }
+    if (price !== undefined) {
+      this._price = price;
     }
     this.addDomainEvent(new MealSelectionUpdatedEvent(this.id));
   }
