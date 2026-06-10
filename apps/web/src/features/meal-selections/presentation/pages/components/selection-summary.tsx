@@ -12,6 +12,7 @@ const TYPE_LABELS: Record<MealType, string> = {
   [MealType.Breakfast]: 'Breakfast',
   [MealType.Dinner]: 'Dinner',
   [MealType.Dessert]: 'Dessert',
+  [MealType.Bread]: 'Bread',
 };
 
 const TYPE_ORDER: MealType[] = [
@@ -21,6 +22,7 @@ const TYPE_ORDER: MealType[] = [
   MealType.Dinner,
   MealType.Salad,
   MealType.Dessert,
+  MealType.Bread,
 ];
 
 function formatDate(iso: string): string {

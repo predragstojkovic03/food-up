@@ -20,7 +20,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { usePreferencesStore } from '@/features/user-preferences/presentation/state/preferences.store';
 import { useServices } from '@/shared/infrastructure/di/service.context';
-import { Language, ThemePreference } from '@food-up/shared';
+import { IUserPreferencesResponse, Language, ThemePreference } from '@food-up/shared';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -290,7 +290,7 @@ function AppearanceSection() {
   ];
 
   const themeMutation = useMutation<
-    void,
+    IUserPreferencesResponse,
     Error,
     ThemePreference,
     { previousTheme: ThemePreference }
@@ -318,7 +318,7 @@ function AppearanceSection() {
   });
 
   const languageMutation = useMutation<
-    void,
+    IUserPreferencesResponse,
     Error,
     Language,
     { previousLanguage: Language }

@@ -56,8 +56,8 @@ function ManagerPanelLink() {
   const { data: employee } = useCurrentEmployee();
   if (employee?.role !== EmployeeRole.Manager) return null;
   return (
-    <Button variant='outline' size='sm' asChild>
-      <Link to='/employee/manager'>{t('nav.managerPanel')}</Link>
+    <Button variant='outline' size='sm' render={<Link to='/employee/manager' />}>
+      {t('nav.managerPanel')}
     </Button>
   );
 }

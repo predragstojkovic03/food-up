@@ -41,7 +41,8 @@ import {
   PlusCircle,
 } from 'lucide-react';
 import { useState } from 'react';
-import { TFunction, useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { CreateChangeRequestDrawer } from './create-change-request-drawer';
 
@@ -80,7 +81,7 @@ interface WindowStatusCardProps {
   changeRequests: IRichChangeRequest[];
 }
 
-function formatDeadline(endTime: string, t: TFunction): string {
+function formatDeadline(endTime: string, t: TFunction<'employees'>): string {
   const end = new Date(endTime);
   const now = new Date();
   const diffMs = end.getTime() - now.getTime();
@@ -312,7 +313,7 @@ export function WindowStatusCard({
                       >
                         <div className='space-y-0.5 min-w-0'>
                           <p className='text-xs font-medium'>
-                            {cr.date ? formatDate(cr.date) : '—'}
+                            {cr.date ? formatDate(cr.date, i18n.language) : '—'}
                           </p>
                           <p className='text-xs text-muted-foreground truncate'>
                             {cr.currentMeal?.name ?? t('windowStatus.noSelection')}

@@ -285,13 +285,12 @@ export default function MealSelectionWindowsPage() {
                   {!isExpired && (
                     window.isLocked ? (
                       <AlertDialog>
-                        <AlertDialogTrigger asChild disabled={isToggling}>
-                          <button
-                            className='p-1.5 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-30'
-                            title={t('windows.actions.unlock')}
-                          >
-                            <LockOpen size={15} />
-                          </button>
+                        <AlertDialogTrigger
+                          disabled={isToggling}
+                          className='p-1.5 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-30'
+                          title={t('windows.actions.unlock')}
+                        >
+                          <LockOpen size={15} />
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
@@ -1000,7 +999,8 @@ function ExtraQuantitiesSection({ windowId, menuItems, targetDates }: ExtraQuant
     setQty(1);
   }
 
-  function handleDateChange(date: string) {
+  function handleDateChange(date: string | null) {
+    if (date === null) return;
     setSelectedDate(date);
     setSelectedMenuItemId('');
   }
@@ -1137,7 +1137,7 @@ function ExtraQuantitiesSection({ windowId, menuItems, targetDates }: ExtraQuant
                   {t('windows.detail.extras.mealFilteredHint', { date: formatDate(selectedDate) })}
                 </span>
               </div>
-              <Select value={selectedMenuItemId} onValueChange={setSelectedMenuItemId}>
+              <Select value={selectedMenuItemId} onValueChange={(v) => v !== null && setSelectedMenuItemId(v)}>
                 <SelectTrigger size='sm' className='w-full text-xs'>
                   <SelectValue placeholder='—'>
                     {selectedMenuItemId && selectedMealItem
@@ -1249,7 +1249,7 @@ const createWindowSchema = z.object({
   startTime: z.string().min(1, 'Opening date is required'),
   endTime: z.string().min(1, 'Deadline is required'),
   targetDates: z.array(z.string()).min(1, 'Select at least one date'),
-  notifyOnDeadline: z.boolean().default(false),
+  notifyOnDeadline: z.boolean(),
 });
 type CreateWindowFormValues = z.infer<typeof createWindowSchema>;
 

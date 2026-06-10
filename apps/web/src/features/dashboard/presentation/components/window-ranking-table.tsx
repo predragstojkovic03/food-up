@@ -9,7 +9,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { formatRSD } from '@/lib/utils';
 import { WindowRankingItem } from '../../domain/dashboard-service.interface';
 
 interface WindowRankingTableProps {

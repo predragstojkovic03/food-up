@@ -27,6 +27,8 @@ services:
       MAIL_FROM: ${MAIL_FROM}
       WEB_APP_URL: ${WEB_APP_URL}
       RESEND_API_KEY: ${RESEND_API_KEY}
+      OTEL_SERVICE_NAME: food-up
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-lgtm:4318
       VIRTUAL_HOST: ${DOMAIN}
       VIRTUAL_PORT: 3000
       LETSENCRYPT_HOST: ${DOMAIN}
@@ -43,6 +45,8 @@ services:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_started
+      otel-lgtm:
         condition: service_started
 
   postgres:
@@ -71,6 +75,22 @@ services:
       - shared-network
     volumes:
       - redis:/data
+
+  otel-lgtm:
+    image: grafana/otel-lgtm:latest
+    container_name: food-up-otel-lgtm
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
+    ports:
+      - "127.0.0.1:3001:3000"
+    volumes:
+      - otel-lgtm:/data
+      - ./grafana/provisioning/food-up-dashboards.yaml:/otel-lgtm/grafana/conf/provisioning/dashboards/food-up-dashboards.yaml:ro
+      - ./grafana/dashboards:/otel-lgtm/grafana/dashboards:ro
+    networks:
+      - shared-network
 
   nginx-proxy:
     image: nginxproxy/nginx-proxy:alpine
@@ -126,4 +146,6 @@ volumes:
   nginx-vhost:
     driver: local
   nginx-html:
+    driver: local
+  otel-lgtm:
     driver: local
