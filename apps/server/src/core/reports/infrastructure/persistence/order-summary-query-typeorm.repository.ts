@@ -109,7 +109,7 @@ export class OrderSummaryQueryTypeOrmRepository
       SELECT "supplierId", "supplierName", SUM("totalCost") AS "totalCost"
       FROM (
         SELECT s.id AS "supplierId", s.name AS "supplierName",
-               SUM(mi.price * COALESCE(ms.quantity, 1)) AS "totalCost"
+               SUM(COALESCE(ms.price, 0) * COALESCE(ms.quantity, 1)) AS "totalCost"
         FROM meal_selection ms
         INNER JOIN menu_item mi ON mi.id = ms.menu_item_id
         INNER JOIN menu_period mp ON mp.id = mi.menu_period_id
@@ -117,7 +117,6 @@ export class OrderSummaryQueryTypeOrmRepository
         WHERE ms.meal_selection_window_id = $1
           AND ms.menu_item_id IS NOT NULL
           AND COALESCE(ms.quantity, 1) > 0
-          AND mi.price IS NOT NULL
           AND NOT EXISTS (
             SELECT 1 FROM change_request cr
             WHERE cr.meal_selection_id = ms.id AND cr.status = 'approved'
