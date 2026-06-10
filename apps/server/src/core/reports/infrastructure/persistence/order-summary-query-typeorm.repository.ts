@@ -109,6 +109,7 @@ export class OrderSummaryQueryTypeOrmRepository
       SELECT "supplierId", "supplierName", SUM("totalCost") AS "totalCost"
       FROM (
         SELECT s.id AS "supplierId", s.name AS "supplierName",
+               -- price snapshot captured at selection time; NULL = legacy row, back-filled by migration 000003
                SUM(COALESCE(ms.price, 0) * COALESCE(ms.quantity, 1)) AS "totalCost"
         FROM meal_selection ms
         INNER JOIN menu_item mi ON mi.id = ms.menu_item_id
