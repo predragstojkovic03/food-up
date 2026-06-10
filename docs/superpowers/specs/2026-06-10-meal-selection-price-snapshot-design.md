@@ -35,7 +35,7 @@ Add a nullable `NUMERIC(10, 2)` column to `meal_selection`:
 ALTER TABLE meal_selection ADD COLUMN price NUMERIC(10, 2);
 ```
 
-Existing rows get `NULL`. The cost report treats `NULL` as `0` via `COALESCE`.
+Existing rows get back-filled from `menu_item.price`. Rows with no menu item remain `NULL`.
 
 **TypeORM entity** (`meal-selection.typeorm-entity.ts`): add
 
@@ -123,6 +123,12 @@ apps/server/migrations/000003_meal_selection_price_snapshot.down.sql
 **Up:**
 ```sql
 ALTER TABLE meal_selection ADD COLUMN price NUMERIC(10, 2);
+
+UPDATE meal_selection ms
+SET price = mi.price
+FROM menu_item mi
+WHERE ms.menu_item_id = mi.id
+  AND ms.price IS NULL;
 ```
 
 **Down:**
