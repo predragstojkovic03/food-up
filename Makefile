@@ -39,5 +39,5 @@ migrate-up:
 migrate-down:
 	$(COMPOSE) run --rm migrate \
 		-path=/migrations \
-		-database="$${MIGRATE_DATABASE_URL}" \
+		-database="postgres://$${POSTGRES_USER}:$${POSTGRES_PASSWORD}@postgres:$${POSTGRES_PORT}/$${POSTGRES_DB}?sslmode=disable" \
 		down 1
