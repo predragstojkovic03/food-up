@@ -12,4 +12,5 @@ export interface IMealSelectionWindowsRepository
   findLatestPublishedByBusiness(
     businessId: string,
   ): Promise<MealSelectionWindow | null>;
+  existsActiveByMenuPeriodId(menuPeriodId: string): Promise<boolean>;
 }

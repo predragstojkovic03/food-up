@@ -56,4 +56,15 @@ export class MealSelectionWindowsTypeOrmRepository
     if (!entities.length) return null;
     return this._mapper.toDomain(entities[0]);
   }
+
+  async existsActiveByMenuPeriodId(menuPeriodId: string): Promise<boolean> {
+    const count = await this._repository
+      .createQueryBuilder('msw')
+      .innerJoin('msw.menuPeriods', 'mp')
+      .where('mp.id = :menuPeriodId', { menuPeriodId })
+      .andWhere('msw.endTime > :now', { now: new Date() })
+      .andWhere('msw.isLocked = false')
+      .getCount();
+    return count > 0;
+  }
 }

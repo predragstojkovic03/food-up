@@ -190,6 +190,10 @@ export class MealSelectionWindowsService {
     );
   }
 
+  async existsActiveByMenuPeriodId(menuPeriodId: string): Promise<boolean> {
+    return this._repository.existsActiveByMenuPeriodId(menuPeriodId);
+  }
+
   private async _validateMenuPeriodsForTargetDates(
     menuPeriodIds: string[],
     targetDates: string[],
