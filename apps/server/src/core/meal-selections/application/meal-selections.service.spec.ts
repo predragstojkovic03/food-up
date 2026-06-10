@@ -51,6 +51,7 @@ describe('MealSelectionsService', () => {
       });
 
       expect(result.price).toBe(12.50);
+      expect(mockRepository.insert).toHaveBeenCalledTimes(1);
     });
 
     it('stores null price when no menu item', async () => {
@@ -60,6 +61,7 @@ describe('MealSelectionsService', () => {
       });
 
       expect(result.price).toBeNull();
+      expect(mockRepository.insert).toHaveBeenCalledTimes(1);
     });
 
     it('stores null price when menu item has no price', async () => {
@@ -76,6 +78,7 @@ describe('MealSelectionsService', () => {
       });
 
       expect(result.price).toBeNull();
+      expect(mockRepository.insert).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -89,10 +92,16 @@ describe('MealSelectionsService', () => {
         update: jest.fn(),
       };
       mockRepository.findOneByCriteriaOrThrow.mockResolvedValue(mockSelection);
+      mockMenuItemsService.findOne.mockResolvedValue({
+        id: 'mi-2',
+        menuPeriodId: 'period-1',
+        price: 12.50,
+      });
 
       await service.update('sel-1', identityId, { menuItemId: 'mi-2' });
 
       expect(mockSelection.update).toHaveBeenCalledWith('mi-2', undefined, 12.50);
+      expect(mockRepository.update).toHaveBeenCalledTimes(1);
     });
 
     it('clears price when menuItemId set to null', async () => {
@@ -108,6 +117,7 @@ describe('MealSelectionsService', () => {
       await service.update('sel-1', identityId, { menuItemId: null });
 
       expect(mockSelection.update).toHaveBeenCalledWith(null, undefined, null);
+      expect(mockRepository.update).toHaveBeenCalledTimes(1);
     });
 
     it('does not change price when menuItemId not in dto', async () => {
@@ -123,6 +133,7 @@ describe('MealSelectionsService', () => {
       await service.update('sel-1', identityId, { quantity: 3 });
 
       expect(mockSelection.update).toHaveBeenCalledWith(undefined, 3, undefined);
+      expect(mockRepository.update).toHaveBeenCalledTimes(1);
     });
   });
 });
