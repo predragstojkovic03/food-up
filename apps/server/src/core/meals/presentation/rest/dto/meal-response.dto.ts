@@ -4,12 +4,15 @@ import { MealType } from '@food-up/shared';
 
 @Expose()
 export class MealResponseDto {
+  @Expose()
   @ApiProperty({ example: 'meal-uuid', description: 'Meal ID' })
   id: string;
 
+  @Expose()
   @ApiProperty({ example: 'Chicken Sandwich', description: 'Name of the meal' })
   name: string;
 
+  @Expose()
   @ApiProperty({
     example: 'Grilled chicken with lettuce',
     description: 'Description of the meal',
@@ -18,6 +21,7 @@ export class MealResponseDto {
   })
   description?: string;
 
+  @Expose()
   @ApiProperty({
     example: MealType.Lunch,
     enum: MealType,
@@ -25,6 +29,7 @@ export class MealResponseDto {
   })
   type: MealType;
 
+  @Expose()
   @ApiProperty({
     example: 450.0,
     description: 'Price of the meal in RSD',

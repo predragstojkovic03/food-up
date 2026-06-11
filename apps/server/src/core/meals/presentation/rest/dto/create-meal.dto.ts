@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 import { MealType } from '@food-up/shared';
 
 export class CreateMealDto {
@@ -30,6 +30,7 @@ export class CreateMealDto {
     required: false,
   })
   @IsNumber()
+  @Min(0)
   @IsOptional()
   price?: number;
 
