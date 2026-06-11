@@ -24,4 +24,12 @@ export class MealResponseDto {
     description: 'Meal type',
   })
   type: MealType;
+
+  @ApiProperty({
+    example: 450.0,
+    description: 'Price of the meal in RSD',
+    required: false,
+    nullable: true,
+  })
+  price?: number;
 }

@@ -15,4 +15,5 @@ export interface IMealResponse {
   name: string;
   description?: string;
   type: MealType;
+  price?: number;
 }
