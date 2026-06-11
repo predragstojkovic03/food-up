@@ -134,7 +134,7 @@ function MealsTab({ supplierId }: { supplierId: string }) {
   });
 
   const updateMeal = useMutation({
-    mutationFn: (payload: { id: string; name?: string; description?: string; type?: MealType }) => {
+    mutationFn: (payload: { id: string; name?: string; description?: string; type?: MealType; price?: number }) => {
       const { id, ...data } = payload;
       return mealService.update(id, data);
     },
@@ -271,18 +271,20 @@ function MealsTab({ supplierId }: { supplierId: string }) {
       )}
 
       <div className='border rounded-lg overflow-hidden'>
-        <div className='grid grid-cols-[1fr_1fr_auto_auto] text-xs font-medium text-muted-foreground bg-muted/40 px-4 py-2.5 border-b'>
+        <div className='grid grid-cols-[1fr_1fr_auto_auto_auto] text-xs font-medium text-muted-foreground bg-muted/40 px-4 py-2.5 border-b'>
           <span>{t('detail.meals.table.nameHeader')}</span>
           <span>{t('detail.meals.table.descriptionHeader')}</span>
+          <span>{t('detail.meals.table.priceHeader')}</span>
           <span>{t('detail.meals.table.typeHeader')}</span>
           <span />
         </div>
         {isLoading && (
           <>
             {[0, 1, 2].map((i) => (
-              <div key={i} className='grid grid-cols-[1fr_1fr_auto_auto] items-center px-4 py-3 border-b gap-3'>
+              <div key={i} className='grid grid-cols-[1fr_1fr_auto_auto_auto] items-center px-4 py-3 border-b gap-3'>
                 <Skeleton className='h-4 w-32' />
                 <Skeleton className='h-4 w-40' />
+                <Skeleton className='h-4 w-16' />
                 <Skeleton className='h-5 w-16 rounded-full' />
                 <Skeleton className='h-6 w-12 rounded' />
               </div>
@@ -318,7 +320,7 @@ interface MealRowProps {
   meal: IMealResponse;
   isUpdating: boolean;
   isRemoving: boolean;
-  onUpdate: (data: { name?: string; description?: string; type?: MealType }) => void;
+  onUpdate: (data: { name?: string; description?: string; type?: MealType; price?: number }) => void;
   onRemove: () => void;
 }
 
@@ -328,9 +330,15 @@ function MealRow({ meal, isUpdating, isRemoving, onUpdate, onRemove }: MealRowPr
   const [name, setName] = useState(meal.name);
   const [description, setDescription] = useState(meal.description ?? '');
   const [type, setType] = useState<MealType>(meal.type);
+  const [price, setPrice] = useState<string>(meal.price != null ? String(meal.price) : '');
 
   function handleSave() {
-    onUpdate({ name, description: description || undefined, type });
+    onUpdate({
+      name,
+      description: description || undefined,
+      type,
+      price: price !== '' ? Number(price) : undefined,
+    });
     setEditing(false);
   }
 
@@ -338,12 +346,13 @@ function MealRow({ meal, isUpdating, isRemoving, onUpdate, onRemove }: MealRowPr
     setName(meal.name);
     setDescription(meal.description ?? '');
     setType(meal.type);
+    setPrice(meal.price != null ? String(meal.price) : '');
     setEditing(false);
   }
 
   if (editing) {
     return (
-      <div className='grid grid-cols-[1fr_1fr_auto_auto] items-center px-4 py-3 border-b last:border-b-0 gap-3'>
+      <div className='grid grid-cols-[1fr_1fr_auto_auto_auto] items-center px-4 py-3 border-b last:border-b-0 gap-3'>
         <Input
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -354,6 +363,15 @@ function MealRow({ meal, isUpdating, isRemoving, onUpdate, onRemove }: MealRowPr
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           className='h-8 text-sm'
+          disabled={isUpdating}
+        />
+        <Input
+          type='number'
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
+          className='h-8 text-sm w-24'
+          step='0.01'
+          min='0'
           disabled={isUpdating}
         />
         <Select
@@ -393,10 +411,13 @@ function MealRow({ meal, isUpdating, isRemoving, onUpdate, onRemove }: MealRowPr
   }
 
   return (
-    <div className='grid grid-cols-[1fr_1fr_auto_auto] items-center px-4 py-3 border-b last:border-b-0 gap-3'>
+    <div className='grid grid-cols-[1fr_1fr_auto_auto_auto] items-center px-4 py-3 border-b last:border-b-0 gap-3'>
       <span className='text-sm font-medium'>{meal.name}</span>
       <span className='text-sm text-muted-foreground truncate'>
         {meal.description ?? <span className='italic'>—</span>}
+      </span>
+      <span className='text-sm text-muted-foreground w-24 text-right'>
+        {meal.price != null ? meal.price.toFixed(2) : <span className='italic'>—</span>}
       </span>
       <span className='text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground'>
         {MEAL_TYPE_LABELS[meal.type]}

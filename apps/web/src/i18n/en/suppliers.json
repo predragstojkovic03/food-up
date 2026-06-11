@@ -47,6 +47,7 @@
       "table": {
         "nameHeader": "Name",
         "descriptionHeader": "Description",
+        "priceHeader": "Price",
         "typeHeader": "Type",
         "empty": "No meals yet."
       },

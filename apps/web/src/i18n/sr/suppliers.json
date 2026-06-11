@@ -47,6 +47,7 @@
       "table": {
         "nameHeader": "Naziv",
         "descriptionHeader": "Opis",
+        "priceHeader": "Cena",
         "typeHeader": "Vrsta",
         "empty": "Još nema obroka."
       },
