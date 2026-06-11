@@ -53,7 +53,7 @@ export class MenuItemsService {
     }
 
     const menuItem = MenuItem.create(
-      dto.price,
+      meal.price ?? null,
       dto.menuPeriodId,
       dto.day,
       meal.id,
