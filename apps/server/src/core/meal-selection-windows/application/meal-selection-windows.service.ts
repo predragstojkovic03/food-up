@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { MenuItemsService } from 'src/core/menu-items/application/menu-items.service';
 import { MenuItemWithMealDto } from 'src/core/menu-items/application/queries/dto/find-menu-items-with-meals.dto';
@@ -54,6 +54,7 @@ export class MealSelectionWindowsService {
     private readonly _repository: IMealSelectionWindowsRepository,
     private readonly _menuPeriodsService: MenuPeriodsService,
     private readonly _employeesService: EmployeesService,
+    @Inject(forwardRef(() => MenuItemsService))
     private readonly _menuItemsService: MenuItemsService,
     @Inject(I_LOGGER) private readonly _logger: ILogger,
   ) {}
