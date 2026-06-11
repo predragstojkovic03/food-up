@@ -274,7 +274,7 @@ function MealsTab({ supplierId }: { supplierId: string }) {
         <div className='grid grid-cols-[1fr_1fr_auto_auto_auto] text-xs font-medium text-muted-foreground bg-muted/40 px-4 py-2.5 border-b'>
           <span>{t('detail.meals.table.nameHeader')}</span>
           <span>{t('detail.meals.table.descriptionHeader')}</span>
-          <span>{t('detail.meals.table.priceHeader')}</span>
+          <span className='w-24 text-right text-xs text-muted-foreground'>{t('detail.meals.table.priceHeader')}</span>
           <span>{t('detail.meals.table.typeHeader')}</span>
           <span />
         </div>
@@ -372,6 +372,7 @@ function MealRow({ meal, isUpdating, isRemoving, onUpdate, onRemove }: MealRowPr
           className='h-8 text-sm w-24'
           step='0.01'
           min='0'
+          placeholder='0.00'
           disabled={isUpdating}
         />
         <Select
