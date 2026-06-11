@@ -24,4 +24,7 @@ export class BusinessInvite {
 
   @Column('timestamp', { nullable: true })
   usedAt: Date | null;
+
+  @Column('timestamp', { nullable: true })
+  emailSentAt: Date | null;
 }

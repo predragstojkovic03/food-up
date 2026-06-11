@@ -30,6 +30,13 @@ const sr: StringValues<typeof en> = {
         rejected: 'Odbijeno: {{count}} zahtev(a)',
       },
     },
+    invite: {
+      subject: 'Pozvani ste da se pridružite svom timu',
+      heading: 'Pozvani ste!',
+      body: 'Pozvani ste da se pridružite svom timu. Kliknite na dugme ispod da podesite nalog.',
+      button: 'Prihvati poziv',
+      footer: 'Ovaj link ističe za 7 dana. Ako niste očekivali ovaj poziv, možete ga ignorisati.',
+    },
     orderSummary: {
       subject: 'Pregled narudžbine za vaše obroke',
       subjectAdjusted: 'Ažurirani pregled narudžbine za vaše obroke',

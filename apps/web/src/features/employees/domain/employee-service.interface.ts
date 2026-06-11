@@ -13,4 +13,6 @@ export interface IEmployeeService {
   updateSelf(data: IUpdateEmployeeSelf): Promise<IEmployeeResponse>;
   remove(id: string): Promise<void>;
   createInvite(businessId: string, data: ICreateBusinessInvite): Promise<IBusinessInviteResponse>;
+  getInvites(businessId: string): Promise<IBusinessInviteResponse[]>;
+  resendInvite(businessId: string, inviteId: string): Promise<IBusinessInviteResponse>;
 }

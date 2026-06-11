@@ -24,6 +24,13 @@ export default {
         rejected: 'Rejected: {{count}} request(s)',
       },
     },
+    invite: {
+      subject: "You've been invited to join your team",
+      heading: "You've been invited!",
+      body: "You've been invited to join your team. Click the button below to set up your account.",
+      button: 'Accept Invitation',
+      footer: 'This link expires in 7 days. If you did not expect this invitation, you can safely ignore this email.',
+    },
     orderSummary: {
       subject: 'Order summary for your meals',
       subjectAdjusted: 'Adjusted order summary for your meals',

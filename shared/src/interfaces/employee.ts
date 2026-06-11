@@ -25,7 +25,9 @@ export interface ICreateBusinessInvite {
 }
 
 export interface IBusinessInviteResponse {
+  id: string;
   token: string;
   email: string;
   expiresAt: string;
+  mailSent: boolean;
 }

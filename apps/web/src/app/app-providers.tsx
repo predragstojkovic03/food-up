@@ -19,6 +19,7 @@ import { SupplierService } from '@/features/suppliers/infrastructure/supplier.se
 import { ServiceProvider } from '@/shared/infrastructure/di/service.context';
 import { tokenStore } from '@/shared/infrastructure/auth/token-store';
 import { HttpClient } from '@/shared/infrastructure/http/http-client';
+import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
@@ -83,6 +84,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
         <TooltipProvider>
           <ThemeAndLangSync />
           <SessionGate>{children}</SessionGate>
+          <Toaster />
         </TooltipProvider>
         {import.meta.env.DEV && <ReactQueryDevtools />}
       </QueryClientProvider>

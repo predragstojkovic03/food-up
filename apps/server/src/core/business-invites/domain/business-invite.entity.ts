@@ -11,6 +11,7 @@ export class BusinessInvite extends Entity {
       crypto.randomUUID(),
       expiresAt,
       null,
+      null,
     );
   }
 
@@ -21,8 +22,9 @@ export class BusinessInvite extends Entity {
     token: string,
     expiresAt: Date,
     usedAt: Date | null,
+    emailSentAt: Date | null,
   ): BusinessInvite {
-    return new BusinessInvite(id, businessId, email, token, expiresAt, usedAt);
+    return new BusinessInvite(id, businessId, email, token, expiresAt, usedAt, emailSentAt);
   }
 
   private constructor(
@@ -32,6 +34,7 @@ export class BusinessInvite extends Entity {
     public readonly token: string,
     public readonly expiresAt: Date,
     public usedAt: Date | null,
+    public emailSentAt: Date | null,
   ) {
     super();
     this.id = id;
@@ -43,6 +46,18 @@ export class BusinessInvite extends Entity {
 
   get isUsed(): boolean {
     return this.usedAt !== null;
+  }
+
+  get isActive(): boolean {
+    return !this.isExpired && !this.isUsed;
+  }
+
+  get mailSent(): boolean {
+    return this.emailSentAt !== null;
+  }
+
+  markEmailSent(): void {
+    this.emailSentAt = new Date();
   }
 
   consume(): void {

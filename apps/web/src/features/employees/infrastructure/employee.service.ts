@@ -37,4 +37,15 @@ export class EmployeeService implements IEmployeeService {
       data,
     );
   }
+
+  getInvites(businessId: string): Promise<IBusinessInviteResponse[]> {
+    return this.http.get<IBusinessInviteResponse[]>(`/api/businesses/${businessId}/invites`);
+  }
+
+  resendInvite(businessId: string, inviteId: string): Promise<IBusinessInviteResponse> {
+    return this.http.post<Record<string, never>, IBusinessInviteResponse>(
+      `/api/businesses/${businessId}/invites/${inviteId}/resend`,
+      {},
+    );
+  }
 }

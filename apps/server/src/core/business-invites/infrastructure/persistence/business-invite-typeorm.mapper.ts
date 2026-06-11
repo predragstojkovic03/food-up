@@ -14,6 +14,7 @@ export class BusinessInviteTypeOrmMapper extends TypeOrmMapper<
       persistence.token,
       persistence.expiresAt,
       persistence.usedAt,
+      persistence.emailSentAt,
     );
   }
 
@@ -25,6 +26,7 @@ export class BusinessInviteTypeOrmMapper extends TypeOrmMapper<
     entity.token = domain.token;
     entity.expiresAt = domain.expiresAt;
     entity.usedAt = domain.usedAt;
+    entity.emailSentAt = domain.emailSentAt;
     return entity;
   }
 
@@ -38,6 +40,7 @@ export class BusinessInviteTypeOrmMapper extends TypeOrmMapper<
     if (domain.token !== undefined) entity.token = domain.token;
     if (domain.expiresAt !== undefined) entity.expiresAt = domain.expiresAt;
     if (domain.usedAt !== undefined) entity.usedAt = domain.usedAt;
+    if (domain.emailSentAt !== undefined) entity.emailSentAt = domain.emailSentAt;
     return entity;
   }
 }

@@ -3,4 +3,7 @@ import { BusinessInvite } from './business-invite.entity';
 
 export const I_BUSINESS_INVITES_REPOSITORY = Symbol('I_BUSINESS_INVITES_REPOSITORY');
 
-export interface IBusinessInvitesRepository extends IRepository<BusinessInvite> {}
+export interface IBusinessInvitesRepository extends IRepository<BusinessInvite> {
+  findActiveByBusiness(businessId: string): Promise<BusinessInvite[]>;
+  findActiveByEmail(businessId: string, email: string): Promise<BusinessInvite | null>;
+}

@@ -56,12 +56,20 @@
       "panelHeading": "Send Invite",
       "emailLabel": "Email address",
       "emailPlaceholder": "employee@example.com",
-      "generating": "Generating…",
-      "generate": "Generate Link",
+      "generating": "Sending…",
+      "generate": "Send Invite",
       "shareText": "Share this link with",
       "expiresText": "It expires on",
       "inviteAnother": "Invite another",
-      "error": "Failed to create invite. Please try again."
+      "error": "Failed to create invite. Please try again.",
+      "toastSending": "Sending invite…",
+      "mailSentSuccess": "Invite sent to {{email}}",
+      "mailNotSent": "Email delivery failed. Copy the link below.",
+      "mailSentBadge": "Sent",
+      "mailNotSentBadge": "Not sent",
+      "resend": "Resend",
+      "alreadyPending": "Already invited.",
+      "resendInstead": "Resend instead"
     },
     "table": {
       "nameHeader": "Name",
@@ -75,7 +83,14 @@
       "manager": "Manager",
       "basic": "Basic"
     },
-    "removeTitle": "Remove employee"
+    "removeTitle": "Remove employee",
+    "pendingInvites": {
+      "title": "Pending Invites",
+      "empty": "No pending invites.",
+      "emailHeader": "Email",
+      "expiresHeader": "Expires",
+      "statusHeader": "Status"
+    }
   },
   "windowStatus": {
     "cardTitle": "Meal Selection",

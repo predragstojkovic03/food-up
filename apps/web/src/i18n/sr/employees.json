@@ -56,12 +56,20 @@
       "panelHeading": "Pošalji poziv",
       "emailLabel": "Imejl adresa",
       "emailPlaceholder": "zaposleni@primer.com",
-      "generating": "Generisanje…",
-      "generate": "Generiši link",
+      "generating": "Slanje…",
+      "generate": "Pošalji poziv",
       "shareText": "Podelite ovaj link sa",
       "expiresText": "Ističe",
       "inviteAnother": "Pozovi još jednog",
-      "error": "Nije moguće kreirati poziv. Pokušajte ponovo."
+      "error": "Nije moguće kreirati poziv. Pokušajte ponovo.",
+      "toastSending": "Slanje poziva…",
+      "mailSentSuccess": "Poziv poslat na {{email}}",
+      "mailNotSent": "Slanje imejla nije uspelo. Kopirajte link ispod.",
+      "mailSentBadge": "Poslato",
+      "mailNotSentBadge": "Nije poslato",
+      "resend": "Ponovo pošalji",
+      "alreadyPending": "Već je pozvan/a.",
+      "resendInstead": "Ponovo pošalji"
     },
     "table": {
       "nameHeader": "Ime",
@@ -75,7 +83,14 @@
       "manager": "Menadžer",
       "basic": "Osnovna"
     },
-    "removeTitle": "Ukloni zaposlenog"
+    "removeTitle": "Ukloni zaposlenog",
+    "pendingInvites": {
+      "title": "Aktivni pozivi",
+      "empty": "Nema aktivnih poziva.",
+      "emailHeader": "Imejl",
+      "expiresHeader": "Ističe",
+      "statusHeader": "Status"
+    }
   },
   "windowStatus": {
     "cardTitle": "Izbor obroka",

@@ -22,6 +22,7 @@ import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
 import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { RequiredEmployeeRole } from 'src/core/employees/presentation/rest/employee-role.decorator';
 import { RequiredIdentityType } from 'src/core/identity/presentation/rest/identity-type.decorator';
+import { BusinessInvite } from '../../../business-invites/domain/business-invite.entity';
 import { BusinessInvitesService } from '../../../business-invites/application/business-invites.service';
 import { BusinessesService } from '../../application/businesses.service';
 import { BusinessInviteResponseDto } from './dto/business-invite-response.dto';
@@ -76,8 +77,21 @@ export class BusinessesController {
     return { email };
   }
 
+  @Get(':id/invites')
+  @ApiOperation({ summary: 'List active (unused, non-expired) invites for a business' })
+  @ApiResponse({ status: 200, type: [BusinessInviteResponseDto] })
+  @RequiredIdentityType(IdentityType.Employee)
+  @RequiredEmployeeRole(EmployeeRole.Manager)
+  @ApiBearerAuth()
+  async listInvites(
+    @Param('id') businessId: string,
+  ): Promise<BusinessInviteResponseDto[]> {
+    const invites = await this._businessInvitesService.findActiveByBusiness(businessId);
+    return plainToInstance(BusinessInviteResponseDto, invites.map(this._toInviteDto));
+  }
+
   @Post(':id/invites')
-  @ApiOperation({ summary: 'Create an employee invite link for a business' })
+  @ApiOperation({ summary: 'Create an employee invite for a business' })
   @ApiResponse({ status: 201, type: BusinessInviteResponseDto })
   @RequiredIdentityType(IdentityType.Employee)
   @RequiredEmployeeRole(EmployeeRole.Manager)
@@ -86,11 +100,24 @@ export class BusinessesController {
     @Param('id') businessId: string,
     @Body() body: CreateBusinessInviteRequestDto,
   ): Promise<BusinessInviteResponseDto> {
-    const invite = await this._businessInvitesService.create(
-      businessId,
-      body.email,
-    );
-    return plainToInstance(BusinessInviteResponseDto, invite);
+    const business = await this._businessesService.findOne(businessId);
+    const invite = await this._businessInvitesService.create(businessId, body.email, business.language);
+    return plainToInstance(BusinessInviteResponseDto, this._toInviteDto(invite));
+  }
+
+  @Post(':id/invites/:inviteId/resend')
+  @ApiOperation({ summary: 'Resend the invite email for an existing active invite' })
+  @ApiResponse({ status: 200, type: BusinessInviteResponseDto })
+  @RequiredIdentityType(IdentityType.Employee)
+  @RequiredEmployeeRole(EmployeeRole.Manager)
+  @ApiBearerAuth()
+  async resendInvite(
+    @Param('id') businessId: string,
+    @Param('inviteId') inviteId: string,
+  ): Promise<BusinessInviteResponseDto> {
+    const business = await this._businessesService.findOne(businessId);
+    const invite = await this._businessInvitesService.resend(inviteId, business.language);
+    return plainToInstance(BusinessInviteResponseDto, this._toInviteDto(invite));
   }
 
   @Get('my')
@@ -118,5 +145,9 @@ export class BusinessesController {
     const employee = await this._employeesService.findByIdentity(sub);
     const business = await this._businessesService.updateLanguage(employee.businessId, dto.language);
     return plainToInstance(BusinessResponseDto, business, { excludeExtraneousValues: true });
+  }
+
+  private _toInviteDto(invite: BusinessInvite): object {
+    return { ...invite, mailSent: invite.mailSent };
   }
 }

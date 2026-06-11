@@ -4,6 +4,10 @@ import { Expose } from 'class-transformer';
 export class BusinessInviteResponseDto {
   @ApiProperty()
   @Expose()
+  id: string;
+
+  @ApiProperty()
+  @Expose()
   token: string;
 
   @ApiProperty()
@@ -13,4 +17,8 @@ export class BusinessInviteResponseDto {
   @ApiProperty()
   @Expose()
   expiresAt: Date;
+
+  @ApiProperty()
+  @Expose()
+  mailSent: boolean;
 }
