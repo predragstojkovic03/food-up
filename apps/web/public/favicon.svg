@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-labelledby="t d">
+  <title id="t">FoodUp app icon</title>
+  <desc id="d">Green rounded-square app icon with a white bowl and two steam chevrons rising from it</desc>
+  <rect x="0" y="0" width="512" height="512" rx="116" fill="#2D6E45"/>
+  <path d="M133 213 v41 a123 123 0 0 0 246 0 v-41" fill="none" stroke="#FFFFFF" stroke-width="37" stroke-linecap="round"/>
+  <path d="M212 268 L256 227 L300 268" fill="none" stroke="#FFFFFF" stroke-width="31" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+  <path d="M201 186 L256 135 L311 186" fill="none" stroke="#FFFFFF" stroke-width="37" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
