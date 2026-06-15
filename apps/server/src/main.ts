@@ -61,21 +61,21 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
 
-  const config = new DocumentBuilder()
-    .setTitle('Food Up API')
-    .setDescription('API documentation for Food Up')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .build();
+  if (!isProduction) {
+    const config = new DocumentBuilder()
+      .setTitle('Food Up API')
+      .setDescription('API documentation for Food Up')
+      .setVersion('1.0')
+      .addBearerAuth()
+      .build();
 
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document, {
-    swaggerOptions: {
-      supportedSubmitMethods: isProduction
-        ? []
-        : ['get', 'post', 'put', 'patch', 'delete'],
-    },
-  });
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api/docs', app, document, {
+      swaggerOptions: {
+        supportedSubmitMethods: ['get', 'post', 'put', 'patch', 'delete'],
+      },
+    });
+  }
 
   await app.listen(3000);
 }
