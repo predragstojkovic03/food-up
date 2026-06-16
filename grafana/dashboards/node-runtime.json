@@ -6,7 +6,7 @@
   "tags": ["food-up"],
   "timezone": "browser",
   "schemaVersion": 38,
-  "version": 1,
+  "version": 2,
   "refresh": "10s",
   "time": { "from": "now-1h", "to": "now" },
   "graphTooltip": 1,
@@ -23,6 +23,21 @@
         "refresh": 1,
         "options": [],
         "current": {}
+      },
+      {
+        "name": "instance",
+        "type": "query",
+        "label": "Instance",
+        "datasource": { "type": "prometheus", "uid": "${prometheus_ds}" },
+        "query": "label_values(v8js_memory_heap_used_bytes, host_name)",
+        "refresh": 2,
+        "includeAll": true,
+        "allValue": ".*",
+        "multi": false,
+        "sort": 1,
+        "hide": 0,
+        "options": [],
+        "current": {}
       }
     ]
   },
@@ -32,13 +47,13 @@
     {
       "id": 1,
       "type": "stat",
-      "title": "Heap Used",
+      "title": "Heap Used (all instances)",
       "gridPos": { "x": 0, "y": 0, "w": 6, "h": 5 },
       "datasource": { "type": "prometheus", "uid": "${prometheus_ds}" },
       "targets": [
         {
           "refId": "A",
-          "expr": "sum(v8js_memory_heap_used_bytes)",
+          "expr": "sum(v8js_memory_heap_used_bytes{host_name=~\"$instance\"})",
           "legendFormat": ""
         }
       ],
@@ -68,13 +83,13 @@
     {
       "id": 2,
       "type": "stat",
-      "title": "Heap Utilization",
+      "title": "Heap Utilization (avg per instance)",
       "gridPos": { "x": 6, "y": 0, "w": 6, "h": 5 },
       "datasource": { "type": "prometheus", "uid": "${prometheus_ds}" },
       "targets": [
         {
           "refId": "A",
-          "expr": "100 * sum(v8js_memory_heap_used_bytes) / sum(v8js_memory_heap_limit_bytes)",
+          "expr": "avg(100 * sum by(host_name) (v8js_memory_heap_used_bytes{host_name=~\"$instance\"}) / sum by(host_name) (v8js_memory_heap_limit_bytes{host_name=~\"$instance\"}))",
           "legendFormat": ""
         }
       ],
@@ -104,13 +119,13 @@
     {
       "id": 3,
       "type": "stat",
-      "title": "Event Loop P99 Delay",
+      "title": "Event Loop P99 Delay (avg per instance)",
       "gridPos": { "x": 12, "y": 0, "w": 6, "h": 5 },
       "datasource": { "type": "prometheus", "uid": "${prometheus_ds}" },
       "targets": [
         {
           "refId": "A",
-          "expr": "nodejs_eventloop_delay_p99_seconds * 1000",
+          "expr": "avg(nodejs_eventloop_delay_p99_seconds{host_name=~\"$instance\"}) * 1000",
           "legendFormat": ""
         }
       ],
@@ -140,13 +155,13 @@
     {
       "id": 4,
       "type": "stat",
-      "title": "Event Loop Utilization",
+      "title": "Event Loop Utilization (avg per instance)",
       "gridPos": { "x": 18, "y": 0, "w": 6, "h": 5 },
       "datasource": { "type": "prometheus", "uid": "${prometheus_ds}" },
       "targets": [
         {
           "refId": "A",
-          "expr": "nodejs_eventloop_utilization_ratio * 100",
+          "expr": "avg(nodejs_eventloop_utilization_ratio{host_name=~\"$instance\"}) * 100",
           "legendFormat": ""
         }
       ],
@@ -176,19 +191,19 @@
     {
       "id": 5,
       "type": "timeseries",
-      "title": "Heap Used vs Limit",
+      "title": "Heap Used vs Limit (per instance)",
       "gridPos": { "x": 0, "y": 5, "w": 12, "h": 9 },
       "datasource": { "type": "prometheus", "uid": "${prometheus_ds}" },
       "targets": [
         {
           "refId": "A",
-          "expr": "sum(v8js_memory_heap_used_bytes)",
-          "legendFormat": "Used"
+          "expr": "sum by (host_name) (v8js_memory_heap_used_bytes{host_name=~\"$instance\"})",
+          "legendFormat": "Used · {{host_name}}"
         },
         {
           "refId": "B",
-          "expr": "sum(v8js_memory_heap_limit_bytes)",
-          "legendFormat": "Limit"
+          "expr": "sum by (host_name) (v8js_memory_heap_limit_bytes{host_name=~\"$instance\"})",
+          "legendFormat": "Limit · {{host_name}}"
         }
       ],
       "options": {
@@ -202,7 +217,7 @@
         },
         "overrides": [
           {
-            "matcher": { "id": "byName", "options": "Limit" },
+            "matcher": { "id": "byRegexp", "options": "^Limit ·.*" },
             "properties": [
               { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } },
               { "id": "custom.lineStyle", "value": { "dash": [8, 4], "fill": "dash" } },
@@ -221,8 +236,8 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "v8js_memory_heap_used_bytes",
-          "legendFormat": "{{v8js_heap_space_name}}"
+          "expr": "sum by (host_name, v8js_heap_space_name) (v8js_memory_heap_used_bytes{host_name=~\"$instance\"})",
+          "legendFormat": "{{host_name}} · {{v8js_heap_space_name}}"
         }
       ],
       "options": {
@@ -240,29 +255,29 @@
     {
       "id": 7,
       "type": "timeseries",
-      "title": "Event Loop Delay",
+      "title": "Event Loop Delay (per instance)",
       "gridPos": { "x": 0, "y": 14, "w": 12, "h": 9 },
       "datasource": { "type": "prometheus", "uid": "${prometheus_ds}" },
       "targets": [
         {
           "refId": "A",
-          "expr": "nodejs_eventloop_delay_p50_seconds * 1000",
-          "legendFormat": "P50"
+          "expr": "nodejs_eventloop_delay_p50_seconds{host_name=~\"$instance\"} * 1000",
+          "legendFormat": "{{host_name}} · P50"
         },
         {
           "refId": "B",
-          "expr": "nodejs_eventloop_delay_p90_seconds * 1000",
-          "legendFormat": "P90"
+          "expr": "nodejs_eventloop_delay_p90_seconds{host_name=~\"$instance\"} * 1000",
+          "legendFormat": "{{host_name}} · P90"
         },
         {
           "refId": "C",
-          "expr": "nodejs_eventloop_delay_p99_seconds * 1000",
-          "legendFormat": "P99"
+          "expr": "nodejs_eventloop_delay_p99_seconds{host_name=~\"$instance\"} * 1000",
+          "legendFormat": "{{host_name}} · P99"
         },
         {
           "refId": "D",
-          "expr": "nodejs_eventloop_delay_max_seconds * 1000",
-          "legendFormat": "Max"
+          "expr": "nodejs_eventloop_delay_max_seconds{host_name=~\"$instance\"} * 1000",
+          "legendFormat": "{{host_name}} · Max"
         }
       ],
       "options": {
@@ -276,7 +291,7 @@
         },
         "overrides": [
           {
-            "matcher": { "id": "byName", "options": "Max" },
+            "matcher": { "id": "byRegexp", "options": "^.* · Max$" },
             "properties": [
               { "id": "custom.lineStyle", "value": { "dash": [6, 3], "fill": "dash" } },
               { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } }
@@ -288,19 +303,19 @@
     {
       "id": 8,
       "type": "timeseries",
-      "title": "Event Loop Utilization",
+      "title": "Event Loop Utilization (per instance)",
       "description": "Fraction of time the event loop is active (not idle). High utilization means the loop has little slack — sustained >0.8 causes latency spikes.",
       "gridPos": { "x": 12, "y": 14, "w": 12, "h": 9 },
       "datasource": { "type": "prometheus", "uid": "${prometheus_ds}" },
       "targets": [
         {
           "refId": "A",
-          "expr": "nodejs_eventloop_utilization_ratio",
-          "legendFormat": "Utilization"
+          "expr": "nodejs_eventloop_utilization_ratio{host_name=~\"$instance\"}",
+          "legendFormat": "{{host_name}}"
         }
       ],
       "options": {
-        "tooltip": { "mode": "single", "sort": "none" },
+        "tooltip": { "mode": "multi", "sort": "desc" },
         "legend": { "displayMode": "list", "placement": "bottom" }
       },
       "fieldConfig": {
@@ -332,8 +347,8 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "100 * sum by (v8js_gc_type) (rate(v8js_gc_duration_seconds_sum[$__rate_interval]))",
-          "legendFormat": "{{v8js_gc_type}}"
+          "expr": "100 * sum by (host_name, v8js_gc_type) (rate(v8js_gc_duration_seconds_sum{host_name=~\"$instance\"}[$__rate_interval]))",
+          "legendFormat": "{{host_name}} · {{v8js_gc_type}}"
         }
       ],
       "options": {
@@ -357,8 +372,8 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum by (v8js_gc_type) (rate(v8js_gc_duration_seconds_count[$__rate_interval]))",
-          "legendFormat": "{{v8js_gc_type}}"
+          "expr": "sum by (host_name, v8js_gc_type) (rate(v8js_gc_duration_seconds_count{host_name=~\"$instance\"}[$__rate_interval]))",
+          "legendFormat": "{{host_name}} · {{v8js_gc_type}}"
         }
       ],
       "options": {
