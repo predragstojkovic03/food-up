@@ -119,14 +119,14 @@
     {
       "id": 3,
       "type": "stat",
-      "title": "Event Loop P99 Delay (avg per instance)",
+      "title": "Event Loop P99 Delay",
       "gridPos": { "x": 12, "y": 0, "w": 6, "h": 5 },
       "datasource": { "type": "prometheus", "uid": "${prometheus_ds}" },
       "targets": [
         {
           "refId": "A",
-          "expr": "avg(nodejs_eventloop_delay_p99_seconds{host_name=~\"$instance\"}) * 1000",
-          "legendFormat": ""
+          "expr": "nodejs_eventloop_delay_p99_seconds{host_name=~\"$instance\"} * 1000",
+          "legendFormat": "{{host_name}}"
         }
       ],
       "options": {
@@ -155,14 +155,14 @@
     {
       "id": 4,
       "type": "stat",
-      "title": "Event Loop Utilization (avg per instance)",
+      "title": "Event Loop Utilization",
       "gridPos": { "x": 18, "y": 0, "w": 6, "h": 5 },
       "datasource": { "type": "prometheus", "uid": "${prometheus_ds}" },
       "targets": [
         {
           "refId": "A",
-          "expr": "avg(nodejs_eventloop_utilization_ratio{host_name=~\"$instance\"}) * 100",
-          "legendFormat": ""
+          "expr": "nodejs_eventloop_utilization_ratio{host_name=~\"$instance\"} * 100",
+          "legendFormat": "{{host_name}}"
         }
       ],
       "options": {
