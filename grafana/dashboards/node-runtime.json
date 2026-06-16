@@ -47,14 +47,14 @@
     {
       "id": 1,
       "type": "stat",
-      "title": "Heap Used (all instances)",
+      "title": "Heap Used",
       "gridPos": { "x": 0, "y": 0, "w": 6, "h": 5 },
       "datasource": { "type": "prometheus", "uid": "${prometheus_ds}" },
       "targets": [
         {
           "refId": "A",
-          "expr": "sum(v8js_memory_heap_used_bytes{host_name=~\"$instance\"})",
-          "legendFormat": ""
+          "expr": "sum by(host_name) (v8js_memory_heap_used_bytes{host_name=~\"$instance\"})",
+          "legendFormat": "{{host_name}}"
         }
       ],
       "options": {
@@ -83,14 +83,14 @@
     {
       "id": 2,
       "type": "stat",
-      "title": "Heap Utilization (avg per instance)",
+      "title": "Heap Utilization",
       "gridPos": { "x": 6, "y": 0, "w": 6, "h": 5 },
       "datasource": { "type": "prometheus", "uid": "${prometheus_ds}" },
       "targets": [
         {
           "refId": "A",
-          "expr": "avg(100 * sum by(host_name) (v8js_memory_heap_used_bytes{host_name=~\"$instance\"}) / sum by(host_name) (v8js_memory_heap_limit_bytes{host_name=~\"$instance\"}))",
-          "legendFormat": ""
+          "expr": "100 * sum by(host_name) (v8js_memory_heap_used_bytes{host_name=~\"$instance\"}) / sum by(host_name) (v8js_memory_heap_limit_bytes{host_name=~\"$instance\"})",
+          "legendFormat": "{{host_name}}"
         }
       ],
       "options": {
