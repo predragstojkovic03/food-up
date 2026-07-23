@@ -9,6 +9,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -211,7 +212,7 @@ function SecuritySection() {
                 <FormItem>
                   <FormLabel>{t('security.currentPassword')}</FormLabel>
                   <FormControl>
-                    <Input type='password' placeholder='••••••••' {...field} />
+                    <PasswordInput placeholder='••••••••' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -224,7 +225,7 @@ function SecuritySection() {
                 <FormItem>
                   <FormLabel>{t('security.newPassword')}</FormLabel>
                   <FormControl>
-                    <Input type='password' placeholder='••••••••' {...field} />
+                    <PasswordInput placeholder='••••••••' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -237,7 +238,7 @@ function SecuritySection() {
                 <FormItem>
                   <FormLabel>{t('security.confirmPassword')}</FormLabel>
                   <FormControl>
-                    <Input type='password' placeholder='••••••••' {...field} />
+                    <PasswordInput placeholder='••••••••' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
