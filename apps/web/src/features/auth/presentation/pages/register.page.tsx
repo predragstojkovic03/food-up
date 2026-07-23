@@ -16,6 +16,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import {
   useRegisterEmployee,
   useRegisterSupplier,
@@ -32,11 +33,17 @@ type AccountType = 'employee' | 'supplier';
 
 // ── Schemas ────────────────────────────────────────────────────────────────
 
-const employeeSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  email: z.string().email('Enter a valid email'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-});
+const employeeSchema = z
+  .object({
+    name: z.string().min(1, 'Name is required'),
+    email: z.string().email('Enter a valid email'),
+    password: z.string().min(8, 'Password must be at least 8 characters'),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
 
 const supplierSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -111,10 +118,10 @@ function EmployeeRegisterForm({
 
   const form = useForm<EmployeeValues>({
     resolver: zodResolver(employeeSchema),
-    defaultValues: { name: '', email: inviteEmail, password: '' },
+    defaultValues: { name: '', email: inviteEmail, password: '', confirmPassword: '' },
   });
 
-  function onSubmit(data: EmployeeValues) {
+  function onSubmit({ confirmPassword: _cp, ...data }: EmployeeValues) {
     register.mutate({ ...data, inviteToken }, {
       onSuccess: () => navigate('/login'),
     });
@@ -170,7 +177,20 @@ function EmployeeRegisterForm({
                 <FormItem>
                   <FormLabel>{t('login.password')}</FormLabel>
                   <FormControl>
-                    <Input type='password' placeholder='••••••••' {...field} />
+                    <PasswordInput placeholder='••••••••' {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='confirmPassword'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('register.fields.confirmPassword')}</FormLabel>
+                  <FormControl>
+                    <PasswordInput placeholder='••••••••' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
