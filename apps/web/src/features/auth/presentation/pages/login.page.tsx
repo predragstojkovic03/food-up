@@ -16,6 +16,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import { useLogin } from '@/features/auth/application/use-login.hook';
 import { useAuthStore } from '@/features/auth/presentation/state/auth.store';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -82,7 +83,7 @@ export default function LoginPage() {
                 <FormItem>
                   <FormLabel>{t('login.password')}</FormLabel>
                   <FormControl>
-                    <Input type='password' placeholder='••••••••' {...field} />
+                    <PasswordInput placeholder='••••••••' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
