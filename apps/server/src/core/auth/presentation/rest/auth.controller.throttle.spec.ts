@@ -4,7 +4,6 @@ import { AuthController } from './auth.controller';
 // Keys are: THROTTLER_TTL + name and THROTTLER_LIMIT + name (from @nestjs/throttler constants).
 const THROTTLER_TTL = 'THROTTLER:TTL';
 const THROTTLER_LIMIT = 'THROTTLER:LIMIT';
-const THROTTLER_SKIP = 'THROTTLER:SKIP';
 
 describe('AuthController throttle metadata', () => {
   it('login is limited to 5 requests per minute', () => {
