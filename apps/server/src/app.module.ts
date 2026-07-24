@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { LoggerModule as PinoLoggerModule } from 'nestjs-pino';
 import { join } from 'path';
@@ -94,6 +95,9 @@ import { TransactionModule } from './shared/infrastructure/transaction/transacti
       inject: [I_CONFIG_SERVICE],
     }),
     EventEmitterModule.forRoot({ wildcard: true }),
+    ThrottlerModule.forRoot([
+      { name: 'default', ttl: 60_000, limit: 120 },
+    ]),
     BullModule.forRootAsync({
       useFactory: (
         configService: IConfigService<EnvironmentVariables, true>,
@@ -145,6 +149,10 @@ import { TransactionModule } from './shared/infrastructure/transaction/transacti
     {
       provide: APP_FILTER,
       useClass: DomainExceptionFilter,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
     },
     {
       provide: APP_GUARD,

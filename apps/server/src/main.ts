@@ -31,6 +31,10 @@ async function bootstrap() {
    */
   app.use(cookieParser());
 
+  // Trust one hop of proxy (Nginx / ALB) so ThrottlerGuard reads the real client IP
+  // from X-Forwarded-For rather than the proxy's IP address.
+  app.set('trust proxy', 1);
+
   /**
    * credentials: true is required for the browser to send cookies on cross-origin requests
    * (e.g. frontend on :5000, backend on :3000 during development).
