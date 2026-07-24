@@ -1,5 +1,6 @@
 import { Controller, Get, SerializeOptions } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 import {
   HealthCheck,
   HealthCheckService,
@@ -8,6 +9,7 @@ import {
 import { Public } from 'src/core/auth/infrastructure/public.decorator';
 import { RedisHealthIndicator } from './redis.health-indicator';
 
+@SkipThrottle()
 @ApiTags('Health')
 @Controller('health')
 export class HealthController {

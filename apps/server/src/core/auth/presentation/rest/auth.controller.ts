@@ -18,6 +18,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { plainToInstance } from 'class-transformer';
 import { CookieOptions, Request, Response } from 'express';
 import { EmployeesService } from 'src/core/employees/application/employees.service';
@@ -78,6 +79,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Login with email and password' })
   @ApiResponse({ status: 200, description: 'Access token returned, refresh token set as httpOnly cookie', type: AuthResponseDto })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
   @Public
   @UseGuards(LocalAuthGuard)
   @Post('login')
@@ -104,6 +106,7 @@ export class AuthController {
   @ApiCookieAuth(REFRESH_COOKIE_NAME)
   @ApiResponse({ status: 200, description: 'New access token returned, new refresh cookie set', type: AuthResponseDto })
   @ApiResponse({ status: 401, description: 'Refresh token invalid, expired, or revoked' })
+  @Throttle({ default: { ttl: 60_000, limit: 20 } })
   @Public
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
@@ -141,6 +144,7 @@ export class AuthController {
     res.cookie(REFRESH_COOKIE_NAME, '', { ...refreshCookieOptions(this._isProduction), maxAge: 0 });
   }
 
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
   @Post('change-password')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Change password for the authenticated identity' })
