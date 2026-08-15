@@ -1356,11 +1356,12 @@ function CreateWindowPanel({
             control={form.control}
             name='menuPeriodIds'
             render={() => {
-              // Compute compatibility inline (extracted from IIFE)
-              const lastTargetDate = activeDates.length > 0 ? [...activeDates].sort().at(-1)! : null;
-              const hasIncompatible = lastTargetDate
-                ? menuPeriods.some((mp) => mp.endDate < lastTargetDate)
-                : false;
+              // A period is compatible if it covers at least one target date.
+              // The backend enforces that all target dates are collectively covered.
+              const coversAnyTargetDate = (mp: IMenuPeriodResponse) =>
+                activeDates.some((date) => mp.startDate <= date && mp.endDate >= date);
+              const hasIncompatible =
+                activeDates.length > 0 && menuPeriods.some((mp) => !coversAnyTargetDate(mp));
 
               return (
                 <FormItem>
@@ -1374,7 +1375,7 @@ function CreateWindowPanel({
                       <div className='flex flex-wrap gap-2'>
                         {menuPeriods.map((mp) => {
                           const selected = watchedMenuPeriodIds.includes(mp.id);
-                          const compatible = lastTargetDate ? mp.endDate >= lastTargetDate : true;
+                          const compatible = activeDates.length === 0 || coversAnyTargetDate(mp);
                           return (
                             <button
                               key={mp.id}
