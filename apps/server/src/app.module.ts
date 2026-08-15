@@ -150,10 +150,9 @@ import { TransactionModule } from './shared/infrastructure/transaction/transacti
       provide: APP_FILTER,
       useClass: DomainExceptionFilter,
     },
-    {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard,
-    },
+    ...(process.env.DISABLE_THROTTLE === 'true'
+      ? []
+      : [{ provide: APP_GUARD, useClass: ThrottlerGuard }]),
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
