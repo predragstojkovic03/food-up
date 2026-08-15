@@ -1358,10 +1358,8 @@ function CreateWindowPanel({
             render={() => {
               // Compute compatibility inline (extracted from IIFE)
               const lastTargetDate = activeDates.length > 0 ? [...activeDates].sort().at(-1)! : null;
-              const deadlineDate = watchedEndTime ? watchedEndTime.split('T')[0] : null;
-              const minRequiredEndDate = [lastTargetDate, deadlineDate].filter(Boolean).sort().at(-1) ?? null;
-              const hasIncompatible = minRequiredEndDate
-                ? menuPeriods.some((mp) => mp.endDate < minRequiredEndDate)
+              const hasIncompatible = lastTargetDate
+                ? menuPeriods.some((mp) => mp.endDate < lastTargetDate)
                 : false;
 
               return (
@@ -1376,7 +1374,7 @@ function CreateWindowPanel({
                       <div className='flex flex-wrap gap-2'>
                         {menuPeriods.map((mp) => {
                           const selected = watchedMenuPeriodIds.includes(mp.id);
-                          const compatible = minRequiredEndDate ? mp.endDate >= minRequiredEndDate : true;
+                          const compatible = lastTargetDate ? mp.endDate >= lastTargetDate : true;
                           return (
                             <button
                               key={mp.id}
