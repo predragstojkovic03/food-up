@@ -15,7 +15,10 @@ function expandDateRange(startDate: string, endDate: string): string[] {
   const cursor = new Date(startDate + 'T00:00:00');
   const end = new Date(endDate + 'T00:00:00');
   while (cursor <= end) {
-    dates.push(cursor.toISOString().slice(0, 10));
+    const y = cursor.getFullYear();
+    const m = String(cursor.getMonth() + 1).padStart(2, '0');
+    const d = String(cursor.getDate()).padStart(2, '0');
+    dates.push(`${y}-${m}-${d}`);
     cursor.setDate(cursor.getDate() + 1);
   }
   return dates;
