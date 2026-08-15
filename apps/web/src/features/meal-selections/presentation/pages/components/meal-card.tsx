@@ -1,4 +1,3 @@
-import { formatRSD } from '@/lib/utils';
 import { MenuItemOption } from '../types';
 
 interface MealCardProps {
@@ -27,11 +26,6 @@ export function MealCard({ item, selected, onSelect }: MealCardProps) {
           )}
         </div>
         <div className="flex flex-col items-end gap-1.5 shrink-0">
-          {item.price != null && (
-            <span className="text-xs font-medium text-muted-foreground">
-              {formatRSD(item.price)}
-            </span>
-          )}
           <span
             className={`size-5 rounded-full border-2 flex items-center justify-center transition-colors ${
               selected ? 'border-primary bg-primary' : 'border-border'
