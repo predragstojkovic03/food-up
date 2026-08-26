@@ -11,8 +11,11 @@ export class Identity {
   @Column('varchar', { unique: true, length: 255 })
   email: string;
 
-  @Column('varchar', { length: 255 })
-  passwordHash: string;
+  @Column('varchar', { length: 255, nullable: true })
+  passwordHash: string | null;
+
+  @Column('varchar', { length: 255, nullable: true, unique: true })
+  googleId: string | null;
 
   @Column('enum', { enum: IdentityType })
   type: IdentityType;

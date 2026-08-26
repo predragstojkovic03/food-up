@@ -30,6 +30,11 @@ export class IdentityTypeOrmRepository implements IIdentityRepository {
     return entity ? this.toDomain(entity) : null;
   }
 
+  async findByGoogleId(googleId: string): Promise<Identity | null> {
+    const entity = await this._repo.findOne({ where: { googleId } });
+    return entity ? this.toDomain(entity) : null;
+  }
+
   async create(identity: Identity): Promise<Identity> {
     const entity = this._repo.create(identity);
     const saved = await this._repo.save(entity);
@@ -54,6 +59,7 @@ export class IdentityTypeOrmRepository implements IIdentityRepository {
       entity.passwordHash,
       entity.type,
       entity.isActive,
+      entity.googleId ?? null,
     );
   }
 }
