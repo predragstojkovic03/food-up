@@ -21,7 +21,7 @@ export class IdentityService {
   async create(dto: CreateIdentityDto): Promise<Identity> {
     const passwordHash = await hash(dto.password, 10);
 
-    const entity = Identity.create(
+    const entity = Identity.createWithPassword(
       dto.email,
       passwordHash,
       dto.type as IdentityType,
