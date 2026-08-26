@@ -10,6 +10,7 @@ import MealSelectionWindowsPage from '@/features/meal-selection-windows/presenta
 import InHouseSupplierDetailPage from '@/features/suppliers/presentation/pages/in-house-supplier-detail.page';
 import InHouseSuppliersPage from '@/features/suppliers/presentation/pages/in-house-suppliers.page';
 import PartnerSuppliersPage from '@/features/suppliers/presentation/pages/partner-suppliers.page';
+import AuthCallbackPage from '@/features/auth/presentation/pages/auth-callback.page';
 import LoginPage from '@/features/auth/presentation/pages/login.page';
 import RegisterPage from '@/features/auth/presentation/pages/register.page';
 import { IdentityType, EmployeeRole } from '@food-up/shared';
@@ -22,6 +23,8 @@ function App() {
   return (
     <Router>
       <Routes>
+        <Route path='/auth/callback' element={<AuthCallbackPage />} />
+
         {/* Auth routes */}
         <Route element={<AuthLayout />}>
           <Route path='/login' element={<LoginPage />} />

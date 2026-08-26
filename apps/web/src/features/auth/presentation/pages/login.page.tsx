@@ -24,6 +24,7 @@ import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { Link, Navigate } from 'react-router-dom';
 import { z } from 'zod/v3';
+import { getRedirectPath } from './_redirect-path';
 
 const schema = z.object({
   email: z.string().email('Enter a valid email'),
@@ -110,19 +111,4 @@ export default function LoginPage() {
       </CardFooter>
     </Card>
   );
-}
-
-import { EmployeeRole, IdentityType } from '@food-up/shared';
-
-function getRedirectPath(type: IdentityType, role?: EmployeeRole): string {
-  switch (type) {
-    case IdentityType.Employee:
-      return role === EmployeeRole.Manager ? '/employee/manager' : '/employee';
-    case IdentityType.Supplier:
-      return '/supplier';
-    case IdentityType.Business:
-      return '/business';
-    case IdentityType.Admin:
-      return '/admin';
-  }
 }
