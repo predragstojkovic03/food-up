@@ -47,16 +47,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { z } from 'zod/v3';
 import { MenuPeriodBuilder } from './components/menu-period-builder/menu-period-builder';
 
-const MEAL_TYPE_LABELS: Record<MealType, string> = {
-  [MealType.Breakfast]: 'Breakfast',
-  [MealType.Bread]: 'Bread',
-  [MealType.Lunch]: 'Lunch',
-  [MealType.Dinner]: 'Dinner',
-  [MealType.Soup]: 'Soup',
-  [MealType.Salad]: 'Salad',
-  [MealType.Dessert]: 'Dessert',
-};
-
 export default function InHouseSupplierDetailPage() {
   const { t } = useTranslation('suppliers');
   const { id: supplierId } = useParams<{ id: string }>();
@@ -109,16 +99,16 @@ export default function InHouseSupplierDetailPage() {
 
 // ─── Meals Tab ───────────────────────────────────────────────────────────────
 
-const createMealSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  description: z.string().optional(),
-  type: z.nativeEnum(MealType),
-  price: z.string().optional(),
-});
-type CreateMealFormValues = z.infer<typeof createMealSchema>;
-
 function MealsTab({ supplierId }: { supplierId: string }) {
   const { t } = useTranslation('suppliers');
+
+  const createMealSchema = z.object({
+    name: z.string().min(1, t('detail.meals.createForm.nameRequired')),
+    description: z.string().optional(),
+    type: z.nativeEnum(MealType),
+    price: z.string().optional(),
+  });
+  type CreateMealFormValues = z.infer<typeof createMealSchema>;
   const { mealService } = useServices();
   const queryClient = useQueryClient();
   const QUERY_KEY = ['meals', 'supplier', supplierId];
@@ -218,12 +208,12 @@ function MealsTab({ supplierId }: { supplierId: string }) {
                     <Select value={field.value} onValueChange={field.onChange}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue>{(v: string) => MEAL_TYPE_LABELS[v as MealType] ?? v}</SelectValue>
+                          <SelectValue>{(v: string) => t(`mealTypes.${v}`, { ns: 'employees' })}</SelectValue>
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {Object.values(MealType).map((t) => (
-                          <SelectItem key={t} value={t} label={MEAL_TYPE_LABELS[t]}>{MEAL_TYPE_LABELS[t]}</SelectItem>
+                        {Object.values(MealType).map((mealType) => (
+                          <SelectItem key={mealType} value={mealType} label={t(`mealTypes.${mealType}`, { ns: 'employees' })}>{t(`mealTypes.${mealType}`, { ns: 'employees' })}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -381,12 +371,12 @@ function MealRow({ meal, isUpdating, isRemoving, onUpdate, onRemove }: MealRowPr
           disabled={isUpdating}
         >
           <SelectTrigger className='h-8 w-28 text-xs'>
-            <SelectValue>{(v: string) => MEAL_TYPE_LABELS[v as MealType] ?? v}</SelectValue>
+            <SelectValue>{(v: string) => t(`mealTypes.${v}`, { ns: 'employees' })}</SelectValue>
           </SelectTrigger>
           <SelectContent>
-            {Object.values(MealType).map((t) => (
-              <SelectItem key={t} value={t} label={MEAL_TYPE_LABELS[t]}>
-                {MEAL_TYPE_LABELS[t]}
+            {Object.values(MealType).map((mealType) => (
+              <SelectItem key={mealType} value={mealType} label={t(`mealTypes.${mealType}`, { ns: 'employees' })}>
+                {t(`mealTypes.${mealType}`, { ns: 'employees' })}
               </SelectItem>
             ))}
           </SelectContent>
@@ -421,7 +411,7 @@ function MealRow({ meal, isUpdating, isRemoving, onUpdate, onRemove }: MealRowPr
         {meal.price != null ? meal.price.toFixed(2) : <span className='italic'>—</span>}
       </span>
       <span className='text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground'>
-        {MEAL_TYPE_LABELS[meal.type]}
+        {t(`mealTypes.${meal.type}`, { ns: 'employees' })}
       </span>
       <div className='flex gap-1'>
         <button
@@ -459,14 +449,14 @@ function MealRow({ meal, isUpdating, isRemoving, onUpdate, onRemove }: MealRowPr
 
 // ─── Menu Periods Tab ─────────────────────────────────────────────────────────
 
-const createPeriodSchema = z.object({
-  startDate: z.string().min(1, 'Start date is required'),
-  endDate: z.string().min(1, 'End date is required'),
-});
-type CreatePeriodFormValues = z.infer<typeof createPeriodSchema>;
-
 function MenuPeriodsTab({ supplierId }: { supplierId: string }) {
   const { t } = useTranslation('suppliers');
+
+  const createPeriodSchema = z.object({
+    startDate: z.string().min(1, t('detail.menuPeriods.createForm.startRequired')),
+    endDate: z.string().min(1, t('detail.menuPeriods.createForm.endRequired')),
+  });
+  type CreatePeriodFormValues = z.infer<typeof createPeriodSchema>;
   const { menuPeriodService, mealService } = useServices();
   const queryClient = useQueryClient();
   const QUERY_KEY = ['menu-periods', 'supplier', supplierId];
@@ -585,7 +575,7 @@ function MenuPeriodsTab({ supplierId }: { supplierId: string }) {
             {t('detail.menuPeriods.empty')}
           </div>
         )}
-        {periods.map((period) => (
+        {[...periods].sort((a, b) => b.startDate.localeCompare(a.startDate)).map((period) => (
           <MenuPeriodRow
             key={period.id}
             period={period}
@@ -640,22 +630,23 @@ function MenuPeriodRow({ period, meals, isRemoving, onRemove, onInvalidate }: Me
 
   return (
     <div className='border rounded-lg overflow-hidden'>
-      <div className='flex items-center px-4 py-3 gap-3'>
-        <button
-          onClick={() => setExpanded((v) => !v)}
-          className='text-muted-foreground hover:text-foreground transition-colors'
-        >
+      <button
+        onClick={() => setExpanded((v) => !v)}
+        className='flex items-center w-full px-4 py-3 gap-3 text-left hover:bg-muted/50 transition-colors'
+      >
+        <span className='text-muted-foreground'>
           {expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-        </button>
-        <div className='flex-1 text-sm'>
+        </span>
+        <span className='flex-1 text-sm'>
           <span className='font-medium'>{period.startDate}</span>
           <span className='text-muted-foreground mx-2'>→</span>
           <span className='font-medium'>{period.endDate}</span>
-        </div>
+        </span>
         <AlertDialog>
           <AlertDialogTrigger
             disabled={isRemoving}
             className='p-1.5 text-muted-foreground hover:text-destructive disabled:opacity-30'
+            onClick={(e) => e.stopPropagation()}
           >
             <Trash2 size={15} />
           </AlertDialogTrigger>
@@ -675,7 +666,7 @@ function MenuPeriodRow({ period, meals, isRemoving, onRemove, onInvalidate }: Me
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-      </div>
+      </button>
 
       {expanded && (
         <div className='border-t'>
