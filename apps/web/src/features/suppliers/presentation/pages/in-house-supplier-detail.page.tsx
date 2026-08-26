@@ -209,7 +209,7 @@ function MealsTab({ supplierId }: { supplierId: string }) {
                     <Select value={field.value} onValueChange={field.onChange}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue>{(v: string) => tEmp(`mealTypes.${v}`)}</SelectValue>
+                          <SelectValue>{(v: string) => tEmp(`mealTypes.${v as MealType}`)}</SelectValue>
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -373,7 +373,7 @@ function MealRow({ meal, isUpdating, isRemoving, onUpdate, onRemove }: MealRowPr
           disabled={isUpdating}
         >
           <SelectTrigger className='h-8 w-28 text-xs'>
-            <SelectValue>{(v: string) => tEmp(`mealTypes.${v}`)}</SelectValue>
+            <SelectValue>{(v: string) => tEmp(`mealTypes.${v as MealType}`)}</SelectValue>
           </SelectTrigger>
           <SelectContent>
             {Object.values(MealType).map((mealType) => (

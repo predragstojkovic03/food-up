@@ -117,7 +117,7 @@ export function CreateMealDialog({
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue>
-                          {(v: string) => tEmp(`mealTypes.${v}`)}
+                          {(v: string) => tEmp(`mealTypes.${v as MealType}`)}
                         </SelectValue>
                       </SelectTrigger>
                     </FormControl>
