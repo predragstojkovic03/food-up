@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/features/auth/presentation/state/auth.store';
 import { useCurrentEmployee } from '@/features/employees/application/use-current-employee.hook';
@@ -32,9 +32,10 @@ export default function MainLayout() {
             {user?.type === IdentityType.Employee && <ManagerPanelLink />}
             <UserMenuDropdown
               accountPath='/employee/account'
-              renderTrigger={({ initials }) => (
+              renderTrigger={({ initials, pictureUrl }) => (
                 <Button variant='ghost' size='sm' className='rounded-full p-1'>
                   <Avatar className='size-7'>
+                    {pictureUrl && <AvatarImage src={pictureUrl} alt='' />}
                     <AvatarFallback className='text-xs font-semibold'>{initials}</AvatarFallback>
                   </Avatar>
                 </Button>

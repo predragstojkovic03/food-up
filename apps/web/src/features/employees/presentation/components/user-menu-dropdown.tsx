@@ -26,7 +26,7 @@ import { useNavigate } from 'react-router-dom';
 
 interface UserMenuDropdownProps {
   accountPath: string;
-  renderTrigger: (data: { name: string | undefined; initials: string }) => React.ReactElement;
+  renderTrigger: (data: { name: string | undefined; initials: string; pictureUrl: string | null }) => React.ReactElement;
   contentSide?: 'top' | 'bottom' | 'left' | 'right';
   contentAlign?: 'start' | 'center' | 'end';
 }
@@ -56,7 +56,7 @@ export function UserMenuDropdown({
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger render={renderTrigger({ name: employee?.name, initials })} />
+        <DropdownMenuTrigger render={renderTrigger({ name: employee?.name, initials, pictureUrl })} />
         <DropdownMenuContent side={contentSide} align={contentAlign} className='w-60'>
           <div className='flex items-center gap-3 px-3 py-2'>
             <Avatar className='size-10 shrink-0'>

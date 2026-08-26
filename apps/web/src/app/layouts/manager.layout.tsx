@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import {
   Collapsible,
@@ -171,9 +171,10 @@ export default function ManagerLayout() {
                 accountPath='/employee/manager/account'
                 contentSide='top'
                 contentAlign='start'
-                renderTrigger={({ name, initials }) => (
+                renderTrigger={({ name, initials, pictureUrl }) => (
                   <SidebarMenuButton size='lg' tooltip={name ?? t('nav.account')}>
                     <Avatar className='size-7 shrink-0'>
+                      {pictureUrl && <AvatarImage src={pictureUrl} alt={name ?? ''} />}
                       <AvatarFallback className='text-xs font-semibold'>{initials}</AvatarFallback>
                     </Avatar>
                     <span className='truncate font-semibold'>{name ?? '…'}</span>
