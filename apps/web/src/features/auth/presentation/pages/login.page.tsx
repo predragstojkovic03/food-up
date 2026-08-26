@@ -22,7 +22,7 @@ import { useAuthStore } from '@/features/auth/presentation/state/auth.store';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { Link, Navigate } from 'react-router-dom';
+import { Link, Navigate, useLocation } from 'react-router-dom';
 import { z } from 'zod/v3';
 import { getRedirectPath } from './_redirect-path';
 
@@ -37,6 +37,8 @@ export default function LoginPage() {
   const { t } = useTranslation('auth');
   const login = useLogin();
   const user = useAuthStore((s) => s.user);
+  const location = useLocation();
+  const hasGoogleError = (location.state as { googleError?: boolean } | null)?.googleError;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -100,6 +102,19 @@ export default function LoginPage() {
             </Button>
           </form>
         </Form>
+      </CardContent>
+      <div className='flex items-center gap-3 px-6'>
+        <div className='bg-border h-px flex-1' />
+        <span className='text-muted-foreground text-xs'>{t('login.orDivider')}</span>
+        <div className='bg-border h-px flex-1' />
+      </div>
+      <CardContent className='pt-0'>
+        {hasGoogleError && (
+          <p className='text-destructive mb-3 text-sm'>{t('login.googleError')}</p>
+        )}
+        <Button variant='outline' className='w-full' asChild>
+          <a href='/api/auth/google'>{t('login.googleButton')}</a>
+        </Button>
       </CardContent>
       <CardFooter className='justify-center text-sm'>
         <span className='text-muted-foreground'>
