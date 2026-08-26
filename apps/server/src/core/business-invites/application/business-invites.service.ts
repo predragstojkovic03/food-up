@@ -6,7 +6,7 @@ import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
 import { EntityInstanceNotFoundException } from 'src/shared/domain/exceptions/entity-instance-not-found.exception';
 import { InvalidOperationException } from 'src/shared/domain/exceptions/invalid-operation.exception';
 import { t } from 'src/shared/i18n/i18n.helper';
-import { emailBody, emailButton, emailHeading, emailLayout, emailNote } from 'src/shared/infrastructure/notifications/mail/email-layout';
+import { emailBody, emailButton, emailHeading, emailLayout, emailNote, getLogoAttachment } from 'src/shared/infrastructure/notifications/mail/email-layout';
 import { I_MAIL_SERVICE, IMailService } from 'src/shared/infrastructure/notifications/mail/mail.service.interface';
 import { BusinessInvite } from '../domain/business-invite.entity';
 import {
@@ -108,7 +108,7 @@ export class BusinessInvitesService {
     const html = emailLayout(content, webAppUrl);
 
     try {
-      await this._mailService.send(invite.email, subject, html);
+      await this._mailService.send(invite.email, subject, html, { attachments: [getLogoAttachment()] });
       invite.markEmailSent();
       await this._repository.update(invite.id, invite);
       this._logger.log(

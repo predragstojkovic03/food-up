@@ -33,6 +33,12 @@ export class ResendMailService implements IMailService {
       html,
       cc: options?.cc,
       replyTo: options?.replyTo,
+      attachments: options?.attachments?.map((a) => ({
+        filename: a.filename,
+        content: a.content,
+        contentType: a.contentType,
+        contentId: a.contentId,
+      })),
     });
     if (error) {
       throw new Error(`Failed to send email to ${to}: ${error.message}`);

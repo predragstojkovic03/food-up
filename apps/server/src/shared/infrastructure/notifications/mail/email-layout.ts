@@ -1,9 +1,38 @@
+import * as fs from 'fs';
+import * as path from 'path';
+
 const BRAND_GREEN = '#2D6A4F';
 const BRAND_GREEN_DARK = '#245C43';
 
+const LOGO_CID = 'foodup-logo';
+
+let _logoBuffer: Buffer | null = null;
+
+function getLogoBuffer(): Buffer {
+  if (!_logoBuffer) {
+    _logoBuffer = fs.readFileSync(path.join(__dirname, 'assets', 'foodup-logo.png'));
+  }
+  return _logoBuffer;
+}
+
+export interface LogoAttachment {
+  filename: string;
+  content: Buffer;
+  contentType: string;
+  contentId: string;
+}
+
+export function getLogoAttachment(): LogoAttachment {
+  return {
+    filename: 'foodup-logo.png',
+    content: getLogoBuffer(),
+    contentType: 'image/png',
+    contentId: LOGO_CID,
+  };
+}
+
 export function emailLayout(content: string, webAppUrl: string): string {
   const year = new Date().getFullYear();
-  const logoUrl = `${webAppUrl}/horizontal/foodup-lockup-horizontal.png`;
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -23,7 +52,7 @@ export function emailLayout(content: string, webAppUrl: string): string {
           <!-- Header -->
           <tr>
             <td align="center" style="background-color:${BRAND_GREEN};padding:24px 32px;">
-              <img src="${logoUrl}" alt="FoodUp" height="34"
+              <img src="cid:${LOGO_CID}" alt="FoodUp" height="34"
                    style="display:block;height:34px;border:0;outline:none;" />
             </td>
           </tr>

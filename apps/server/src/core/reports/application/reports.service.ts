@@ -13,7 +13,7 @@ import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
 import { I_CONFIG_SERVICE, IConfigService } from 'src/shared/application/config-service.interface';
 import { EnvironmentVariables } from 'src/env.validation';
 import { t } from 'src/shared/i18n/i18n.helper';
-import { emailLayout } from 'src/shared/infrastructure/notifications/mail/email-layout';
+import { emailLayout, getLogoAttachment } from 'src/shared/infrastructure/notifications/mail/email-layout';
 import {
   I_MAIL_SERVICE,
   IMailService,
@@ -255,6 +255,7 @@ export class ReportsService {
 
       await this._mailService.send(supplier.email, subject, html, {
         cc: managerEmail ?? undefined,
+        attachments: [getLogoAttachment()],
       });
 
       const send = OrderSummarySend.create(windowId, supplierId, managerIdentityId, subject, html);

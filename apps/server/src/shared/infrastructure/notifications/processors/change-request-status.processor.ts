@@ -10,7 +10,7 @@ import { I_CONFIG_SERVICE, IConfigService } from 'src/shared/application/config-
 import { EnvironmentVariables } from 'src/env.validation';
 import { t } from 'src/shared/i18n/i18n.helper';
 import { bullmqTelemetry } from '../bullmq-telemetry';
-import { emailBody, emailHeading, emailLayout, emailStatusBadge } from '../mail/email-layout';
+import { emailBody, emailHeading, emailLayout, emailStatusBadge, getLogoAttachment } from '../mail/email-layout';
 import { I_MAIL_SERVICE, IMailService } from '../mail/mail.service.interface';
 import { CHANGE_REQUEST_QUEUE } from '../queue-names';
 
@@ -55,7 +55,7 @@ export class ChangeRequestStatusProcessor extends WorkerHost {
       emailBody(body);
     const html = emailLayout(content, webAppUrl);
 
-    await this._mailService.send(employee.email, subject, html);
+    await this._mailService.send(employee.email, subject, html, { attachments: [getLogoAttachment()] });
 
     this._logger.log(
       `job:done queue=${job.queueName} jobId=${job.id} attempt=${job.attemptsMade + 1} employeeId=${employeeId} status=${status} durationMs=${Date.now() - start}`,

@@ -10,7 +10,7 @@ import { I_CONFIG_SERVICE, IConfigService } from 'src/shared/application/config-
 import { EnvironmentVariables } from 'src/env.validation';
 import { t } from 'src/shared/i18n/i18n.helper';
 import { bullmqTelemetry } from '../bullmq-telemetry';
-import { emailBody, emailHeading, emailLayout } from '../mail/email-layout';
+import { emailBody, emailHeading, emailLayout, getLogoAttachment } from '../mail/email-layout';
 import { I_MAIL_SERVICE, IMailService } from '../mail/mail.service.interface';
 import { BULK_CHANGE_REQUEST_QUEUE } from '../queue-names';
 
@@ -63,7 +63,7 @@ export class BulkChangeRequestStatusProcessor extends WorkerHost {
       emailBody(intro + list);
     const html = emailLayout(content, webAppUrl);
 
-    await this._mailService.send(employee.email, subject, html);
+    await this._mailService.send(employee.email, subject, html, { attachments: [getLogoAttachment()] });
 
     this._logger.log(
       `job:done queue=${job.queueName} jobId=${job.id} attempt=${job.attemptsMade + 1} employeeId=${employeeId} approved=${approved.length} rejected=${rejected.length} durationMs=${Date.now() - start}`,
