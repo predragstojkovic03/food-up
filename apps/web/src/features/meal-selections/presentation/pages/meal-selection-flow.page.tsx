@@ -131,11 +131,14 @@ export default function MealSelectionFlowPage() {
   const handleChoose = useCallback((type: MealType, itemId: string) => {
     setDaySelections((prev) => {
       const next = [...prev];
-      next[step] = {
-        ...next[step],
-        skipped: false,
-        choices: { ...next[step].choices, [type]: itemId },
-      };
+      const current = next[step];
+      const updatedChoices = { ...current.choices };
+      if (updatedChoices[type] === itemId) {
+        delete updatedChoices[type];
+      } else {
+        updatedChoices[type] = itemId;
+      }
+      next[step] = { ...current, skipped: false, choices: updatedChoices };
       return next;
     });
   }, [step]);
