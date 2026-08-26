@@ -10,7 +10,7 @@ let _logoBuffer: Buffer | null = null;
 
 function getLogoBuffer(): Buffer {
   if (!_logoBuffer) {
-    _logoBuffer = fs.readFileSync(path.join(__dirname, 'assets', 'foodup-logo.png'));
+    _logoBuffer = fs.readFileSync(path.join(__dirname, 'assets', 'foodup-logo-dark.png'));
   }
   return _logoBuffer;
 }
@@ -24,7 +24,7 @@ export interface LogoAttachment {
 
 export function getLogoAttachment(): LogoAttachment {
   return {
-    filename: 'foodup-logo.png',
+    filename: 'foodup-logo-dark.png',
     content: getLogoBuffer(),
     contentType: 'image/png',
     contentId: LOGO_CID,
