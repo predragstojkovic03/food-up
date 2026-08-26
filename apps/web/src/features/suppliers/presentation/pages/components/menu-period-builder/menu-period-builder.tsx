@@ -40,7 +40,7 @@ export function MenuPeriodBuilder({
   return (
     <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
       <div className='flex gap-6 p-4 items-start'>
-        <MealPalette meals={meals} />
+        <MealPalette meals={meals} supplierId={period.supplierId} />
         <DateGrid
           dates={dates}
           itemsByDate={itemsByDate}
