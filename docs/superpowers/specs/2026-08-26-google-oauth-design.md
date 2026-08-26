@@ -61,8 +61,8 @@ Session issuance uses the existing `issueSessionForIdentity()` — no changes to
 
 ### New controller endpoints (both `@Public()`)
 
-- `GET /auth/google` — triggers `GoogleStrategy` redirect to Google's login page
-- `GET /auth/google/callback` — OAuth code exchange handled by `GoogleStrategy`; on success calls `findOrLinkGoogleIdentity()`, sets the httpOnly refresh cookie (same as current login), then redirects the browser to:
+- `GET /api/auth/google` — triggers `GoogleStrategy` redirect to Google's login page
+- `GET /api/auth/google/callback` — OAuth code exchange handled by `GoogleStrategy`; on success calls `findOrLinkGoogleIdentity()`, sets the httpOnly refresh cookie (same as current login), then redirects the browser to:
   ```
   {WEB_APP_URL}/auth/callback?token={accessToken}
   ```
@@ -81,7 +81,7 @@ The OAuth callback is a browser navigation, not a fetch. There is no JavaScript 
 
 ### Login page
 
-Add a "Sign in with Google" button. It must be a plain anchor (`<a href="/auth/google">`) or `window.location.href` — not a fetch call — to trigger the full browser navigation the OAuth flow requires.
+Add a "Sign in with Google" button. It must be a plain anchor (`<a href="/api/auth/google">`) or `window.location.href` — not a fetch call — to trigger the full browser navigation the OAuth flow requires. The `/api` prefix follows the existing relative-path convention (Vite proxies `/api/*` to the backend in dev; Nginx does the same in production).
 
 ### New `/auth/callback` route
 
@@ -115,8 +115,8 @@ No explicit "link account" UI is needed. The transition for each employee happen
 Register both redirect URIs in the same Google Cloud Console project:
 
 ```
-https://yourdomain.com/auth/google/callback    ← production
-http://localhost:3000/auth/google/callback     ← local dev
+https://yourdomain.com/api/auth/google/callback    ← production
+http://localhost:3000/api/auth/google/callback     ← local dev (direct to NestJS port)
 ```
 
 Google explicitly permits `http://localhost` URIs for development. Same Client ID and Client Secret are used for both environments; `GOOGLE_CALLBACK_URL` in the local `.env` points to localhost.
