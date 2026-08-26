@@ -28,6 +28,27 @@
       }
     }
   },
+  "menuPeriodBuilder": {
+    "title": "Meals",
+    "addMeal": "Add meal",
+    "searchPlaceholder": "Search meals…",
+    "noMatch": "No meals match your search.",
+    "noMeals": "No meals available.",
+    "dropHere": "Drop here",
+    "alreadyAssigned": "Already assigned",
+    "createMeal": {
+      "title": "Add Meal",
+      "nameLabel": "Name",
+      "nameRequired": "Name is required",
+      "namePlaceholder": "e.g. Chicken Soup",
+      "typeLabel": "Type",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Optional description",
+      "priceLabel": "Price",
+      "submit": "Create Meal",
+      "error": "Failed to create meal. Please try again."
+    }
+  },
   "detail": {
     "mealsTab": "Meals",
     "menuPeriodsTab": "Menu Periods",
@@ -37,6 +58,7 @@
       "createForm": {
         "title": "New Meal",
         "nameLabel": "Name",
+        "nameRequired": "Name is required",
         "namePlaceholder": "Chicken sandwich",
         "typeLabel": "Type",
         "descriptionLabel": "Description",
@@ -63,8 +85,10 @@
         "title": "New Menu Period",
         "startLabel": "Start date",
         "startPlaceholder": "Pick start date",
+        "startRequired": "Start date is required",
         "endLabel": "End date",
         "endPlaceholder": "Pick end date",
+        "endRequired": "End date is required",
         "error": "Failed to create period."
       },
       "loading": "Loading…",

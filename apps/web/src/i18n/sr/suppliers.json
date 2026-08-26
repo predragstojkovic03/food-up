@@ -28,6 +28,27 @@
       }
     }
   },
+  "menuPeriodBuilder": {
+    "title": "Obroci",
+    "addMeal": "Dodaj obrok",
+    "searchPlaceholder": "Pretraži obroke…",
+    "noMatch": "Nema obroka koji odgovaraju pretrazi.",
+    "noMeals": "Nema dostupnih obroka.",
+    "dropHere": "Prevuci ovde",
+    "alreadyAssigned": "Već dodeljeno",
+    "createMeal": {
+      "title": "Dodaj obrok",
+      "nameLabel": "Naziv",
+      "nameRequired": "Naziv je obavezan",
+      "namePlaceholder": "npr. Pileća supa",
+      "typeLabel": "Vrsta",
+      "descriptionLabel": "Opis",
+      "descriptionPlaceholder": "Opcioni opis",
+      "priceLabel": "Cena",
+      "submit": "Kreiraj obrok",
+      "error": "Nije moguće kreirati obrok. Pokušajte ponovo."
+    }
+  },
   "detail": {
     "mealsTab": "Obroci",
     "menuPeriodsTab": "Periodi menija",
@@ -37,6 +58,7 @@
       "createForm": {
         "title": "Novi obrok",
         "nameLabel": "Naziv",
+        "nameRequired": "Naziv je obavezan",
         "namePlaceholder": "Pileći sendvič",
         "typeLabel": "Vrsta",
         "descriptionLabel": "Opis",
@@ -63,8 +85,10 @@
         "title": "Novi period menija",
         "startLabel": "Datum početka",
         "startPlaceholder": "Izaberite datum početka",
+        "startRequired": "Datum početka je obavezan",
         "endLabel": "Datum završetka",
         "endPlaceholder": "Izaberite datum završetka",
+        "endRequired": "Datum završetka je obavezan",
         "error": "Nije moguće kreirati period."
       },
       "loading": "Učitavanje…",

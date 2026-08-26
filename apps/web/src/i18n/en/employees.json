@@ -68,6 +68,7 @@
       "mailSentBadge": "Sent",
       "mailNotSentBadge": "Not sent",
       "resend": "Resend",
+      "copyLink": "Copy link",
       "alreadyPending": "Already invited.",
       "resendInstead": "Resend instead"
     },

@@ -4,6 +4,7 @@ import Fuse from 'fuse.js';
 import { Plus, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from 'react-i18next';
 import { DraggableMealCard } from './draggable-meal-card';
 import { CreateMealDialog } from './create-meal-dialog';
 
@@ -17,22 +18,13 @@ const TYPE_ORDER: MealType[] = [
   MealType.Dessert,
 ];
 
-const TYPE_LABELS: Record<MealType, string> = {
-  [MealType.Breakfast]: 'Breakfast',
-  [MealType.Bread]: 'Bread',
-  [MealType.Soup]: 'Soup',
-  [MealType.Lunch]: 'Main',
-  [MealType.Dinner]: 'Dinner',
-  [MealType.Salad]: 'Salad',
-  [MealType.Dessert]: 'Dessert',
-};
-
 interface MealPaletteProps {
   meals: IMealResponse[];
   supplierId: string;
 }
 
 export function MealPalette({ meals, supplierId }: MealPaletteProps) {
+  const { t } = useTranslation('suppliers');
   const [query, setQuery] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -61,14 +53,14 @@ export function MealPalette({ meals, supplierId }: MealPaletteProps) {
     <div className='w-52 shrink-0 flex flex-col gap-3'>
       <div className='flex items-center justify-between'>
         <p className='text-xs font-semibold uppercase tracking-wide text-muted-foreground'>
-          Meals
+          {t('menuPeriodBuilder.title')}
         </p>
         <Button
           variant='ghost'
           size='icon'
           className='h-5 w-5'
           onClick={() => setDialogOpen(true)}
-          title='Add meal'
+          title={t('menuPeriodBuilder.addMeal')}
         >
           <Plus size={14} />
         </Button>
@@ -81,7 +73,7 @@ export function MealPalette({ meals, supplierId }: MealPaletteProps) {
         />
         <Input
           className='pl-7 h-7 text-xs'
-          placeholder='Search meals…'
+          placeholder={t('menuPeriodBuilder.searchPlaceholder')}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
@@ -89,10 +81,10 @@ export function MealPalette({ meals, supplierId }: MealPaletteProps) {
 
       <div className='overflow-y-auto max-h-[480px] flex flex-col gap-4'>
         {!hasAny && query.trim() && (
-          <p className='text-xs text-muted-foreground'>No meals match your search.</p>
+          <p className='text-xs text-muted-foreground'>{t('menuPeriodBuilder.noMatch')}</p>
         )}
         {!hasAny && !query.trim() && (
-          <p className='text-xs text-muted-foreground'>No meals available.</p>
+          <p className='text-xs text-muted-foreground'>{t('menuPeriodBuilder.noMeals')}</p>
         )}
         {TYPE_ORDER.map((type) => {
           const group = grouped[type];
@@ -100,7 +92,7 @@ export function MealPalette({ meals, supplierId }: MealPaletteProps) {
           return (
             <div key={type} className='space-y-1.5'>
               <p className='text-xs font-semibold uppercase tracking-wide text-muted-foreground'>
-                {TYPE_LABELS[type]}
+                {t(`mealTypes.${type}`, { ns: 'employees' })}
               </p>
               {group.map((meal) => (
                 <DraggableMealCard key={meal.id} meal={meal} />

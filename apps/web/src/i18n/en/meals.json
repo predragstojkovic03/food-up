@@ -129,6 +129,10 @@
     },
     "createForm": {
       "title": "Create Meal Selection Window",
+      "menuPeriodsRequired": "Select at least one menu period",
+      "opensRequired": "Opening date is required",
+      "closesRequired": "Deadline is required",
+      "targetDatesRequired": "Select at least one date",
       "menuPeriodsSection": "Menu Periods",
       "menuPeriodsEmpty": "No menu periods available. Create menu periods under each supplier first.",
       "menuPeriodUnavailableHint": "Some menu periods are unavailable because their end date is before the deadline or last target date.",

@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useServices } from '@/shared/infrastructure/di/service.context';
+import { useTranslation } from 'react-i18next';
 import {
   Dialog,
   DialogContent,
@@ -28,24 +29,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-const MEAL_TYPE_LABELS: Record<MealType, string> = {
-  [MealType.Breakfast]: 'Breakfast',
-  [MealType.Bread]: 'Bread',
-  [MealType.Lunch]: 'Lunch',
-  [MealType.Dinner]: 'Dinner',
-  [MealType.Soup]: 'Soup',
-  [MealType.Salad]: 'Salad',
-  [MealType.Dessert]: 'Dessert',
-};
-
-const createMealSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  type: z.nativeEnum(MealType),
-  description: z.string().optional(),
-  price: z.string().optional(),
-});
-type FormValues = z.infer<typeof createMealSchema>;
-
 interface CreateMealDialogProps {
   supplierId: string;
   open: boolean;
@@ -59,8 +42,17 @@ export function CreateMealDialog({
   onOpenChange,
   onSuccess,
 }: CreateMealDialogProps) {
+  const { t } = useTranslation('suppliers');
   const { mealService } = useServices();
   const queryClient = useQueryClient();
+
+  const createMealSchema = z.object({
+    name: z.string().min(1, t('menuPeriodBuilder.createMeal.nameRequired')),
+    type: z.nativeEnum(MealType),
+    description: z.string().optional(),
+    price: z.string().optional(),
+  });
+  type FormValues = z.infer<typeof createMealSchema>;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(createMealSchema),
@@ -97,7 +89,7 @@ export function CreateMealDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className='sm:max-w-md'>
         <DialogHeader>
-          <DialogTitle>Add Meal</DialogTitle>
+          <DialogTitle>{t('menuPeriodBuilder.createMeal.title')}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className='grid grid-cols-2 gap-3'>
@@ -106,9 +98,9 @@ export function CreateMealDialog({
               name='name'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>{t('menuPeriodBuilder.createMeal.nameLabel')}</FormLabel>
                   <FormControl>
-                    <Input placeholder='e.g. Chicken Soup' {...field} />
+                    <Input placeholder={t('menuPeriodBuilder.createMeal.namePlaceholder')} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -119,19 +111,19 @@ export function CreateMealDialog({
               name='type'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Type</FormLabel>
+                  <FormLabel>{t('menuPeriodBuilder.createMeal.typeLabel')}</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue>
-                          {(v: string) => MEAL_TYPE_LABELS[v as MealType] ?? v}
+                          {(v: string) => t(`mealTypes.${v}`, { ns: 'employees' })}
                         </SelectValue>
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {Object.values(MealType).map((type) => (
-                        <SelectItem key={type} value={type} label={MEAL_TYPE_LABELS[type]}>
-                          {MEAL_TYPE_LABELS[type]}
+                      {Object.values(MealType).map((mealType) => (
+                        <SelectItem key={mealType} value={mealType} label={t(`mealTypes.${mealType}`, { ns: 'employees' })}>
+                          {t(`mealTypes.${mealType}`, { ns: 'employees' })}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -145,9 +137,9 @@ export function CreateMealDialog({
               name='description'
               render={({ field }) => (
                 <FormItem className='col-span-2'>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>{t('menuPeriodBuilder.createMeal.descriptionLabel')}</FormLabel>
                   <FormControl>
-                    <Input placeholder='Optional description' {...field} />
+                    <Input placeholder={t('menuPeriodBuilder.createMeal.descriptionPlaceholder')} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -158,7 +150,7 @@ export function CreateMealDialog({
               name='price'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Price</FormLabel>
+                  <FormLabel>{t('menuPeriodBuilder.createMeal.priceLabel')}</FormLabel>
                   <FormControl>
                     <Input type='number' step='0.01' min='0' placeholder='0.00' {...field} />
                   </FormControl>
@@ -172,15 +164,15 @@ export function CreateMealDialog({
                 variant='outline'
                 onClick={() => onOpenChange(false)}
               >
-                Cancel
+                {t('actions.cancel', { ns: 'common' })}
               </Button>
               <Button type='submit' disabled={createMeal.isPending}>
-                {createMeal.isPending ? 'Creating…' : 'Create Meal'}
+                {createMeal.isPending ? t('actions.creating', { ns: 'common' }) : t('menuPeriodBuilder.createMeal.submit')}
               </Button>
             </div>
             {createMeal.isError && (
               <p className='col-span-2 text-xs text-destructive'>
-                Failed to create meal. Please try again.
+                {t('menuPeriodBuilder.createMeal.error')}
               </p>
             )}
           </form>

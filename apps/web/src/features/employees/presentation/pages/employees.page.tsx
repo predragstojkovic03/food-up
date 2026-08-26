@@ -207,7 +207,7 @@ export default function EmployeesPage() {
                 />
                 <Button variant='outline' onClick={() => handleCopyLink(generatedInvite.token)} className='gap-2 shrink-0'>
                   {copied ? <Check size={14} /> : <Copy size={14} />}
-                  {copied ? 'Copied' : 'Copy'}
+                  {copied ? t('actions.copied', { ns: 'common' }) : t('actions.copy', { ns: 'common' })}
                 </Button>
               </div>
               <div className='flex items-center gap-2'>
@@ -353,7 +353,7 @@ function PendingInviteRow({ invite, isResending, onCopy, onResend }: PendingInvi
       <button
         onClick={onCopy}
         className='p-1.5 text-muted-foreground hover:text-foreground transition-colors'
-        title='Copy link'
+        title={t('team.invite.copyLink')}
       >
         <Copy size={14} />
       </button>
@@ -412,7 +412,7 @@ function EmployeeRow({
         disabled={isCurrentUser || isUpdating || isRemoving}
       >
         <SelectTrigger className='h-8 w-28 text-xs'>
-          <SelectValue>{(v: string) => v === EmployeeRole.Manager ? 'Manager' : 'Basic'}</SelectValue>
+          <SelectValue>{(v: string) => v === EmployeeRole.Manager ? t('team.roles.manager') : t('team.roles.basic')}</SelectValue>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value={EmployeeRole.Manager} label={t('team.roles.manager')}>{t('team.roles.manager')}</SelectItem>

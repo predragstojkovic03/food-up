@@ -1244,15 +1244,6 @@ function CostSummarySection({ windowId }: { windowId: string }) {
 
 // ─── Create Panel ─────────────────────────────────────────────────────────────
 
-const createWindowSchema = z.object({
-  menuPeriodIds: z.array(z.string()).min(1, 'Select at least one menu period'),
-  startTime: z.string().min(1, 'Opening date is required'),
-  endTime: z.string().min(1, 'Deadline is required'),
-  targetDates: z.array(z.string()).min(1, 'Select at least one date'),
-  notifyOnDeadline: z.boolean(),
-});
-type CreateWindowFormValues = z.infer<typeof createWindowSchema>;
-
 interface CreateWindowPanelProps {
   menuPeriods: IMenuPeriodResponse[];
   supplierNameById: Record<string, string>;
@@ -1278,6 +1269,16 @@ function CreateWindowPanel({
 }: CreateWindowPanelProps) {
   const { t, i18n } = useTranslation('meals');
   const locale = i18n.language === 'sr' ? 'sr-Latn-RS' : 'en-US';
+
+  const createWindowSchema = z.object({
+    menuPeriodIds: z.array(z.string()).min(1, t('windows.createForm.menuPeriodsRequired')),
+    startTime: z.string().min(1, t('windows.createForm.opensRequired')),
+    endTime: z.string().min(1, t('windows.createForm.closesRequired')),
+    targetDates: z.array(z.string()).min(1, t('windows.createForm.targetDatesRequired')),
+    notifyOnDeadline: z.boolean(),
+  });
+  type CreateWindowFormValues = z.infer<typeof createWindowSchema>;
+
   const form = useForm<CreateWindowFormValues>({
     resolver: zodResolver(createWindowSchema),
     defaultValues: {

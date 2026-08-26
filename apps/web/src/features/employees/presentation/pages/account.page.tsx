@@ -9,8 +9,8 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { PasswordInput } from '@/components/ui/password-input';
 import { Label } from '@/components/ui/label';
+import { PasswordInput } from '@/components/ui/password-input';
 import {
   Select,
   SelectContent,
@@ -22,7 +22,11 @@ import { Separator } from '@/components/ui/separator';
 import { useAuthStore } from '@/features/auth/presentation/state/auth.store';
 import { usePreferencesStore } from '@/features/user-preferences/presentation/state/preferences.store';
 import { useServices } from '@/shared/infrastructure/di/service.context';
-import { IUserPreferencesResponse, Language, ThemePreference } from '@food-up/shared';
+import {
+  IUserPreferencesResponse,
+  Language,
+  ThemePreference,
+} from '@food-up/shared';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -97,7 +101,10 @@ function ProfileSection() {
                 <FormItem>
                   <FormLabel>{t('profile.nameLabel')}</FormLabel>
                   <FormControl>
-                    <Input placeholder={t('profile.namePlaceholder')} {...field} />
+                    <Input
+                      placeholder={t('profile.namePlaceholder')}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -136,13 +143,9 @@ function SecuritySection() {
 
   const passwordSchema = z
     .object({
-      currentPassword: z
-        .string()
-        .min(6, t('security.passwordMinLength')),
+      currentPassword: z.string().min(6, t('security.passwordMinLength')),
       newPassword: z.string().min(6, t('security.passwordMinLength')),
-      confirmPassword: z
-        .string()
-        .min(6, t('security.passwordMinLength')),
+      confirmPassword: z.string().min(6, t('security.passwordMinLength')),
     })
     .refine((d) => d.newPassword === d.confirmPassword, {
       message: t('security.passwordMismatch'),

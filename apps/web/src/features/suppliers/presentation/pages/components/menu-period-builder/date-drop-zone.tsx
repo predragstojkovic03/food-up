@@ -1,5 +1,6 @@
 import { IMealResponse, IMenuItemResponse } from '@food-up/shared';
 import { useDroppable } from '@dnd-kit/core';
+import { useTranslation } from 'react-i18next';
 import { AssignedMealChip } from './assigned-meal-chip';
 
 interface DateDropZoneProps {
@@ -27,6 +28,7 @@ export function DateDropZone({
   removingItemId,
   onRemove,
 }: DateDropZoneProps) {
+  const { t } = useTranslation('suppliers');
   const { setNodeRef, isOver } = useDroppable({ id: dateStr });
 
   const isDuplicate =
@@ -72,12 +74,12 @@ export function DateDropZone({
         })}
         {items.length === 0 && !isOver && (
           <p className='text-xs text-muted-foreground/50 text-center my-auto'>
-            Drop here
+            {t('menuPeriodBuilder.dropHere')}
           </p>
         )}
         {isOver && isDuplicate && (
           <p className='text-xs text-destructive text-center my-auto'>
-            Already assigned
+            {t('menuPeriodBuilder.alreadyAssigned')}
           </p>
         )}
       </div>

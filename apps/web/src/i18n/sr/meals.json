@@ -129,6 +129,10 @@
     },
     "createForm": {
       "title": "Kreiraj prozor za izbor obroka",
+      "menuPeriodsRequired": "Izaberite najmanje jedan period menija",
+      "opensRequired": "Datum otvaranja je obavezan",
+      "closesRequired": "Rok je obavezan",
+      "targetDatesRequired": "Izaberite najmanje jedan datum",
       "menuPeriodsSection": "Periodi menija",
       "menuPeriodsEmpty": "Nema dostupnih perioda menija. Kreirajte periode menija kod svakog dobavljača.",
       "menuPeriodUnavailableHint": "Neki periodi menija nisu dostupni jer im datum završetka prethodi roku ili poslednjem ciljnom datumu.",

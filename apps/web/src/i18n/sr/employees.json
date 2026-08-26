@@ -68,6 +68,7 @@
       "mailSentBadge": "Poslato",
       "mailNotSentBadge": "Nije poslato",
       "resend": "Ponovo pošalji",
+      "copyLink": "Kopiraj link",
       "alreadyPending": "Već je pozvan/a.",
       "resendInstead": "Ponovo pošalji"
     },
