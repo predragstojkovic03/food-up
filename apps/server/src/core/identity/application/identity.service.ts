@@ -61,6 +61,20 @@ export class IdentityService {
     return this._repository.findById(id);
   }
 
+  async findByGoogleId(googleId: string): Promise<Identity | null> {
+    return this._repository.findByGoogleId(googleId);
+  }
+
+  async linkGoogle(identityId: string, googleId: string, clearPassword: boolean): Promise<void> {
+    const identity = await this._repository.findById(identityId);
+    if (!identity) throw new Error(`Identity not found: ${identityId}`);
+    identity.linkGoogle(googleId, clearPassword);
+    const update: Record<string, unknown> = { googleId: identity.googleId };
+    if (clearPassword) update.passwordHash = null;
+    await this._repository.update(identityId, update as unknown as Partial<Identity>);
+    this._logger.log(`Google linked for identity: id=${identityId}`, IdentityService.name);
+  }
+
   async update(id: string, update: Partial<Identity>): Promise<Identity> {
     const result = await this._repository.update(id, update);
     this._logger.log(`Identity updated: id=${id}`, IdentityService.name);
