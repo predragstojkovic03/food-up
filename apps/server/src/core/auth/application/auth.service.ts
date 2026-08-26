@@ -184,6 +184,38 @@ export class AuthService {
     return this._buildCookieToken(record.id, rawSecret);
   }
 
+  /**
+   * Finds an existing identity by Google ID, or links Google to an existing email-based account.
+   * Throws UnauthorizedException if no account exists for the Google email.
+   *
+   * WHY clearPassword logic: basic employees are migrated to Google-only login (password removed),
+   * while managers retain their password so they can still log in via email/password if needed.
+   * Non-employee identities also keep their password (clearPassword=false).
+   */
+  async findOrLinkGoogleIdentity(googleId: string, email: string): Promise<Identity> {
+    const existing = await this._identityService.findByGoogleId(googleId);
+    if (existing) return existing;
+
+    const identity = await this._identityService.findByEmail(email);
+    if (!identity) {
+      throw new UnauthorizedException(
+        'No account found for this Google email. Ask your manager to create an account first.',
+      );
+    }
+
+    let clearPassword = false;
+    if (identity.type === IdentityType.Employee) {
+      const employee = await this._employeesService.findByIdentity(identity.id);
+      clearPassword = employee?.role !== EmployeeRole.Manager;
+    }
+
+    await this._identityService.linkGoogle(identity.id, googleId, clearPassword);
+
+    const linked = await this._identityService.findById(identity.id);
+    if (!linked) throw new UnauthorizedException('Identity not found after Google linking');
+    return linked;
+  }
+
   async changePassword(identityId: string, currentPassword: string, newPassword: string): Promise<void> {
     await this._identityService.changePassword(identityId, currentPassword, newPassword);
   }

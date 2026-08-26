@@ -30,6 +30,7 @@ import {
 import { IdentityType } from '@food-up/shared';
 import { AuthService } from '../../application/auth.service';
 import { CurrentIdentity } from '../../infrastructure/current-identity.decorator';
+import { GoogleAuthGuard } from '../../infrastructure/google-auth.guard';
 import { JwtPayload } from '../../infrastructure/jwt-payload';
 import { LocalAuthGuard } from '../../infrastructure/local-auth.guard';
 import { Public } from '../../infrastructure/public.decorator';
@@ -57,6 +58,7 @@ function refreshCookieOptions(isProduction: boolean): CookieOptions {
 @Controller('auth')
 export class AuthController {
   private readonly _isProduction: boolean;
+  private readonly _webAppUrl: string;
 
   constructor(
     private readonly _authService: AuthService,
@@ -65,6 +67,7 @@ export class AuthController {
     config: IConfigService<EnvironmentVariables, true>,
   ) {
     this._isProduction = config.get('NODE_ENV') === NodeEnv.Production;
+    this._webAppUrl = config.get('WEB_APP_URL');
   }
 
   /**
@@ -142,6 +145,36 @@ export class AuthController {
 
     // Clear the cookie by setting maxAge=0 (expires immediately)
     res.cookie(REFRESH_COOKIE_NAME, '', { ...refreshCookieOptions(this._isProduction), maxAge: 0 });
+  }
+
+  @ApiOperation({ summary: 'Initiate Google OAuth login — redirects to Google' })
+  @ApiResponse({ status: 302, description: 'Redirects to Google login page' })
+  @Public
+  @UseGuards(GoogleAuthGuard)
+  @Get('google')
+  async googleLogin(): Promise<void> {
+    // GoogleAuthGuard handles the redirect; this handler body never executes
+  }
+
+  @ApiOperation({ summary: 'Google OAuth callback — sets session and redirects to frontend' })
+  @ApiResponse({ status: 302, description: 'Redirects to frontend /auth/callback with token' })
+  @Public
+  @UseGuards(GoogleAuthGuard)
+  @Get('google/callback')
+  async googleCallback(
+    @Req() req: Request,
+    @Res() res: Response,
+  ): Promise<void> {
+    try {
+      const { googleId, email } = req.user as { googleId: string; email: string };
+      const identity = await this._authService.findOrLinkGoogleIdentity(googleId, email);
+      const { accessToken, rawRefreshToken } = await this._authService.issueSessionForIdentity(identity.id);
+
+      res.cookie(REFRESH_COOKIE_NAME, rawRefreshToken, refreshCookieOptions(this._isProduction));
+      res.redirect(`${this._webAppUrl}/auth/callback?token=${encodeURIComponent(accessToken)}`);
+    } catch {
+      res.redirect(`${this._webAppUrl}/auth/callback?error=google_auth_failed`);
+    }
   }
 
   @Throttle({ default: { ttl: 60_000, limit: 5 } })
