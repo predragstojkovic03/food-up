@@ -6,6 +6,8 @@ import { EmployeesModule } from '../employees/employees.module';
 import { IdentityModule } from '../identity/identity.module';
 import { AuthService } from './application/auth.service';
 import { I_REFRESH_TOKEN_REPOSITORY } from './domain/refresh-token.repository.interface';
+import { GoogleAuthGuard } from './infrastructure/google-auth.guard';
+import { GoogleStrategy } from './infrastructure/google.strategy';
 import { JwtAuthGuard } from './infrastructure/jwt-auth.guard';
 import { JwtStrategy } from './infrastructure/jwt.strategy';
 import { LocalAuthGuard } from './infrastructure/local-auth.guard';
@@ -49,6 +51,8 @@ import { ConfigModule } from 'src/shared/infrastructure/config/config.module';
     JwtAuthGuard,
     LocalStrategy,
     LocalAuthGuard,
+    GoogleStrategy,
+    GoogleAuthGuard,
     {
       provide: I_REFRESH_TOKEN_REPOSITORY,
       useClass: RefreshTokenTypeOrmRepository,
