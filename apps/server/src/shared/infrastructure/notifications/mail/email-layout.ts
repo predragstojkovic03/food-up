@@ -10,7 +10,7 @@ let _logoBuffer: Buffer | null = null;
 
 function getLogoBuffer(): Buffer {
   if (!_logoBuffer) {
-    _logoBuffer = fs.readFileSync(path.join(__dirname, 'assets', 'foodup-logo-dark.png'));
+    _logoBuffer = fs.readFileSync(path.join(__dirname, 'assets', 'foodup-logo.png'));
   }
   return _logoBuffer;
 }
@@ -24,7 +24,7 @@ export interface LogoAttachment {
 
 export function getLogoAttachment(): LogoAttachment {
   return {
-    filename: 'foodup-logo-dark.png',
+    filename: 'foodup-logo.png',
     content: getLogoBuffer(),
     contentType: 'image/png',
     contentId: LOGO_CID,
@@ -51,7 +51,7 @@ export function emailLayout(content: string, webAppUrl: string): string {
 
           <!-- Header -->
           <tr>
-            <td align="center" style="background-color:${BRAND_GREEN};padding:24px 32px;">
+            <td align="center" style="background-color:#ffffff;padding:28px 32px;border-bottom:1px solid #e4e9e6;">
               <img src="cid:${LOGO_CID}" alt="FoodUp" height="34"
                    style="display:block;height:34px;border:0;outline:none;" />
             </td>
