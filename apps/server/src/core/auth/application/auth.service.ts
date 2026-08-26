@@ -40,8 +40,16 @@ export class AuthService {
   /**
    * Validates email/password credentials. Returns the Identity on success, null on failure.
    * Called by LocalStrategy — keeps the controller strategy-agnostic.
+   *
+   * Throws UnauthorizedException for Google-only accounts (passwordHash === null) so that
+   * LocalStrategy can surface a meaningful error message rather than a generic 401.
    */
   async validateLocalCredentials(email: string, password: string): Promise<Identity | null> {
+    const identity = await this._identityService.findByEmail(email);
+    if (!identity) return null;
+    if (!identity.passwordHash) {
+      throw new UnauthorizedException('This account uses Google login');
+    }
     try {
       return await this._identityService.validateCredentials(email, password);
     } catch {
