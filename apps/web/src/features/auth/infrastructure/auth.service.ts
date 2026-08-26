@@ -21,8 +21,8 @@ export class AuthService implements IAuthService {
     // The server sets the refresh token as an httpOnly cookie automatically.
     tokenStore.set(access_token);
 
-    const { id, type, role, businessId } = await this.http.get<IMeResponse>('/api/auth/me');
-    return User.reconstitute(id, type, role, businessId);
+    const { id, type, role, businessId, pictureUrl, hasPassword } = await this.http.get<IMeResponse>('/api/auth/me');
+    return User.reconstitute(id, type, role, businessId, pictureUrl, hasPassword);
   }
 
   async logout(): Promise<void> {
@@ -66,8 +66,8 @@ export class AuthService implements IAuthService {
 
   async restoreSession(): Promise<User | null> {
     try {
-      const { id, type, role, businessId } = await this.http.get<IMeResponse>('/api/auth/me');
-      return User.reconstitute(id, type, role, businessId);
+      const { id, type, role, businessId, pictureUrl, hasPassword } = await this.http.get<IMeResponse>('/api/auth/me');
+      return User.reconstitute(id, type, role, businessId, pictureUrl, hasPassword);
     } catch {
       return null;
     }

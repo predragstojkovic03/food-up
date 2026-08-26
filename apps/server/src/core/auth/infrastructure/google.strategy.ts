@@ -24,9 +24,13 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   validate(
     _accessToken: string,
     _refreshToken: string,
-    profile: { id: string; emails: Array<{ value: string }> },
+    profile: { id: string; emails: Array<{ value: string }>; photos?: Array<{ value: string }> },
     done: VerifyCallback,
   ): void {
-    done(null, { googleId: profile.id, email: profile.emails[0].value });
+    done(null, {
+      googleId: profile.id,
+      email: profile.emails[0].value,
+      pictureUrl: profile.photos?.[0]?.value ?? null,
+    });
   }
 }

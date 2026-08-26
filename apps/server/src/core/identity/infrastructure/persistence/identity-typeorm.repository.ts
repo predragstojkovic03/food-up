@@ -60,6 +60,7 @@ export class IdentityTypeOrmRepository implements IIdentityRepository {
       entity.type,
       entity.isActive,
       entity.googleId ?? null,
+      entity.pictureUrl ?? null,
     );
   }
 }

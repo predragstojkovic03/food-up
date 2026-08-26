@@ -166,8 +166,8 @@ export class AuthController {
     @Res() res: Response,
   ): Promise<void> {
     try {
-      const { googleId, email } = req.user as { googleId: string; email: string };
-      const identity = await this._authService.findOrLinkGoogleIdentity(googleId, email);
+      const { googleId, email, pictureUrl } = req.user as { googleId: string; email: string; pictureUrl: string | null };
+      const identity = await this._authService.findOrLinkGoogleIdentity(googleId, email, pictureUrl);
       const { accessToken, rawRefreshToken } = await this._authService.issueSessionForIdentity(identity.id);
 
       res.cookie(REFRESH_COOKIE_NAME, rawRefreshToken, refreshCookieOptions(this._isProduction));
@@ -203,9 +203,17 @@ export class AuthController {
       businessId = employee.businessId;
     }
 
+    const identity = await this._authService.findIdentityById(user.sub);
+
     return plainToInstance(
       MeResponseDto,
-      { id: user.sub, ...user, businessId },
+      {
+        id: user.sub,
+        ...user,
+        businessId,
+        pictureUrl: identity?.pictureUrl ?? null,
+        hasPassword: (identity?.passwordHash ?? null) !== null,
+      },
       { excludeExtraneousValues: true },
     );
   }

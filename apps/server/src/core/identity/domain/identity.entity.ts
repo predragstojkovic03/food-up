@@ -28,8 +28,9 @@ export class Identity extends Entity {
     type: IdentityType,
     isActive: boolean = true,
     googleId: string | null = null,
+    pictureUrl: string | null = null,
   ): Identity {
-    return new Identity(id, email, passwordHash, type, isActive, googleId);
+    return new Identity(id, email, passwordHash, type, isActive, googleId, pictureUrl);
   }
 
   private constructor(
@@ -39,6 +40,7 @@ export class Identity extends Entity {
     type: IdentityType,
     isActive: boolean,
     googleId: string | null,
+    pictureUrl: string | null = null,
   ) {
     super();
     if (!passwordHash && !googleId) {
@@ -50,6 +52,7 @@ export class Identity extends Entity {
     this._type = type;
     this._isActive = isActive;
     this._googleId = googleId;
+    this._pictureUrl = pictureUrl;
   }
 
   private readonly _id: string;
@@ -58,6 +61,7 @@ export class Identity extends Entity {
   private readonly _type: IdentityType;
   private _isActive: boolean;
   private _googleId: string | null;
+  private _pictureUrl: string | null;
 
   get id(): string {
     return this._id;
@@ -81,6 +85,14 @@ export class Identity extends Entity {
 
   get googleId(): string | null {
     return this._googleId;
+  }
+
+  get pictureUrl(): string | null {
+    return this._pictureUrl;
+  }
+
+  updatePictureUrl(url: string | null): void {
+    this._pictureUrl = url;
   }
 
   set isActive(value: boolean) {

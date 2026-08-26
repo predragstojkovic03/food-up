@@ -17,6 +17,9 @@ export class Identity {
   @Column('varchar', { length: 255, nullable: true, unique: true })
   googleId: string | null;
 
+  @Column('varchar', { length: 2048, nullable: true })
+  pictureUrl: string | null;
+
   @Column('enum', { enum: IdentityType })
   type: IdentityType;
 

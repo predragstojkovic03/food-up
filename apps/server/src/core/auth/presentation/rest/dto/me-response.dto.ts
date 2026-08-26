@@ -31,4 +31,12 @@ export class MeResponseDto {
   })
   @Expose()
   businessId?: string;
+
+  @ApiProperty({ description: 'Google profile picture URL', nullable: true, required: false })
+  @Expose()
+  pictureUrl: string | null;
+
+  @ApiProperty({ description: 'Whether the account has a password set' })
+  @Expose()
+  hasPassword: boolean;
 }

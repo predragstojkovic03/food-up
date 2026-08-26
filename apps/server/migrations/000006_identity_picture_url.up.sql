@@ -1,0 +1,1 @@
+ALTER TABLE identity ADD COLUMN picture_url VARCHAR(2048) NULL;

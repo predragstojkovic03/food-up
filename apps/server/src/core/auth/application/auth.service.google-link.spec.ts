@@ -8,6 +8,7 @@ const mockIdentityService = {
   findByEmail: jest.fn(),
   findById: jest.fn(),
   linkGoogle: jest.fn(),
+  updatePictureUrl: jest.fn(),
 };
 const mockEmployeesService = { findByIdentity: jest.fn() };
 const mockRtRepo = { findById: jest.fn(), create: jest.fn(), markUsed: jest.fn(), revoke: jest.fn(), revokeFamily: jest.fn() };
@@ -30,7 +31,7 @@ describe('AuthService.findOrLinkGoogleIdentity', () => {
   it('returns existing identity when googleId already linked', async () => {
     const existing = Identity.createWithGoogle('a@b.com', 'gid', IdentityType.Employee);
     mockIdentityService.findByGoogleId.mockResolvedValue(existing);
-    const result = await makeService().findOrLinkGoogleIdentity('gid', 'a@b.com');
+    const result = await makeService().findOrLinkGoogleIdentity('gid', 'a@b.com', null);
     expect(result).toBe(existing);
     expect(mockIdentityService.findByEmail).not.toHaveBeenCalled();
   });
@@ -43,7 +44,7 @@ describe('AuthService.findOrLinkGoogleIdentity', () => {
     mockIdentityService.linkGoogle.mockResolvedValue(undefined);
     mockIdentityService.findById.mockResolvedValue(employee);
 
-    await makeService().findOrLinkGoogleIdentity('gid', 'emp@b.com');
+    await makeService().findOrLinkGoogleIdentity('gid', 'emp@b.com', null);
 
     expect(mockIdentityService.linkGoogle).toHaveBeenCalledWith(
       employee.id,
@@ -60,7 +61,7 @@ describe('AuthService.findOrLinkGoogleIdentity', () => {
     mockIdentityService.linkGoogle.mockResolvedValue(undefined);
     mockIdentityService.findById.mockResolvedValue(manager);
 
-    await makeService().findOrLinkGoogleIdentity('gid', 'mgr@b.com');
+    await makeService().findOrLinkGoogleIdentity('gid', 'mgr@b.com', null);
 
     expect(mockIdentityService.linkGoogle).toHaveBeenCalledWith(
       manager.id,
@@ -72,7 +73,7 @@ describe('AuthService.findOrLinkGoogleIdentity', () => {
   it('throws UnauthorizedException when email has no account', async () => {
     mockIdentityService.findByGoogleId.mockResolvedValue(null);
     mockIdentityService.findByEmail.mockResolvedValue(null);
-    await expect(makeService().findOrLinkGoogleIdentity('gid', 'unknown@b.com'))
+    await expect(makeService().findOrLinkGoogleIdentity('gid', 'unknown@b.com', null))
       .rejects.toThrow(UnauthorizedException);
   });
 });

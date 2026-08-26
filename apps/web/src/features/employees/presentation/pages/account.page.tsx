@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { useAuthStore } from '@/features/auth/presentation/state/auth.store';
 import { usePreferencesStore } from '@/features/user-preferences/presentation/state/preferences.store';
 import { useServices } from '@/shared/infrastructure/di/service.context';
 import { IUserPreferencesResponse, Language, ThemePreference } from '@food-up/shared';
@@ -30,16 +31,9 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import { useCurrentEmployee } from '../../application/use-current-employee.hook';
 
-// Extension point: when Google OAuth or other SSO is added, derive capabilities
-// from the identity provider returned by the API (e.g. canChangePassword = provider === 'local').
 type AccountCapabilities = {
   canChangeName: boolean;
   canChangePassword: boolean;
-};
-
-const CAPABILITIES: AccountCapabilities = {
-  canChangeName: true,
-  canChangePassword: true,
 };
 
 type NameFormValues = { name: string };
@@ -433,6 +427,12 @@ function AppearanceSection() {
 
 export default function AccountPage() {
   const { t } = useTranslation('preferences');
+  const hasPassword = useAuthStore((s) => s.user?.hasPassword ?? true);
+
+  const capabilities: AccountCapabilities = {
+    canChangeName: true,
+    canChangePassword: hasPassword,
+  };
 
   return (
     <div className='max-w-2xl space-y-6'>
@@ -440,8 +440,8 @@ export default function AccountPage() {
         <h1 className='text-xl font-semibold'>{t('title')}</h1>
         <p className='text-sm text-muted-foreground mt-1'>{t('subtitle')}</p>
       </div>
-      {CAPABILITIES.canChangeName && <ProfileSection />}
-      {CAPABILITIES.canChangePassword && <SecuritySection />}
+      {capabilities.canChangeName && <ProfileSection />}
+      {capabilities.canChangePassword && <SecuritySection />}
       <AppearanceSection />
     </div>
   );

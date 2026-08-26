@@ -192,9 +192,12 @@ export class AuthService {
    * while managers retain their password so they can still log in via email/password if needed.
    * Non-employee identities also keep their password (clearPassword=false).
    */
-  async findOrLinkGoogleIdentity(googleId: string, email: string): Promise<Identity> {
+  async findOrLinkGoogleIdentity(googleId: string, email: string, pictureUrl: string | null): Promise<Identity> {
     const existing = await this._identityService.findByGoogleId(googleId);
-    if (existing) return existing;
+    if (existing) {
+      await this._identityService.updatePictureUrl(existing.id, pictureUrl);
+      return existing;
+    }
 
     const identity = await this._identityService.findByEmail(email);
     if (!identity) {
@@ -210,10 +213,15 @@ export class AuthService {
     }
 
     await this._identityService.linkGoogle(identity.id, googleId, clearPassword);
+    await this._identityService.updatePictureUrl(identity.id, pictureUrl);
 
     const linked = await this._identityService.findById(identity.id);
     if (!linked) throw new UnauthorizedException('Identity not found after Google linking');
     return linked;
+  }
+
+  async findIdentityById(id: string): Promise<Identity | null> {
+    return this._identityService.findById(id);
   }
 
   async changePassword(identityId: string, currentPassword: string, newPassword: string): Promise<void> {

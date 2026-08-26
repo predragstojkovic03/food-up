@@ -9,7 +9,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,6 +41,7 @@ export function UserMenuDropdown({
   const { authService } = useServices();
   const clearUser = useAuthStore((s) => s.clearUser);
   const { data: employee } = useCurrentEmployee();
+  const pictureUrl = useAuthStore((s) => s.user?.pictureUrl ?? null);
   const { t } = useTranslation('common');
   const [logoutOpen, setLogoutOpen] = useState(false);
 
@@ -59,6 +60,7 @@ export function UserMenuDropdown({
         <DropdownMenuContent side={contentSide} align={contentAlign} className='w-60'>
           <div className='flex items-center gap-3 px-3 py-2'>
             <Avatar className='size-10 shrink-0'>
+              {pictureUrl && <AvatarImage src={pictureUrl} alt={employee?.name ?? ''} />}
               <AvatarFallback className='font-semibold'>{initials}</AvatarFallback>
             </Avatar>
             <div className='flex min-w-0 flex-col'>

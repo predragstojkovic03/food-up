@@ -15,6 +15,8 @@ export interface IMeResponse {
   type: IdentityType;
   role?: EmployeeRole;
   businessId?: string;
+  pictureUrl: string | null;
+  hasPassword: boolean;
 }
 
 export interface IChangePassword {

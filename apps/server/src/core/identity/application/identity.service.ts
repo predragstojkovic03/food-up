@@ -65,6 +65,10 @@ export class IdentityService {
     return this._repository.findByGoogleId(googleId);
   }
 
+  async updatePictureUrl(id: string, pictureUrl: string | null): Promise<void> {
+    await this._repository.update(id, { pictureUrl } as unknown as Partial<Identity>);
+  }
+
   async linkGoogle(identityId: string, googleId: string, clearPassword: boolean): Promise<void> {
     const identity = await this._repository.findById(identityId);
     if (!identity) throw new Error(`Identity not found: ${identityId}`);
