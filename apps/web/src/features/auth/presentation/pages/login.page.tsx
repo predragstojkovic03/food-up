@@ -112,8 +112,8 @@ export default function LoginPage() {
         {hasGoogleError && (
           <p className='text-destructive mb-3 text-sm'>{t('login.googleError')}</p>
         )}
-        <Button variant='outline' className='w-full' asChild>
-          <a href='/api/auth/google'>{t('login.googleButton')}</a>
+        <Button variant='outline' className='w-full' render={<a href='/api/auth/google' />}>
+          {t('login.googleButton')}
         </Button>
       </CardContent>
       <CardFooter className='justify-center text-sm'>

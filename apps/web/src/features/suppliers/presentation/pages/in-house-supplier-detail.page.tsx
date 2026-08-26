@@ -101,6 +101,7 @@ export default function InHouseSupplierDetailPage() {
 
 function MealsTab({ supplierId }: { supplierId: string }) {
   const { t } = useTranslation('suppliers');
+  const { t: tEmp } = useTranslation('employees');
 
   const createMealSchema = z.object({
     name: z.string().min(1, t('detail.meals.createForm.nameRequired')),
@@ -208,12 +209,12 @@ function MealsTab({ supplierId }: { supplierId: string }) {
                     <Select value={field.value} onValueChange={field.onChange}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue>{(v: string) => t(`mealTypes.${v}`, { ns: 'employees' })}</SelectValue>
+                          <SelectValue>{(v: string) => tEmp(`mealTypes.${v}`)}</SelectValue>
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         {Object.values(MealType).map((mealType) => (
-                          <SelectItem key={mealType} value={mealType} label={t(`mealTypes.${mealType}`, { ns: 'employees' })}>{t(`mealTypes.${mealType}`, { ns: 'employees' })}</SelectItem>
+                          <SelectItem key={mealType} value={mealType} label={tEmp(`mealTypes.${mealType}`)}>{tEmp(`mealTypes.${mealType}`)}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -316,6 +317,7 @@ interface MealRowProps {
 
 function MealRow({ meal, isUpdating, isRemoving, onUpdate, onRemove }: MealRowProps) {
   const { t } = useTranslation('suppliers');
+  const { t: tEmp } = useTranslation('employees');
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(meal.name);
   const [description, setDescription] = useState(meal.description ?? '');
@@ -371,12 +373,12 @@ function MealRow({ meal, isUpdating, isRemoving, onUpdate, onRemove }: MealRowPr
           disabled={isUpdating}
         >
           <SelectTrigger className='h-8 w-28 text-xs'>
-            <SelectValue>{(v: string) => t(`mealTypes.${v}`, { ns: 'employees' })}</SelectValue>
+            <SelectValue>{(v: string) => tEmp(`mealTypes.${v}`)}</SelectValue>
           </SelectTrigger>
           <SelectContent>
             {Object.values(MealType).map((mealType) => (
-              <SelectItem key={mealType} value={mealType} label={t(`mealTypes.${mealType}`, { ns: 'employees' })}>
-                {t(`mealTypes.${mealType}`, { ns: 'employees' })}
+              <SelectItem key={mealType} value={mealType} label={tEmp(`mealTypes.${mealType}`)}>
+                {tEmp(`mealTypes.${mealType}`)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -411,7 +413,7 @@ function MealRow({ meal, isUpdating, isRemoving, onUpdate, onRemove }: MealRowPr
         {meal.price != null ? meal.price.toFixed(2) : <span className='italic'>—</span>}
       </span>
       <span className='text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground'>
-        {t(`mealTypes.${meal.type}`, { ns: 'employees' })}
+        {tEmp(`mealTypes.${meal.type}`)}
       </span>
       <div className='flex gap-1'>
         <button

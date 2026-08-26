@@ -43,6 +43,7 @@ export function CreateMealDialog({
   onSuccess,
 }: CreateMealDialogProps) {
   const { t } = useTranslation('suppliers');
+  const { t: tEmp } = useTranslation('employees');
   const { mealService } = useServices();
   const queryClient = useQueryClient();
 
@@ -116,14 +117,14 @@ export function CreateMealDialog({
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue>
-                          {(v: string) => t(`mealTypes.${v}`, { ns: 'employees' })}
+                          {(v: string) => tEmp(`mealTypes.${v}`)}
                         </SelectValue>
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {Object.values(MealType).map((mealType) => (
-                        <SelectItem key={mealType} value={mealType} label={t(`mealTypes.${mealType}`, { ns: 'employees' })}>
-                          {t(`mealTypes.${mealType}`, { ns: 'employees' })}
+                        <SelectItem key={mealType} value={mealType} label={tEmp(`mealTypes.${mealType}`)}>
+                          {tEmp(`mealTypes.${mealType}`)}
                         </SelectItem>
                       ))}
                     </SelectContent>

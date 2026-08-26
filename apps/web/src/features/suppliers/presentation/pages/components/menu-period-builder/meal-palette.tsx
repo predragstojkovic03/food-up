@@ -25,6 +25,7 @@ interface MealPaletteProps {
 
 export function MealPalette({ meals, supplierId }: MealPaletteProps) {
   const { t } = useTranslation('suppliers');
+  const { t: tEmp } = useTranslation('employees');
   const [query, setQuery] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -92,7 +93,7 @@ export function MealPalette({ meals, supplierId }: MealPaletteProps) {
           return (
             <div key={type} className='space-y-1.5'>
               <p className='text-xs font-semibold uppercase tracking-wide text-muted-foreground'>
-                {t(`mealTypes.${type}`, { ns: 'employees' })}
+                {tEmp(`mealTypes.${type}`)}
               </p>
               {group.map((meal) => (
                 <DraggableMealCard key={meal.id} meal={meal} />
