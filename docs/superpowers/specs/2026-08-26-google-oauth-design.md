@@ -112,14 +112,18 @@ No explicit "link account" UI is needed. The transition for each employee happen
 
 ## 5. Local Development
 
+**Production:** NestJS serves both the frontend and the API on the same port, so there is no port split. `https://yourdomain.com/api/auth/google/callback` is a single-origin request and `WEB_APP_URL=https://yourdomain.com` redirects back to the same NestJS process that serves the React app.
+
+**Development:** ports matter. The Vite dev server (port 5000) and NestJS (port 3000) are separate. Google always redirects to `GOOGLE_CALLBACK_URL`, which points to NestJS directly on port 3000 — not through Vite. After processing, NestJS redirects to `WEB_APP_URL` (port 5000, the Vite dev server) to hand the token back to the React app.
+
 Register both redirect URIs in the same Google Cloud Console project:
 
 ```
 https://yourdomain.com/api/auth/google/callback    ← production
-http://localhost:3000/api/auth/google/callback     ← local dev (direct to NestJS port)
+http://localhost:3000/api/auth/google/callback     ← local dev (direct to NestJS, not Vite)
 ```
 
-Google explicitly permits `http://localhost` URIs for development. Same Client ID and Client Secret are used for both environments; `GOOGLE_CALLBACK_URL` in the local `.env` points to localhost.
+Google explicitly permits `http://localhost` URIs for development. Same Client ID and Client Secret are used for both environments; `GOOGLE_CALLBACK_URL` in the local `.env` points to localhost:3000.
 
 ---
 
