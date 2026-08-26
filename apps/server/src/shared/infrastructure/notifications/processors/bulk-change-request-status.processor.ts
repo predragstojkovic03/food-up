@@ -6,8 +6,11 @@ import { BulkChangeRequestNotificationJobData } from 'src/core/change-requests/i
 import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { UserPreferencesService } from 'src/core/user-preferences/application/user-preferences.service';
 import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
+import { I_CONFIG_SERVICE, IConfigService } from 'src/shared/application/config-service.interface';
+import { EnvironmentVariables } from 'src/env.validation';
 import { t } from 'src/shared/i18n/i18n.helper';
 import { bullmqTelemetry } from '../bullmq-telemetry';
+import { emailBody, emailHeading, emailLayout } from '../mail/email-layout';
 import { I_MAIL_SERVICE, IMailService } from '../mail/mail.service.interface';
 import { BULK_CHANGE_REQUEST_QUEUE } from '../queue-names';
 
@@ -17,6 +20,7 @@ export class BulkChangeRequestStatusProcessor extends WorkerHost {
     private readonly _employeesService: EmployeesService,
     private readonly _preferencesService: UserPreferencesService,
     @Inject(I_MAIL_SERVICE) private readonly _mailService: IMailService,
+    @Inject(I_CONFIG_SERVICE) private readonly _configService: IConfigService<EnvironmentVariables, true>,
     @Inject(I_LOGGER) private readonly _logger: ILogger,
   ) {
     super();
@@ -35,31 +39,31 @@ export class BulkChangeRequestStatusProcessor extends WorkerHost {
 
     const prefs = await this._preferencesService.getOrCreate(employee.identityId);
     const lang = prefs.language;
+    const webAppUrl = this._configService.get('WEB_APP_URL');
 
-    const approved = items.filter(
-      (i) => i.status === ChangeRequestStatus.Approved,
-    );
-    const rejected = items.filter(
-      (i) => i.status === ChangeRequestStatus.Rejected,
-    );
+    const approved = items.filter((i) => i.status === ChangeRequestStatus.Approved);
+    const rejected = items.filter((i) => i.status === ChangeRequestStatus.Rejected);
 
+    const subject = t((k) => k.mail.changeRequest.bulkProcessed.subject, lang);
     const intro = t((k) => k.mail.changeRequest.bulkProcessed.intro, lang);
-    const lines = [`<p>${intro}</p><ul>`];
+
+    const listItems: string[] = [];
     if (approved.length) {
-      const approvedLine = t((k) => k.mail.changeRequest.bulkProcessed.approved, lang).replace('{{count}}', String(approved.length));
-      lines.push(`<li>${approvedLine}</li>`);
+      const label = t((k) => k.mail.changeRequest.bulkProcessed.approved, lang).replace('{{count}}', String(approved.length));
+      listItems.push(`<li style="color:#166534;margin-bottom:6px;">&#10003; ${label}</li>`);
     }
     if (rejected.length) {
-      const rejectedLine = t((k) => k.mail.changeRequest.bulkProcessed.rejected, lang).replace('{{count}}', String(rejected.length));
-      lines.push(`<li>${rejectedLine}</li>`);
+      const label = t((k) => k.mail.changeRequest.bulkProcessed.rejected, lang).replace('{{count}}', String(rejected.length));
+      listItems.push(`<li style="color:#991b1b;margin-bottom:6px;">&#10007; ${label}</li>`);
     }
-    lines.push('</ul>');
 
-    await this._mailService.send(
-      employee.email,
-      t((k) => k.mail.changeRequest.bulkProcessed.subject, lang),
-      lines.join(''),
-    );
+    const list = `<ul style="margin:12px 0 0;padding-left:20px;font-size:15px;line-height:1.6;">${listItems.join('')}</ul>`;
+    const content =
+      emailHeading(subject) +
+      emailBody(intro + list);
+    const html = emailLayout(content, webAppUrl);
+
+    await this._mailService.send(employee.email, subject, html);
 
     this._logger.log(
       `job:done queue=${job.queueName} jobId=${job.id} attempt=${job.attemptsMade + 1} employeeId=${employeeId} approved=${approved.length} rejected=${rejected.length} durationMs=${Date.now() - start}`,

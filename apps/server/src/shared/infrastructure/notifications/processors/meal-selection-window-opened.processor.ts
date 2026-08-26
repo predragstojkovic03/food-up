@@ -12,6 +12,7 @@ import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
 import { t } from 'src/shared/i18n/i18n.helper';
 import { MealWindowNotificationJobData } from 'src/core/meal-selection-windows/infrastructure/meal-selection-window-event-handler.service';
 import { bullmqTelemetry } from '../bullmq-telemetry';
+import { emailBody, emailButton, emailHeading, emailLayout } from '../mail/email-layout';
 import { I_MAIL_SERVICE, IMailService } from '../mail/mail.service.interface';
 import { MEAL_WINDOW_QUEUE } from '../queue-names';
 
@@ -43,11 +44,14 @@ export class MealSelectionWindowOpenedProcessor extends WorkerHost {
     const lang = prefs.language;
     const webAppUrl = this._configService.get('WEB_APP_URL');
 
-    await this._mailService.send(
-      employee.email,
-      t((k) => k.mail.mealWindow.subject, lang),
-      `<p>${t((k) => k.mail.mealWindow.body, lang)} <a href="${webAppUrl}">Click here</a></p>`,
-    );
+    const subject = t((k) => k.mail.mealWindow.subject, lang);
+    const content =
+      emailHeading(subject) +
+      emailBody(t((k) => k.mail.mealWindow.body, lang)) +
+      emailButton(webAppUrl, lang === 'sr' ? 'Izaberi obroke' : 'Select meals');
+    const html = emailLayout(content, webAppUrl);
+
+    await this._mailService.send(employee.email, subject, html);
 
     this._logger.log(
       `job:done queue=${job.queueName} jobId=${job.id} attempt=${job.attemptsMade + 1} windowId=${windowId} employeeId=${employeeId} durationMs=${Date.now() - start}`,

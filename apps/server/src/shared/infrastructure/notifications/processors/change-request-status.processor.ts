@@ -6,8 +6,11 @@ import { ChangeRequestStatusNotificationJobData } from 'src/core/change-requests
 import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { UserPreferencesService } from 'src/core/user-preferences/application/user-preferences.service';
 import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
+import { I_CONFIG_SERVICE, IConfigService } from 'src/shared/application/config-service.interface';
+import { EnvironmentVariables } from 'src/env.validation';
 import { t } from 'src/shared/i18n/i18n.helper';
 import { bullmqTelemetry } from '../bullmq-telemetry';
+import { emailBody, emailHeading, emailLayout, emailStatusBadge } from '../mail/email-layout';
 import { I_MAIL_SERVICE, IMailService } from '../mail/mail.service.interface';
 import { CHANGE_REQUEST_QUEUE } from '../queue-names';
 
@@ -17,6 +20,7 @@ export class ChangeRequestStatusProcessor extends WorkerHost {
     private readonly _employeesService: EmployeesService,
     private readonly _preferencesService: UserPreferencesService,
     @Inject(I_MAIL_SERVICE) private readonly _mailService: IMailService,
+    @Inject(I_CONFIG_SERVICE) private readonly _configService: IConfigService<EnvironmentVariables, true>,
     @Inject(I_LOGGER) private readonly _logger: ILogger,
   ) {
     super();
@@ -36,16 +40,22 @@ export class ChangeRequestStatusProcessor extends WorkerHost {
     const prefs = await this._preferencesService.getOrCreate(employee.identityId);
     const lang = prefs.language;
     const isApproved = status === ChangeRequestStatus.Approved;
+    const webAppUrl = this._configService.get('WEB_APP_URL');
 
-    await this._mailService.send(
-      employee.email,
-      isApproved
-        ? t((k) => k.mail.changeRequest.approved.subject, lang)
-        : t((k) => k.mail.changeRequest.rejected.subject, lang),
-      isApproved
-        ? `<p>${t((k) => k.mail.changeRequest.approved.body, lang)}</p>`
-        : `<p>${t((k) => k.mail.changeRequest.rejected.body, lang)}</p>`,
-    );
+    const subject = isApproved
+      ? t((k) => k.mail.changeRequest.approved.subject, lang)
+      : t((k) => k.mail.changeRequest.rejected.subject, lang);
+    const body = isApproved
+      ? t((k) => k.mail.changeRequest.approved.body, lang)
+      : t((k) => k.mail.changeRequest.rejected.body, lang);
+
+    const content =
+      emailStatusBadge(isApproved ? 'approved' : 'rejected') +
+      emailHeading(subject) +
+      emailBody(body);
+    const html = emailLayout(content, webAppUrl);
+
+    await this._mailService.send(employee.email, subject, html);
 
     this._logger.log(
       `job:done queue=${job.queueName} jobId=${job.id} attempt=${job.attemptsMade + 1} employeeId=${employeeId} status=${status} durationMs=${Date.now() - start}`,

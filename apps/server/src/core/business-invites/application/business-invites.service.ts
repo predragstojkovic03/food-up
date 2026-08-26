@@ -6,6 +6,7 @@ import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
 import { EntityInstanceNotFoundException } from 'src/shared/domain/exceptions/entity-instance-not-found.exception';
 import { InvalidOperationException } from 'src/shared/domain/exceptions/invalid-operation.exception';
 import { t } from 'src/shared/i18n/i18n.helper';
+import { emailBody, emailButton, emailHeading, emailLayout, emailNote } from 'src/shared/infrastructure/notifications/mail/email-layout';
 import { I_MAIL_SERVICE, IMailService } from 'src/shared/infrastructure/notifications/mail/mail.service.interface';
 import { BusinessInvite } from '../domain/business-invite.entity';
 import {
@@ -103,16 +104,8 @@ export class BusinessInvitesService {
     const button = t(tr => tr.mail.invite.button, language);
     const footer = t(tr => tr.mail.invite.footer, language);
 
-    const html = `
-<div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 24px; color: #111;">
-  <h2 style="margin: 0 0 12px;">${heading}</h2>
-  <p style="margin: 0 0 24px; color: #555; line-height: 1.5;">${body}</p>
-  <a href="${registrationUrl}"
-     style="display: inline-block; background: #111; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600;">
-    ${button}
-  </a>
-  <p style="margin: 24px 0 0; color: #999; font-size: 13px;">${footer}</p>
-</div>`;
+    const content = emailHeading(heading) + emailBody(body) + emailButton(registrationUrl, button) + emailNote(footer);
+    const html = emailLayout(content, webAppUrl);
 
     try {
       await this._mailService.send(invite.email, subject, html);

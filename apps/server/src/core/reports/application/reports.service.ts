@@ -10,7 +10,10 @@ import { MealSelectionWindowsService } from 'src/core/meal-selection-windows/app
 import { SuppliersService } from 'src/core/suppliers/application/suppliers.service';
 import { DomainEvents } from 'src/shared/application/domain-events/domain-events.decorator';
 import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
+import { I_CONFIG_SERVICE, IConfigService } from 'src/shared/application/config-service.interface';
+import { EnvironmentVariables } from 'src/env.validation';
 import { t } from 'src/shared/i18n/i18n.helper';
+import { emailLayout } from 'src/shared/infrastructure/notifications/mail/email-layout';
 import {
   I_MAIL_SERVICE,
   IMailService,
@@ -84,6 +87,7 @@ export class ReportsService {
     private readonly _businessSuppliersService: BusinessSuppliersService,
     private readonly _windowsService: MealSelectionWindowsService,
     private readonly _businessesService: BusinessesService,
+    @Inject(I_CONFIG_SERVICE) private readonly _configService: IConfigService<EnvironmentVariables, true>,
     @Inject(I_LOGGER) private readonly _logger: ILogger,
   ) {}
 
@@ -207,7 +211,8 @@ export class ReportsService {
       ? t((k) => k.mail.orderSummary.intro, lang)
       : t((k) => k.mail.orderSummary.introAdjusted, lang);
 
-    const html = this._renderHtmlTable(supplier.name, rows, introText, lang);
+    const webAppUrl = this._configService.get('WEB_APP_URL');
+    const html = this._renderHtmlTable(supplier.name, rows, introText, lang, webAppUrl);
 
     return { subject, introText, html };
   }
@@ -245,7 +250,8 @@ export class ReportsService {
       }
 
       const rows = await this._queryRepository.getByWindowAndSupplier(windowId, supplierId);
-      const html = this._renderHtmlTable(supplier.name, rows, introText, lang);
+      const webAppUrl = this._configService.get('WEB_APP_URL');
+      const html = this._renderHtmlTable(supplier.name, rows, introText, lang, webAppUrl);
 
       await this._mailService.send(supplier.email, subject, html, {
         cc: managerEmail ?? undefined,
@@ -287,51 +293,55 @@ export class ReportsService {
     rows: OrderSummaryRow[],
     introText: string,
     lang: Language,
+    webAppUrl: string,
   ): string {
-    const intro = `<p>${introText}</p>`;
+    const intro = `<p style="margin:0 0 20px;font-size:15px;color:#4a4a4a;line-height:1.6;">${introText}</p>`;
 
     if (rows.length === 0) {
-      return `${intro}<p>${t((k) => k.mail.orderSummary.noOrders, lang)}</p>`;
+      const content = intro + `<p style="font-size:15px;color:#888;">${t((k) => k.mail.orderSummary.noOrders, lang)}</p>`;
+      return emailLayout(content, webAppUrl);
     }
 
     const byDate = this._groupByDateAndType(rows);
-    let body = '';
+    let tableBody = '';
 
     for (const [date, typeGroups] of byDate) {
-      body += `
+      tableBody += `
         <tr>
-          <td colspan="2" style="background:#2D6A4F;color:#ffffff;font-weight:bold;font-size:14px;padding:8px 12px;">
+          <td colspan="2" style="background-color:#2D6A4F;color:#ffffff;font-weight:700;font-size:13px;padding:8px 14px;border-radius:4px 4px 0 0;">
             ${this._formatDayLabel(date, lang)}
           </td>
         </tr>`;
 
       for (const [mealType, meals] of typeGroups) {
-        body += `
+        tableBody += `
           <tr>
-            <td colspan="2" style="background:#EDF7F2;color:#2D6A4F;font-style:italic;font-weight:bold;padding:5px 12px 5px 20px;">
+            <td colspan="2" style="background-color:#EDF7F2;color:#2D6A4F;font-style:italic;font-weight:700;font-size:12px;padding:5px 14px 5px 22px;text-transform:uppercase;letter-spacing:0.04em;">
               ${this._formatMealTypeLabel(mealType, lang)}
             </td>
           </tr>`;
 
         for (const meal of meals) {
-          body += `
-            <tr style="border-bottom:1px solid #D4E8DC;">
-              <td style="padding:5px 12px 5px 30px;">${meal.mealName}</td>
-              <td style="text-align:center;padding:5px 12px;font-weight:bold;width:50px;">${meal.totalQuantity}</td>
+          tableBody += `
+            <tr>
+              <td style="padding:6px 14px 6px 30px;font-size:13px;color:#1a1a1a;border-bottom:1px solid #e4e9e6;">${meal.mealName}</td>
+              <td style="text-align:center;padding:6px 14px;font-size:13px;font-weight:700;color:#1a1a1a;border-bottom:1px solid #e4e9e6;width:48px;">${meal.totalQuantity}</td>
             </tr>`;
         }
       }
 
-      body += `<tr><td colspan="2" style="padding:4px;"></td></tr>`;
+      tableBody += `<tr><td colspan="2" style="padding:6px;"></td></tr>`;
     }
 
-    return `
-      ${intro}
-      <h3 style="font-family:Calibri,Arial,sans-serif;">${supplierName}</h3>
-      <table border="0" cellpadding="0" cellspacing="0"
-             style="border-collapse:collapse;width:480px;font-family:Calibri,Arial,sans-serif;font-size:13px;">
-        ${body}
+    const supplierHeading = `<h2 style="margin:0 0 16px;font-size:18px;font-weight:700;color:#1a1a1a;">${supplierName}</h2>`;
+    const table = `
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0"
+             style="border-collapse:collapse;width:100%;font-size:13px;border:1px solid #e4e9e6;border-radius:6px;overflow:hidden;">
+        ${tableBody}
       </table>`;
+
+    const content = intro + supplierHeading + table;
+    return emailLayout(content, webAppUrl);
   }
 
   private _buildSupplierSheet(
