@@ -1,4 +1,3 @@
-import { DietaryTag } from '@food-up/shared';
 import { TypeOrmMapper } from 'src/shared/infrastructure/typeorm.mapper';
 import { Meal as MealDomain } from '../../domain/meal.entity';
 import { Meal as MealPersistence } from './meal.typeorm-entity';
@@ -12,7 +11,7 @@ export class MealTypeOrmMapper extends TypeOrmMapper<MealDomain, MealPersistence
       persistence.type,
       persistence.supplier?.id,
       persistence.price,
-      (persistence.dietaryTags ?? []) as DietaryTag[],
+      persistence.dietaryTags ?? [],
     );
   }
 

@@ -28,8 +28,8 @@ export class Meal {
   })
   price?: number;
 
-  @Column({ type: 'text', array: true, default: '{}' })
-  dietaryTags: string[];
+  @Column({ type: 'enum', enum: DietaryTag, array: true, default: '{}' })
+  dietaryTags: DietaryTag[];
 
   @OneToMany(() => MenuItem, (menuItem) => menuItem.meal)
   menuItems: MenuItem[];
