@@ -37,6 +37,7 @@ function buildItemsByType(
       description: item.meal.description,
       type,
       price: item.price,
+      dietaryTags: item.meal.dietaryTags,
     });
   }
   return result;
@@ -114,6 +115,7 @@ export default function MealSelectionFlowPage() {
         description: i.meal.description,
         type: i.meal.type,
         price: i.price,
+        dietaryTags: i.meal.dietaryTags,
       }))
     : [];
 

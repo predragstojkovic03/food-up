@@ -1,4 +1,4 @@
-import { MealType } from '@food-up/shared';
+import { DietaryTag, MealType } from '@food-up/shared';
 
 export interface MenuItemOption {
   id: string;
@@ -6,6 +6,7 @@ export interface MenuItemOption {
   description?: string;
   type: MealType;
   price?: number;
+  dietaryTags?: DietaryTag[];
 }
 
 // What the user has decided for a single day

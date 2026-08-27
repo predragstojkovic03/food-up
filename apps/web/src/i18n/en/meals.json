@@ -1,4 +1,14 @@
 {
+  "dietaryTags": {
+    "label": "Dietary tags",
+    "vegetarian": "Vegetarian",
+    "vegan": "Vegan",
+    "lenten": "Lenten",
+    "chrono": "Chrono",
+    "gluten_free": "Gluten Free",
+    "dairy_free": "Dairy Free",
+    "halal": "Halal"
+  },
   "selectionFlow": {
     "nextDay": "Next day",
     "reviewSelections": "Review selections",

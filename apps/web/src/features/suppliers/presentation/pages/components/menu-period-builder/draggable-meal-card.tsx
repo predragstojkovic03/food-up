@@ -1,5 +1,6 @@
 import { IMealResponse } from '@food-up/shared';
 import { useDraggable } from '@dnd-kit/core';
+import { DietaryTagBadge } from '@/components/dietary-tag-badge';
 
 interface DraggableMealCardProps {
   meal: IMealResponse;
@@ -23,7 +24,14 @@ export function DraggableMealCard({ meal }: DraggableMealCardProps) {
         ${isDragging ? 'opacity-40' : ''}
       `}
     >
-      {meal.name}
+      <span>{meal.name}</span>
+      {meal.dietaryTags && meal.dietaryTags.length > 0 && (
+        <div className='flex flex-wrap gap-1 mt-1.5'>
+          {meal.dietaryTags.map((tag) => (
+            <DietaryTagBadge key={tag} tag={tag} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

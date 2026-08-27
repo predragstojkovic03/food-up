@@ -1,3 +1,4 @@
+import { DietaryTag } from '../enums/dietary-tag.enum';
 import { MealType } from '../enums/meal-type.enum';
 
 export interface ICreateMeal {
@@ -6,6 +7,7 @@ export interface ICreateMeal {
   type: MealType;
   price?: number;
   supplierId?: string;
+  dietaryTags?: DietaryTag[];
 }
 
 export interface IUpdateMeal extends Partial<ICreateMeal> {}
@@ -16,4 +18,5 @@ export interface IMealResponse {
   description?: string;
   type: MealType;
   price?: number;
+  dietaryTags: DietaryTag[];
 }

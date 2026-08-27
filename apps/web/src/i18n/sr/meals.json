@@ -1,4 +1,14 @@
 {
+  "dietaryTags": {
+    "label": "Dijetetske oznake",
+    "vegetarian": "Vegetarijansko",
+    "vegan": "Vegansko",
+    "lenten": "Posno",
+    "chrono": "Krono",
+    "gluten_free": "Bez glutena",
+    "dairy_free": "Bez mlečnih proizvoda",
+    "halal": "Halal"
+  },
   "selectionFlow": {
     "nextDay": "Sledeći dan",
     "reviewSelections": "Pregled izbora",

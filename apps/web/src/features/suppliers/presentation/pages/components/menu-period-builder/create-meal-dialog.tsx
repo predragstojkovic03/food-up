@@ -1,4 +1,5 @@
-import { MealType } from '@food-up/shared';
+import { DietaryTag, MealType } from '@food-up/shared';
+import { DietaryTagsSelect } from '../dietary-tags-select';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -52,12 +53,13 @@ export function CreateMealDialog({
     type: z.nativeEnum(MealType),
     description: z.string().optional(),
     price: z.string().optional(),
+    dietaryTags: z.array(z.nativeEnum(DietaryTag)),
   });
   type FormValues = z.infer<typeof createMealSchema>;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(createMealSchema),
-    defaultValues: { name: '', type: MealType.Lunch, description: '', price: '' },
+    defaultValues: { name: '', type: MealType.Lunch, description: '', price: '', dietaryTags: [] },
   });
 
   const createMeal = useMutation({
@@ -75,6 +77,7 @@ export function CreateMealDialog({
         description: values.description || undefined,
         price: values.price ? Number(values.price) : undefined,
         supplierId,
+        dietaryTags: values.dietaryTags,
       },
       {
         onSuccess: () => {
@@ -156,6 +159,18 @@ export function CreateMealDialog({
                     <Input type='number' step='0.01' min='0' placeholder='0.00' {...field} />
                   </FormControl>
                   <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='dietaryTags'
+              render={({ field }) => (
+                <FormItem className='col-span-2'>
+                  <FormLabel>{t('dietaryTags.label', { ns: 'meals' })}</FormLabel>
+                  <FormControl>
+                    <DietaryTagsSelect value={field.value} onChange={field.onChange} />
+                  </FormControl>
                 </FormItem>
               )}
             />

@@ -1,3 +1,4 @@
+import { DietaryTagBadge } from '@/components/dietary-tag-badge';
 import { MenuItemOption } from '../types';
 
 interface MealCardProps {
@@ -23,6 +24,13 @@ export function MealCard({ item, selected, onSelect }: MealCardProps) {
             <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
               {item.description}
             </p>
+          )}
+          {item.dietaryTags && item.dietaryTags.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-1.5">
+              {item.dietaryTags.map((tag) => (
+                <DietaryTagBadge key={tag} tag={tag} />
+              ))}
+            </div>
           )}
         </div>
         <div className="flex flex-col items-end gap-1.5 shrink-0">

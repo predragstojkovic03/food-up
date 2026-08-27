@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
+import { DietaryTag } from '@food-up/shared';
 import { TransactionContext } from 'src/shared/infrastructure/transaction-context';
 import { DataSource, Repository } from 'typeorm';
 import { MenuItemWithMealDto } from '../../application/queries/dto/find-menu-items-with-meals.dto';
@@ -43,6 +44,7 @@ export class MenuItemsQueryTypeOrmRepository
         name: menuItem.meal.name,
         description: menuItem.meal.description,
         type: menuItem.meal.type,
+        dietaryTags: (menuItem.meal.dietaryTags ?? []) as DietaryTag[],
       },
     }));
   }
