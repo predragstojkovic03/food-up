@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { MealType } from '@food-up/shared';
+import { DietaryTag, MealType } from '@food-up/shared';
 
 @Expose()
 export class MealResponseDto {
@@ -37,4 +37,13 @@ export class MealResponseDto {
     nullable: true,
   })
   price?: number;
+
+  @Expose()
+  @ApiProperty({
+    example: [DietaryTag.Vegetarian],
+    enum: DietaryTag,
+    isArray: true,
+    description: 'Dietary labels',
+  })
+  dietaryTags: DietaryTag[];
 }

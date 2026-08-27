@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
-import { MealType } from '@food-up/shared';
+import { IsArray, IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { DietaryTag, MealType } from '@food-up/shared';
 
 export class CreateMealDto {
   @ApiProperty({ example: 'Chicken Sandwich', description: 'Name of the meal' })
@@ -43,4 +43,16 @@ export class CreateMealDto {
   @IsString()
   @IsOptional()
   supplierId?: string;
+
+  @ApiProperty({
+    example: [DietaryTag.Vegetarian],
+    enum: DietaryTag,
+    isArray: true,
+    description: 'Dietary labels for the meal',
+    required: false,
+  })
+  @IsArray()
+  @IsEnum(DietaryTag, { each: true })
+  @IsOptional()
+  dietaryTags?: DietaryTag[];
 }
