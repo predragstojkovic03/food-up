@@ -1,3 +1,4 @@
+import { DietaryTag } from '../enums/dietary-tag.enum';
 import { MealType } from '../enums/meal-type.enum';
 
 export interface IMealSelectionWindowResponse {
@@ -22,6 +23,7 @@ export interface IWindowMenuItemMeal {
   name: string;
   description: string;
   type: MealType;
+  dietaryTags: DietaryTag[];
 }
 
 export interface ICurrentWindowMenuItem {
