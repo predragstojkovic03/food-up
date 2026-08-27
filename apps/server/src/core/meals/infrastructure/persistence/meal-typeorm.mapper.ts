@@ -1,11 +1,9 @@
+import { DietaryTag } from '@food-up/shared';
 import { TypeOrmMapper } from 'src/shared/infrastructure/typeorm.mapper';
 import { Meal as MealDomain } from '../../domain/meal.entity';
 import { Meal as MealPersistence } from './meal.typeorm-entity';
 
-export class MealTypeOrmMapper extends TypeOrmMapper<
-  MealDomain,
-  MealPersistence
-> {
+export class MealTypeOrmMapper extends TypeOrmMapper<MealDomain, MealPersistence> {
   toDomain(persistence: MealPersistence): MealDomain {
     return MealDomain.reconstitute(
       persistence.id,
@@ -14,6 +12,7 @@ export class MealTypeOrmMapper extends TypeOrmMapper<
       persistence.type,
       persistence.supplier?.id,
       persistence.price,
+      (persistence.dietaryTags ?? []) as DietaryTag[],
     );
   }
 
@@ -23,11 +22,9 @@ export class MealTypeOrmMapper extends TypeOrmMapper<
     persistence.name = domain.name;
     persistence.description = domain.description;
     persistence.type = domain.type;
-    persistence.supplier = domain.supplierId
-      ? ({ id: domain.supplierId } as any)
-      : undefined;
+    persistence.supplier = domain.supplierId ? ({ id: domain.supplierId } as any) : undefined;
     persistence.price = domain.price;
-
+    persistence.dietaryTags = domain.dietaryTags ?? [];
     return persistence;
   }
 
@@ -39,6 +36,7 @@ export class MealTypeOrmMapper extends TypeOrmMapper<
     if (domain.type !== undefined) persistence.type = domain.type;
     if (domain.price !== undefined) persistence.price = domain.price;
     if (domain.supplierId !== undefined) persistence.supplier = { id: domain.supplierId } as any;
+    if (domain.dietaryTags !== undefined) persistence.dietaryTags = domain.dietaryTags;
     return persistence;
   }
 }

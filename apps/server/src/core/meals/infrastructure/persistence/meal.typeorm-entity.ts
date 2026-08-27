@@ -1,7 +1,7 @@
 import { MenuItem } from 'src/core/menu-items/infrastructure/persistence/menu-item.typeorm-entity';
 import { Supplier } from 'src/core/suppliers/infrastructure/persistence/supplier.typeorm-entity';
 import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
-import { MealType } from '@food-up/shared';
+import { DietaryTag, MealType } from '@food-up/shared';
 
 @Entity()
 export class Meal {
@@ -27,6 +27,9 @@ export class Meal {
     transformer: { from: (v: string | null) => (v != null ? Number(v) : undefined), to: (v) => v },
   })
   price?: number;
+
+  @Column({ type: 'text', array: true, default: '{}' })
+  dietaryTags: string[];
 
   @OneToMany(() => MenuItem, (menuItem) => menuItem.meal)
   menuItems: MenuItem[];
