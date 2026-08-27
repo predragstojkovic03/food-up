@@ -24,10 +24,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useServices } from '@/shared/infrastructure/di/service.context';
 import {
+  DietaryTag,
   IMealResponse,
   IMenuPeriodResponse,
   MealType,
 } from '@food-up/shared';
+import { DietaryTagBadge } from '@/components/dietary-tag-badge';
+import { DietaryTagsSelect } from './components/dietary-tags-select';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -108,6 +111,7 @@ function MealsTab({ supplierId }: { supplierId: string }) {
     description: z.string().optional(),
     type: z.nativeEnum(MealType),
     price: z.string().optional(),
+    dietaryTags: z.array(z.nativeEnum(DietaryTag)),
   });
   type CreateMealFormValues = z.infer<typeof createMealSchema>;
   const { mealService } = useServices();
@@ -125,7 +129,7 @@ function MealsTab({ supplierId }: { supplierId: string }) {
   });
 
   const updateMeal = useMutation({
-    mutationFn: (payload: { id: string; name?: string; description?: string; type?: MealType; price?: number }) => {
+    mutationFn: (payload: { id: string; name?: string; description?: string; type?: MealType; price?: number; dietaryTags?: DietaryTag[] }) => {
       const { id, ...data } = payload;
       return mealService.update(id, data);
     },
@@ -141,7 +145,7 @@ function MealsTab({ supplierId }: { supplierId: string }) {
 
   const createMealForm = useForm<CreateMealFormValues>({
     resolver: zodResolver(createMealSchema),
-    defaultValues: { name: '', description: '', type: MealType.Lunch, price: '' },
+    defaultValues: { name: '', description: '', type: MealType.Lunch, price: '', dietaryTags: [] },
   });
 
   function handleCreate(values: CreateMealFormValues) {
@@ -152,6 +156,7 @@ function MealsTab({ supplierId }: { supplierId: string }) {
         type: values.type,
         price: values.price ? Number(values.price) : undefined,
         supplierId,
+        dietaryTags: values.dietaryTags,
       },
       {
         onSuccess: () => {
@@ -248,6 +253,18 @@ function MealsTab({ supplierId }: { supplierId: string }) {
                   </FormItem>
                 )}
               />
+              <FormField
+                control={createMealForm.control}
+                name='dietaryTags'
+                render={({ field }) => (
+                  <FormItem className='col-span-2'>
+                    <FormLabel className='text-xs'>{t('dietaryTags.label', { ns: 'meals' })}</FormLabel>
+                    <FormControl>
+                      <DietaryTagsSelect value={field.value} onChange={field.onChange} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
               <div className='flex items-end'>
                 <Button type='submit' size='sm' disabled={createMeal.isPending}>
                   {createMeal.isPending ? t('actions.creating', { ns: 'common' }) : t('actions.create', { ns: 'common' })}
@@ -311,7 +328,7 @@ interface MealRowProps {
   meal: IMealResponse;
   isUpdating: boolean;
   isRemoving: boolean;
-  onUpdate: (data: { name?: string; description?: string; type?: MealType; price?: number }) => void;
+  onUpdate: (data: { name?: string; description?: string; type?: MealType; price?: number; dietaryTags?: DietaryTag[] }) => void;
   onRemove: () => void;
 }
 
@@ -323,6 +340,7 @@ function MealRow({ meal, isUpdating, isRemoving, onUpdate, onRemove }: MealRowPr
   const [description, setDescription] = useState(meal.description ?? '');
   const [type, setType] = useState<MealType>(meal.type);
   const [price, setPrice] = useState<string>(meal.price != null ? String(meal.price) : '');
+  const [dietaryTags, setDietaryTags] = useState<DietaryTag[]>(meal.dietaryTags ?? []);
 
   function handleSave() {
     onUpdate({
@@ -330,6 +348,7 @@ function MealRow({ meal, isUpdating, isRemoving, onUpdate, onRemove }: MealRowPr
       description: description || undefined,
       type,
       price: price !== '' ? Number(price) : undefined,
+      dietaryTags,
     });
     setEditing(false);
   }
@@ -339,6 +358,7 @@ function MealRow({ meal, isUpdating, isRemoving, onUpdate, onRemove }: MealRowPr
     setDescription(meal.description ?? '');
     setType(meal.type);
     setPrice(meal.price != null ? String(meal.price) : '');
+    setDietaryTags(meal.dietaryTags ?? []);
     setEditing(false);
   }
 
@@ -399,13 +419,25 @@ function MealRow({ meal, isUpdating, isRemoving, onUpdate, onRemove }: MealRowPr
             <X size={15} />
           </button>
         </div>
+        <div className='col-span-5'>
+          <DietaryTagsSelect value={dietaryTags} onChange={setDietaryTags} />
+        </div>
       </div>
     );
   }
 
   return (
     <div className='grid grid-cols-[1fr_1fr_auto_auto_auto] items-center px-4 py-3 border-b last:border-b-0 gap-3'>
-      <span className='text-sm font-medium'>{meal.name}</span>
+      <div className='flex flex-col'>
+        <span className='text-sm font-medium'>{meal.name}</span>
+        {meal.dietaryTags && meal.dietaryTags.length > 0 && (
+          <div className='flex flex-wrap gap-1 mt-1'>
+            {meal.dietaryTags.map((tag) => (
+              <DietaryTagBadge key={tag} tag={tag} />
+            ))}
+          </div>
+        )}
+      </div>
       <span className='text-sm text-muted-foreground truncate'>
         {meal.description ?? <span className='italic'>—</span>}
       </span>
