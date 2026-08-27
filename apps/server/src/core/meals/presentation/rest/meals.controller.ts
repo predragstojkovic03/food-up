@@ -99,6 +99,7 @@ export class MealsController {
       description: entity.description,
       type: entity.type,
       price: entity.price,
+      dietaryTags: entity.dietaryTags,
     };
 
     return plainToClass(MealResponseDto, dto);

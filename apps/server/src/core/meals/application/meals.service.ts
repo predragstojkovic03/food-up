@@ -80,6 +80,7 @@ export class MealsService {
       dto.type,
       supplierId,
       dto.price,
+      dto.dietaryTags ?? [],
     );
 
     const result = await this._repository.insert(meal);
