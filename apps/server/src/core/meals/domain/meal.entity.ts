@@ -1,4 +1,4 @@
-import { MealType } from '@food-up/shared';
+import { DietaryTag, MealType } from '@food-up/shared';
 import { Entity } from 'src/shared/domain/entity';
 import { generateId } from 'src/shared/domain/generate-id';
 
@@ -9,8 +9,9 @@ export class Meal extends Entity {
     type: MealType,
     supplierId: string,
     price?: number,
+    dietaryTags: DietaryTag[] = [],
   ): Meal {
-    return new Meal(generateId(), name, description, type, supplierId, price);
+    return new Meal(generateId(), name, description, type, supplierId, price, dietaryTags);
   }
 
   static reconstitute(
@@ -20,8 +21,9 @@ export class Meal extends Entity {
     type: MealType,
     supplierId: string,
     price?: number,
+    dietaryTags: DietaryTag[] = [],
   ): Meal {
-    return new Meal(id, name, description ?? undefined, type, supplierId, price);
+    return new Meal(id, name, description ?? undefined, type, supplierId, price, dietaryTags);
   }
 
   private constructor(
@@ -31,6 +33,7 @@ export class Meal extends Entity {
     public type: MealType,
     public readonly supplierId: string,
     public price?: number,
+    public dietaryTags: DietaryTag[] = [],
   ) {
     super();
   }
