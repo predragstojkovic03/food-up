@@ -36,6 +36,24 @@ export class IdentityService {
     return result;
   }
 
+  async createWithGoogle(dto: {
+    email: string;
+    googleId: string;
+    pictureUrl?: string | null;
+    type: IdentityType;
+  }): Promise<Identity> {
+    const entity = Identity.createWithGoogle(dto.email, dto.googleId, dto.type);
+    const result = await this._repository.create(entity);
+    if (dto.pictureUrl) {
+      await this.updatePictureUrl(result.id, dto.pictureUrl);
+    }
+    this._logger.log(
+      `Identity created with Google: id=${result.id} type=${dto.type}`,
+      IdentityService.name,
+    );
+    return result;
+  }
+
   async validateCredentials(
     email: string,
     password: string,

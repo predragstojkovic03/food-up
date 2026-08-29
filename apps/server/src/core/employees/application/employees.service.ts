@@ -1,5 +1,5 @@
 import { EmployeeRole, IdentityType } from '@food-up/shared';
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { BusinessInvitesService } from 'src/core/business-invites/application/business-invites.service';
 import { IdentityService } from 'src/core/identity/application/identity.service';
 import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
@@ -52,6 +52,48 @@ export class EmployeesService {
       const result = await this._repository.insert(entity);
       this._logger.log(
         `Employee registered: id=${result.id} name=${dto.name} businessId=${invite.businessId}`,
+        EmployeesService.name,
+      );
+      return result;
+    });
+  }
+
+  async registerWithGoogle(
+    googleId: string,
+    googleEmail: string,
+    displayName: string,
+    pictureUrl: string | null,
+    inviteToken: string,
+  ): Promise<Employee> {
+    const inviteEmail = await this._businessInvitesService.validate(inviteToken);
+    if (!inviteEmail) {
+      throw new BadRequestException('GOOGLE_INVALID_INVITE');
+    }
+
+    if (googleEmail.toLowerCase() !== inviteEmail.toLowerCase()) {
+      throw new BadRequestException('GOOGLE_EMAIL_MISMATCH');
+    }
+
+    return this._transactionRunner.run(async () => {
+      const invite = await this._businessInvitesService.consume(inviteToken);
+
+      const identity = await this._identityService.createWithGoogle({
+        email: inviteEmail,
+        googleId,
+        pictureUrl,
+        type: IdentityType.Employee,
+      });
+
+      const entity = Employee.create(
+        displayName,
+        EmployeeRole.Basic,
+        invite.businessId,
+        identity.id,
+      );
+
+      const result = await this._repository.insert(entity);
+      this._logger.log(
+        `Employee registered via Google: id=${result.id} name=${displayName} businessId=${invite.businessId}`,
         EmployeesService.name,
       );
       return result;

@@ -147,7 +147,7 @@ export class AuthController {
     res.cookie(REFRESH_COOKIE_NAME, '', { ...refreshCookieOptions(this._isProduction), maxAge: 0 });
   }
 
-  @ApiOperation({ summary: 'Initiate Google OAuth login — redirects to Google' })
+  @ApiOperation({ summary: 'Initiate Google OAuth login or registration — redirects to Google' })
   @ApiResponse({ status: 302, description: 'Redirects to Google login page' })
   @Public
   @UseGuards(GoogleAuthGuard)
@@ -165,15 +165,39 @@ export class AuthController {
     @Req() req: Request,
     @Res() res: Response,
   ): Promise<void> {
+    const inviteToken = req.query['state'] as string | undefined;
     try {
-      const { googleId, email, pictureUrl } = req.user as { googleId: string; email: string; pictureUrl: string | null };
-      const identity = await this._authService.findOrLinkGoogleIdentity(googleId, email, pictureUrl);
-      const { accessToken, rawRefreshToken } = await this._authService.issueSessionForIdentity(identity.id);
+      const { googleId, email, displayName, pictureUrl } = req.user as {
+        googleId: string;
+        email: string;
+        displayName: string;
+        pictureUrl: string | null;
+      };
 
+      let identityId: string;
+      if (inviteToken) {
+        const employee = await this._employeesService.registerWithGoogle(
+          googleId, email, displayName, pictureUrl, inviteToken,
+        );
+        identityId = employee.identityId;
+      } else {
+        const identity = await this._authService.findOrLinkGoogleIdentity(googleId, email, pictureUrl);
+        identityId = identity.id;
+      }
+
+      const { accessToken, rawRefreshToken } = await this._authService.issueSessionForIdentity(identityId);
       res.cookie(REFRESH_COOKIE_NAME, rawRefreshToken, refreshCookieOptions(this._isProduction));
       res.redirect(`${this._webAppUrl}/auth/callback?token=${encodeURIComponent(accessToken)}`);
-    } catch {
-      res.redirect(`${this._webAppUrl}/auth/callback?error=google_auth_failed`);
+    } catch (err) {
+      if (inviteToken) {
+        if ((err as Error).message === 'GOOGLE_EMAIL_MISMATCH') {
+          res.redirect(`${this._webAppUrl}/register?invite=${encodeURIComponent(inviteToken)}&googleError=email_mismatch`);
+        } else {
+          res.redirect(`${this._webAppUrl}/register?googleError=invalid_invite`);
+        }
+      } else {
+        res.redirect(`${this._webAppUrl}/auth/callback?error=google_auth_failed`);
+      }
     }
   }
 

@@ -1,4 +1,4 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { compare, hash } from 'bcrypt';
 import { randomBytes } from 'crypto';
@@ -48,7 +48,7 @@ export class AuthService {
     const identity = await this._identityService.findByEmail(email);
     if (!identity) return null;
     if (!identity.passwordHash) {
-      throw new UnauthorizedException('This account uses Google login');
+      throw new ForbiddenException('This account uses Google login');
     }
     try {
       return await this._identityService.validateCredentials(email, password);

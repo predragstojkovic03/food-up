@@ -1,4 +1,4 @@
-import { UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Identity } from 'src/core/identity/domain/identity.entity';
 import { IdentityType } from '@food-up/shared';
@@ -33,11 +33,11 @@ describe('AuthService.validateLocalCredentials', () => {
     expect(result).toBeNull();
   });
 
-  it('throws UnauthorizedException for Google-only account (passwordHash null)', async () => {
+  it('throws ForbiddenException for Google-only account (passwordHash null)', async () => {
     const googleOnly = Identity.createWithGoogle('x@y.com', 'gid', IdentityType.Employee);
     mockIdentityService.findByEmail.mockResolvedValue(googleOnly);
     await expect(makeService().validateLocalCredentials('x@y.com', 'pass'))
-      .rejects.toThrow(new UnauthorizedException('This account uses Google login'));
+      .rejects.toThrow(ForbiddenException);
   });
 
   it('returns null when password is wrong', async () => {

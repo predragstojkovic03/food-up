@@ -19,6 +19,7 @@ import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/ui/password-input';
 import { useLogin } from '@/features/auth/application/use-login.hook';
 import { useAuthStore } from '@/features/auth/presentation/state/auth.store';
+import { HttpError } from '@/shared/infrastructure/http/http-error';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -94,7 +95,9 @@ export default function LoginPage() {
             />
             {login.isError && (
               <p className='text-destructive text-sm'>
-                {t('login.error')}
+                {login.error instanceof HttpError && login.error.status === 403
+                  ? t('login.googleOnlyAccount')
+                  : t('login.error')}
               </p>
             )}
             <Button type='submit' className='w-full' disabled={login.isPending}>
