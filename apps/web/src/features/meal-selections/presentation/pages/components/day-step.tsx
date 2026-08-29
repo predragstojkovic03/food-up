@@ -19,6 +19,7 @@ interface DayStepProps {
 
 const TYPE_ORDER: MealType[] = [
   MealType.Breakfast,
+  MealType.Bread,
   MealType.Soup,
   MealType.Lunch,
   MealType.Dinner,
