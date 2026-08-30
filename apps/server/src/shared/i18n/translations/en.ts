@@ -52,6 +52,7 @@ export default {
       date: 'Date',
       qty: 'Qty',
       soup: 'Soup',
+      salad: 'Salad',
       bread: 'Bread',
       dessert: 'Dessert',
     },

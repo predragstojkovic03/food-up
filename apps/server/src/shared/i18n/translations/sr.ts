@@ -59,6 +59,7 @@ const sr: StringValues<typeof en> = {
       date: 'Datum',
       qty: 'Kol.',
       soup: 'Čorba',
+      salad: 'Salata',
       bread: 'Hleb',
       dessert: 'Desert',
     },

@@ -258,7 +258,7 @@ export class ReportsService {
         attachments: [getLogoAttachment()],
       });
 
-      const send = OrderSummarySend.create(windowId, supplierId, managerIdentityId, subject, html);
+      const send = OrderSummarySend.create(windowId, supplierId, managerEmployee.id, subject, html);
       await this._sendsRepository.insert(send);
 
       this._logger.log(
@@ -406,19 +406,21 @@ export class ReportsService {
     const NONE = '/';
     const YES = t((k) => k.excel.daySheet.yes, lang);
     const NO = t((k) => k.excel.daySheet.no, lang);
-    const MAIN_TYPES = new Set(['lunch', 'dinner', 'breakfast', 'salad']);
+    const MAIN_TYPES = new Set(['lunch', 'dinner', 'breakfast']);
 
     // Pivot rows per employee: one row per person with typed columns
-    const byEmployee = new Map<string, { soup: string; meal: string; bread: string; dessert: string }>();
+    const byEmployee = new Map<string, { soup: string; meal: string; salad: string; bread: string; dessert: string }>();
     for (const row of rows) {
       if (!byEmployee.has(row.employeeName)) {
-        byEmployee.set(row.employeeName, { soup: NONE, meal: NONE, bread: NO, dessert: NONE });
+        byEmployee.set(row.employeeName, { soup: NONE, meal: NONE, salad: NONE, bread: NO, dessert: NONE });
       }
       const pivot = byEmployee.get(row.employeeName)!;
       if (row.mealType === 'soup') {
         pivot.soup = row.mealName;
       } else if (MAIN_TYPES.has(row.mealType)) {
         pivot.meal = pivot.meal === NONE ? row.mealName : `${pivot.meal}, ${row.mealName}`;
+      } else if (row.mealType === 'salad') {
+        pivot.salad = row.mealName;
       } else if (row.mealType === 'bread') {
         pivot.bread = YES;
       } else if (row.mealType === 'dessert') {
@@ -430,13 +432,14 @@ export class ReportsService {
       { header: t((k) => k.excel.columns.employeeName, lang), key: 'employee', width: 28 },
       { header: t((k) => k.excel.columns.soup, lang),         key: 'soup',     width: 28 },
       { header: t((k) => k.excel.columns.meal, lang),         key: 'meal',     width: 32 },
+      { header: t((k) => k.excel.columns.salad, lang),        key: 'salad',    width: 28 },
       { header: t((k) => k.excel.columns.bread, lang),        key: 'bread',    width: 12 },
       { header: t((k) => k.excel.columns.dessert, lang),      key: 'dessert',  width: 24 },
     ];
 
     const headerRow = sheet.getRow(1);
     headerRow.height = 24;
-    for (let i = 1; i <= 5; i++) {
+    for (let i = 1; i <= 6; i++) {
       const cell = headerRow.getCell(i);
       cell.font = { name: 'Calibri', bold: true, size: 11, color: { argb: 'FFFFFFFF' } };
       cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2D6A4F' } };
@@ -450,17 +453,18 @@ export class ReportsService {
         employee: employeeName,
         soup: pivot.soup,
         meal: pivot.meal,
+        salad: pivot.salad,
         bread: pivot.bread,
         dessert: pivot.dessert,
       });
       const stripeBg = rowIndex % 2 === 1 ? 'FFEDF7F2' : 'FFFFFFFF';
-      for (let i = 1; i <= 5; i++) {
+      for (let i = 1; i <= 6; i++) {
         const cell = dataRow.getCell(i);
         cell.font = { name: 'Calibri' };
         cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: stripeBg } };
         cell.border = { bottom: { style: 'thin', color: { argb: 'FFD4E8DC' } } };
       }
-      dataRow.getCell(4).alignment = { horizontal: 'center' };
+      dataRow.getCell(5).alignment = { horizontal: 'center' };
     });
   }
 
