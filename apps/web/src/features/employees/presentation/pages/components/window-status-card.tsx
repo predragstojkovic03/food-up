@@ -46,16 +46,6 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { CreateChangeRequestDrawer } from './create-change-request-drawer';
 
-const TYPE_LABELS: Record<MealType, string> = {
-  [MealType.Breakfast]: 'Breakfast',
-  [MealType.Bread]: 'Bread',
-  [MealType.Soup]: 'Soup',
-  [MealType.Lunch]: 'Main',
-  [MealType.Dinner]: 'Dinner',
-  [MealType.Salad]: 'Salad',
-  [MealType.Dessert]: 'Dessert',
-};
-
 const TYPE_ORDER: MealType[] = [
   MealType.Breakfast,
   MealType.Soup,
@@ -63,6 +53,7 @@ const TYPE_ORDER: MealType[] = [
   MealType.Dinner,
   MealType.Salad,
   MealType.Dessert,
+  MealType.Bread,
 ];
 
 const STATUS_VARIANTS: Record<
@@ -265,7 +256,7 @@ export function WindowStatusCard({
                                 className='flex items-center gap-2 text-sm'
                               >
                                 <span className='text-xs text-muted-foreground w-16 shrink-0'>
-                                  {TYPE_LABELS[type]}
+                                  {t(`mealTypes.${type}`)}
                                 </span>
                                 <span className='flex-1 min-w-0 truncate'>
                                   {sel.meal!.name}

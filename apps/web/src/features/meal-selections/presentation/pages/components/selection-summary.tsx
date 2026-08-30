@@ -5,16 +5,6 @@ import { CheckCircle2, Pencil } from 'lucide-react';
 import { DaySelection, MenuItemOption } from '../types';
 import { useTranslation } from 'react-i18next';
 
-const TYPE_LABELS: Record<MealType, string> = {
-  [MealType.Soup]: 'Soup',
-  [MealType.Lunch]: 'Main',
-  [MealType.Salad]: 'Salad',
-  [MealType.Breakfast]: 'Breakfast',
-  [MealType.Dinner]: 'Dinner',
-  [MealType.Dessert]: 'Dessert',
-  [MealType.Bread]: 'Bread',
-};
-
 const TYPE_ORDER: MealType[] = [
   MealType.Breakfast,
   MealType.Soup,
@@ -49,6 +39,7 @@ export function SelectionSummary({
   isSubmitting,
 }: SelectionSummaryProps) {
   const { t } = useTranslation('meals');
+  const { t: tEmp } = useTranslation('employees');
   const itemMap = new Map(allItems.map((i) => [i.id, i]));
 
   return (
@@ -85,7 +76,7 @@ export function SelectionSummary({
                   return (
                     <div key={type} className="flex items-center justify-between gap-2 text-sm">
                       <span className="text-xs text-muted-foreground w-16 shrink-0">
-                        {TYPE_LABELS[type]}
+                        {tEmp(`mealTypes.${type}`)}
                       </span>
                       <span className="flex-1 min-w-0 truncate">{item?.name ?? '—'}</span>
                     </div>

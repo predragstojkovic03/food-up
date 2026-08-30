@@ -1,16 +1,7 @@
 import { MealType } from '@food-up/shared';
+import { useTranslation } from 'react-i18next';
 import { MenuItemOption } from '../types';
 import { MealCard } from './meal-card';
-
-const TYPE_LABELS: Record<MealType, string> = {
-  [MealType.Soup]: 'Soup',
-  [MealType.Lunch]: 'Main',
-  [MealType.Salad]: 'Salad',
-  [MealType.Breakfast]: 'Breakfast',
-  [MealType.Dinner]: 'Dinner',
-  [MealType.Dessert]: 'Dessert',
-  [MealType.Bread]: 'Bread',
-};
 
 interface MealTypeGroupProps {
   type: MealType;
@@ -20,10 +11,11 @@ interface MealTypeGroupProps {
 }
 
 export function MealTypeGroup({ type, items, selectedId, onSelect }: MealTypeGroupProps) {
+  const { t } = useTranslation('employees');
   return (
     <div className="space-y-2">
       <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground px-1">
-        {TYPE_LABELS[type]}
+        {t(`mealTypes.${type}`)}
       </h3>
       <div className="space-y-2">
         {items.map((item) => (
