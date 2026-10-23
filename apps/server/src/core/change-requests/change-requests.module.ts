@@ -8,6 +8,7 @@ import {
 import { EmployeesModule } from '../employees/employees.module';
 import { MealSelectionWindowsModule } from '../meal-selection-windows/meal-selection-windows.module';
 import { MealSelectionsModule } from '../meal-selections/meal-selections.module';
+import { MealsModule } from '../meals/meals.module';
 import { MenuItemsModule } from '../menu-items/menu-items.module';
 import { ChangeRequestsService } from './application/change-requests.service';
 import { I_CHANGE_REQUESTS_QUERY_REPOSITORY } from './application/queries/change-requests-query-repository.interface';
@@ -26,6 +27,7 @@ const ChangeRequestsQueryRepositoryProvider: Provider = {
   imports: [
     MealSelectionsModule,
     MenuItemsModule,
+    MealsModule,
     EmployeesModule,
     MealSelectionWindowsModule,
     BullModule.registerQueue(

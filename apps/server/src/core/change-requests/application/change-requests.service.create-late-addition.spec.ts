@@ -43,6 +43,7 @@ describe('ChangeRequestsService.create() — late addition', () => {
       mockRepository,
       mockMealSelectionsService,
       mockMenuItemsService,
+      { findOne: jest.fn() } as any,
       mockEmployeesService,
       mockWindowsService,
       { log: jest.fn() } as any,

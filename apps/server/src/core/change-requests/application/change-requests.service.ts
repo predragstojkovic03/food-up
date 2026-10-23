@@ -3,7 +3,10 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { MealSelectionWindowsService } from 'src/core/meal-selection-windows/application/meal-selection-windows.service';
 import { MealSelectionsService } from 'src/core/meal-selections/application/meal-selections.service';
+import { MealSelection } from 'src/core/meal-selections/domain/meal-selection.entity';
+import { MealsService } from 'src/core/meals/application/meals.service';
 import { MenuItemsService } from 'src/core/menu-items/application/menu-items.service';
+import { MenuItem } from 'src/core/menu-items/domain/menu-item.entity';
 import { DomainEvents } from 'src/shared/application/domain-events/domain-events.decorator';
 import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
 import {
@@ -29,6 +32,7 @@ export class ChangeRequestsService {
     private readonly _repository: IChangeRequestsRepository,
     private readonly _mealSelectionsService: MealSelectionsService,
     private readonly _menuItemsService: MenuItemsService,
+    private readonly _mealsService: MealsService,
     private readonly _employeesService: EmployeesService,
     private readonly _mealSelectionWindowsService: MealSelectionWindowsService,
     @Inject(I_LOGGER) private readonly _logger: ILogger,
@@ -53,6 +57,10 @@ export class ChangeRequestsService {
         'Cannot create a change request for a meal selection window that has not passed its deadline.',
       );
     }
+
+    const newMenuItem = dto.newMenuItemId
+      ? await this._menuItemsService.findOne(dto.newMenuItemId)
+      : null;
 
     if (dto.mealSelectionId) {
       const mealSelection = await this._mealSelectionsService.findOne(
@@ -80,6 +88,10 @@ export class ChangeRequestsService {
           'Change request is identical to the current meal selection.',
         );
       }
+
+      if (newMenuItem) {
+        await this._assertSameMealSlot(mealSelection, newMenuItem);
+      }
     } else {
       if (!dto.newMenuItemId || dto.newQuantity == null) {
         throw new InvalidInputDataException(
@@ -99,9 +111,7 @@ export class ChangeRequestsService {
       }
     }
 
-    if (dto.newMenuItemId) {
-      const newMenuItem = await this._menuItemsService.findOne(dto.newMenuItemId);
-
+    if (newMenuItem) {
       if (!mealSelectionWindow.menuPeriodIds.includes(newMenuItem.menuPeriodId)) {
         throw new InvalidInputDataException(
           `New menu item with ID ${dto.newMenuItemId} does not belong to any of the menu periods associated with meal selection window ${mealSelectionWindow.id}`,
@@ -158,6 +168,13 @@ export class ChangeRequestsService {
         throw new InvalidInputDataException(
           `New menu item with ID ${dto.newMenuItemId} does not belong to any of the menu periods associated with meal selection window ${changeRequest.mealSelectionWindowId}`,
         );
+      }
+
+      if (changeRequest.mealSelectionId) {
+        const mealSelection = await this._mealSelectionsService.findOne(
+          changeRequest.mealSelectionId,
+        );
+        await this._assertSameMealSlot(mealSelection, newMenuItem);
       }
     }
 
@@ -271,5 +288,34 @@ export class ChangeRequestsService {
   async delete(id: string): Promise<void> {
     await this._repository.delete(id);
     this._logger.log(`Change request deleted: id=${id}`, ChangeRequestsService.name);
+  }
+
+  /** A swap must stay on the same day and meal type as the selection it replaces */
+  private async _assertSameMealSlot(
+    mealSelection: MealSelection,
+    newMenuItem: MenuItem,
+  ): Promise<void> {
+    if (newMenuItem.day !== mealSelection.date) {
+      throw new InvalidInputDataException(
+        'New menu item must be for the same day as the meal selection being changed.',
+      );
+    }
+
+    if (!mealSelection.menuItemId) return;
+
+    const originalMenuItem = await this._menuItemsService.findOne(
+      mealSelection.menuItemId,
+    );
+    if (originalMenuItem.mealId === newMenuItem.mealId) return;
+
+    const [originalMeal, newMeal] = await Promise.all([
+      this._mealsService.findOne(originalMenuItem.mealId),
+      this._mealsService.findOne(newMenuItem.mealId),
+    ]);
+    if (originalMeal.type !== newMeal.type) {
+      throw new InvalidInputDataException(
+        'New menu item must be of the same meal type as the meal selection being changed.',
+      );
+    }
   }
 }

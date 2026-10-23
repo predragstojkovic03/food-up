@@ -36,6 +36,7 @@ describe('ChangeRequestsService.revoke', () => {
       mockRepository as any,
       null as any,
       null as any,
+      null as any,
       mockEmployeesService as any,
       null as any,
       { log: jest.fn() } as any,
