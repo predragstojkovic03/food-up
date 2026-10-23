@@ -3,7 +3,6 @@ import {
   ExecutionContext,
   ForbiddenException,
   Injectable,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
@@ -14,10 +13,11 @@ export class IdentityTypeGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const requiredTypes = this.reflector.get<string[]>(
-      IDENTITY_TYPE_KEY,
+    // Method-level metadata overrides class-level metadata
+    const requiredTypes = this.reflector.getAllAndOverride<string[]>(IDENTITY_TYPE_KEY, [
       context.getHandler(),
-    );
+      context.getClass(),
+    ]);
     if (!requiredTypes) return true;
 
     const request = context.switchToHttp().getRequest();
@@ -28,7 +28,7 @@ export class IdentityTypeGuard implements CanActivate {
     }
 
     if (!requiredTypes.includes(user.type)) {
-      throw new UnauthorizedException('Access denied for identity type');
+      throw new ForbiddenException('Access denied for identity type');
     }
 
     return true;
