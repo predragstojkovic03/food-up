@@ -58,19 +58,6 @@ export class MealSelectionWindowsController {
     return this.toResponseDto(result);
   }
 
-  @Get()
-  @ApiOperation({ summary: 'Get all meal selection windows' })
-  @ApiResponse({
-    status: 200,
-    description: 'List of meal selection windows',
-    type: [MealSelectionWindowResponseDto],
-  })
-  @ApiBearerAuth()
-  async findAll(): Promise<MealSelectionWindowResponseDto[]> {
-    const result = await this._mealSelectionWindowService.findAll();
-    return result.map((e) => this.toResponseDto(e));
-  }
-
   @RequiredIdentityType(IdentityType.Employee)
   @RequiredEmployeeRole(EmployeeRole.Manager)
   @ApiBearerAuth()
@@ -116,27 +103,13 @@ export class MealSelectionWindowsController {
   @Get(':id/menu-items')
   @ApiOperation({ summary: 'Get enriched menu items for a meal selection window' })
   @ApiResponse({ status: 200, type: [WindowMenuItemResponseDto] })
+  @ApiResponse({ status: 404, description: "Window not found in the employee's business" })
   async getMenuItems(
     @Param('id') id: string,
+    @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<WindowMenuItemResponseDto[]> {
-    const menuItems = await this._mealSelectionWindowService.findMenuItemsForWindow(id);
+    const menuItems = await this._mealSelectionWindowService.findMenuItemsForWindow(id, sub);
     return plainToInstance(WindowMenuItemResponseDto, menuItems);
-  }
-
-  @Get(':id')
-  @ApiOperation({ summary: 'Get a meal selection window by ID' })
-  @ApiResponse({
-    status: 200,
-    description: 'Meal selection window found',
-    type: MealSelectionWindowResponseDto,
-  })
-  @ApiResponse({ status: 404, description: 'Meal selection window not found' })
-  @ApiBearerAuth()
-  async findOne(
-    @Param('id') id: string,
-  ): Promise<MealSelectionWindowResponseDto> {
-    const result = await this._mealSelectionWindowService.findOne(id);
-    return this.toResponseDto(result);
   }
 
   @Patch(':id')
@@ -146,23 +119,31 @@ export class MealSelectionWindowsController {
     description: 'Meal selection window updated',
     type: MealSelectionWindowResponseDto,
   })
-  @ApiResponse({ status: 404, description: 'Meal selection window not found' })
+  @ApiResponse({ status: 404, description: "Window not found in the manager's business" })
+  @RequiredIdentityType(IdentityType.Employee)
+  @RequiredEmployeeRole(EmployeeRole.Manager)
   @ApiBearerAuth()
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateMealSelectionWindowDto,
+    @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<MealSelectionWindowResponseDto> {
-    const result = await this._mealSelectionWindowService.update(id, dto);
+    const result = await this._mealSelectionWindowService.update(id, dto, sub);
     return this.toResponseDto(result);
   }
 
   @ApiOperation({ summary: 'Delete a meal selection window' })
   @ApiResponse({ status: 200, description: 'Meal selection window deleted' })
-  @ApiResponse({ status: 404, description: 'Meal selection window not found' })
+  @ApiResponse({ status: 404, description: "Window not found in the manager's business" })
+  @RequiredIdentityType(IdentityType.Employee)
+  @RequiredEmployeeRole(EmployeeRole.Manager)
   @ApiBearerAuth()
   @Delete(':id')
-  async delete(@Param('id') id: string): Promise<void> {
-    return this._mealSelectionWindowService.delete(id);
+  async delete(
+    @Param('id') id: string,
+    @CurrentIdentity() { sub }: JwtPayload,
+  ): Promise<void> {
+    return this._mealSelectionWindowService.delete(id, sub);
   }
 
   private toRelevantResponseDto(

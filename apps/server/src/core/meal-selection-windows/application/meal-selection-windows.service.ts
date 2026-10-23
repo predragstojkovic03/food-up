@@ -3,8 +3,10 @@ import { EmployeesService } from 'src/core/employees/application/employees.servi
 import { MenuItemsService } from 'src/core/menu-items/application/menu-items.service';
 import { MenuItemWithMealDto } from 'src/core/menu-items/application/queries/dto/find-menu-items-with-meals.dto';
 import { MenuPeriodsService } from 'src/core/menu-periods/application/menu-periods.service';
+import { SuppliersService } from 'src/core/suppliers/application/suppliers.service';
 import { DomainEvents } from 'src/shared/application/domain-events/domain-events.decorator';
 import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
+import { EntityInstanceNotFoundException } from 'src/shared/domain/exceptions/entity-instance-not-found.exception';
 import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
 import { MealSelectionWindow } from '../domain/meal-selection-window.entity';
 import {
@@ -54,6 +56,7 @@ export class MealSelectionWindowsService {
     private readonly _repository: IMealSelectionWindowsRepository,
     private readonly _menuPeriodsService: MenuPeriodsService,
     private readonly _employeesService: EmployeesService,
+    private readonly _suppliersService: SuppliersService,
     @Inject(forwardRef(() => MenuItemsService))
     private readonly _menuItemsService: MenuItemsService,
     @Inject(I_LOGGER) private readonly _logger: ILogger,
@@ -68,6 +71,7 @@ export class MealSelectionWindowsService {
     await this._validateMenuPeriodsForTargetDates(
       dto.menuPeriodIds,
       dto.targetDates,
+      identityId,
     );
 
     const window = MealSelectionWindow.create(
@@ -86,10 +90,6 @@ export class MealSelectionWindowsService {
     return result;
   }
 
-  async findAll(): Promise<MealSelectionWindow[]> {
-    return this._repository.findAll();
-  }
-
   async findByMyBusiness(identityId: string): Promise<MealSelectionWindow[]> {
     const employee = await this._employeesService.findByIdentity(identityId);
     return this._repository.findAllByBusiness(employee.businessId);
@@ -99,12 +99,32 @@ export class MealSelectionWindowsService {
     return this._repository.findOneByCriteriaOrThrow({ id });
   }
 
+  /**
+   * Loads a window of the requesting employee's business.
+   * Windows of other businesses respond as not found so their IDs aren't confirmed to exist.
+   */
+  async findOneInMyBusiness(id: string, identityId: string): Promise<MealSelectionWindow> {
+    const [employee, window] = await Promise.all([
+      this._employeesService.findByIdentity(identityId),
+      this._repository.findOneByCriteriaOrThrow({ id }),
+    ]);
+    if (window.businessId !== employee.businessId) {
+      this._logger.warn(
+        `Cross-business window access denied: windowId=${id} identityId=${identityId}`,
+        MealSelectionWindowsService.name,
+      );
+      throw new EntityInstanceNotFoundException(`Meal selection window ${id} not found`);
+    }
+    return window;
+  }
+
   @DomainEvents
   async update(
     id: string,
     dto: UpdateMealSelectionWindowDto,
+    identityId: string,
   ): Promise<MealSelectionWindow> {
-    const existing = await this._repository.findOneByCriteriaOrThrow({ id });
+    const existing = await this.findOneInMyBusiness(id, identityId);
 
     if (dto.menuPeriodIds || dto.targetDates) {
       const effectiveMenuPeriodIds =
@@ -114,6 +134,7 @@ export class MealSelectionWindowsService {
       await this._validateMenuPeriodsForTargetDates(
         effectiveMenuPeriodIds,
         effectiveTargetDates,
+        identityId,
       );
     }
 
@@ -138,10 +159,9 @@ export class MealSelectionWindowsService {
 
   async findMenuItemsForWindow(
     windowId: string,
+    identityId: string,
   ): Promise<MenuItemWithMealDto[]> {
-    const window = await this._repository.findOneByCriteriaOrThrow({
-      id: windowId,
-    });
+    const window = await this.findOneInMyBusiness(windowId, identityId);
     return this._menuItemsService.findWithMealsByMenuPeriods(
       window.menuPeriodIds,
     );
@@ -183,7 +203,8 @@ export class MealSelectionWindowsService {
     };
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string, identityId: string): Promise<void> {
+    await this.findOneInMyBusiness(id, identityId);
     await this._repository.delete(id);
     this._logger.log(
       `Meal selection window deleted: id=${id}`,
@@ -198,9 +219,26 @@ export class MealSelectionWindowsService {
   private async _validateMenuPeriodsForTargetDates(
     menuPeriodIds: string[],
     targetDates: string[],
+    identityId: string,
   ): Promise<void> {
-    const menuPeriods =
-      await this._menuPeriodsService.findBulkByIds(menuPeriodIds);
+    const [menuPeriods, managedSuppliers, partnerSuppliers] = await Promise.all([
+      this._menuPeriodsService.findBulkByIds(menuPeriodIds),
+      this._suppliersService.findManagedByBusiness(identityId),
+      this._suppliersService.findPartnersByBusiness(identityId),
+    ]);
+
+    // Windows may only use menus of suppliers the business manages or partners with
+    const allowedSupplierIds = new Set(
+      [...managedSuppliers, ...partnerSuppliers].map((s) => s.id),
+    );
+    const foreignPeriodIds = menuPeriods
+      .filter((mp) => !allowedSupplierIds.has(mp.supplierId))
+      .map((mp) => mp.id);
+    if (foreignPeriodIds.length > 0) {
+      throw new InvalidInputDataException(
+        `Menu periods belong to suppliers not available to this business: ${foreignPeriodIds.join(', ')}`,
+      );
+    }
 
     for (const date of targetDates) {
       const covered = menuPeriods.some(

@@ -8,6 +8,7 @@ import {
 import { EmployeesModule } from '../employees/employees.module';
 import { MenuItemsModule } from '../menu-items/menu-items.module';
 import { MenuPeriodsModule } from '../menu-periods/menu-periods.module';
+import { SuppliersModule } from '../suppliers/suppliers.module';
 import { MealSelectionWindowsService } from './application/meal-selection-windows.service';
 import { MealSelectionWindowEventHandler } from './infrastructure/meal-selection-window-event-handler.service';
 import { MealSelectionWindowsRepositoryProvider } from './infrastructure/meal-selection-windows.providers';
@@ -17,6 +18,7 @@ import { MealSelectionWindowsController } from './presentation/rest/meal-selecti
   imports: [
     MenuPeriodsModule,
     EmployeesModule,
+    SuppliersModule,
     forwardRef(() => MenuItemsModule),
     BullModule.registerQueue(
       { name: MEAL_WINDOW_QUEUE, telemetry: bullmqTelemetry },
