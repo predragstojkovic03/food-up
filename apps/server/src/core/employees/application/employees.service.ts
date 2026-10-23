@@ -7,6 +7,7 @@ import {
   I_TRANSACTION_RUNNER,
   ITransactionRunner,
 } from 'src/shared/application/transaction.runner';
+import { EntityInstanceNotFoundException } from 'src/shared/domain/exceptions/entity-instance-not-found.exception';
 import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
 import { Employee } from '../domain/employee.entity';
 import {
@@ -198,7 +199,50 @@ export class EmployeesService {
     };
   }
 
-  async update(id: string, dto: UpdateEmployeeDto): Promise<EmployeeView> {
+  /** Lists employees of the requesting manager's business; other businesses respond as not found. */
+  async findAllInManagerBusiness(
+    businessId: string,
+    managerIdentityId: string,
+  ): Promise<EmployeeView[]> {
+    const manager = await this.findByIdentity(managerIdentityId);
+    if (manager.businessId !== businessId) {
+      throw new EntityInstanceNotFoundException(`Business ${businessId} not found`);
+    }
+    return this.findAllByBusinessEnriched(businessId);
+  }
+
+  async updateInManagerBusiness(
+    id: string,
+    dto: UpdateEmployeeDto,
+    managerIdentityId: string,
+  ): Promise<EmployeeView> {
+    await this._findInManagerBusiness(id, managerIdentityId);
+    return this._update(id, dto);
+  }
+
+  async deleteInManagerBusiness(id: string, managerIdentityId: string): Promise<void> {
+    await this._findInManagerBusiness(id, managerIdentityId);
+    await this._repository.delete(id);
+    this._logger.log(`Employee deleted: id=${id}`, EmployeesService.name);
+  }
+
+  /** Loads an employee of the manager's business; employees of other businesses respond as not found. */
+  private async _findInManagerBusiness(id: string, managerIdentityId: string): Promise<Employee> {
+    const [manager, employee] = await Promise.all([
+      this.findByIdentity(managerIdentityId),
+      this.findOne(id),
+    ]);
+    if (employee.businessId !== manager.businessId) {
+      this._logger.warn(
+        `Cross-business employee access denied: employeeId=${id} identityId=${managerIdentityId}`,
+        EmployeesService.name,
+      );
+      throw new EntityInstanceNotFoundException(`Employee ${id} not found`);
+    }
+    return employee;
+  }
+
+  private async _update(id: string, dto: UpdateEmployeeDto): Promise<EmployeeView> {
     const employee = await this.findOne(id);
 
     if (dto.name !== undefined) {
@@ -223,11 +267,6 @@ export class EmployeesService {
 
   async updateSelf(identityId: string, name: string): Promise<EmployeeView> {
     const employee = await this.findByIdentity(identityId);
-    return this.update(employee.id, { name });
-  }
-
-  async delete(id: string): Promise<void> {
-    await this._repository.delete(id);
-    this._logger.log(`Employee deleted: id=${id}`, EmployeesService.name);
+    return this._update(employee.id, { name });
   }
 }
