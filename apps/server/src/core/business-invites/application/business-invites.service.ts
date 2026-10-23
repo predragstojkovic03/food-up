@@ -51,8 +51,12 @@ export class BusinessInvitesService {
     return invite;
   }
 
-  async resend(inviteId: string, language: Language): Promise<BusinessInvite> {
+  async resend(inviteId: string, businessId: string, language: Language): Promise<BusinessInvite> {
     const invite = await this._repository.findOneByCriteriaOrThrow({ id: inviteId } as Partial<BusinessInvite>);
+
+    if (invite.businessId !== businessId) {
+      throw new EntityInstanceNotFoundException(`Invite ${inviteId} not found`);
+    }
 
     if (!invite.isActive) {
       throw new InvalidOperationException('Invite is no longer active.');

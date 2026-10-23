@@ -22,6 +22,7 @@ import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
 import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { RequiredEmployeeRole } from 'src/core/employees/presentation/rest/employee-role.decorator';
 import { RequiredIdentityType } from 'src/core/identity/presentation/rest/identity-type.decorator';
+import { EntityInstanceNotFoundException } from 'src/shared/domain/exceptions/entity-instance-not-found.exception';
 import { BusinessInvite } from '../../../business-invites/domain/business-invite.entity';
 import { BusinessInvitesService } from '../../../business-invites/application/business-invites.service';
 import { BusinessesService } from '../../application/businesses.service';
@@ -52,15 +53,6 @@ export class BusinessesController {
     return plainToInstance(BusinessResponseDto, business);
   }
 
-  @Get()
-  @ApiOperation({ summary: 'Get all businesses' })
-  @ApiResponse({ status: 200, type: [BusinessResponseDto] })
-  @ApiBearerAuth()
-  async findAll(): Promise<BusinessResponseDto[]> {
-    const businesses = await this._businessesService.findAll();
-    return plainToInstance(BusinessResponseDto, businesses);
-  }
-
   @SerializeOptions({ strategy: 'exposeAll' })
   @Get('invites/validate')
   @ApiOperation({
@@ -80,12 +72,15 @@ export class BusinessesController {
   @Get(':id/invites')
   @ApiOperation({ summary: 'List active (unused, non-expired) invites for a business' })
   @ApiResponse({ status: 200, type: [BusinessInviteResponseDto] })
+  @ApiResponse({ status: 404, description: "Business is not the manager's own business" })
   @RequiredIdentityType(IdentityType.Employee)
   @RequiredEmployeeRole(EmployeeRole.Manager)
   @ApiBearerAuth()
   async listInvites(
     @Param('id') businessId: string,
+    @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<BusinessInviteResponseDto[]> {
+    await this._assertManagesBusiness(businessId, sub);
     const invites = await this._businessInvitesService.findActiveByBusiness(businessId);
     return plainToInstance(BusinessInviteResponseDto, invites.map(this._toInviteDto));
   }
@@ -93,13 +88,16 @@ export class BusinessesController {
   @Post(':id/invites')
   @ApiOperation({ summary: 'Create an employee invite for a business' })
   @ApiResponse({ status: 201, type: BusinessInviteResponseDto })
+  @ApiResponse({ status: 404, description: "Business is not the manager's own business" })
   @RequiredIdentityType(IdentityType.Employee)
   @RequiredEmployeeRole(EmployeeRole.Manager)
   @ApiBearerAuth()
   async createInvite(
     @Param('id') businessId: string,
     @Body() body: CreateBusinessInviteRequestDto,
+    @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<BusinessInviteResponseDto> {
+    await this._assertManagesBusiness(businessId, sub);
     const business = await this._businessesService.findOne(businessId);
     const invite = await this._businessInvitesService.create(businessId, body.email, business.language);
     return plainToInstance(BusinessInviteResponseDto, this._toInviteDto(invite));
@@ -108,15 +106,18 @@ export class BusinessesController {
   @Post(':id/invites/:inviteId/resend')
   @ApiOperation({ summary: 'Resend the invite email for an existing active invite' })
   @ApiResponse({ status: 200, type: BusinessInviteResponseDto })
+  @ApiResponse({ status: 404, description: "Business is not the manager's own business" })
   @RequiredIdentityType(IdentityType.Employee)
   @RequiredEmployeeRole(EmployeeRole.Manager)
   @ApiBearerAuth()
   async resendInvite(
     @Param('id') businessId: string,
     @Param('inviteId') inviteId: string,
+    @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<BusinessInviteResponseDto> {
+    await this._assertManagesBusiness(businessId, sub);
     const business = await this._businessesService.findOne(businessId);
-    const invite = await this._businessInvitesService.resend(inviteId, business.language);
+    const invite = await this._businessInvitesService.resend(inviteId, businessId, business.language);
     return plainToInstance(BusinessInviteResponseDto, this._toInviteDto(invite));
   }
 
@@ -145,6 +146,14 @@ export class BusinessesController {
     const employee = await this._employeesService.findByIdentity(sub);
     const business = await this._businessesService.updateSettings(employee.businessId, dto);
     return plainToInstance(BusinessResponseDto, business, { excludeExtraneousValues: true });
+  }
+
+  /** Managers may only act on their own business; other businesses respond as not found. */
+  private async _assertManagesBusiness(businessId: string, identityId: string): Promise<void> {
+    const employee = await this._employeesService.findByIdentity(identityId);
+    if (employee.businessId !== businessId) {
+      throw new EntityInstanceNotFoundException(`Business ${businessId} not found`);
+    }
   }
 
   private _toInviteDto(invite: BusinessInvite): object {

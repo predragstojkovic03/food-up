@@ -31,10 +31,6 @@ export class BusinessesService {
     return result;
   }
 
-  async findAll(): Promise<Business[]> {
-    return this._repository.findAll();
-  }
-
   findOne(businessId: string): Promise<Business> {
     return this._repository.findOneByCriteriaOrThrow({ id: businessId });
   }
