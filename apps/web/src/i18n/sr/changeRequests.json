@@ -2,18 +2,36 @@
   "title": "Zahtevi za promenu",
   "subtitle": "Prikaz zahteva za trenutni prozor izbora",
   "subtitleNoWindow": "Nema aktivnog prozora izbora",
-  "selectedCount": "izabrano",
-  "table": {
-    "employeeHeader": "Zaposleni",
-    "dateHeader": "Datum",
-    "changeHeader": "Promena",
-    "statusHeader": "Status",
-    "empty": "Nema zahteva za promenu za ovaj prozor."
+  "tabs": {
+    "pending": "Na čekanju ({{count}})",
+    "handled": "Obrađeni ({{count}})"
+  },
+  "changesCount_one": "{{count}} promena",
+  "changesCount_few": "{{count}} promene",
+  "changesCount_other": "{{count}} promena",
+  "change": {
+    "removed": "Uklonjeno",
+    "added": "(dodato)"
   },
   "actions": {
     "approve": "Odobri",
-    "reject": "Odbij"
+    "reject": "Odbij",
+    "approveAll": "Odobri sve",
+    "rejectAll": "Odbij sve",
+    "approveDay": "Odobri dan",
+    "rejectDay": "Odbij dan"
   },
+  "confirmRejectDay": {
+    "title": "Odbiti sve zahteve za {{date}}?",
+    "body_one": "{{count}} zahtev za promenu na čekanju biće odbijen. Zaposleni će biti obavešteni putem e-pošte.",
+    "body_few": "{{count}} zahteva za promenu na čekanju biće odbijena. Zaposleni će biti obavešteni putem e-pošte.",
+    "body_other": "{{count}} zahteva za promenu na čekanju biće odbijeno. Zaposleni će biti obavešteni putem e-pošte.",
+    "cancel": "Otkaži",
+    "confirm": "Odbij sve"
+  },
+  "emptyPending": "Nema zahteva na čekanju. Sve je obrađeno.",
+  "emptyHandled": "Još nema obrađenih zahteva.",
+  "unknownDate": "Nepoznat datum",
   "noWindow": "Trenutno nema dostupnog prozora za izbor obroka.",
   "noSelection": "Bez izbora"
 }

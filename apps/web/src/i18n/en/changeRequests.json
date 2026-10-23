@@ -2,18 +2,34 @@
   "title": "Change Requests",
   "subtitle": "Showing requests for the current selection window",
   "subtitleNoWindow": "No active selection window",
-  "selectedCount": "selected",
-  "table": {
-    "employeeHeader": "Employee",
-    "dateHeader": "Date",
-    "changeHeader": "Change",
-    "statusHeader": "Status",
-    "empty": "No change requests for this window."
+  "tabs": {
+    "pending": "Pending ({{count}})",
+    "handled": "Handled ({{count}})"
+  },
+  "changesCount_one": "{{count}} change",
+  "changesCount_other": "{{count}} changes",
+  "change": {
+    "removed": "Removed",
+    "added": "(added)"
   },
   "actions": {
     "approve": "Approve",
-    "reject": "Reject"
+    "reject": "Reject",
+    "approveAll": "Approve all",
+    "rejectAll": "Reject all",
+    "approveDay": "Approve day",
+    "rejectDay": "Reject day"
   },
+  "confirmRejectDay": {
+    "title": "Reject all requests for {{date}}?",
+    "body_one": "{{count}} pending change request will be rejected. Employees will be notified by email.",
+    "body_other": "{{count}} pending change requests will be rejected. Employees will be notified by email.",
+    "cancel": "Cancel",
+    "confirm": "Reject all"
+  },
+  "emptyPending": "No pending change requests. You're all caught up.",
+  "emptyHandled": "No handled change requests yet.",
+  "unknownDate": "Unknown date",
   "noWindow": "No meal selection window available right now.",
   "noSelection": "No selection"
 }
