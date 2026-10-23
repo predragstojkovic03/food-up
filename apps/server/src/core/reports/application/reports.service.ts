@@ -97,12 +97,10 @@ export class ReportsService {
     return this._queryRepository.getByWindow(windowId);
   }
 
-  async generateXlsx(
-    windowId: string,
-    language: Language,
-  ): Promise<{ buffer: Buffer; filename: string }> {
+  async generateXlsx(windowId: string): Promise<{ buffer: Buffer; filename: string }> {
     const window = await this._windowsService.findOne(windowId);
     const business = await this._businessesService.findOne(window.businessId);
+    const language = business.language;
 
     const includeAllEmployees = business.reportIncludeEmployeesWithoutSelection;
     const [rows, employeeRows, employeesWithoutSelection, skippedEmployees] = await Promise.all([

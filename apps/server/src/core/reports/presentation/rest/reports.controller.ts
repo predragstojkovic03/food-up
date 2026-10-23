@@ -12,7 +12,6 @@ import { CurrentIdentity } from 'src/core/auth/infrastructure/current-identity.d
 import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
 import { RequiredEmployeeRole } from 'src/core/employees/presentation/rest/employee-role.decorator';
 import { RequiredIdentityType } from 'src/core/identity/presentation/rest/identity-type.decorator';
-import { UserPreferencesService } from 'src/core/user-preferences/application/user-preferences.service';
 import { ReportsService } from '../../application/reports.service';
 import { MailPreviewResponseDto } from './dto/mail-preview-response.dto';
 import { OrderSummarySendResponseDto } from './dto/order-summary-send-response.dto';
@@ -26,21 +25,14 @@ import { WindowCostSummaryResponseDto } from './dto/window-cost-summary-response
 @RequiredIdentityType(IdentityType.Employee)
 @RequiredEmployeeRole(EmployeeRole.Manager)
 export class ReportsController {
-  constructor(
-    private readonly _reportsService: ReportsService,
-    private readonly _preferencesService: UserPreferencesService,
-  ) {}
+  constructor(private readonly _reportsService: ReportsService) {}
 
   @Get('export')
   @ApiOperation({ summary: 'Download XLSX order summary for a meal selection window' })
   @ApiQuery({ name: 'windowId', required: true, type: String })
   @ApiResponse({ status: 200, description: 'XLSX file download' })
-  async exportXlsx(
-    @Query('windowId') windowId: string,
-    @CurrentIdentity() { sub }: JwtPayload,
-  ): Promise<StreamableFile> {
-    const prefs = await this._preferencesService.getOrCreate(sub);
-    const { buffer, filename } = await this._reportsService.generateXlsx(windowId, prefs.language);
+  async exportXlsx(@Query('windowId') windowId: string): Promise<StreamableFile> {
+    const { buffer, filename } = await this._reportsService.generateXlsx(windowId);
     return new StreamableFile(buffer, {
       disposition: `attachment; filename="${filename}"`,
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

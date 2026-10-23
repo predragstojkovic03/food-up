@@ -7,7 +7,6 @@ import { EmployeesModule } from '../employees/employees.module';
 import { IdentityModule } from '../identity/identity.module';
 import { MealSelectionWindowsModule } from '../meal-selection-windows/meal-selection-windows.module';
 import { SuppliersModule } from '../suppliers/suppliers.module';
-import { UserPreferencesModule } from '../user-preferences/user-preferences.module';
 import { I_ORDER_SUMMARY_QUERY_REPOSITORY } from './application/queries/order-summary-query-repository.interface';
 import { ReportsService } from './application/reports.service';
 import { I_ORDER_SUMMARY_SENDS_REPOSITORY } from './domain/order-summary-sends.repository.interface';
@@ -26,7 +25,7 @@ const OrderSummarySendsRepositoryProvider: Provider = {
 };
 
 @Module({
-  imports: [MailModule, SuppliersModule, IdentityModule, ChangeRequestsModule, EmployeesModule, BusinessSuppliersModule, UserPreferencesModule, MealSelectionWindowsModule, BusinessesModule],
+  imports: [MailModule, SuppliersModule, IdentityModule, ChangeRequestsModule, EmployeesModule, BusinessSuppliersModule, MealSelectionWindowsModule, BusinessesModule],
   controllers: [ReportsController],
   providers: [
     OrderSummaryQueryRepositoryProvider,
