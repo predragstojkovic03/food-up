@@ -104,11 +104,15 @@ export class ReportsService {
     const window = await this._windowsService.findOne(windowId);
     const business = await this._businessesService.findOne(window.businessId);
 
-    const [rows, employeeRows, employeesWithoutSelection] = await Promise.all([
+    const includeAllEmployees = business.reportIncludeEmployeesWithoutSelection;
+    const [rows, employeeRows, employeesWithoutSelection, skippedEmployees] = await Promise.all([
       this._queryRepository.getByWindow(windowId),
       this._queryRepository.getEmployeeSelections(windowId),
-      business.reportIncludeEmployeesWithoutSelection
+      includeAllEmployees
         ? this._queryRepository.getEmployeesWithoutSelection(windowId)
+        : Promise.resolve([]),
+      includeAllEmployees
+        ? this._queryRepository.getSkippedEmployees(windowId)
         : Promise.resolve([]),
     ]);
 
@@ -126,10 +130,19 @@ export class ReportsService {
 
     const dateGroups = this._groupEmployeesByDate(employeeRows);
     const missingByDate = this._groupEmployeesByDate(employeesWithoutSelection);
-    const sheetDates = [...new Set([...dateGroups.keys(), ...missingByDate.keys()])].sort();
+    const skippedByDate = this._groupEmployeesByDate(skippedEmployees);
+    const sheetDates = [
+      ...new Set([...dateGroups.keys(), ...missingByDate.keys(), ...skippedByDate.keys()]),
+    ].sort();
     for (const date of sheetDates) {
-      const missingNames = (missingByDate.get(date) ?? []).map((r) => r.employeeName);
-      this._buildDaySheet(workbook, date, dateGroups.get(date) ?? [], missingNames, language);
+      this._buildDaySheet(
+        workbook,
+        date,
+        dateGroups.get(date) ?? [],
+        (skippedByDate.get(date) ?? []).map((r) => r.employeeName),
+        (missingByDate.get(date) ?? []).map((r) => r.employeeName),
+        language,
+      );
     }
 
     const buffer = Buffer.from(await workbook.xlsx.writeBuffer());
@@ -408,6 +421,7 @@ export class ReportsService {
     workbook: ExcelJS.Workbook,
     date: string,
     rows: EmployeeDaySelectionRow[],
+    skippedEmployees: string[],
     employeesWithoutSelection: string[],
     lang: Language,
   ): void {
@@ -418,6 +432,7 @@ export class ReportsService {
     const NONE = '/';
     const YES = t((k) => k.excel.daySheet.yes, lang);
     const NO = t((k) => k.excel.daySheet.no, lang);
+    const SKIPPED = t((k) => k.excel.daySheet.skipped, lang);
     const MAIN_TYPES = new Set(['lunch', 'dinner', 'breakfast']);
 
     // Pivot rows per employee: one row per person with typed columns
@@ -459,22 +474,35 @@ export class ReportsService {
       cell.border = { bottom: { style: 'medium', color: { argb: 'FF1E4E38' } } };
     }
 
-    // Employees without any selection for the day get an empty, pastel-red row
-    const entries: { employeeName: string; pivot: DayPivot | null }[] = [
+    // Skipped employees get a grey row; employees with no selection at all get an empty, pastel-red row.
+    // Anyone who still has a meal for the day (e.g. via an approved change request) keeps their normal row.
+    const EMPTY_PIVOT: DayPivot = { soup: '', meal: '', salad: '', bread: '', dessert: '' };
+    const entries: { employeeName: string; pivot: DayPivot; bg?: string }[] = [
       ...[...byEmployee.entries()].map(([employeeName, pivot]) => ({ employeeName, pivot })),
-      ...employeesWithoutSelection.map((employeeName) => ({ employeeName, pivot: null })),
+      ...[...new Set(skippedEmployees)]
+        .filter((employeeName) => !byEmployee.has(employeeName))
+        .map((employeeName) => ({
+          employeeName,
+          pivot: { ...EMPTY_PIVOT, meal: SKIPPED },
+          bg: 'FFEDEDED',
+        })),
+      ...employeesWithoutSelection.map((employeeName) => ({
+        employeeName,
+        pivot: EMPTY_PIVOT,
+        bg: 'FFF8D7DA',
+      })),
     ];
     entries.sort((a, b) => a.employeeName.localeCompare(b.employeeName));
-    entries.forEach(({ employeeName, pivot }, rowIndex) => {
+    entries.forEach(({ employeeName, pivot, bg }, rowIndex) => {
       const dataRow = sheet.addRow({
         employee: employeeName,
-        soup: pivot?.soup ?? '',
-        meal: pivot?.meal ?? '',
-        salad: pivot?.salad ?? '',
-        bread: pivot?.bread ?? '',
-        dessert: pivot?.dessert ?? '',
+        soup: pivot.soup,
+        meal: pivot.meal,
+        salad: pivot.salad,
+        bread: pivot.bread,
+        dessert: pivot.dessert,
       });
-      const stripeBg = pivot === null ? 'FFF8D7DA' : rowIndex % 2 === 1 ? 'FFEDF7F2' : 'FFFFFFFF';
+      const stripeBg = bg ?? (rowIndex % 2 === 1 ? 'FFEDF7F2' : 'FFFFFFFF');
       for (let i = 1; i <= 6; i++) {
         const cell = dataRow.getCell(i);
         cell.font = { name: 'Calibri' };

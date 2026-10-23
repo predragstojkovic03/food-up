@@ -135,6 +135,38 @@ export class OrderSummaryQueryTypeOrmRepository
     );
   }
 
+  async getSkippedEmployees(windowId: string): Promise<EmployeeWithoutSelectionRow[]> {
+    const manager = this._transactionContext.getManager();
+    return (manager ?? this._dataSource).query<EmployeeWithoutSelectionRow[]>(
+      `
+      SELECT DISTINCT to_char(ms.date, 'YYYY-MM-DD') AS "date", e.name AS "employeeName"
+      FROM meal_selection ms
+      INNER JOIN employee e ON e.id = ms.employee_id
+      WHERE ms.meal_selection_window_id = $1
+        AND (
+          (
+            ms.menu_item_id IS NULL
+            AND NOT EXISTS (
+              SELECT 1 FROM change_request cr
+              WHERE cr.meal_selection_id = ms.id
+                AND cr.status = $2
+                AND cr.clear_selection = false
+                AND cr.new_menu_item_id IS NOT NULL
+            )
+          )
+          OR EXISTS (
+            SELECT 1 FROM change_request cr
+            WHERE cr.meal_selection_id = ms.id
+              AND cr.status = $2
+              AND cr.clear_selection = true
+          )
+        )
+      ORDER BY "date", "employeeName"
+    `,
+      [windowId, ChangeRequestStatus.Approved],
+    );
+  }
+
   async getCostByWindow(windowId: string): Promise<CostByWindowRow[]> {
     const manager = this._transactionContext.getManager();
     const result = await (manager ?? this._dataSource).query<

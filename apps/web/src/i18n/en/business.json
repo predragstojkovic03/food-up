@@ -13,8 +13,8 @@
     },
     "excelReport": {
       "cardTitle": "Excel Report",
-      "includeEmployeesWithoutSelectionLabel": "Include employees who made no selection",
-      "includeEmployeesWithoutSelectionHint": "Day sheets in the Excel export will also list employees who did not choose a meal or skip that day. Their rows are highlighted in red."
+      "includeEmployeesWithoutSelectionLabel": "Include all employees in day sheets",
+      "includeEmployeesWithoutSelectionHint": "Day sheets in the Excel export will list every employee. Those who skipped the day are shown in grey, and those who made no selection at all are highlighted in red."
     }
   }
 }

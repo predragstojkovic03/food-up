@@ -59,6 +59,7 @@ export default {
     daySheet: {
       yes: 'Yes',
       no: 'No',
+      skipped: 'Skipped',
     },
     mealTypes: {
       breakfast: 'Breakfasts',

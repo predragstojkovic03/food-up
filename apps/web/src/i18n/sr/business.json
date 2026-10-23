@@ -13,8 +13,8 @@
     },
     "excelReport": {
       "cardTitle": "Excel izveštaj",
-      "includeEmployeesWithoutSelectionLabel": "Uključi zaposlene koji nisu napravili izbor",
-      "includeEmployeesWithoutSelectionHint": "Dnevni listovi u Excel izvozu će prikazati i zaposlene koji za taj dan nisu izabrali obrok niti ga preskočili. Njihovi redovi su označeni crvenom bojom."
+      "includeEmployeesWithoutSelectionLabel": "Uključi sve zaposlene u dnevne listove",
+      "includeEmployeesWithoutSelectionHint": "Dnevni listovi u Excel izvozu će prikazati sve zaposlene. Oni koji su preskočili dan prikazani su sivom bojom, a oni koji nisu napravili nikakav izbor označeni su crvenom."
     }
   }
 }

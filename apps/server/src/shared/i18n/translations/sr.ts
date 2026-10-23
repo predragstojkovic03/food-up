@@ -66,6 +66,7 @@ const sr: StringValues<typeof en> = {
     daySheet: {
       yes: 'Da',
       no: 'Ne',
+      skipped: 'Preskočeno',
     },
     mealTypes: {
       breakfast: 'Doručci',

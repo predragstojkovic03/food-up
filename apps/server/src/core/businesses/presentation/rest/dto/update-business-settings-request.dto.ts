@@ -10,7 +10,7 @@ export class UpdateBusinessSettingsRequestDto implements IUpdateBusinessSettings
 
   @ApiPropertyOptional({
     description:
-      'Include employees with no selection for a day (not even a skip) in XLSX day sheets',
+      'List every employee in XLSX day sheets: skipped days in grey, no selection at all in red',
   })
   @IsOptional()
   @IsBoolean()
