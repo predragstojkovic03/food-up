@@ -5,9 +5,16 @@
     "communicationLanguage": {
       "cardTitle": "Communication Language",
       "label": "Language for Excel exports",
-      "hint": "Column headers and labels in Excel exports use this language.",
+      "hint": "Column headers and labels in Excel exports use this language."
+    },
+    "feedback": {
       "success": "Business settings updated.",
       "error": "Failed to update. Please try again."
+    },
+    "excelReport": {
+      "cardTitle": "Excel Report",
+      "includeEmployeesWithoutSelectionLabel": "Include employees who made no selection",
+      "includeEmployeesWithoutSelectionHint": "Day sheets in the Excel export will also list employees who did not choose a meal or skip that day. Their rows are highlighted in red."
     }
   }
 }

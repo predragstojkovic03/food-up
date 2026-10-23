@@ -5,9 +5,16 @@
     "communicationLanguage": {
       "cardTitle": "Jezik komunikacije",
       "label": "Jezik za Excel izvoz",
-      "hint": "Zaglavlja kolona i oznake u Excel izvozu koriste ovaj jezik.",
+      "hint": "Zaglavlja kolona i oznake u Excel izvozu koriste ovaj jezik."
+    },
+    "feedback": {
       "success": "Podešavanja firme ažurirana.",
       "error": "Ažuriranje nije uspelo. Pokušajte ponovo."
+    },
+    "excelReport": {
+      "cardTitle": "Excel izveštaj",
+      "includeEmployeesWithoutSelectionLabel": "Uključi zaposlene koji nisu napravili izbor",
+      "includeEmployeesWithoutSelectionHint": "Dnevni listovi u Excel izvozu će prikazati i zaposlene koji za taj dan nisu izabrali obrok niti ga preskočili. Njihovi redovi su označeni crvenom bojom."
     }
   }
 }

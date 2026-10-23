@@ -12,7 +12,11 @@ import {
   CostByWindowRow,
   IOrderSummaryQueryRepository,
 } from '../../application/queries/order-summary-query-repository.interface';
-import { EmployeeDaySelectionRow, OrderSummaryRow } from '../../application/queries/dto/order-summary-row.dto';
+import {
+  EmployeeDaySelectionRow,
+  EmployeeWithoutSelectionRow,
+  OrderSummaryRow,
+} from '../../application/queries/dto/order-summary-row.dto';
 
 const MEAL_TYPE_ORDER: Record<string, number> = {
   breakfast: 0,
@@ -98,6 +102,37 @@ export class OrderSummaryQueryTypeOrmRepository
         if (a.date !== b.date) return a.date.localeCompare(b.date);
         return a.employeeName.localeCompare(b.employeeName);
       });
+  }
+
+  async getEmployeesWithoutSelection(windowId: string): Promise<EmployeeWithoutSelectionRow[]> {
+    const manager = this._transactionContext.getManager();
+    return (manager ?? this._dataSource).query<EmployeeWithoutSelectionRow[]>(
+      `
+      SELECT to_char(td.date, 'YYYY-MM-DD') AS "date", e.name AS "employeeName"
+      FROM meal_selection_window w
+      CROSS JOIN LATERAL unnest(w.target_dates) AS td(date)
+      INNER JOIN employee e ON e.business_id = w.business_id
+      INNER JOIN identity i ON i.id = e.identity_id AND i.is_active = true
+      WHERE w.id = $1
+        AND NOT EXISTS (
+          SELECT 1 FROM meal_selection ms
+          WHERE ms.meal_selection_window_id = w.id
+            AND ms.employee_id = e.id
+            AND ms.date = td.date
+        )
+        AND NOT EXISTS (
+          SELECT 1 FROM change_request cr
+          INNER JOIN menu_item mi ON mi.id = cr.new_menu_item_id
+          WHERE cr.meal_selection_window_id = w.id
+            AND cr.employee_id = e.id
+            AND cr.meal_selection_id IS NULL
+            AND cr.status = $2
+            AND mi.day = td.date
+        )
+      ORDER BY td.date, e.name
+    `,
+      [windowId, ChangeRequestStatus.Approved],
+    );
   }
 
   async getCostByWindow(windowId: string): Promise<CostByWindowRow[]> {

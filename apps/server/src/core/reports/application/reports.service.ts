@@ -38,6 +38,8 @@ export type SupplierSendStatus = {
   canSend: boolean;
 };
 
+type DayPivot = { soup: string; meal: string; salad: string; bread: string; dessert: string };
+
 const FUN_WORDS = [
   'mango',
   'delta',
@@ -99,9 +101,15 @@ export class ReportsService {
     windowId: string,
     language: Language,
   ): Promise<{ buffer: Buffer; filename: string }> {
-    const [rows, employeeRows] = await Promise.all([
+    const window = await this._windowsService.findOne(windowId);
+    const business = await this._businessesService.findOne(window.businessId);
+
+    const [rows, employeeRows, employeesWithoutSelection] = await Promise.all([
       this._queryRepository.getByWindow(windowId),
       this._queryRepository.getEmployeeSelections(windowId),
+      business.reportIncludeEmployeesWithoutSelection
+        ? this._queryRepository.getEmployeesWithoutSelection(windowId)
+        : Promise.resolve([]),
     ]);
 
     const workbook = new ExcelJS.Workbook();
@@ -117,8 +125,11 @@ export class ReportsService {
     }
 
     const dateGroups = this._groupEmployeesByDate(employeeRows);
-    for (const [date, dayRows] of dateGroups) {
-      this._buildDaySheet(workbook, date, dayRows, language);
+    const missingByDate = this._groupEmployeesByDate(employeesWithoutSelection);
+    const sheetDates = [...new Set([...dateGroups.keys(), ...missingByDate.keys()])].sort();
+    for (const date of sheetDates) {
+      const missingNames = (missingByDate.get(date) ?? []).map((r) => r.employeeName);
+      this._buildDaySheet(workbook, date, dateGroups.get(date) ?? [], missingNames, language);
     }
 
     const buffer = Buffer.from(await workbook.xlsx.writeBuffer());
@@ -397,6 +408,7 @@ export class ReportsService {
     workbook: ExcelJS.Workbook,
     date: string,
     rows: EmployeeDaySelectionRow[],
+    employeesWithoutSelection: string[],
     lang: Language,
   ): void {
     const sheetName = this._formatShortDayLabel(date, lang);
@@ -409,7 +421,7 @@ export class ReportsService {
     const MAIN_TYPES = new Set(['lunch', 'dinner', 'breakfast']);
 
     // Pivot rows per employee: one row per person with typed columns
-    const byEmployee = new Map<string, { soup: string; meal: string; salad: string; bread: string; dessert: string }>();
+    const byEmployee = new Map<string, DayPivot>();
     for (const row of rows) {
       if (!byEmployee.has(row.employeeName)) {
         byEmployee.set(row.employeeName, { soup: NONE, meal: NONE, salad: NONE, bread: NO, dessert: NONE });
@@ -447,17 +459,22 @@ export class ReportsService {
       cell.border = { bottom: { style: 'medium', color: { argb: 'FF1E4E38' } } };
     }
 
-    const sorted = [...byEmployee.entries()].sort(([a], [b]) => a.localeCompare(b));
-    sorted.forEach(([employeeName, pivot], rowIndex) => {
+    // Employees without any selection for the day get an empty, pastel-red row
+    const entries: { employeeName: string; pivot: DayPivot | null }[] = [
+      ...[...byEmployee.entries()].map(([employeeName, pivot]) => ({ employeeName, pivot })),
+      ...employeesWithoutSelection.map((employeeName) => ({ employeeName, pivot: null })),
+    ];
+    entries.sort((a, b) => a.employeeName.localeCompare(b.employeeName));
+    entries.forEach(({ employeeName, pivot }, rowIndex) => {
       const dataRow = sheet.addRow({
         employee: employeeName,
-        soup: pivot.soup,
-        meal: pivot.meal,
-        salad: pivot.salad,
-        bread: pivot.bread,
-        dessert: pivot.dessert,
+        soup: pivot?.soup ?? '',
+        meal: pivot?.meal ?? '',
+        salad: pivot?.salad ?? '',
+        bread: pivot?.bread ?? '',
+        dessert: pivot?.dessert ?? '',
       });
-      const stripeBg = rowIndex % 2 === 1 ? 'FFEDF7F2' : 'FFFFFFFF';
+      const stripeBg = pivot === null ? 'FFF8D7DA' : rowIndex % 2 === 1 ? 'FFEDF7F2' : 'FFFFFFFF';
       for (let i = 1; i <= 6; i++) {
         const cell = dataRow.getCell(i);
         cell.font = { name: 'Calibri' };
@@ -500,10 +517,8 @@ export class ReportsService {
     return byDate;
   }
 
-  private _groupEmployeesByDate(
-    rows: EmployeeDaySelectionRow[],
-  ): Map<string, EmployeeDaySelectionRow[]> {
-    const map = new Map<string, EmployeeDaySelectionRow[]>();
+  private _groupEmployeesByDate<T extends { date: string }>(rows: T[]): Map<string, T[]> {
+    const map = new Map<string, T[]>();
     for (const row of rows) {
       const existing = map.get(row.date);
       if (existing) {

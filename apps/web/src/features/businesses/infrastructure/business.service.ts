@@ -1,5 +1,5 @@
 import { HttpClient } from '@/shared/infrastructure/http/http-client';
-import { IUpdateBusinessLanguage } from '@food-up/shared';
+import { IUpdateBusinessSettings } from '@food-up/shared';
 import {
   IBusinessOption,
   IBusinessService,
@@ -17,7 +17,7 @@ export class BusinessService implements IBusinessService {
     return this.http.get<IMyBusiness>('/api/businesses/my');
   }
 
-  updateLanguage(data: IUpdateBusinessLanguage): Promise<void> {
-    return this.http.patch<IUpdateBusinessLanguage, void>('/api/businesses/my', data);
+  updateSettings(data: IUpdateBusinessSettings): Promise<void> {
+    return this.http.patch<IUpdateBusinessSettings, void>('/api/businesses/my', data);
   }
 }

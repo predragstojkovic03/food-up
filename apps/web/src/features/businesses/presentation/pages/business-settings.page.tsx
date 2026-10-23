@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -9,7 +10,7 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { useServices } from '@/shared/infrastructure/di/service.context';
-import { Language } from '@food-up/shared';
+import { IUpdateBusinessSettings, Language } from '@food-up/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -23,28 +24,41 @@ export default function BusinessSettingsPage() {
   const { t } = useTranslation('business');
   const { businessService } = useServices();
   const queryClient = useQueryClient();
-  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [feedback, setFeedback] = useState<{
+    setting: keyof IUpdateBusinessSettings;
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
 
   const { data: myBusiness } = useQuery({
     queryKey: ['businesses', 'my'],
     queryFn: () => businessService.getMy(),
   });
 
-  const mutation = useMutation<void, Error, Language>({
-    mutationFn: (newLanguage) =>
-      businessService.updateLanguage({ language: newLanguage }),
-    onSuccess: () => {
+  const mutation = useMutation<void, Error, IUpdateBusinessSettings>({
+    mutationFn: (settings) => businessService.updateSettings(settings),
+    onSuccess: (_, settings) => {
       queryClient.invalidateQueries({ queryKey: ['businesses', 'my'] });
-      setFeedback({ type: 'success', message: t('settings.communicationLanguage.success') });
+      setFeedback({ setting: settingKey(settings), type: 'success', message: t('settings.feedback.success') });
     },
-    onError: () => {
-      setFeedback({ type: 'error', message: t('settings.communicationLanguage.error') });
+    onError: (_, settings) => {
+      setFeedback({ setting: settingKey(settings), type: 'error', message: t('settings.feedback.error') });
     },
   });
 
-  const language = mutation.isPending
-    ? mutation.variables
-    : (myBusiness?.language ?? Language.En);
+  function updateSetting(settings: IUpdateBusinessSettings) {
+    setFeedback(null);
+    mutation.mutate(settings);
+  }
+
+  const language =
+    (mutation.isPending ? mutation.variables?.language : undefined) ??
+    myBusiness?.language ??
+    Language.En;
+  const includeEmployeesWithoutSelection =
+    (mutation.isPending ? mutation.variables?.reportIncludeEmployeesWithoutSelection : undefined) ??
+    myBusiness?.reportIncludeEmployeesWithoutSelection ??
+    false;
 
   return (
     <div className='max-w-2xl space-y-6'>
@@ -65,10 +79,7 @@ export default function BusinessSettingsPage() {
             <Label>{t('settings.communicationLanguage.label')}</Label>
             <Select
               value={language}
-              onValueChange={(v) => {
-                setFeedback(null);
-                mutation.mutate(v as Language);
-              }}
+              onValueChange={(v) => updateSetting({ language: v as Language })}
               disabled={mutation.isPending}
             >
               <SelectTrigger className='w-full'>
@@ -90,19 +101,60 @@ export default function BusinessSettingsPage() {
               {t('settings.communicationLanguage.hint')}
             </p>
           </div>
-          {feedback && (
-            <p
-              className={
-                feedback.type === 'success'
-                  ? 'text-sm text-success'
-                  : 'text-sm text-destructive'
+          <SettingFeedback feedback={feedback?.setting === 'language' ? feedback : null} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className='px-6 pt-5 pb-0'>
+          <CardTitle className='text-base'>{t('settings.excelReport.cardTitle')}</CardTitle>
+        </CardHeader>
+        <Separator className='mt-4' />
+        <CardContent className='px-6 pt-4 pb-5 space-y-4'>
+          <div className='flex items-start gap-3'>
+            <Checkbox
+              id='report-include-employees-without-selection'
+              checked={includeEmployeesWithoutSelection}
+              onCheckedChange={(checked) =>
+                updateSetting({ reportIncludeEmployeesWithoutSelection: checked === true })
               }
-            >
-              {feedback.message}
-            </p>
-          )}
+              disabled={mutation.isPending}
+              className='mt-0.5'
+            />
+            <div>
+              <Label
+                htmlFor='report-include-employees-without-selection'
+                className='font-normal cursor-pointer'
+              >
+                {t('settings.excelReport.includeEmployeesWithoutSelectionLabel')}
+              </Label>
+              <p className='text-xs text-muted-foreground mt-0.5'>
+                {t('settings.excelReport.includeEmployeesWithoutSelectionHint')}
+              </p>
+            </div>
+          </div>
+          <SettingFeedback
+            feedback={feedback?.setting === 'reportIncludeEmployeesWithoutSelection' ? feedback : null}
+          />
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+function settingKey(settings: IUpdateBusinessSettings): keyof IUpdateBusinessSettings {
+  return settings.language !== undefined ? 'language' : 'reportIncludeEmployeesWithoutSelection';
+}
+
+interface SettingFeedbackProps {
+  feedback: { type: 'success' | 'error'; message: string } | null;
+}
+
+function SettingFeedback({ feedback }: SettingFeedbackProps) {
+  if (!feedback) return null;
+  return (
+    <p className={feedback.type === 'success' ? 'text-sm text-success' : 'text-sm text-destructive'}>
+      {feedback.message}
+    </p>
   );
 }

@@ -22,6 +22,9 @@ export class Business {
   @Column('enum', { enum: Language, default: Language.En })
   language: Language;
 
+  @Column('boolean', { default: false })
+  reportIncludeEmployeesWithoutSelection: boolean;
+
   @OneToMany(() => Employee, (employee) => employee.business, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',

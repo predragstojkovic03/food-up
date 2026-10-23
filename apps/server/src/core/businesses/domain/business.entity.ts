@@ -20,6 +20,7 @@ export class Business extends Entity {
     supplierIds: string[] = [],
     managedSupplierIds: string[] = [],
     language: Language = Language.En,
+    reportIncludeEmployeesWithoutSelection = false,
   ): Business {
     const b = new Business(
       id,
@@ -31,6 +32,7 @@ export class Business extends Entity {
       managedSupplierIds,
     );
     b.language = language;
+    b.reportIncludeEmployeesWithoutSelection = reportIncludeEmployeesWithoutSelection;
     return b;
   }
 
@@ -52,6 +54,7 @@ export class Business extends Entity {
     this.managedSupplierIds = managedSupplierIds;
     this.contactPhone = contactPhone;
     this.language = Language.En;
+    this.reportIncludeEmployeesWithoutSelection = false;
   }
 
   readonly id: string;
@@ -62,4 +65,5 @@ export class Business extends Entity {
   supplierIds: string[];
   managedSupplierIds: string[];
   language: Language;
+  reportIncludeEmployeesWithoutSelection: boolean;
 }

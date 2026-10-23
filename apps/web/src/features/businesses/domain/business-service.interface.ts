@@ -1,4 +1,4 @@
-import { IUpdateBusinessLanguage, Language } from '@food-up/shared';
+import { IUpdateBusinessSettings, Language } from '@food-up/shared';
 
 export interface IBusinessOption {
   id: string;
@@ -10,10 +10,11 @@ export interface IMyBusiness {
   name: string;
   contactEmail: string;
   language: Language;
+  reportIncludeEmployeesWithoutSelection: boolean;
 }
 
 export interface IBusinessService {
   findAll(): Promise<IBusinessOption[]>;
   getMy(): Promise<IMyBusiness>;
-  updateLanguage(data: IUpdateBusinessLanguage): Promise<void>;
+  updateSettings(data: IUpdateBusinessSettings): Promise<void>;
 }

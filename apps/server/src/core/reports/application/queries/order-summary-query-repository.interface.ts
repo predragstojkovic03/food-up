@@ -1,4 +1,8 @@
-import { EmployeeDaySelectionRow, OrderSummaryRow } from './dto/order-summary-row.dto';
+import {
+  EmployeeDaySelectionRow,
+  EmployeeWithoutSelectionRow,
+  OrderSummaryRow,
+} from './dto/order-summary-row.dto';
 
 export const I_ORDER_SUMMARY_QUERY_REPOSITORY = Symbol(
   'IOrderSummaryQueryRepository',
@@ -17,5 +21,7 @@ export interface IOrderSummaryQueryRepository {
     supplierId: string,
   ): Promise<OrderSummaryRow[]>;
   getEmployeeSelections(windowId: string): Promise<EmployeeDaySelectionRow[]>;
+  /** Active employees of the window's business with no selection record (not even a skip) for a target date */
+  getEmployeesWithoutSelection(windowId: string): Promise<EmployeeWithoutSelectionRow[]>;
   getCostByWindow(windowId: string): Promise<CostByWindowRow[]>;
 }

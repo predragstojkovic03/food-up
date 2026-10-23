@@ -1,5 +1,6 @@
 import { Language } from '../enums/language.enum';
 
-export interface IUpdateBusinessLanguage {
-  language: Language;
+export interface IUpdateBusinessSettings {
+  language?: Language;
+  reportIncludeEmployeesWithoutSelection?: boolean;
 }

@@ -7,4 +7,5 @@ export class BusinessResponseDto {
   @Expose() name: string;
   @Expose() contactEmail: string;
   @ApiProperty({ enum: Language }) @Expose() language: Language;
+  @ApiProperty() @Expose() reportIncludeEmployeesWithoutSelection: boolean;
 }

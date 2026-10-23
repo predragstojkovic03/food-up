@@ -29,7 +29,7 @@ import { BusinessInviteResponseDto } from './dto/business-invite-response.dto';
 import { BusinessResponseDto } from './dto/business-response.dto';
 import { CreateBusinessInviteRequestDto } from './dto/create-business-invite.dto';
 import { CreateBusinessRequestDto } from './dto/create-business.dto';
-import { UpdateBusinessLanguageRequestDto } from './dto/update-business-language-request.dto';
+import { UpdateBusinessSettingsRequestDto } from './dto/update-business-settings-request.dto';
 
 @ApiTags('Businesses')
 @Controller('businesses')
@@ -133,17 +133,17 @@ export class BusinessesController {
   }
 
   @Patch('my')
-  @ApiOperation({ summary: "Update the current manager's business language" })
+  @ApiOperation({ summary: "Update the current manager's business settings" })
   @ApiResponse({ status: 200, type: BusinessResponseDto })
   @RequiredIdentityType(IdentityType.Employee)
   @RequiredEmployeeRole(EmployeeRole.Manager)
   @ApiBearerAuth()
-  async updateMyLanguage(
-    @Body() dto: UpdateBusinessLanguageRequestDto,
+  async updateMySettings(
+    @Body() dto: UpdateBusinessSettingsRequestDto,
     @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<BusinessResponseDto> {
     const employee = await this._employeesService.findByIdentity(sub);
-    const business = await this._businessesService.updateLanguage(employee.businessId, dto.language);
+    const business = await this._businessesService.updateSettings(employee.businessId, dto);
     return plainToInstance(BusinessResponseDto, business, { excludeExtraneousValues: true });
   }
 
