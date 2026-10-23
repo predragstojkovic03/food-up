@@ -8,7 +8,11 @@ import { EmployeesService } from 'src/core/employees/application/employees.servi
 import { IdentityService } from 'src/core/identity/application/identity.service';
 import { MealSelectionWindowsService } from 'src/core/meal-selection-windows/application/meal-selection-windows.service';
 import { SuppliersService } from 'src/core/suppliers/application/suppliers.service';
+import { Employee } from 'src/core/employees/domain/employee.entity';
+import { MealSelectionWindow } from 'src/core/meal-selection-windows/domain/meal-selection-window.entity';
 import { DomainEvents } from 'src/shared/application/domain-events/domain-events.decorator';
+import { EntityInstanceNotFoundException } from 'src/shared/domain/exceptions/entity-instance-not-found.exception';
+import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
 import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
 import { I_CONFIG_SERVICE, IConfigService } from 'src/shared/application/config-service.interface';
 import { EnvironmentVariables } from 'src/env.validation';
@@ -97,8 +101,11 @@ export class ReportsService {
     return this._queryRepository.getByWindow(windowId);
   }
 
-  async generateXlsx(windowId: string): Promise<{ buffer: Buffer; filename: string }> {
-    const window = await this._windowsService.findOne(windowId);
+  async generateXlsx(
+    windowId: string,
+    managerIdentityId: string,
+  ): Promise<{ buffer: Buffer; filename: string }> {
+    const { window } = await this._getManagedWindow(windowId, managerIdentityId);
     const business = await this._businessesService.findOne(window.businessId);
     const language = business.language;
 
@@ -154,7 +161,8 @@ export class ReportsService {
     return { buffer, filename };
   }
 
-  async getSendStatus(windowId: string): Promise<SupplierSendStatus[]> {
+  async getSendStatus(windowId: string, managerIdentityId: string): Promise<SupplierSendStatus[]> {
+    await this._getManagedWindow(windowId, managerIdentityId);
     const rows = await this._queryRepository.getByWindow(windowId);
     const uniqueSupplierIds = [...new Set(rows.map((r) => r.supplierId))];
 
@@ -199,11 +207,9 @@ export class ReportsService {
     supplierId: string,
     managerIdentityId: string,
   ): Promise<{ subject: string; introText: string; html: string }> {
-    const [managerEmployee, supplier, window] = await Promise.all([
-      this._employeesService.findByIdentity(managerIdentityId),
-      this._suppliersService.findOne(supplierId),
-      this._windowsService.findOne(windowId),
-    ]);
+    const { window, managerEmployee } = await this._getManagedWindow(windowId, managerIdentityId);
+    await this._assertSuppliersInWindow(windowId, [supplierId]);
+    const supplier = await this._suppliersService.findOne(supplierId);
 
     const businessId = managerEmployee.businessId;
     const business = await this._businessesService.findOne(businessId);
@@ -245,10 +251,12 @@ export class ReportsService {
     suppliers: ISendReportItem[],
     managerIdentityId: string,
   ): Promise<void> {
-    const [identity, managerEmployee] = await Promise.all([
-      this._identityService.findById(managerIdentityId),
-      this._employeesService.findByIdentity(managerIdentityId),
-    ]);
+    const { managerEmployee } = await this._getManagedWindow(windowId, managerIdentityId);
+    await this._assertSuppliersInWindow(
+      windowId,
+      suppliers.map((s) => s.supplierId),
+    );
+    const identity = await this._identityService.findById(managerIdentityId);
     const managerEmail = identity?.email ?? null;
     const businessId = managerEmployee.businessId;
 
@@ -290,11 +298,13 @@ export class ReportsService {
     }
   }
 
-  async getCostSummary(windowId: string): Promise<IWindowCostSummary[]> {
+  async getCostSummary(windowId: string, managerIdentityId: string): Promise<IWindowCostSummary[]> {
+    await this._getManagedWindow(windowId, managerIdentityId);
     return this._queryRepository.getCostByWindow(windowId);
   }
 
-  async getAllSends(windowId: string): Promise<IOrderSummarySend[]> {
+  async getAllSends(windowId: string, managerIdentityId: string): Promise<IOrderSummarySend[]> {
+    await this._getManagedWindow(windowId, managerIdentityId);
     const sends = await this._sendsRepository.findAllByWindow(windowId);
     return Promise.all(
       sends.map(async (send) => {
@@ -309,6 +319,42 @@ export class ReportsService {
         };
       }),
     );
+  }
+
+  /**
+   * Loads the window and the requesting manager, and rejects windows that belong to another business.
+   * Responds as "not found" so other businesses' window IDs aren't confirmed to exist.
+   */
+  private async _getManagedWindow(
+    windowId: string,
+    managerIdentityId: string,
+  ): Promise<{ window: MealSelectionWindow; managerEmployee: Employee }> {
+    const [managerEmployee, window] = await Promise.all([
+      this._employeesService.findByIdentity(managerIdentityId),
+      this._windowsService.findOne(windowId),
+    ]);
+
+    if (window.businessId !== managerEmployee.businessId) {
+      this._logger.warn(
+        `Cross-business report access denied: windowId=${windowId} identityId=${managerIdentityId}`,
+        ReportsService.name,
+      );
+      throw new EntityInstanceNotFoundException(`Meal selection window ${windowId} not found`);
+    }
+
+    return { window, managerEmployee };
+  }
+
+  /** Only suppliers with orders in the window can be previewed or emailed. */
+  private async _assertSuppliersInWindow(windowId: string, supplierIds: string[]): Promise<void> {
+    const rows = await this._queryRepository.getByWindow(windowId);
+    const windowSupplierIds = new Set(rows.map((r) => r.supplierId));
+    const unknown = supplierIds.filter((id) => !windowSupplierIds.has(id));
+    if (unknown.length > 0) {
+      throw new InvalidInputDataException(
+        `Suppliers have no orders in meal selection window ${windowId}: ${unknown.join(', ')}`,
+      );
+    }
   }
 
   private _renderHtmlTable(

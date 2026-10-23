@@ -31,8 +31,12 @@ export class ReportsController {
   @ApiOperation({ summary: 'Download XLSX order summary for a meal selection window' })
   @ApiQuery({ name: 'windowId', required: true, type: String })
   @ApiResponse({ status: 200, description: 'XLSX file download' })
-  async exportXlsx(@Query('windowId') windowId: string): Promise<StreamableFile> {
-    const { buffer, filename } = await this._reportsService.generateXlsx(windowId);
+  @ApiResponse({ status: 404, description: "Window not found or belongs to another business" })
+  async exportXlsx(
+    @Query('windowId') windowId: string,
+    @CurrentIdentity() { sub }: JwtPayload,
+  ): Promise<StreamableFile> {
+    const { buffer, filename } = await this._reportsService.generateXlsx(windowId, sub);
     return new StreamableFile(buffer, {
       disposition: `attachment; filename="${filename}"`,
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -43,10 +47,12 @@ export class ReportsController {
   @ApiOperation({ summary: 'Get send status per supplier for a meal selection window' })
   @ApiQuery({ name: 'windowId', required: true, type: String })
   @ApiResponse({ status: 200, type: [SupplierSendStatusResponseDto] })
+  @ApiResponse({ status: 404, description: "Window not found or belongs to another business" })
   async getSendStatus(
     @Query('windowId') windowId: string,
+    @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<SupplierSendStatusResponseDto[]> {
-    const statuses = await this._reportsService.getSendStatus(windowId);
+    const statuses = await this._reportsService.getSendStatus(windowId, sub);
     return plainToInstance(SupplierSendStatusResponseDto, statuses, {
       strategy: 'excludeAll',
     });
@@ -57,6 +63,8 @@ export class ReportsController {
   @ApiQuery({ name: 'windowId', required: true, type: String })
   @ApiQuery({ name: 'supplierId', required: true, type: String })
   @ApiResponse({ status: 200, type: MailPreviewResponseDto })
+  @ApiResponse({ status: 400, description: 'Supplier has no orders in the window' })
+  @ApiResponse({ status: 404, description: "Window not found or belongs to another business" })
   async getPreview(
     @Query('windowId') windowId: string,
     @Query('supplierId') supplierId: string,
@@ -69,6 +77,8 @@ export class ReportsController {
   @Post('send')
   @ApiOperation({ summary: 'Send order summary email to selected suppliers' })
   @ApiResponse({ status: 201, description: 'Emails sent' })
+  @ApiResponse({ status: 400, description: 'A supplier has no orders in the window' })
+  @ApiResponse({ status: 404, description: "Window not found or belongs to another business" })
   async sendToSuppliers(
     @Body() dto: SendReportDto,
     @CurrentIdentity() { sub }: JwtPayload,
@@ -80,10 +90,12 @@ export class ReportsController {
   @ApiOperation({ summary: 'Get estimated cost breakdown by supplier for a meal selection window' })
   @ApiQuery({ name: 'windowId', required: true, type: String })
   @ApiResponse({ status: 200, type: [WindowCostSummaryResponseDto] })
+  @ApiResponse({ status: 404, description: "Window not found or belongs to another business" })
   async getCostSummary(
     @Query('windowId') windowId: string,
+    @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<WindowCostSummaryResponseDto[]> {
-    const rows = await this._reportsService.getCostSummary(windowId);
+    const rows = await this._reportsService.getCostSummary(windowId, sub);
     return plainToInstance(WindowCostSummaryResponseDto, rows, { strategy: 'excludeAll' });
   }
 
@@ -91,10 +103,12 @@ export class ReportsController {
   @ApiOperation({ summary: 'Get all sent order summaries for a meal selection window' })
   @ApiQuery({ name: 'windowId', required: true, type: String })
   @ApiResponse({ status: 200, type: [OrderSummarySendResponseDto] })
+  @ApiResponse({ status: 404, description: "Window not found or belongs to another business" })
   async getAllSends(
     @Query('windowId') windowId: string,
+    @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<OrderSummarySendResponseDto[]> {
-    const sends = await this._reportsService.getAllSends(windowId);
+    const sends = await this._reportsService.getAllSends(windowId, sub);
     return plainToInstance(OrderSummarySendResponseDto, sends, { strategy: 'excludeAll' });
   }
 }
