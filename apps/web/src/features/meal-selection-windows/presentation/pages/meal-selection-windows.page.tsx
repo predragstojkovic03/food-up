@@ -1350,66 +1350,6 @@ function CreateWindowPanel({
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className='space-y-5'>
-          {/* Menu Periods */}
-          <FormField
-            control={form.control}
-            name='menuPeriodIds'
-            render={() => {
-              // A period is compatible if it covers at least one target date.
-              // The backend enforces that all target dates are collectively covered.
-              const coversAnyTargetDate = (mp: IMenuPeriodResponse) =>
-                activeDates.some((date) => mp.startDate <= date && mp.endDate >= date);
-              const hasIncompatible =
-                activeDates.length > 0 && menuPeriods.some((mp) => !coversAnyTargetDate(mp));
-
-              return (
-                <FormItem>
-                  <FormLabel>{t('windows.createForm.menuPeriodsSection')}</FormLabel>
-                  {menuPeriods.length === 0 ? (
-                    <p className='text-sm text-muted-foreground'>
-                      {t('windows.createForm.menuPeriodsEmpty')}
-                    </p>
-                  ) : (
-                    <>
-                      <div className='flex flex-wrap gap-2'>
-                        {menuPeriods.map((mp) => {
-                          const selected = watchedMenuPeriodIds.includes(mp.id);
-                          const compatible = activeDates.length === 0 || coversAnyTargetDate(mp);
-                          return (
-                            <button
-                              key={mp.id}
-                              type='button'
-                              onClick={() => compatible ? toggleMenuPeriod(mp.id) : undefined}
-                              disabled={!compatible && !selected}
-                              className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
-                                selected && compatible
-                                  ? 'bg-primary text-primary-foreground border-primary'
-                                  : selected && !compatible
-                                    ? 'border-destructive text-destructive bg-destructive/10'
-                                    : compatible
-                                      ? 'bg-background text-foreground border-border hover:border-primary'
-                                      : 'opacity-40 cursor-not-allowed bg-background text-foreground border-border'
-                              }`}
-                            >
-                              {supplierNameById[mp.supplierId] ?? 'Supplier'} ·{' '}
-                              {formatDateWithWeekday(mp.startDate, locale)} – {formatDateWithWeekday(mp.endDate, locale)}
-                            </button>
-                          );
-                        })}
-                      </div>
-                      {hasIncompatible && (
-                        <p className='text-xs text-muted-foreground mt-1.5'>
-                          {t('windows.createForm.menuPeriodUnavailableHint')}
-                        </p>
-                      )}
-                    </>
-                  )}
-                  <FormMessage />
-                </FormItem>
-              );
-            }}
-          />
-
           {/* Start / End time */}
           <div className='grid grid-cols-2 gap-4'>
             <FormField
@@ -1501,6 +1441,82 @@ function CreateWindowPanel({
                 <FormMessage />
               </FormItem>
             )}
+          />
+
+          {/* Menu Periods */}
+          <FormField
+            control={form.control}
+            name='menuPeriodIds'
+            render={() => {
+              // Without target dates, show current and upcoming periods only.
+              // With target dates, show periods covering at least one of them —
+              // the backend enforces that all target dates are collectively covered.
+              // Selected periods stay visible so they can be deselected.
+              const today = dateToString(new Date());
+              const coversAnyTargetDate = (mp: IMenuPeriodResponse) =>
+                activeDates.some((date) => mp.startDate <= date && mp.endDate >= date);
+              const isRelevant = (mp: IMenuPeriodResponse) =>
+                activeDates.length > 0 ? coversAnyTargetDate(mp) : mp.endDate >= today;
+              const visiblePeriods = menuPeriods
+                .filter((mp) => isRelevant(mp) || watchedMenuPeriodIds.includes(mp.id))
+                .sort((a, b) =>
+                  a.startDate.localeCompare(b.startDate) ||
+                  (supplierNameById[a.supplierId] ?? '').localeCompare(supplierNameById[b.supplierId] ?? ''),
+                );
+              const hasSelectedIncompatible = visiblePeriods.some(
+                (mp) => watchedMenuPeriodIds.includes(mp.id) && !isRelevant(mp),
+              );
+
+              return (
+                <FormItem>
+                  <FormLabel>{t('windows.createForm.menuPeriodsSection')}</FormLabel>
+                  {visiblePeriods.length === 0 ? (
+                    <p className='text-sm text-muted-foreground'>
+                      {activeDates.length > 0
+                        ? t('windows.createForm.menuPeriodsNoneForDates')
+                        : t('windows.createForm.menuPeriodsEmpty')}
+                    </p>
+                  ) : (
+                    <>
+                      {activeDates.length === 0 && (
+                        <p className='text-xs text-muted-foreground mb-1.5'>
+                          {t('windows.createForm.menuPeriodsSelectDatesHint')}
+                        </p>
+                      )}
+                      <div className='flex flex-wrap gap-2'>
+                        {visiblePeriods.map((mp) => {
+                          const selected = watchedMenuPeriodIds.includes(mp.id);
+                          const relevant = isRelevant(mp);
+                          return (
+                            <button
+                              key={mp.id}
+                              type='button'
+                              onClick={() => toggleMenuPeriod(mp.id)}
+                              className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+                                selected && relevant
+                                  ? 'bg-primary text-primary-foreground border-primary'
+                                  : selected
+                                    ? 'border-destructive text-destructive bg-destructive/10'
+                                    : 'bg-background text-foreground border-border hover:border-primary'
+                              }`}
+                            >
+                              {supplierNameById[mp.supplierId] ?? 'Supplier'} ·{' '}
+                              {formatDateWithWeekday(mp.startDate, locale)} – {formatDateWithWeekday(mp.endDate, locale)}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {hasSelectedIncompatible && (
+                        <p className='text-xs text-destructive mt-1.5'>
+                          {t('windows.createForm.menuPeriodIncompatibleHint')}
+                        </p>
+                      )}
+                    </>
+                  )}
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
 
           {/* Notify on deadline */}
