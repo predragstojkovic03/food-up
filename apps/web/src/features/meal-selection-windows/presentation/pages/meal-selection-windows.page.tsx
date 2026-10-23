@@ -37,7 +37,6 @@ import { useServices } from '@/shared/infrastructure/di/service.context';
 import {
   IExtraQuantity,
   IMailPreview,
-  IMealSelectionResponse,
   IMealSelectionWindowResponse,
   IMenuPeriodResponse,
   IOrderSummarySend,
@@ -376,7 +375,7 @@ interface WindowDetailsProps {
 function WindowDetails({ windowId, endTime, targetDates }: WindowDetailsProps) {
   const { t, i18n } = useTranslation('meals');
   const locale = i18n.language === 'sr' ? 'sr-Latn-RS' : 'en-US';
-  const { mealSelectionWindowService, mealSelectionService, reportService } = useServices();
+  const { mealSelectionWindowService, reportService } = useServices();
   const isExpired = new Date(endTime) < new Date();
 
   const { data: menuItems = [], isLoading: loadingItems } = useQuery<IWindowMenuItemResponse[]>({
@@ -384,13 +383,10 @@ function WindowDetails({ windowId, endTime, targetDates }: WindowDetailsProps) {
     queryFn: () => mealSelectionWindowService.getMenuItems(windowId),
   });
 
-  const { data: selections = [], isLoading: loadingSelections } = useQuery<IMealSelectionResponse[]>({
-    queryKey: ['meal-selections', 'window', windowId],
-    queryFn: () => mealSelectionService.getByWindow(windowId),
-  });
+  // Effective selections (approved change requests applied) — also pre-fetches the daily order dialog
+  const { data: dailyOverview = [], isLoading: loadingSelections } = useWindowDailyOverview(windowId);
 
   const [openDate, setOpenDate] = useState<string | null>(null);
-  useWindowDailyOverview(windowId); // pre-fetch so Dialog opens instantly
 
   const openDateFormatted = openDate
     ? new Date(openDate + 'T00:00:00').toLocaleDateString(locale, {
@@ -407,10 +403,12 @@ function WindowDetails({ windowId, endTime, targetDates }: WindowDetailsProps) {
 
   const isLoading = loadingItems || loadingSelections;
 
-  const quantityByMenuItemId = selections.reduce<Record<string, number>>((acc, s) => {
-    if (s.menuItemId) acc[s.menuItemId] = (acc[s.menuItemId] ?? 0) + (s.quantity ?? 1);
-    return acc;
-  }, {});
+  const quantityByMenuItemId = dailyOverview
+    .flatMap((item) => item.meals)
+    .reduce<Record<string, number>>((acc, meal) => {
+      acc[meal.menuItemId] = (acc[meal.menuItemId] ?? 0) + meal.quantity;
+      return acc;
+    }, {});
 
   const itemsByDate = targetDates.reduce<Record<string, IWindowMenuItemResponse[]>>((acc, date) => {
     acc[date] = menuItems.filter((item) => item.day === date);

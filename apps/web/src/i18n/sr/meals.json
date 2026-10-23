@@ -118,7 +118,17 @@
         "statusOrdered": "Naručeno",
         "statusSkipped": "Preskočeno",
         "noMeals": "—",
-        "loadingError": "Nije moguće učitati pregled narudžbina."
+        "loadingError": "Nije moguće učitati pregled narudžbina.",
+        "changedBadge": "Promenjeno",
+        "removedBadge": "Uklonjeno",
+        "addedBadge": "Dodato",
+        "historyTitle": "Istorija izbora",
+        "historyOriginal": "Prvobitno: {{meal}}",
+        "historyNothing": "ništa",
+        "historySwap": "Promenjeno u {{meal}}",
+        "historyRemoval": "Uklonjeno",
+        "historyAddition": "Dodato: {{meal}}",
+        "historyApprovedAt": "odobreno {{date}}"
       },
       "sentHistory": {
         "title": "Istorija poslatih mejlova",

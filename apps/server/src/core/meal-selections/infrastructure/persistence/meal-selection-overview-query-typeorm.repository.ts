@@ -1,18 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { MealType } from '@food-up/shared';
+import { ChangeRequestStatus } from '@food-up/shared';
 import { DataSource } from 'typeorm';
 import { IMealSelectionOverviewQueryRepository } from '../../application/queries/meal-selection-overview-query-repository.interface';
 import { WindowDailyOverviewItemDto } from '../../application/queries/dto/window-daily-overview-item.dto';
-
-interface RawRow {
-  employeeId: string;
-  employeeName: string;
-  date: string;
-  mealSelectionId: string | null;
-  mealName: string | null;
-  mealType: string | null;
-}
+import {
+  buildDailyOverview,
+  DailyOverviewApprovedChangeRow,
+  DailyOverviewSelectionRow,
+} from './daily-overview.builder';
 
 @Injectable()
 export class MealSelectionOverviewQueryTypeOrmRepository
@@ -21,15 +17,26 @@ export class MealSelectionOverviewQueryTypeOrmRepository
   constructor(@InjectDataSource() private readonly _dataSource: DataSource) {}
 
   async getDailyOverview(windowId: string): Promise<WindowDailyOverviewItemDto[]> {
-    const rows: RawRow[] = await this._dataSource.query(
+    const [selectionRows, approvedChanges] = await Promise.all([
+      this._querySelections(windowId),
+      this._queryApprovedChanges(windowId),
+    ]);
+
+    return buildDailyOverview(selectionRows, approvedChanges);
+  }
+
+  private _querySelections(windowId: string): Promise<DailyOverviewSelectionRow[]> {
+    return this._dataSource.query(
       `
       SELECT
         e.id                   AS "employeeId",
         e.name                 AS "employeeName",
         dates.date::text       AS date,
         ms.id                  AS "mealSelectionId",
+        ms.menu_item_id        AS "menuItemId",
         meal.name              AS "mealName",
-        meal.type              AS "mealType"
+        meal.type              AS "mealType",
+        ms.quantity            AS quantity
       FROM employee e
       CROSS JOIN (
         SELECT UNNEST(w.target_dates) AS date
@@ -49,45 +56,30 @@ export class MealSelectionOverviewQueryTypeOrmRepository
       `,
       [windowId],
     );
-
-    return this._mapRows(rows);
   }
 
-  private _mapRows(rows: RawRow[]): WindowDailyOverviewItemDto[] {
-    const grouped = new Map<
-      string,
-      { employeeId: string; employeeName: string; date: string; rows: RawRow[] }
-    >();
-
-    for (const row of rows) {
-      const key = `${row.employeeId}::${row.date}`;
-      if (!grouped.has(key)) {
-        grouped.set(key, {
-          employeeId: row.employeeId,
-          employeeName: row.employeeName,
-          date: row.date,
-          rows: [],
-        });
-      }
-      grouped.get(key)!.rows.push(row);
-    }
-
-    return [...grouped.values()].map(({ employeeId, employeeName, date, rows: groupRows }) => {
-      const hasAnyRecord = groupRows.some((r) => r.mealSelectionId !== null);
-      const meals = groupRows
-        .filter((r) => r.mealName !== null)
-        .map((r) => ({ name: r.mealName!, type: r.mealType as MealType }));
-
-      let status: 'ordered' | 'skipped' | 'no_record';
-      if (!hasAnyRecord) {
-        status = 'no_record';
-      } else if (meals.length === 0) {
-        status = 'skipped';
-      } else {
-        status = 'ordered';
-      }
-
-      return { employeeId, employeeName, date, status, meals };
-    });
+  /** Approved change requests in approval order (ULID id as tiebreaker) */
+  private _queryApprovedChanges(windowId: string): Promise<DailyOverviewApprovedChangeRow[]> {
+    return this._dataSource.query(
+      `
+      SELECT
+        cr.employee_id         AS "employeeId",
+        cr.meal_selection_id   AS "mealSelectionId",
+        cr.clear_selection     AS "clearSelection",
+        cr.new_menu_item_id    AS "newMenuItemId",
+        meal.name              AS "newMealName",
+        meal.type              AS "newMealType",
+        mi.day::text           AS "newMenuItemDay",
+        cr.new_quantity        AS "newQuantity",
+        cr.approved_at         AS "approvedAt"
+      FROM change_request cr
+      LEFT JOIN menu_item mi ON mi.id = cr.new_menu_item_id
+      LEFT JOIN meal         ON meal.id = mi.meal_id
+      WHERE cr.meal_selection_window_id = $1
+        AND cr.status = $2
+      ORDER BY cr.approved_at ASC NULLS FIRST, cr.id ASC
+      `,
+      [windowId, ChangeRequestStatus.Approved],
+    );
   }
 }

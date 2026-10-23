@@ -5,8 +5,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useWindowDailyOverview } from '@/features/meal-selections/application/use-window-daily-overview.hook';
-import { IWindowDailyOverviewItem } from '@food-up/shared';
+import { IWindowDailyOverviewChange, IWindowDailyOverviewItem } from '@food-up/shared';
 import { MealType } from '@food-up/shared';
 import { useTranslation } from 'react-i18next';
 
@@ -116,9 +117,16 @@ function DailyOrderRow({
       <td className='px-3 py-2.5 font-medium'>{item.employeeName}</td>
       {availableMealTypes.map((type) => {
         const meal = item.meals.find((m) => m.type === type);
+        const changes = item.changes.filter((c) => c.type === type);
         return (
           <td key={type} className='px-3 py-2.5 text-muted-foreground'>
-            {meal ? meal.name : t('windows.detail.dailyOverview.noMeals')}
+            <div className='flex items-center gap-1.5'>
+              <span>
+                {meal ? meal.name : t('windows.detail.dailyOverview.noMeals')}
+                {meal && meal.quantity > 1 && <span className='ml-1'>×{meal.quantity}</span>}
+              </span>
+              {changes.length > 0 && <ChangeHistoryBadge changes={changes} />}
+            </div>
           </td>
         );
       })}
@@ -135,5 +143,61 @@ function DailyOrderRow({
         )}
       </td>
     </tr>
+  );
+}
+
+const CHANGE_BADGE_KEYS = {
+  swap: 'windows.detail.dailyOverview.changedBadge',
+  removal: 'windows.detail.dailyOverview.removedBadge',
+  addition: 'windows.detail.dailyOverview.addedBadge',
+} as const;
+
+function ChangeHistoryBadge({ changes }: { changes: IWindowDailyOverviewChange[] }) {
+  const { t, i18n } = useTranslation('meals');
+  const locale = i18n.language === 'sr' ? 'sr-Latn-RS' : 'en-US';
+  const latest = changes[changes.length - 1];
+
+  function describe(change: IWindowDailyOverviewChange): string {
+    if (change.kind === 'removal') return t('windows.detail.dailyOverview.historyRemoval');
+    if (change.kind === 'addition') return t('windows.detail.dailyOverview.historyAddition', { meal: change.to });
+    return t('windows.detail.dailyOverview.historySwap', { meal: change.to });
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={<Badge variant='outline' className='text-[10px] px-1.5 py-0 cursor-default border-primary/40 text-primary' />}
+      >
+        {t(CHANGE_BADGE_KEYS[latest.kind])}
+      </TooltipTrigger>
+      <TooltipContent className='max-w-xs'>
+        <p className='font-semibold mb-1'>{t('windows.detail.dailyOverview.historyTitle')}</p>
+        <ul className='space-y-0.5'>
+          <li>
+            {t('windows.detail.dailyOverview.historyOriginal', {
+              meal: changes[0].from ?? t('windows.detail.dailyOverview.historyNothing'),
+            })}
+          </li>
+          {changes.map((change, index) => (
+            <li key={index}>
+              → {describe(change)}
+              {change.approvedAt && (
+                <span className='opacity-70'>
+                  {' · '}
+                  {t('windows.detail.dailyOverview.historyApprovedAt', {
+                    date: new Date(change.approvedAt).toLocaleString(locale, {
+                      day: 'numeric',
+                      month: 'short',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    }),
+                  })}
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
+      </TooltipContent>
+    </Tooltip>
   );
 }

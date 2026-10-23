@@ -35,9 +35,21 @@ export interface IUpdateMealSelection {
   quantity?: number | null;
 }
 
+/** Effective meal for an employee on a day, with approved change requests applied */
 export interface IWindowDailyOverviewMeal {
+  menuItemId: string;
   name: string;
   type: MealType;
+  quantity: number;
+}
+
+/** One approved change request, in the order it was approved */
+export interface IWindowDailyOverviewChange {
+  type: MealType;
+  kind: 'swap' | 'removal' | 'addition';
+  from: string | null;
+  to: string | null;
+  approvedAt: string | null;
 }
 
 export interface IWindowDailyOverviewItem {
@@ -46,4 +58,5 @@ export interface IWindowDailyOverviewItem {
   date: string;
   status: 'ordered' | 'skipped' | 'no_record';
   meals: IWindowDailyOverviewMeal[];
+  changes: IWindowDailyOverviewChange[];
 }

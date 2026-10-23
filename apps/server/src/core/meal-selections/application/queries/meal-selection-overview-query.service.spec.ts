@@ -27,6 +27,7 @@ describe('MealSelectionOverviewQueryService', () => {
           date: '2026-05-26',
           status: 'ordered',
           meals: [],
+          changes: [],
         },
       ];
       mockRepository.getDailyOverview.mockResolvedValue(items);

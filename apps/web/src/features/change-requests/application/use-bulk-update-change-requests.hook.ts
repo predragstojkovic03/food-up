@@ -18,6 +18,7 @@ export function useBulkUpdateChangeRequests(windowId: string | undefined): BulkU
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['change-requests', 'window', windowId] });
       queryClient.invalidateQueries({ queryKey: ['change-requests', 'pending-count', windowId] });
+      queryClient.invalidateQueries({ queryKey: ['meal-selections', 'daily-overview', windowId] });
     },
   });
 

@@ -118,7 +118,17 @@
         "statusOrdered": "Ordered",
         "statusSkipped": "Skipped",
         "noMeals": "—",
-        "loadingError": "Failed to load order overview."
+        "loadingError": "Failed to load order overview.",
+        "changedBadge": "Changed",
+        "removedBadge": "Removed",
+        "addedBadge": "Added",
+        "historyTitle": "Selection history",
+        "historyOriginal": "Originally: {{meal}}",
+        "historyNothing": "nothing",
+        "historySwap": "Changed to {{meal}}",
+        "historyRemoval": "Removed",
+        "historyAddition": "Added {{meal}}",
+        "historyApprovedAt": "approved {{date}}"
       },
       "sentHistory": {
         "title": "Sent emails history",
