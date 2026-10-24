@@ -30,6 +30,13 @@ export class ExtraQuantitiesTypeOrmRepository implements IExtraQuantitiesReposit
     await this._repository.save(persistence);
   }
 
+  async findById(id: string): Promise<ExtraQuantityDomain | null> {
+    const r = await this._repository.findOne({ where: { id } });
+    return r
+      ? ExtraQuantityDomain.reconstitute(r.id, r.windowId, r.menuItemId, r.quantity, r.guestName)
+      : null;
+  }
+
   async findByWindow(windowId: string): Promise<ExtraQuantityDomain[]> {
     const records = await this._repository.find({ where: { windowId } });
     return records.map((r) =>

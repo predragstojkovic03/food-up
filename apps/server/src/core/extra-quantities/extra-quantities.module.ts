@@ -1,4 +1,6 @@
 import { Module, Provider } from '@nestjs/common';
+import { MealSelectionWindowsModule } from '../meal-selection-windows/meal-selection-windows.module';
+import { MenuItemsModule } from '../menu-items/menu-items.module';
 import { ExtraQuantitiesService } from './application/extra-quantities.service';
 import { I_EXTRA_QUANTITIES_REPOSITORY } from './domain/extra-quantities.repository.interface';
 import { ExtraQuantitiesTypeOrmRepository } from './infrastructure/persistence/extra-quantities-typeorm.repository';
@@ -10,6 +12,7 @@ const ExtraQuantitiesRepositoryProvider: Provider = {
 };
 
 @Module({
+  imports: [MealSelectionWindowsModule, MenuItemsModule],
   controllers: [ExtraQuantitiesController],
   providers: [ExtraQuantitiesRepositoryProvider, ExtraQuantitiesService],
   exports: [ExtraQuantitiesService],
