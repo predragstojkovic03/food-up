@@ -2,7 +2,6 @@ import { EmployeeRole, IdentityType } from '@food-up/shared';
 import {
   Body,
   Controller,
-  Delete,
   Get,
   Param,
   Patch,
@@ -42,6 +41,7 @@ export class MealSelectionsController {
     description: 'Meal selection created',
     type: MealSelectionResponseDto,
   })
+  @ApiResponse({ status: 404, description: "Window not found in the caller's business" })
   @RequiredIdentityType(IdentityType.Employee)
   @ApiBearerAuth()
   @Post()
@@ -53,19 +53,6 @@ export class MealSelectionsController {
     return this.toResponseDto(result);
   }
 
-  @Get()
-  @ApiOperation({ summary: 'Get all meal selections' })
-  @ApiResponse({
-    status: 200,
-    description: 'List of meal selections',
-    type: [MealSelectionResponseDto],
-  })
-  @ApiBearerAuth()
-  async findAll(): Promise<MealSelectionResponseDto[]> {
-    const result = await this._mealSelectionsService.findAll();
-    return result.map(this.toResponseDto);
-  }
-
   @RequiredIdentityType(IdentityType.Employee)
   @RequiredEmployeeRole(EmployeeRole.Manager)
   @ApiBearerAuth()
@@ -74,10 +61,12 @@ export class MealSelectionsController {
     summary: 'Get all meal selections for a window (manager view)',
   })
   @ApiResponse({ status: 200, type: [MealSelectionResponseDto] })
+  @ApiResponse({ status: 404, description: "Window not found in the caller's business" })
   async findByWindow(
     @Param('windowId') windowId: string,
+    @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<MealSelectionResponseDto[]> {
-    const result = await this._mealSelectionsService.findByWindow(windowId);
+    const result = await this._mealSelectionsService.findByWindowInMyBusiness(windowId, sub);
     return result.map((e) => this.toResponseDto(e));
   }
 
@@ -89,25 +78,13 @@ export class MealSelectionsController {
     summary: 'Get per-employee daily order overview for a window (manager view)',
   })
   @ApiResponse({ status: 200, description: 'List of per-employee per-day overview items', type: [WindowDailyOverviewResponseDto] })
+  @ApiResponse({ status: 404, description: "Window not found in the caller's business" })
   async getDailyOverview(
     @Param('windowId') windowId: string,
+    @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<WindowDailyOverviewResponseDto[]> {
-    const items = await this._overviewQueryService.getDailyOverview(windowId);
+    const items = await this._overviewQueryService.getDailyOverview(windowId, sub);
     return plainToInstance(WindowDailyOverviewResponseDto, items, { excludeExtraneousValues: true });
-  }
-
-  @Get(':id')
-  @ApiOperation({ summary: 'Get a meal selection by ID' })
-  @ApiResponse({
-    status: 200,
-    description: 'Meal selection found',
-    type: MealSelectionResponseDto,
-  })
-  @ApiResponse({ status: 404, description: 'Meal selection not found' })
-  @ApiBearerAuth()
-  async findOne(@Param('id') id: string): Promise<MealSelectionResponseDto> {
-    const result = await this._mealSelectionsService.findOne(id);
-    return this.toResponseDto(result);
   }
 
   @ApiOperation({ summary: 'Update a meal selection' })
@@ -127,15 +104,6 @@ export class MealSelectionsController {
   ): Promise<MealSelectionResponseDto> {
     const result = await this._mealSelectionsService.update(id, sub, dto);
     return this.toResponseDto(result);
-  }
-
-  @Delete(':id')
-  @ApiOperation({ summary: 'Delete a meal selection' })
-  @ApiResponse({ status: 200, description: 'Meal selection deleted' })
-  @ApiResponse({ status: 404, description: 'Meal selection not found' })
-  @ApiBearerAuth()
-  async delete(@Param('id') id: string): Promise<void> {
-    return this._mealSelectionsService.delete(id);
   }
 
   @RequiredIdentityType(IdentityType.Employee)

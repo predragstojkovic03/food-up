@@ -1,3 +1,4 @@
+import { EntityInstanceNotFoundException } from 'src/shared/domain/exceptions/entity-instance-not-found.exception';
 import { MealSelectionsService } from './meal-selections.service';
 
 describe('MealSelectionsService', () => {
@@ -17,13 +18,15 @@ describe('MealSelectionsService', () => {
     mockEmployeesService = {
       findByIdentity: jest.fn().mockResolvedValue({ id: employeeId }),
     };
+    const window = {
+      id: windowId,
+      isActive: true,
+      targetDates: new Set(['2026-01-01']),
+      menuPeriodIds: ['period-1'],
+    };
     mockWindowsService = {
-      findOne: jest.fn().mockResolvedValue({
-        id: windowId,
-        isActive: true,
-        targetDates: new Set(['2026-01-01']),
-        menuPeriodIds: ['period-1'],
-      }),
+      findOne: jest.fn().mockResolvedValue(window),
+      findOneInMyBusiness: jest.fn().mockResolvedValue(window),
     };
     mockMenuItemsService = {
       findOne: jest.fn().mockResolvedValue({
@@ -43,6 +46,16 @@ describe('MealSelectionsService', () => {
   });
 
   describe('create()', () => {
+    it("rejects a window outside the employee's business without inserting", async () => {
+      mockWindowsService.findOneInMyBusiness.mockRejectedValue(new EntityInstanceNotFoundException());
+
+      await expect(
+        service.create(identityId, { mealSelectionWindowId: 'win-other', date: '2026-01-01', menuItemId }),
+      ).rejects.toBeInstanceOf(EntityInstanceNotFoundException);
+      expect(mockWindowsService.findOneInMyBusiness).toHaveBeenCalledWith('win-other', identityId);
+      expect(mockRepository.insert).not.toHaveBeenCalled();
+    });
+
     it('captures price from menu item onto selection', async () => {
       const result = await service.create(identityId, {
         mealSelectionWindowId: windowId,

@@ -30,8 +30,9 @@ export class MealSelectionsService {
   ): Promise<MealSelection> {
     const employee = await this._employeesService.findByIdentity(identityId);
 
-    const mealSelectionWindow = await this._mealSelectionWindowsService.findOne(
+    const mealSelectionWindow = await this._mealSelectionWindowsService.findOneInMyBusiness(
       dto.mealSelectionWindowId,
+      identityId,
     );
 
     if (!mealSelectionWindow.isActive) {
@@ -77,15 +78,12 @@ export class MealSelectionsService {
     return mealSelection;
   }
 
-  async findAll(): Promise<MealSelection[]> {
-    return this._repository.findAll();
-  }
-
   findOne(id: string): Promise<MealSelection> {
     return this._repository.findOneByCriteriaOrThrow({ id });
   }
 
-  findByWindow(windowId: string): Promise<MealSelection[]> {
+  async findByWindowInMyBusiness(windowId: string, identityId: string): Promise<MealSelection[]> {
+    await this._mealSelectionWindowsService.findOneInMyBusiness(windowId, identityId);
     return this._repository.findByWindow(windowId);
   }
 
@@ -151,11 +149,6 @@ export class MealSelectionsService {
     this._logger.log(`Meal selection updated: id=${id}`, MealSelectionsService.name);
 
     return mealSelection;
-  }
-
-  async delete(id: string): Promise<void> {
-    await this._repository.delete(id);
-    this._logger.log(`Meal selection deleted: id=${id}`, MealSelectionsService.name);
   }
 
   existsByEmployeeWindowWithSameMealTypeAndDateAs(
