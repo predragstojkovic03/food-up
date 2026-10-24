@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   Param,
   Patch,
@@ -41,6 +40,7 @@ export class ChangeRequestsController {
   ) {}
 
   @ApiOperation({ summary: 'Create a new change request' })
+  @ApiResponse({ status: 404, description: "Window or change request not found in the caller's business" })
   @ApiResponse({ status: 201, type: ChangeRequestResponseDto })
   @RequiredIdentityType(IdentityTypeEnum.Employee)
   @ApiBearerAuth()
@@ -58,6 +58,7 @@ export class ChangeRequestsController {
   @RequiredEmployeeRole(EmployeeRole.Manager)
   @RequiredIdentityType(IdentityTypeEnum.Employee)
   @ApiBearerAuth()
+  @ApiResponse({ status: 404, description: "Window or change request not found in the caller's business" })
   @Patch('bulk-status')
   async bulkUpdateStatus(
     @Body() dto: BulkUpdateChangeRequestStatusDto,
@@ -71,11 +72,13 @@ export class ChangeRequestsController {
   @RequiredEmployeeRole(EmployeeRole.Manager)
   @RequiredIdentityType(IdentityTypeEnum.Employee)
   @ApiBearerAuth()
+  @ApiResponse({ status: 404, description: "Window or change request not found in the caller's business" })
   @Get('window/:windowId')
   async findByWindow(
     @Param('windowId') windowId: string,
+    @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<RichChangeRequestResponseDto[]> {
-    const results = await this._changeRequestsQueryService.findRichByWindow(windowId);
+    const results = await this._changeRequestsQueryService.findRichByWindowInMyBusiness(windowId, sub);
     return plainToInstance(RichChangeRequestResponseDto, results);
   }
 
@@ -84,11 +87,13 @@ export class ChangeRequestsController {
   @RequiredEmployeeRole(EmployeeRole.Manager)
   @RequiredIdentityType(IdentityTypeEnum.Employee)
   @ApiBearerAuth()
+  @ApiResponse({ status: 404, description: "Window or change request not found in the caller's business" })
   @Get('window/:windowId/pending-count')
   async getPendingCount(
     @Param('windowId') windowId: string,
+    @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<PendingCountResponseDto> {
-    const count = await this._changeRequestsQueryService.findPendingCountByWindow(windowId);
+    const count = await this._changeRequestsQueryService.findPendingCountByWindowInMyBusiness(windowId, sub);
     return plainToInstance(PendingCountResponseDto, { count });
   }
 
@@ -103,24 +108,6 @@ export class ChangeRequestsController {
     const employee = await this._employeesService.findByIdentity(sub);
     const results = await this._changeRequestsQueryService.findRichByEmployee(employee.id);
     return plainToInstance(RichChangeRequestResponseDto, results);
-  }
-
-  @ApiOperation({ summary: 'Get all change requests' })
-  @ApiResponse({ status: 200, type: [ChangeRequestResponseDto] })
-  @ApiBearerAuth()
-  @Get()
-  async findAll(): Promise<ChangeRequestResponseDto[]> {
-    const crs = await this._changeRequestsService.findAll();
-    return plainToInstance(ChangeRequestResponseDto, crs);
-  }
-
-  @ApiOperation({ summary: 'Get a change request by ID' })
-  @ApiResponse({ status: 200, type: ChangeRequestResponseDto })
-  @ApiBearerAuth()
-  @Get(':id')
-  async findOne(@Param('id') id: string): Promise<ChangeRequestResponseDto> {
-    const cr = await this._changeRequestsService.findOne(id);
-    return plainToInstance(ChangeRequestResponseDto, cr);
   }
 
   @ApiOperation({ summary: 'Update a change request' })
@@ -142,6 +129,7 @@ export class ChangeRequestsController {
   @RequiredEmployeeRole(EmployeeRole.Manager)
   @RequiredIdentityType(IdentityTypeEnum.Employee)
   @ApiBearerAuth()
+  @ApiResponse({ status: 404, description: "Window or change request not found in the caller's business" })
   @Patch(':id/status')
   async updateStatus(
     @Param('id') id: string,
@@ -163,13 +151,4 @@ export class ChangeRequestsController {
     await this._changeRequestsService.revoke(id, user.sub);
   }
 
-  @ApiOperation({ summary: 'Delete a change request' })
-  @ApiResponse({ status: 204 })
-  @RequiredEmployeeRole(EmployeeRole.Manager)
-  @RequiredIdentityType(IdentityTypeEnum.Employee)
-  @ApiBearerAuth()
-  @Delete(':id')
-  async delete(@Param('id') id: string): Promise<void> {
-    return this._changeRequestsService.delete(id);
-  }
 }

@@ -19,12 +19,10 @@ describe('ChangeRequestsService.create() — late addition', () => {
     mockEmployeesService = {
       findByIdentity: jest.fn().mockResolvedValue({ id: employeeId }),
     };
+    const window = { id: windowId, isPastDeadline: true, menuPeriodIds: ['period-1'] };
     mockWindowsService = {
-      findOne: jest.fn().mockResolvedValue({
-        id: windowId,
-        isPastDeadline: true,
-        menuPeriodIds: ['period-1'],
-      }),
+      findOne: jest.fn().mockResolvedValue(window),
+      findOneInMyBusiness: jest.fn().mockResolvedValue(window),
     };
     mockMenuItemsService = {
       findOne: jest.fn().mockResolvedValue({

@@ -48,8 +48,9 @@ export class ChangeRequestsService {
   ): Promise<ChangeRequest> {
     const employee = await this._employeesService.findByIdentity(identityId);
 
-    const mealSelectionWindow = await this._mealSelectionWindowsService.findOne(
+    const mealSelectionWindow = await this._mealSelectionWindowsService.findOneInMyBusiness(
       dto.mealSelectionWindowId,
+      identityId,
     );
 
     if (!mealSelectionWindow.isPastDeadline) {
@@ -137,14 +138,6 @@ export class ChangeRequestsService {
     return changeRequest;
   }
 
-  async findAll(): Promise<ChangeRequest[]> {
-    return this._repository.findAll();
-  }
-
-  async findOne(id: string): Promise<ChangeRequest | null> {
-    return this._repository.findOneByCriteria({ id });
-  }
-
   @DomainEvents
   async update(
     id: string,
@@ -209,6 +202,11 @@ export class ChangeRequestsService {
       );
     }
 
+    await this._assertWindowsInManagerBusiness(
+      [changeRequest],
+      performedByIdentityId,
+    );
+
     changeRequest.changeStatus(status, performer.id, new Date());
     await this._repository.update(id, changeRequest);
     this._logger.log(
@@ -240,10 +238,19 @@ export class ChangeRequestsService {
     }> = [];
 
     await this._transactionRunner.run(async () => {
-      for (const item of dto.items) {
-        const changeRequest = await this._repository.findOneByCriteriaOrThrow({
-          id: item.id,
-        });
+      // Load and authorize every item before changing any of them
+      const changeRequests = await Promise.all(
+        dto.items.map((item) =>
+          this._repository.findOneByCriteriaOrThrow({ id: item.id }),
+        ),
+      );
+      await this._assertWindowsInManagerBusiness(
+        changeRequests,
+        performedByIdentityId,
+      );
+
+      for (const [index, item] of dto.items.entries()) {
+        const changeRequest = changeRequests[index];
 
         changeRequest.changeStatus(item.status, performer.id, new Date());
         await this._repository.update(item.id, changeRequest);
@@ -285,9 +292,17 @@ export class ChangeRequestsService {
     this._logger.log(`Change request revoked: id=${id} employeeId=${employee.id}`, ChangeRequestsService.name);
   }
 
-  async delete(id: string): Promise<void> {
-    await this._repository.delete(id);
-    this._logger.log(`Change request deleted: id=${id}`, ChangeRequestsService.name);
+  /** Change requests of other businesses' windows respond as not found. */
+  private async _assertWindowsInManagerBusiness(
+    changeRequests: ChangeRequest[],
+    identityId: string,
+  ): Promise<void> {
+    const windowIds = [...new Set(changeRequests.map((cr) => cr.mealSelectionWindowId))];
+    await Promise.all(
+      windowIds.map((windowId) =>
+        this._mealSelectionWindowsService.findOneInMyBusiness(windowId, identityId),
+      ),
+    );
   }
 
   /** A swap must stay on the same day and meal type as the selection it replaces */

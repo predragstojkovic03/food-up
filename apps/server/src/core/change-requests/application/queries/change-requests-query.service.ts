@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { MealSelectionWindowsService } from 'src/core/meal-selection-windows/application/meal-selection-windows.service';
 import {
   I_CHANGE_REQUESTS_QUERY_REPOSITORY,
   IChangeRequestsQueryRepository,
@@ -10,9 +11,14 @@ export class ChangeRequestsQueryService {
   constructor(
     @Inject(I_CHANGE_REQUESTS_QUERY_REPOSITORY)
     private readonly _repository: IChangeRequestsQueryRepository,
+    private readonly _windowsService: MealSelectionWindowsService,
   ) {}
 
-  findRichByWindow(windowId: string): Promise<RichChangeRequestDto[]> {
+  async findRichByWindowInMyBusiness(
+    windowId: string,
+    identityId: string,
+  ): Promise<RichChangeRequestDto[]> {
+    await this._windowsService.findOneInMyBusiness(windowId, identityId);
     return this._repository.findRichByWindow(windowId);
   }
 
@@ -20,7 +26,11 @@ export class ChangeRequestsQueryService {
     return this._repository.findRichByEmployee(employeeId);
   }
 
-  findPendingCountByWindow(windowId: string): Promise<number> {
+  async findPendingCountByWindowInMyBusiness(
+    windowId: string,
+    identityId: string,
+  ): Promise<number> {
+    await this._windowsService.findOneInMyBusiness(windowId, identityId);
     return this._repository.findPendingCountByWindow(windowId);
   }
 

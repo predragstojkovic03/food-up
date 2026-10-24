@@ -42,6 +42,7 @@ describe('ChangeRequestsService.create() — swap', () => {
       { findByIdentity: jest.fn().mockResolvedValue({ id: employeeId }) } as any,
       {
         findOne: jest.fn().mockResolvedValue({ id: windowId, isPastDeadline: true, menuPeriodIds: ['period-1'] }),
+        findOneInMyBusiness: jest.fn().mockResolvedValue({ id: windowId, isPastDeadline: true, menuPeriodIds: ['period-1'] }),
       } as any,
       { log: jest.fn() } as any,
       { run: jest.fn() } as any,
