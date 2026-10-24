@@ -1,14 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { BusinessesService } from 'src/core/businesses/application/businesses.service';
-import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { IdentityService } from 'src/core/identity/application/identity.service';
 import { IdentityType } from '@food-up/shared';
 import { SuppliersService } from 'src/core/suppliers/application/suppliers.service';
 import { Supplier } from 'src/core/suppliers/domain/supplier.entity';
 import { DomainEvents } from 'src/shared/application/domain-events/domain-events.decorator';
-import { AuthenticationException } from 'src/shared/domain/exceptions/authentication.exception';
 import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
-import { UnauthorizedException } from 'src/shared/domain/exceptions/unauthorized.exception';
 import { MenuPeriod } from '../domain/menu-period.entity';
 import {
   I_MENU_PERIODS_REPOSITORY,
@@ -21,8 +17,6 @@ export class MenuPeriodsService {
     @Inject(I_MENU_PERIODS_REPOSITORY)
     private readonly _repository: IMenuPeriodsRepository,
     private readonly _identityService: IdentityService,
-    private readonly _businessesService: BusinessesService,
-    private readonly _employeesService: EmployeesService,
     private readonly _suppliersService: SuppliersService,
   ) {}
 
@@ -35,10 +29,7 @@ export class MenuPeriodsService {
       supplierId?: string;
     },
   ): Promise<MenuPeriod> {
-    const supplier = await this.validateOrGetSupplier(
-      identityId,
-      dto.supplierId,
-    );
+    const supplier = await this._resolveManagedSupplier(identityId, dto.supplierId);
 
     const entity = MenuPeriod.create(dto.startDate, dto.endDate, supplier.id);
 
@@ -46,11 +37,8 @@ export class MenuPeriodsService {
     return entity;
   }
 
-  async findAll(): Promise<MenuPeriod[]> {
-    return this._repository.findAll();
-  }
-
-  async findBySupplier(supplierId: string): Promise<MenuPeriod[]> {
+  async findBySupplier(supplierId: string, identityId: string): Promise<MenuPeriod[]> {
+    await this._suppliersService.assertCanView(supplierId, identityId);
     return this._repository.findByCriteria({ supplierId } as any);
   }
 
@@ -70,7 +58,7 @@ export class MenuPeriodsService {
   ): Promise<MenuPeriod> {
     const menuPeriod = await this._repository.findOneByCriteriaOrThrow({ id });
 
-    await this.validateOrGetSupplier(identityId, menuPeriod.supplierId);
+    await this._suppliersService.assertCanManage(menuPeriod.supplierId, identityId);
 
     menuPeriod.updateDetails(dto.startDate, dto.endDate);
 
@@ -81,54 +69,29 @@ export class MenuPeriodsService {
   async delete(id: string, identityId: string): Promise<void> {
     const existing = await this._repository.findOneByCriteriaOrThrow({ id });
 
-    await this.validateOrGetSupplier(identityId, existing.supplierId);
+    await this._suppliersService.assertCanManage(existing.supplierId, identityId);
 
     return this._repository.delete(id);
   }
 
   /**
-   * Authorizes access for the user based on their identity and the requested menu period.
-   * @param identityId The ID of the user making the request.
-   * @param supplierId The ID of the supplier associated with the menu period.
-   * @throws {AuthenticationException} if the identity is invalid.
-   * @throws {UnauthorizedException} if the user is not authorized to create or modify the menu period.
+   * Resolves the supplier a new menu period is created for: the given supplier, or the caller's own
+   * supplier account if none is given. The caller must be allowed to manage it.
    */
-  private async validateOrGetSupplier(
+  private async _resolveManagedSupplier(
     identityId: string,
     supplierId?: string,
   ): Promise<Supplier> {
+    if (supplierId) {
+      return this._suppliersService.assertCanManage(supplierId, identityId);
+    }
+
     const identity = await this._identityService.findById(identityId);
-
-    if (!identity) {
-      throw new AuthenticationException('Invalid identity');
-    }
-
-    if (identity.type === IdentityType.Employee) {
-      if (!supplierId) {
-        throw new InvalidInputDataException(
-          'Employee must specify a supplier ID to manage menu periods',
-        );
-      }
-
-      const employee = await this._employeesService.findByIdentity(identity.id);
-      const business = await this._businessesService.findOne(
-        employee.businessId,
+    if (identity?.type !== IdentityType.Supplier) {
+      throw new InvalidInputDataException(
+        'Employee must specify a supplier ID to manage menu periods',
       );
-
-      if (
-        business.managedSupplierIds.length === 0 ||
-        !business.managedSupplierIds.includes(supplierId)
-      ) {
-        throw new UnauthorizedException(
-          'The business does not manage the specified supplier',
-        );
-      }
-
-      return this._suppliersService.findOne(supplierId);
-    } else if (identity.type === IdentityType.Supplier) {
-      return this._suppliersService.findByIdentityId(identity.id);
     }
-
-    throw new UnauthorizedException();
+    return this._suppliersService.findByIdentityId(identityId);
   }
 }

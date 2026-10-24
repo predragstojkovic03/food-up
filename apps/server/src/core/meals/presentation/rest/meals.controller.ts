@@ -40,56 +40,43 @@ export class MealsController {
     return this.toResponseDto(meal);
   }
 
-  @Get()
-  @ApiOperation({ summary: 'Get all meals' })
-  @ApiResponse({ status: 200, type: [MealResponseDto] })
-  @ApiBearerAuth()
-  async findAll(): Promise<MealResponseDto[]> {
-    const meals = await this._mealsService.findAll();
-    return meals.map(this.toResponseDto);
-  }
-
   @Get('supplier/:supplierId')
   @ApiOperation({ summary: 'Get all meals for a supplier' })
   @ApiResponse({ status: 200, type: [MealResponseDto] })
+  @ApiResponse({ status: 404, description: 'Meal or supplier not found, or not available to the caller' })
   @ApiBearerAuth()
   async findBySupplier(
     @Param('supplierId') supplierId: string,
+    @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<MealResponseDto[]> {
-    const meals = await this._mealsService.findBySupplier(supplierId);
+    const meals = await this._mealsService.findBySupplier(supplierId, sub);
     return meals.map(this.toResponseDto);
-  }
-
-  @Get(':id')
-  @ApiOperation({ summary: 'Get a meal by ID' })
-  @ApiResponse({ status: 200, type: MealResponseDto })
-  @ApiResponse({ status: 404, description: 'Meal not found' })
-  @ApiBearerAuth()
-  async findOne(@Param('id') id: string): Promise<MealResponseDto> {
-    const meal = await this._mealsService.findOne(id);
-    return this.toResponseDto(meal);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update a meal by ID' })
   @ApiResponse({ status: 200, type: MealResponseDto })
-  @ApiResponse({ status: 404, description: 'Meal not found' })
+  @ApiResponse({ status: 404, description: 'Meal or supplier not found, or not available to the caller' })
   @ApiBearerAuth()
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateMealDto,
+    @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<MealResponseDto> {
-    const meal = await this._mealsService.update(id, dto);
+    const meal = await this._mealsService.update(id, dto, sub);
     return this.toResponseDto(meal);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a meal by ID' })
   @ApiResponse({ status: 204, description: 'Meal deleted' })
-  @ApiResponse({ status: 404, description: 'Meal not found' })
+  @ApiResponse({ status: 404, description: 'Meal or supplier not found, or not available to the caller' })
   @ApiBearerAuth()
-  async delete(@Param('id') id: string): Promise<void> {
-    await this._mealsService.delete(id);
+  async delete(
+    @Param('id') id: string,
+    @CurrentIdentity() { sub }: JwtPayload,
+  ): Promise<void> {
+    await this._mealsService.delete(id, sub);
   }
 
   private toResponseDto(entity: Meal): MealResponseDto {

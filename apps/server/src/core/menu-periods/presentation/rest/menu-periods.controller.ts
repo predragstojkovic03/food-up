@@ -43,33 +43,17 @@ export class MenuPeriodsController {
     return this.domainToDto(period);
   }
 
-  @ApiOperation({ summary: 'Get all menu periods' })
-  @ApiResponse({ status: 200, type: [MenuPeriodResponseDto] })
-  @ApiBearerAuth()
-  @Get()
-  async findAll(): Promise<MenuPeriodResponseDto[]> {
-    const periods = await this._menuPeriodsService.findAll();
-    return periods.map((period) => this.domainToDto(period));
-  }
-
   @ApiOperation({ summary: 'Get all menu periods for a supplier' })
   @ApiResponse({ status: 200, type: [MenuPeriodResponseDto] })
+  @ApiResponse({ status: 404, description: 'Supplier not found or not available to the caller' })
   @ApiBearerAuth()
   @Get('supplier/:supplierId')
   async findBySupplier(
     @Param('supplierId') supplierId: string,
+    @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<MenuPeriodResponseDto[]> {
-    const periods = await this._menuPeriodsService.findBySupplier(supplierId);
+    const periods = await this._menuPeriodsService.findBySupplier(supplierId, sub);
     return periods.map((p) => this.domainToDto(p));
-  }
-
-  @ApiOperation({ summary: 'Get a menu period by ID' })
-  @ApiResponse({ status: 200, type: MenuPeriodResponseDto })
-  @ApiBearerAuth()
-  @Get(':id')
-  async findOne(@Param('id') id: string): Promise<MenuPeriodResponseDto> {
-    const period = await this._menuPeriodsService.findOne(id);
-    return this.domainToDto(period);
   }
 
   @ApiOperation({ summary: 'Update a menu period' })

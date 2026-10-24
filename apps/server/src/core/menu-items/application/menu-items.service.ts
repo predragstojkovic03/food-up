@@ -2,6 +2,7 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { MealSelectionWindowsService } from 'src/core/meal-selection-windows/application/meal-selection-windows.service';
 import { MealsService } from 'src/core/meals/application/meals.service';
 import { MenuPeriodsService } from 'src/core/menu-periods/application/menu-periods.service';
+import { SuppliersService } from 'src/core/suppliers/application/suppliers.service';
 import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
 import { InvalidOperationException } from 'src/shared/domain/exceptions/invalid-operation.exception';
 import { MenuItem } from '../domain/menu-item.entity';
@@ -20,19 +21,24 @@ export class MenuItemsService {
     private readonly _menuItemsQueryService: MenuItemsQueryService,
     private readonly _mealsService: MealsService,
     private readonly _menuPeriodsService: MenuPeriodsService,
+    private readonly _suppliersService: SuppliersService,
     @Inject(forwardRef(() => MealSelectionWindowsService))
     private readonly _mealSelectionWindowsService: MealSelectionWindowsService,
   ) {}
 
-  async create(dto: {
-    price?: number | null;
-    menuPeriodId: string;
-    day: string;
-    mealId: string;
-  }): Promise<MenuItem> {
+  async create(
+    dto: {
+      price?: number | null;
+      menuPeriodId: string;
+      day: string;
+      mealId: string;
+    },
+    identityId: string,
+  ): Promise<MenuItem> {
     const meal = await this._mealsService.findOne(dto.mealId);
 
     const menuPeriod = await this._menuPeriodsService.findOne(dto.menuPeriodId);
+    await this._suppliersService.assertCanManage(menuPeriod.supplierId, identityId);
 
     if (menuPeriod.supplierId !== meal.supplierId) {
       throw new InvalidInputDataException(
@@ -64,11 +70,9 @@ export class MenuItemsService {
     return menuItem;
   }
 
-  async findAll(): Promise<MenuItem[]> {
-    return this._repository.findAll();
-  }
-
-  async findByMenuPeriod(menuPeriodId: string): Promise<MenuItem[]> {
+  async findByMenuPeriod(menuPeriodId: string, identityId: string): Promise<MenuItem[]> {
+    const menuPeriod = await this._menuPeriodsService.findOne(menuPeriodId);
+    await this._suppliersService.assertCanView(menuPeriod.supplierId, identityId);
     return this._repository.findByCriteria({ menuPeriodId } as any);
   }
 
@@ -79,8 +83,10 @@ export class MenuItemsService {
   async update(
     id: string,
     dto: { price?: number | null; day?: string },
+    identityId: string,
   ): Promise<MenuItem> {
     const menuItem = await this.findOne(id);
+    await this._assertCanManageMenuPeriod(menuItem.menuPeriodId, identityId);
 
     if (dto.price !== undefined) {
       const locked = await this._mealSelectionWindowsService.existsActiveByMenuPeriodId(
@@ -115,7 +121,14 @@ export class MenuItemsService {
     return this._repository.findBulkByMenuPeriodIdsWithMeal(menuPeriodIds);
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string, identityId: string): Promise<void> {
+    const menuItem = await this.findOne(id);
+    await this._assertCanManageMenuPeriod(menuItem.menuPeriodId, identityId);
     return this._repository.delete(id);
+  }
+
+  private async _assertCanManageMenuPeriod(menuPeriodId: string, identityId: string): Promise<void> {
+    const menuPeriod = await this._menuPeriodsService.findOne(menuPeriodId);
+    await this._suppliersService.assertCanManage(menuPeriod.supplierId, identityId);
   }
 }

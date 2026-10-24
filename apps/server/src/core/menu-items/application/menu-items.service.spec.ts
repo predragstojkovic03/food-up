@@ -5,6 +5,8 @@ import { MenuPeriod } from 'src/core/menu-periods/domain/menu-period.entity';
 import { MealsService } from 'src/core/meals/application/meals.service';
 import { MenuPeriodsService } from 'src/core/menu-periods/application/menu-periods.service';
 import { MealSelectionWindowsService } from 'src/core/meal-selection-windows/application/meal-selection-windows.service';
+import { SuppliersService } from 'src/core/suppliers/application/suppliers.service';
+import { EntityInstanceNotFoundException } from 'src/shared/domain/exceptions/entity-instance-not-found.exception';
 import { MenuItemsQueryService } from './queries/menu-items-query.service';
 import { I_MENU_ITEMS_REPOSITORY } from '../domain/menu-items.repository.interface';
 import { InvalidOperationException } from 'src/shared/domain/exceptions/invalid-operation.exception';
@@ -14,8 +16,10 @@ describe('MenuItemsService.update()', () => {
   let service: MenuItemsService;
   let mockRepository: any;
   let mockMealSelectionWindowsService: any;
+  let mockSuppliersService: any;
 
   const menuItemId = 'mi-1';
+  const identityId = 'identity-1';
 
   beforeEach(() => {
     mockRepository = {
@@ -26,6 +30,12 @@ describe('MenuItemsService.update()', () => {
         day: '2026-01-01',
       }),
       update: jest.fn(),
+      delete: jest.fn(),
+      findByCriteria: jest.fn().mockResolvedValue([]),
+    };
+    mockSuppliersService = {
+      assertCanManage: jest.fn().mockResolvedValue({ id: 'supplier-1' }),
+      assertCanView: jest.fn().mockResolvedValue({ id: 'supplier-1' }),
     };
     mockMealSelectionWindowsService = {
       existsActiveByMenuPeriodId: jest.fn().mockResolvedValue(false),
@@ -35,7 +45,8 @@ describe('MenuItemsService.update()', () => {
       mockRepository,
       { findWithMealsByMenuPeriodIds: jest.fn() } as any,
       { findOne: jest.fn() } as any,
-      { findOne: jest.fn() } as any,
+      { findOne: jest.fn().mockResolvedValue({ id: 'period-1', supplierId: 'supplier-1' }) } as any,
+      mockSuppliersService,
       mockMealSelectionWindowsService,
     );
   });
@@ -44,7 +55,7 @@ describe('MenuItemsService.update()', () => {
     mockMealSelectionWindowsService.existsActiveByMenuPeriodId.mockResolvedValue(true);
 
     await expect(
-      service.update(menuItemId, { price: 15.00 }),
+      service.update(menuItemId, { price: 15.00 }, identityId),
     ).rejects.toThrow(InvalidOperationException);
 
     expect(mockMealSelectionWindowsService.existsActiveByMenuPeriodId)
@@ -55,17 +66,44 @@ describe('MenuItemsService.update()', () => {
     mockMealSelectionWindowsService.existsActiveByMenuPeriodId.mockResolvedValue(false);
 
     await expect(
-      service.update(menuItemId, { price: 15.00 }),
+      service.update(menuItemId, { price: 15.00 }, identityId),
     ).resolves.not.toThrow();
 
     expect(mockRepository.update).toHaveBeenCalledTimes(1);
   });
 
   it('skips active-window check when price not in dto', async () => {
-    await service.update(menuItemId, { day: '2026-02-01' });
+    await service.update(menuItemId, { day: '2026-02-01' }, identityId);
 
     expect(mockMealSelectionWindowsService.existsActiveByMenuPeriodId)
       .not.toHaveBeenCalled();
+  });
+
+  describe("suppliers the caller can't manage or view", () => {
+    beforeEach(() => {
+      mockSuppliersService.assertCanManage.mockRejectedValue(new EntityInstanceNotFoundException());
+      mockSuppliersService.assertCanView.mockRejectedValue(new EntityInstanceNotFoundException());
+    });
+
+    it('rejects update without changing the menu item', async () => {
+      await expect(service.update(menuItemId, { price: 1 }, identityId)).rejects.toBeInstanceOf(
+        EntityInstanceNotFoundException,
+      );
+      expect(mockSuppliersService.assertCanManage).toHaveBeenCalledWith('supplier-1', identityId);
+      expect(mockRepository.update).not.toHaveBeenCalled();
+    });
+
+    it('rejects delete without deleting', async () => {
+      await expect(service.delete(menuItemId, identityId)).rejects.toBeInstanceOf(EntityInstanceNotFoundException);
+      expect(mockRepository.delete).not.toHaveBeenCalled();
+    });
+
+    it('rejects listing the menu period', async () => {
+      await expect(service.findByMenuPeriod('period-1', identityId)).rejects.toBeInstanceOf(
+        EntityInstanceNotFoundException,
+      );
+      expect(mockRepository.findByCriteria).not.toHaveBeenCalled();
+    });
   });
 });
 
@@ -90,6 +128,7 @@ describe('MenuItemsService.create — price copy', () => {
         { provide: MenuItemsQueryService, useValue: {} },
         { provide: MealsService, useValue: mealsServiceMock },
         { provide: MenuPeriodsService, useValue: menuPeriodsServiceMock },
+        { provide: SuppliersService, useValue: { assertCanManage: jest.fn().mockResolvedValue({}) } },
         { provide: MealSelectionWindowsService, useValue: {} },
       ],
     }).compile();
@@ -107,7 +146,7 @@ describe('MenuItemsService.create — price copy', () => {
       menuPeriodId: 'period-1',
       day: '2026-06-11',
       mealId: 'meal-1',
-    });
+    }, 'identity-1');
 
     expect(result.price).toBe(450);
   });
@@ -122,7 +161,7 @@ describe('MenuItemsService.create — price copy', () => {
       menuPeriodId: 'period-1',
       day: '2026-06-11',
       mealId: 'meal-2',
-    });
+    }, 'identity-1');
 
     expect(result.price).toBeNull();
   });

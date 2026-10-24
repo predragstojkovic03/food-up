@@ -1,11 +1,8 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { BusinessesService } from 'src/core/businesses/application/businesses.service';
-import { EmployeesService } from 'src/core/employees/application/employees.service';
+import { Inject, Injectable } from '@nestjs/common';
 import { IdentityService } from 'src/core/identity/application/identity.service';
-import { EmployeeRole, IdentityType } from '@food-up/shared';
+import { IdentityType } from '@food-up/shared';
 import { SuppliersService } from 'src/core/suppliers/application/suppliers.service';
 import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
-import { AuthenticationException } from 'src/shared/domain/exceptions/authentication.exception';
 import { EntityInstanceNotFoundException } from 'src/shared/domain/exceptions/entity-instance-not-found.exception';
 import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
 import { Meal } from '../domain/meal.entity';
@@ -23,56 +20,11 @@ export class MealsService {
     private readonly _repository: IMealsRepository,
     private readonly _identityService: IdentityService,
     private readonly _suppliersService: SuppliersService,
-    private readonly _employeesService: EmployeesService,
-    private readonly _businessesService: BusinessesService,
     @Inject(I_LOGGER) private readonly _logger: ILogger,
   ) {}
 
   async create(identityId: string, dto: CreateMealDto): Promise<Meal> {
-    const identity = await this._identityService.findById(identityId);
-    let supplierId = dto.supplierId;
-
-    if (!identity) {
-      throw new AuthenticationException('Identity not found');
-    }
-
-    if (identity.type === IdentityType.Supplier) {
-      const supplier = await this._suppliersService.findByIdentityId(
-        identity.id,
-      );
-
-      supplierId = supplier.id;
-    } else if (identity.type === IdentityType.Employee) {
-      if (!dto.supplierId) {
-        throw new InvalidInputDataException(
-          'Supplier ID must be provided when creating a meal as an employee.',
-        );
-      }
-
-      const employee = await this._employeesService.findByIdentity(identity.id);
-
-      if (employee.role !== EmployeeRole.Manager) {
-        throw new UnauthorizedException('Only managers can create meals.');
-      }
-
-      const business = await this._businessesService.findOne(
-        employee.businessId,
-      );
-
-      if (!business.managedSupplierIds.includes(dto.supplierId)) {
-        this._logger.warn(
-          `Unauthorized meal creation: supplierId=${dto.supplierId} not managed by businessId=${business.id}`,
-          MealsService.name,
-        );
-        throw new UnauthorizedException(
-          'You can only create meals for suppliers managed by your business.',
-        );
-      }
-    }
-
-    if (!supplierId) {
-      throw new InvalidInputDataException('Supplier ID is required.');
-    }
+    const supplierId = await this._resolveManagedSupplierId(identityId, dto.supplierId);
 
     const meal = Meal.create(
       dto.name,
@@ -91,11 +43,8 @@ export class MealsService {
     return result;
   }
 
-  async findAll(): Promise<Meal[]> {
-    return this._repository.findAll();
-  }
-
-  async findBySupplier(supplierId: string): Promise<Meal[]> {
+  async findBySupplier(supplierId: string, identityId: string): Promise<Meal[]> {
+    await this._suppliersService.assertCanView(supplierId, identityId);
     return this._repository.findByCriteria({ supplierId } as any);
   }
 
@@ -103,16 +52,42 @@ export class MealsService {
     return this._repository.findOneByCriteriaOrThrow({ id });
   }
 
-  async update(id: string, dto: UpdateMealDto): Promise<Meal> {
+  async update(id: string, dto: UpdateMealDto, identityId: string): Promise<Meal> {
     const existing = await this._repository.findOneByCriteria({ id });
     if (!existing) throw new EntityInstanceNotFoundException('Meal not found');
+    await this._suppliersService.assertCanManage(existing.supplierId, identityId);
     const result = await this._repository.update(id, { ...existing, ...dto } as any);
     this._logger.log(`Meal updated: id=${id}`, MealsService.name);
     return result;
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string, identityId: string): Promise<void> {
+    const existing = await this.findOne(id);
+    await this._suppliersService.assertCanManage(existing.supplierId, identityId);
     await this._repository.delete(id);
     this._logger.log(`Meal deleted: id=${id}`, MealsService.name);
+  }
+
+  /**
+   * The supplier a new meal is created for: the given supplier, or the caller's own supplier
+   * account if none is given. The caller must be allowed to manage it.
+   */
+  private async _resolveManagedSupplierId(
+    identityId: string,
+    supplierId: string | undefined,
+  ): Promise<string> {
+    if (supplierId) {
+      const supplier = await this._suppliersService.assertCanManage(supplierId, identityId);
+      return supplier.id;
+    }
+
+    const identity = await this._identityService.findById(identityId);
+    if (identity?.type !== IdentityType.Supplier) {
+      throw new InvalidInputDataException(
+        'Supplier ID must be provided when creating a meal as an employee.',
+      );
+    }
+    const supplier = await this._suppliersService.findByIdentityId(identityId);
+    return supplier.id;
   }
 }

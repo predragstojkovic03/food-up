@@ -10,7 +10,7 @@ export interface ICreateMeal {
   dietaryTags?: DietaryTag[];
 }
 
-export interface IUpdateMeal extends Partial<ICreateMeal> {}
+export interface IUpdateMeal extends Partial<Omit<ICreateMeal, 'supplierId'>> {}
 
 export interface IMealResponse {
   id: string;

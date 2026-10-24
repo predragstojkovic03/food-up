@@ -65,19 +65,6 @@ export class SuppliersController {
     return this.toResponseDto(result);
   }
 
-  @ApiOperation({ summary: 'Get all suppliers' })
-  @ApiResponse({
-    status: 200,
-    description: 'List of suppliers',
-    type: [SupplierResponseDto],
-  })
-  @ApiBearerAuth()
-  @Get()
-  async findAll(): Promise<SupplierResponseDto[]> {
-    const result = await this._suppliersService.findAll();
-    return result.map(this.toResponseDto);
-  }
-
   @ApiOperation({ summary: 'Get in-house (managed) suppliers for the current manager\'s business' })
   @ApiResponse({ status: 200, type: [SupplierResponseDto] })
   @RequiredIdentityType(IdentityType.Employee)
@@ -104,20 +91,6 @@ export class SuppliersController {
     return result.map(this.toResponseDto);
   }
 
-  @ApiOperation({ summary: 'Get a supplier by ID' })
-  @ApiResponse({
-    status: 200,
-    description: 'Supplier found',
-    type: SupplierResponseDto,
-  })
-  @ApiBearerAuth()
-  @Get(':id')
-  @ApiResponse({ status: 404, description: 'Supplier not found' })
-  async findOne(@Param('id') id: string): Promise<SupplierResponseDto> {
-    const result = await this._suppliersService.findOne(id);
-    return this.toResponseDto(result);
-  }
-
   @ApiOperation({ summary: 'Update a supplier' })
   @ApiResponse({
     status: 200,
@@ -139,10 +112,13 @@ export class SuppliersController {
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a supplier' })
   @ApiResponse({ status: 200, description: 'Supplier deleted' })
-  @ApiResponse({ status: 404, description: 'Supplier not found' })
+  @ApiResponse({ status: 404, description: 'Supplier not found or not managed by the caller' })
   @ApiBearerAuth()
-  async delete(@Param('id') id: string): Promise<void> {
-    return this._suppliersService.delete(id);
+  async delete(
+    @Param('id') id: string,
+    @CurrentIdentity() { sub }: JwtPayload,
+  ): Promise<void> {
+    return this._suppliersService.delete(id, sub);
   }
 
   private toResponseDto(entity: Supplier): SupplierResponseDto {

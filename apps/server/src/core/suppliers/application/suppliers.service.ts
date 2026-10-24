@@ -9,6 +9,7 @@ import {
   I_TRANSACTION_RUNNER,
   ITransactionRunner,
 } from 'src/shared/application/transaction.runner';
+import { EntityInstanceNotFoundException } from 'src/shared/domain/exceptions/entity-instance-not-found.exception';
 import { UnauthorizedException } from 'src/shared/domain/exceptions/unauthorized.exception';
 import { Supplier } from '../domain/supplier.entity';
 import {
@@ -83,10 +84,6 @@ export class SuppliersService {
     return supplier;
   }
 
-  async findAll(): Promise<Supplier[]> {
-    return this._repository.findAll();
-  }
-
   async findManagedByBusiness(identityId: string): Promise<Supplier[]> {
     const employee = await this._employeesService.findByIdentity(identityId);
     return this._repository.findManagedByBusiness(employee.businessId);
@@ -156,7 +153,57 @@ export class SuppliersService {
     return supplier;
   }
 
-  async delete(id: string): Promise<void> {
-    return this._repository.delete(id);
+  async delete(id: string, identityId: string): Promise<void> {
+    await this.assertCanManage(id, identityId);
+    await this._repository.delete(id);
+    this._logger.log(`Supplier deleted: id=${id}`, SuppliersService.name);
+  }
+
+  /**
+   * A supplier's catalog and menus can be changed by the standalone supplier itself,
+   * or by a manager of the business that manages it. Anyone else gets "not found".
+   */
+  async assertCanManage(supplierId: string, identityId: string): Promise<Supplier> {
+    const supplier = await this._repository.findOneByCriteriaOrThrow({ id: supplierId });
+    if (await this._isOwnerOrManagingManager(supplier, identityId)) return supplier;
+    throw this._accessDenied(supplierId, identityId);
+  }
+
+  /** Viewing additionally allows managers of businesses that partner with the supplier. */
+  async assertCanView(supplierId: string, identityId: string): Promise<Supplier> {
+    const supplier = await this._repository.findOneByCriteriaOrThrow({ id: supplierId });
+    if (await this._isOwnerOrManagingManager(supplier, identityId)) return supplier;
+
+    const manager = await this._findManager(identityId);
+    if (manager) {
+      const link = await this._businessSuppliersService.findBySupplierAndBusiness(
+        supplierId,
+        manager.businessId,
+      );
+      if (link) return supplier;
+    }
+    throw this._accessDenied(supplierId, identityId);
+  }
+
+  private async _isOwnerOrManagingManager(supplier: Supplier, identityId: string): Promise<boolean> {
+    if (supplier.identityId && supplier.identityId === identityId) return true;
+    const manager = await this._findManager(identityId);
+    return !!manager && supplier.managingBusinessId === manager.businessId;
+  }
+
+  /** The caller's employee record if they are a manager, otherwise null. */
+  private async _findManager(identityId: string) {
+    const identity = await this._identityService.findById(identityId);
+    if (identity?.type !== IdentityType.Employee) return null;
+    const employee = await this._employeesService.findByIdentity(identityId);
+    return employee.role === EmployeeRole.Manager ? employee : null;
+  }
+
+  private _accessDenied(supplierId: string, identityId: string): EntityInstanceNotFoundException {
+    this._logger.warn(
+      `Supplier access denied: supplierId=${supplierId} identityId=${identityId}`,
+      SuppliersService.name,
+    );
+    return new EntityInstanceNotFoundException(`Supplier ${supplierId} not found`);
   }
 }
