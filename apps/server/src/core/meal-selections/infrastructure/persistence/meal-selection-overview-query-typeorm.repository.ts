@@ -53,12 +53,25 @@ export class MealSelectionOverviewQueryTypeOrmRepository
         AND ms.date                      = dates.date
       LEFT JOIN menu_item mi ON mi.id   = ms.menu_item_id
       LEFT JOIN meal       ON meal.id   = mi.meal_id
+      JOIN identity i ON i.id = e.identity_id
       WHERE e.business_id = (
-        SELECT business_id FROM meal_selection_window WHERE id = $1
-      )
+          SELECT business_id FROM meal_selection_window WHERE id = $1
+        )
+        -- Deactivated employees only while they still have something in this window
+        AND (
+          i.is_active
+          OR EXISTS (
+            SELECT 1 FROM meal_selection s
+            WHERE s.meal_selection_window_id = $1 AND s.employee_id = e.id
+          )
+          OR EXISTS (
+            SELECT 1 FROM change_request cr
+            WHERE cr.meal_selection_window_id = $1 AND cr.employee_id = e.id AND cr.status = $2
+          )
+        )
       ORDER BY e.name, dates.date
       `,
-      [windowId],
+      [windowId, ChangeRequestStatus.Approved],
     );
   }
 
