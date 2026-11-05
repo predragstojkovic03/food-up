@@ -138,6 +138,8 @@ export class AuthService {
   private async _buildJwtPayload(identityId: string): Promise<JwtPayload> {
     const identity = await this._identityService.findById(identityId);
     if (!identity) throw new UnauthorizedException('Identity not found');
+    // Every session (password, Google, refresh) passes through here, so deactivation ends them all
+    if (!identity.isActive) throw new UnauthorizedException('Account is deactivated');
 
     let role: EmployeeRole | undefined;
     if (identity.type === IdentityType.Employee) {

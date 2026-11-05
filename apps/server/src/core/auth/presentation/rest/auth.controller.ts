@@ -86,6 +86,7 @@ export class AuthController {
   @Public
   @UseGuards(LocalAuthGuard)
   @Post('login')
+  @HttpCode(HttpStatus.OK)
   async login(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
