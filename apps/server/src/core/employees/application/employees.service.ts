@@ -37,6 +37,10 @@ export class EmployeesService {
         dto.inviteToken,
       );
 
+      if (invite.email.trim().toLowerCase() !== dto.email.trim().toLowerCase()) {
+        throw new InvalidInputDataException('This invite was sent to a different email address.');
+      }
+
       const identity = await this._identityService.create({
         email: dto.email,
         password: dto.password,
