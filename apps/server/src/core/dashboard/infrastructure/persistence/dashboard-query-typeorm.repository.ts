@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { ChangeRequestStatus, Language } from '@food-up/shared';
+import { Language } from '@food-up/shared';
+import { EFFECTIVE_ORDER_LINES } from 'src/core/meal-selections/infrastructure/persistence/effective-order-lines.sql';
 import {
   GroupBy,
   IDashboardQueryRepository,
@@ -22,6 +23,9 @@ function buildWindowLabel(targetDates: string[], language: Language): string {
     ? `${first.getUTCDate()}–${last.getUTCDate()} ${first.toLocaleDateString(locale, { month: 'short', timeZone: 'UTC' })}`
     : `${fmtDay(first)} – ${fmtDay(last)}`;
 }
+
+/** Ordered meals only: the effective order can contain skipped/removed lines. */
+const ORDERED = `eol.menu_item_id IS NOT NULL AND eol.quantity > 0`;
 
 function pctChange(current: number, previous: number): number | null {
   if (previous === 0) return null;
@@ -69,64 +73,14 @@ export class DashboardQueryTypeOrmRepository implements IDashboardQueryRepositor
 
   async getCostTrend(from: string, to: string, groupBy: GroupBy, businessId: string, language: Language): Promise<CostTrendItemDto[]> {
     const granularity = groupBy === 'weekly' ? 'week' : 'month';
-    const approved = ChangeRequestStatus.Approved;
     const rows = await this._dataSource.query<{ period: string; total_cost: string }[]>(
       `
-      SELECT DATE_TRUNC($3, period_date)::date::text AS period, SUM(cost) AS total_cost
-      FROM (
-        SELECT ms.date::date AS period_date, mi.price * COALESCE(ms.quantity, 1) AS cost
-        FROM meal_selection ms
-        JOIN meal_selection_window msw ON msw.id = ms.meal_selection_window_id
-        JOIN menu_item mi ON mi.id = ms.menu_item_id
-        WHERE ms.date BETWEEN $1 AND $2
-          AND msw.business_id = $4
-          AND mi.price IS NOT NULL
-          AND COALESCE(ms.quantity, 1) > 0
-          AND NOT EXISTS (
-            SELECT 1 FROM change_request cr
-            WHERE cr.meal_selection_id = ms.id AND cr.status = '${approved}'
-          )
-
-        UNION ALL
-
-        SELECT ms.date::date, mi.price * COALESCE(cr.new_quantity, 1)
-        FROM meal_selection ms
-        JOIN meal_selection_window msw ON msw.id = ms.meal_selection_window_id
-        JOIN change_request cr
-          ON cr.meal_selection_id = ms.id
-          AND cr.status = '${approved}'
-          AND cr.clear_selection = false
-        JOIN menu_item mi ON mi.id = cr.new_menu_item_id
-        WHERE ms.date BETWEEN $1 AND $2
-          AND msw.business_id = $4
-          AND cr.new_menu_item_id IS NOT NULL
-          AND mi.price IS NOT NULL
-
-        UNION ALL
-
-        SELECT mi.day::date, mi.price * COALESCE(cr.new_quantity, 1)
-        FROM change_request cr
-        JOIN meal_selection_window msw ON msw.id = cr.meal_selection_window_id
-        JOIN menu_item mi ON mi.id = cr.new_menu_item_id
-        WHERE mi.day BETWEEN $1 AND $2
-          AND msw.business_id = $4
-          AND cr.meal_selection_id IS NULL
-          AND cr.status = '${approved}'
-          AND cr.clear_selection = false
-          AND cr.new_menu_item_id IS NOT NULL
-          AND mi.price IS NOT NULL
-          AND COALESCE(cr.new_quantity, 1) > 0
-
-        UNION ALL
-
-        SELECT mi.day::date, mi.price * eq.quantity
-        FROM extra_quantity eq
-        JOIN meal_selection_window msw ON msw.id = eq.window_id
-        JOIN menu_item mi ON mi.id = eq.menu_item_id
-        WHERE mi.day BETWEEN $1 AND $2
-          AND msw.business_id = $4
-          AND mi.price IS NOT NULL
-      ) sub
+      SELECT DATE_TRUNC($3, eol.date)::date::text AS period,
+             SUM(COALESCE(eol.unit_price, 0) * eol.quantity) AS total_cost
+      FROM ${EFFECTIVE_ORDER_LINES} eol
+      WHERE eol.business_id = $4
+        AND eol.date BETWEEN $1 AND $2
+        AND ${ORDERED}
       GROUP BY 1
       ORDER BY 1
       `,
@@ -141,7 +95,6 @@ export class DashboardQueryTypeOrmRepository implements IDashboardQueryRepositor
   }
 
   async getSupplierBreakdown(from: string, to: string, businessId: string, language: Language): Promise<SupplierBreakdownItemDto[]> {
-    const approved = ChangeRequestStatus.Approved;
     const rows = await this._dataSource.query<{
       window_id: string;
       target_dates: string[];
@@ -151,60 +104,13 @@ export class DashboardQueryTypeOrmRepository implements IDashboardQueryRepositor
     }[]>(
       `
       SELECT msw.id AS window_id, msw.target_dates, s.id AS supplier_id, s.name AS supplier_name,
-             SUM(sub.cost) AS total_cost
-      FROM (
-        SELECT ms.meal_selection_window_id AS window_id, mp.supplier_id, mi.price * COALESCE(ms.quantity, 1) AS cost
-        FROM meal_selection ms
-        JOIN menu_item mi ON mi.id = ms.menu_item_id
-        JOIN menu_period mp ON mp.id = mi.menu_period_id
-        WHERE ms.date BETWEEN $1 AND $2
-          AND mi.price IS NOT NULL
-          AND COALESCE(ms.quantity, 1) > 0
-          AND NOT EXISTS (
-            SELECT 1 FROM change_request cr
-            WHERE cr.meal_selection_id = ms.id AND cr.status = '${approved}'
-          )
-
-        UNION ALL
-
-        SELECT ms.meal_selection_window_id, mp.supplier_id, mi.price * COALESCE(cr.new_quantity, 1)
-        FROM meal_selection ms
-        JOIN change_request cr
-          ON cr.meal_selection_id = ms.id
-          AND cr.status = '${approved}'
-          AND cr.clear_selection = false
-        JOIN menu_item mi ON mi.id = cr.new_menu_item_id
-        JOIN menu_period mp ON mp.id = mi.menu_period_id
-        WHERE ms.date BETWEEN $1 AND $2
-          AND cr.new_menu_item_id IS NOT NULL
-          AND mi.price IS NOT NULL
-
-        UNION ALL
-
-        SELECT cr.meal_selection_window_id, mp.supplier_id, mi.price * COALESCE(cr.new_quantity, 1)
-        FROM change_request cr
-        JOIN menu_item mi ON mi.id = cr.new_menu_item_id
-        JOIN menu_period mp ON mp.id = mi.menu_period_id
-        WHERE mi.day BETWEEN $1 AND $2
-          AND cr.meal_selection_id IS NULL
-          AND cr.status = '${approved}'
-          AND cr.clear_selection = false
-          AND cr.new_menu_item_id IS NOT NULL
-          AND mi.price IS NOT NULL
-          AND COALESCE(cr.new_quantity, 1) > 0
-
-        UNION ALL
-
-        SELECT eq.window_id, mp.supplier_id, mi.price * eq.quantity
-        FROM extra_quantity eq
-        JOIN menu_item mi ON mi.id = eq.menu_item_id
-        JOIN menu_period mp ON mp.id = mi.menu_period_id
-        WHERE mi.day BETWEEN $1 AND $2
-          AND mi.price IS NOT NULL
-      ) sub
-      JOIN meal_selection_window msw ON msw.id = sub.window_id
-      JOIN supplier s ON s.id = sub.supplier_id
-      WHERE msw.business_id = $3
+             SUM(COALESCE(eol.unit_price, 0) * eol.quantity) AS total_cost
+      FROM ${EFFECTIVE_ORDER_LINES} eol
+      JOIN meal_selection_window msw ON msw.id = eol.window_id
+      JOIN supplier s ON s.id = eol.supplier_id
+      WHERE eol.business_id = $3
+        AND eol.date BETWEEN $1 AND $2
+        AND ${ORDERED}
       GROUP BY msw.id, msw.target_dates, s.id, s.name
       ORDER BY msw.target_dates[1], s.name
       `,
@@ -264,7 +170,6 @@ export class DashboardQueryTypeOrmRepository implements IDashboardQueryRepositor
   }
 
   async getWindowRanking(from: string, to: string, businessId: string, language: Language): Promise<WindowRankingItemDto[]> {
-    const approved = ChangeRequestStatus.Approved;
     const costRows = await this._dataSource.query<{
       window_id: string;
       target_dates: string[];
@@ -272,63 +177,16 @@ export class DashboardQueryTypeOrmRepository implements IDashboardQueryRepositor
       total_cost: string;
     }[]>(
       `
-      SELECT sub.window_id, msw.target_dates,
+      SELECT eol.window_id, msw.target_dates,
              STRING_AGG(DISTINCT s.name, ', ' ORDER BY s.name) AS supplier_names,
-             SUM(sub.cost) AS total_cost
-      FROM (
-        SELECT ms.meal_selection_window_id AS window_id, mp.supplier_id, mi.price * COALESCE(ms.quantity, 1) AS cost
-        FROM meal_selection ms
-        JOIN menu_item mi ON mi.id = ms.menu_item_id
-        JOIN menu_period mp ON mp.id = mi.menu_period_id
-        WHERE ms.date BETWEEN $1 AND $2
-          AND mi.price IS NOT NULL
-          AND COALESCE(ms.quantity, 1) > 0
-          AND NOT EXISTS (
-            SELECT 1 FROM change_request cr
-            WHERE cr.meal_selection_id = ms.id AND cr.status = '${approved}'
-          )
-
-        UNION ALL
-
-        SELECT ms.meal_selection_window_id, mp.supplier_id, mi.price * COALESCE(cr.new_quantity, 1)
-        FROM meal_selection ms
-        JOIN change_request cr
-          ON cr.meal_selection_id = ms.id
-          AND cr.status = '${approved}'
-          AND cr.clear_selection = false
-        JOIN menu_item mi ON mi.id = cr.new_menu_item_id
-        JOIN menu_period mp ON mp.id = mi.menu_period_id
-        WHERE ms.date BETWEEN $1 AND $2
-          AND cr.new_menu_item_id IS NOT NULL
-          AND mi.price IS NOT NULL
-
-        UNION ALL
-
-        SELECT cr.meal_selection_window_id, mp.supplier_id, mi.price * COALESCE(cr.new_quantity, 1)
-        FROM change_request cr
-        JOIN menu_item mi ON mi.id = cr.new_menu_item_id
-        JOIN menu_period mp ON mp.id = mi.menu_period_id
-        WHERE mi.day BETWEEN $1 AND $2
-          AND cr.meal_selection_id IS NULL
-          AND cr.status = '${approved}'
-          AND cr.clear_selection = false
-          AND cr.new_menu_item_id IS NOT NULL
-          AND mi.price IS NOT NULL
-          AND COALESCE(cr.new_quantity, 1) > 0
-
-        UNION ALL
-
-        SELECT eq.window_id, mp.supplier_id, mi.price * eq.quantity
-        FROM extra_quantity eq
-        JOIN menu_item mi ON mi.id = eq.menu_item_id
-        JOIN menu_period mp ON mp.id = mi.menu_period_id
-        WHERE mi.day BETWEEN $1 AND $2
-          AND mi.price IS NOT NULL
-      ) sub
-      JOIN meal_selection_window msw ON msw.id = sub.window_id
-      JOIN supplier s ON s.id = sub.supplier_id
-      WHERE msw.business_id = $3
-      GROUP BY sub.window_id, msw.target_dates
+             SUM(COALESCE(eol.unit_price, 0) * eol.quantity) AS total_cost
+      FROM ${EFFECTIVE_ORDER_LINES} eol
+      JOIN meal_selection_window msw ON msw.id = eol.window_id
+      JOIN supplier s ON s.id = eol.supplier_id
+      WHERE eol.business_id = $3
+        AND eol.date BETWEEN $1 AND $2
+        AND ${ORDERED}
+      GROUP BY eol.window_id, msw.target_dates
       ORDER BY total_cost DESC
       `,
       [from, to, businessId],
@@ -352,69 +210,15 @@ export class DashboardQueryTypeOrmRepository implements IDashboardQueryRepositor
     to: string,
     businessId: string,
   ): Promise<{ supplierId: string; supplierName: string; totalCost: number }[]> {
-    const approved = ChangeRequestStatus.Approved;
     const rows = await this._dataSource.query<{ supplier_id: string; supplier_name: string; total_cost: string }[]>(
       `
-      SELECT s.id AS supplier_id, s.name AS supplier_name, SUM(sub.cost) AS total_cost
-      FROM (
-        SELECT mp.supplier_id, mi.price * COALESCE(ms.quantity, 1) AS cost
-        FROM meal_selection ms
-        JOIN menu_item mi ON mi.id = ms.menu_item_id
-        JOIN menu_period mp ON mp.id = mi.menu_period_id
-        JOIN meal_selection_window msw ON msw.id = ms.meal_selection_window_id
-        WHERE ms.date BETWEEN $1 AND $2
-          AND msw.business_id = $3
-          AND mi.price IS NOT NULL
-          AND COALESCE(ms.quantity, 1) > 0
-          AND NOT EXISTS (
-            SELECT 1 FROM change_request cr
-            WHERE cr.meal_selection_id = ms.id AND cr.status = '${approved}'
-          )
-
-        UNION ALL
-
-        SELECT mp.supplier_id, mi.price * COALESCE(cr.new_quantity, 1)
-        FROM meal_selection ms
-        JOIN meal_selection_window msw ON msw.id = ms.meal_selection_window_id
-        JOIN change_request cr
-          ON cr.meal_selection_id = ms.id
-          AND cr.status = '${approved}'
-          AND cr.clear_selection = false
-        JOIN menu_item mi ON mi.id = cr.new_menu_item_id
-        JOIN menu_period mp ON mp.id = mi.menu_period_id
-        WHERE ms.date BETWEEN $1 AND $2
-          AND msw.business_id = $3
-          AND cr.new_menu_item_id IS NOT NULL
-          AND mi.price IS NOT NULL
-
-        UNION ALL
-
-        SELECT mp.supplier_id, mi.price * COALESCE(cr.new_quantity, 1)
-        FROM change_request cr
-        JOIN meal_selection_window msw ON msw.id = cr.meal_selection_window_id
-        JOIN menu_item mi ON mi.id = cr.new_menu_item_id
-        JOIN menu_period mp ON mp.id = mi.menu_period_id
-        WHERE mi.day BETWEEN $1 AND $2
-          AND msw.business_id = $3
-          AND cr.meal_selection_id IS NULL
-          AND cr.status = '${approved}'
-          AND cr.clear_selection = false
-          AND cr.new_menu_item_id IS NOT NULL
-          AND mi.price IS NOT NULL
-          AND COALESCE(cr.new_quantity, 1) > 0
-
-        UNION ALL
-
-        SELECT mp.supplier_id, mi.price * eq.quantity
-        FROM extra_quantity eq
-        JOIN meal_selection_window msw ON msw.id = eq.window_id
-        JOIN menu_item mi ON mi.id = eq.menu_item_id
-        JOIN menu_period mp ON mp.id = mi.menu_period_id
-        WHERE mi.day BETWEEN $1 AND $2
-          AND msw.business_id = $3
-          AND mi.price IS NOT NULL
-      ) sub
-      JOIN supplier s ON s.id = sub.supplier_id
+      SELECT s.id AS supplier_id, s.name AS supplier_name,
+             SUM(COALESCE(eol.unit_price, 0) * eol.quantity) AS total_cost
+      FROM ${EFFECTIVE_ORDER_LINES} eol
+      JOIN supplier s ON s.id = eol.supplier_id
+      WHERE eol.business_id = $3
+        AND eol.date BETWEEN $1 AND $2
+        AND ${ORDERED}
       GROUP BY s.id, s.name
       `,
       [from, to, businessId],
