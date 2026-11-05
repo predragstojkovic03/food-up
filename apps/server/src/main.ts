@@ -1,13 +1,11 @@
 import './instrumentation';
 
-import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
-import { NestFactory, Reflector } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import * as cookieParser from 'cookie-parser';
 import { Logger } from 'nestjs-pino';
-import { join } from 'node:path';
 import { AppModule } from './app.module';
+import { configureApp } from './app.setup';
 import {
   API_KEY_HEADER,
   API_KEY_SECURITY_NAME,
@@ -29,45 +27,7 @@ async function bootstrap() {
     app.get<IConfigService<EnvironmentVariables, true>>(I_CONFIG_SERVICE);
   const isProduction = configService.get('NODE_ENV') === NodeEnv.Production;
 
-  /**
-   * cookie-parser makes req.cookies available so controllers can read the httpOnly
-   * refresh token cookie without manual header parsing.
-   */
-  app.use(cookieParser());
-
-  // Trust one hop of proxy (Nginx / ALB) so ThrottlerGuard reads the real client IP
-  // from X-Forwarded-For rather than the proxy's IP address.
-  app.set('trust proxy', 1);
-
-  /**
-   * credentials: true is required for the browser to send cookies on cross-origin requests
-   * (e.g. frontend on :5000, backend on :3000 during development).
-   * Without this, fetch(..., { credentials: 'include' }) would not attach the refresh cookie.
-   */
-  app.enableCors({
-    origin: configService.get('WEB_APP_URL'),
-    credentials: true,
-  });
-
-  app.useStaticAssets(join(__dirname, '..', 'public'), {
-    index: false,
-    prefix: '/public',
-  });
-
-  app.useGlobalPipes(
-    new ValidationPipe({
-      transform: true,
-      whitelist: true,
-    }),
-  );
-
-  app.useGlobalInterceptors(
-    new ClassSerializerInterceptor(app.get(Reflector), {
-      strategy: 'excludeAll',
-    }),
-  );
-
-  app.setGlobalPrefix('api');
+  configureApp(app);
 
   if (!isProduction) {
     const config = new DocumentBuilder()

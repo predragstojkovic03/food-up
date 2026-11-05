@@ -63,6 +63,12 @@ import {
   X,
 } from 'lucide-react';
 import { DailyOrderDialog } from './components/daily-order-dialog';
+import {
+  dateToString,
+  getNextWorkWeek,
+  getVisibleMenuPeriods,
+  isMenuPeriodRelevant,
+} from '../utils/window-form.utils';
 import { useWindowDailyOverview } from '@/features/meal-selections/application/use-window-daily-overview.hook';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -77,41 +83,6 @@ function formatDateWithWeekday(dateStr: string, locale: string): string {
     day: 'numeric',
     month: 'numeric',
     year: 'numeric',
-  });
-}
-
-function dateToString(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-}
-
-function getNextWorkWeek(afterDate: Date): string[] {
-  const day = afterDate.getDay(); // 0=Sun, 1=Mon … 5=Fri, 6=Sat
-
-  // How many work days remain in the current week after the deadline day:
-  // Mon(1)→4, Tue(2)→3, Wed(3)→2, Thu(4)→1, Fri/Sat/Sun→0
-  const remainingInWeek = day >= 1 && day <= 4 ? 5 - day : 0;
-
-  if (remainingInWeek > 0) {
-    return Array.from({ length: remainingInWeek }, (_, i) => {
-      const d = new Date(afterDate);
-      d.setDate(afterDate.getDate() + i + 1);
-      d.setHours(0, 0, 0, 0);
-      return dateToString(d);
-    });
-  }
-
-  // Fri / Sat / Sun → full Mon–Fri of the next work week
-  const daysToNextMon = day === 0 ? 1 : 8 - day; // Sun→1, Fri→3, Sat→2
-  const monday = new Date(afterDate);
-  monday.setDate(afterDate.getDate() + daysToNextMon);
-  monday.setHours(0, 0, 0, 0);
-  return Array.from({ length: 5 }, (_, i) => {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
-    return dateToString(d);
   });
 }
 
@@ -1453,16 +1424,14 @@ function CreateWindowPanel({
               // the backend enforces that all target dates are collectively covered.
               // Selected periods stay visible so they can be deselected.
               const today = dateToString(new Date());
-              const coversAnyTargetDate = (mp: IMenuPeriodResponse) =>
-                activeDates.some((date) => mp.startDate <= date && mp.endDate >= date);
               const isRelevant = (mp: IMenuPeriodResponse) =>
-                activeDates.length > 0 ? coversAnyTargetDate(mp) : mp.endDate >= today;
-              const visiblePeriods = menuPeriods
-                .filter((mp) => isRelevant(mp) || watchedMenuPeriodIds.includes(mp.id))
-                .sort((a, b) =>
-                  a.startDate.localeCompare(b.startDate) ||
-                  (supplierNameById[a.supplierId] ?? '').localeCompare(supplierNameById[b.supplierId] ?? ''),
-                );
+                isMenuPeriodRelevant(mp, activeDates, today);
+              const visiblePeriods = getVisibleMenuPeriods(menuPeriods, {
+                targetDates: activeDates,
+                selectedIds: watchedMenuPeriodIds,
+                today,
+                supplierNameById,
+              });
               const hasSelectedIncompatible = visiblePeriods.some(
                 (mp) => watchedMenuPeriodIds.includes(mp.id) && !isRelevant(mp),
               );

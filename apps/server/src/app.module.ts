@@ -33,6 +33,7 @@ import { TransactionModule } from './shared/infrastructure/transaction/transacti
   imports: [
     PinoLoggerModule.forRoot({
       pinoHttp: {
+        level: process.env.LOG_LEVEL ?? 'info',
         autoLogging: true,
         customReceivedMessage: (req) => `Request ${req.method} ${req.url}`,
         customSuccessMessage: (req, res, responseTime) =>

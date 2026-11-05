@@ -47,8 +47,9 @@ npm run dev:web          # Frontend only
 npm run watch:shared     # Shared lib in watch mode
 
 npm run build            # Build all
-npm run test             # Run server unit tests
-npm run test:e2e         # E2E tests
+npm run test             # Unit tests (server Jest + web Vitest)
+npm run test:e2e         # Integration + end-to-end tests against real Postgres/Redis (needs Docker)
+                         # Runs in Europe/Belgrade time on purpose; override with TEST_TZ=UTC
 
 # Seed the database
 npm run seed --workspace=apps/server -- --manager-email=user@example.com --manager-password=password
@@ -170,6 +171,15 @@ Typed Fetch wrapper, auto-injects JWT from Zustand auth store.
 - PostgreSQL with `SnakeNamingStrategy` (camelCase → snake_case)
 - `ORM_SYNC=true` in dev (auto-syncs schema)
 - TypeORM entities loaded by glob `*.typeorm-entity.*`
+
+## Testing
+
+- **Unit** (`apps/server/src/**/*.spec.ts`, `apps/web/src/**/*.test.ts`): domain rules and services with mocked dependencies.
+- **Integration** (`apps/server/test/integration/*.int-spec.ts`): query repositories and services against a real Postgres built from `apps/server/migrations`.
+- **End-to-end** (`apps/server/test/e2e/*.e2e-spec.ts`): HTTP requests against the full app (`createTestApp()` boots `AppModule` with email faked).
+- Testcontainers starts throwaway Postgres and Redis containers once per run (`test/setup/global-setup.ts`).
+- Test data is inserted with plain SQL through `TestData` (`test/support/test-data.ts`); act as any user with `bearer(employee)`.
+- Tests describe intended behaviour. A failing test means the code is wrong, not the test.
 
 ## Naming Conventions
 
