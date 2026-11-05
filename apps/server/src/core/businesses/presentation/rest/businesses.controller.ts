@@ -29,7 +29,6 @@ import { BusinessesService } from '../../application/businesses.service';
 import { BusinessInviteResponseDto } from './dto/business-invite-response.dto';
 import { BusinessResponseDto } from './dto/business-response.dto';
 import { CreateBusinessInviteRequestDto } from './dto/create-business-invite.dto';
-import { CreateBusinessRequestDto } from './dto/create-business.dto';
 import { UpdateBusinessSettingsRequestDto } from './dto/update-business-settings-request.dto';
 
 @ApiTags('Businesses')
@@ -40,18 +39,6 @@ export class BusinessesController {
     private readonly _businessInvitesService: BusinessInvitesService,
     private readonly _employeesService: EmployeesService,
   ) {}
-
-  @Post()
-  @ApiOperation({ summary: 'Create a new business' })
-  @ApiResponse({ status: 201, type: BusinessResponseDto })
-  @ApiBearerAuth()
-  @Public
-  async create(
-    @Body() createBusinessDto: CreateBusinessRequestDto,
-  ): Promise<BusinessResponseDto> {
-    const business = await this._businessesService.create(createBusinessDto);
-    return plainToInstance(BusinessResponseDto, business);
-  }
 
   @SerializeOptions({ strategy: 'exposeAll' })
   @Get('invites/validate')

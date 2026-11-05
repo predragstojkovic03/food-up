@@ -7,6 +7,7 @@ import {
   I_TRANSACTION_RUNNER,
   ITransactionRunner,
 } from 'src/shared/application/transaction.runner';
+import { EntityInstanceAlreadyExistsException } from 'src/shared/domain/exceptions/entity-instance-already-exists.exception';
 import { EntityInstanceNotFoundException } from 'src/shared/domain/exceptions/entity-instance-not-found.exception';
 import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
 import { Employee } from '../domain/employee.entity';
@@ -108,6 +109,10 @@ export class EmployeesService {
     businessId: string;
   }): Promise<Employee> {
     return this._transactionRunner.run(async () => {
+      if (await this._identityService.findByEmail(dto.email)) {
+        throw new EntityInstanceAlreadyExistsException(`An account with email ${dto.email} already exists`);
+      }
+
       const identity = await this._identityService.create({
         email: dto.email,
         password: dto.password,

@@ -12,6 +12,10 @@ export class TypeOrmTransactionRunner implements ITransactionRunner {
   ) {}
 
   run<T>(work: () => Promise<T>): Promise<T> {
+    // Join a transaction that is already open so nested service calls commit or roll back together
+    if (this._transactionContext.getManager()) {
+      return work();
+    }
     return this._dataSource.transaction((manager) =>
       this._transactionContext.run(manager, work),
     );

@@ -8,6 +8,10 @@ import * as cookieParser from 'cookie-parser';
 import { Logger } from 'nestjs-pino';
 import { join } from 'node:path';
 import { AppModule } from './app.module';
+import {
+  API_KEY_HEADER,
+  API_KEY_SECURITY_NAME,
+} from './core/auth/infrastructure/api-key-protected.decorator';
 import { EnvironmentVariables, NodeEnv } from './env.validation';
 import {
   I_CONFIG_SERVICE,
@@ -71,6 +75,10 @@ async function bootstrap() {
       .setDescription('API documentation for Food Up')
       .setVersion('1.0')
       .addBearerAuth()
+      .addApiKey(
+        { type: 'apiKey', name: API_KEY_HEADER, in: 'header' },
+        API_KEY_SECURITY_NAME,
+      )
       .build();
 
     const document = SwaggerModule.createDocument(app, config);

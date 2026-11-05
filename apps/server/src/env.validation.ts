@@ -3,6 +3,7 @@ import {
   IsBoolean,
   IsEnum,
   IsNumber,
+  IsOptional,
   IsString,
   validateSync,
 } from 'class-validator';
@@ -70,6 +71,11 @@ export class EnvironmentVariables {
 
   @IsString()
   GOOGLE_CALLBACK_URL: string;
+
+  /** Key for operator endpoints such as business onboarding. When unset, those endpoints are disabled. */
+  @IsOptional()
+  @IsString()
+  ADMIN_API_KEY?: string;
 }
 
 export function validate(config: Record<string, unknown>) {

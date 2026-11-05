@@ -1,6 +1,7 @@
 import { IUpdateBusinessSettings } from '@food-up/shared';
 import { Inject, Injectable } from '@nestjs/common';
 import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
+import { EntityInstanceAlreadyExistsException } from 'src/shared/domain/exceptions/entity-instance-already-exists.exception';
 import { Business } from '../domain/business.entity';
 import {
   I_BUSINESSES_REPOSITORY,
@@ -17,6 +18,11 @@ export class BusinessesService {
   ) {}
 
   async create(createBusinessDto: CreateBusinessDto): Promise<Business> {
+    await this._assertNameAndContactEmailAvailable(
+      createBusinessDto.name,
+      createBusinessDto.contactEmail,
+    );
+
     const business = Business.create(
       createBusinessDto.name,
       createBusinessDto.contactEmail,
@@ -50,5 +56,23 @@ export class BusinessesService {
       BusinessesService.name,
     );
     return business;
+  }
+
+  private async _assertNameAndContactEmailAvailable(
+    name: string,
+    contactEmail: string,
+  ): Promise<void> {
+    const [byName, byContactEmail] = await Promise.all([
+      this._repository.findOneByCriteria({ name }),
+      this._repository.findOneByCriteria({ contactEmail }),
+    ]);
+    if (byName) {
+      throw new EntityInstanceAlreadyExistsException(`A business named "${name}" already exists`);
+    }
+    if (byContactEmail) {
+      throw new EntityInstanceAlreadyExistsException(
+        `A business with contact email ${contactEmail} already exists`,
+      );
+    }
   }
 }

@@ -1,7 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { BusinessesService } from './core/businesses/application/businesses.service';
-import { EmployeesService } from './core/employees/application/employees.service';
+import { BusinessOnboardingService } from './core/businesses/application/business-onboarding.service';
 
 function arg(flag: string, envVar: string): string | undefined {
   const match = process.argv.find((a) => a.startsWith(`--${flag}=`));
@@ -23,8 +22,7 @@ async function seed() {
     logger: ['error', 'warn'],
   });
 
-  const businessesService = app.get(BusinessesService);
-  const employeesService = app.get(EmployeesService);
+  const onboardingService = app.get(BusinessOnboardingService);
 
   const businessName = arg('business-name', 'SEED_BUSINESS_NAME') ?? 'My Business';
   const contactEmail = arg('contact-email', 'SEED_CONTACT_EMAIL') ?? requireArg('manager-email', 'SEED_MANAGER_EMAIL');
@@ -32,20 +30,13 @@ async function seed() {
   const managerEmail = requireArg('manager-email', 'SEED_MANAGER_EMAIL');
   const managerPassword = requireArg('manager-password', 'SEED_MANAGER_PASSWORD');
 
-  const business = await businessesService.create({
+  const { business, manager } = await onboardingService.onboard({
     name: businessName,
     contactEmail,
+    manager: { name: managerName, email: managerEmail, password: managerPassword },
   });
 
   console.log(`Business created: ${business.name} (${business.id})`);
-
-  const manager = await employeesService.createManager({
-    name: managerName,
-    email: managerEmail,
-    password: managerPassword,
-    businessId: business.id,
-  });
-
   console.log(`Manager created:  ${manager.name} (${manager.id})`);
   console.log(`  Email:    ${managerEmail}`);
   console.log(`  Password: ${managerPassword}`);

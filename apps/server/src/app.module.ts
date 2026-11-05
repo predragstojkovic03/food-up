@@ -10,6 +10,7 @@ import { join } from 'path';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { ApiKeyGuard } from './core/auth/infrastructure/api-key.guard';
 import { JwtAuthGuard } from './core/auth/infrastructure/jwt-auth.guard';
 import { CoreModule } from './core/core.module';
 import { HealthModule } from './health/health.module';
@@ -156,6 +157,10 @@ import { TransactionModule } from './shared/infrastructure/transaction/transacti
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ApiKeyGuard,
     },
     {
       provide: APP_GUARD,

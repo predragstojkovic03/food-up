@@ -53,6 +53,10 @@ npm run test:e2e         # E2E tests
 # Seed the database
 npm run seed --workspace=apps/server -- --manager-email=user@example.com --manager-password=password
 
+# Onboard a business + first manager over HTTP (requires ADMIN_API_KEY; disabled when unset)
+curl -X POST http://localhost:3000/api/admin/businesses -H "X-Api-Key: $ADMIN_API_KEY" -H "Content-Type: application/json" \
+  -d '{"name":"Acme","contactEmail":"office@acme.com","manager":{"name":"Jane","email":"jane@acme.com","password":"secret123"}}'
+
 # Docker (runs app + PostgreSQL + pgAdmin)
 docker-compose up
 # pgAdmin: http://localhost:5050 (admin@admin.com / admin)
@@ -134,6 +138,7 @@ const I_MY_REPOSITORY = Symbol('IMyRepository');
 - `@EmployeeRole(EmployeeRole.Manager)` — role-based guard
 - `@IdentityType(IdentityType.Employee)` — identity type guard
 - `@DisabledInProduction()` — disables endpoint in prod
+- `@ApiKeyProtected()` — operator endpoint authenticated by the `X-Api-Key` header (`ADMIN_API_KEY`) instead of a JWT; 404 when the key isn't configured
 
 ## Frontend Architecture
 
