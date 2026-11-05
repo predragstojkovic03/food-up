@@ -66,14 +66,15 @@ export class MealSelection extends Entity {
     this._employeeId = employeeId;
     this._mealSelectionWindowId = mealSelectionWindowId;
     this._date = date;
-    this._menuItemId = menuItemId;
+    this._menuItemId = menuItemId ?? null;
     this._quantity = quantity;
     this._price = price;
   }
 
   private readonly _id: string;
   private readonly _employeeId: string;
-  private _menuItemId: string | undefined;
+  /** null means the day was explicitly skipped */
+  private _menuItemId: string | null;
   private readonly _mealSelectionWindowId: string;
   private _quantity: number | undefined;
   private readonly _date: string;
@@ -87,13 +88,13 @@ export class MealSelection extends Entity {
     return this._employeeId;
   }
 
-  get menuItemId(): string | undefined {
+  get menuItemId(): string | null {
     return this._menuItemId;
   }
 
-  set menuItemId(value: string | undefined) {
+  set menuItemId(value: string | null) {
     this._menuItemId = value;
-    this.addDomainEvent(new MealSelectionMenuItemChangedEvent(this.id, value));
+    this.addDomainEvent(new MealSelectionMenuItemChangedEvent(this.id, value ?? undefined));
   }
 
   get mealSelectionWindowId(): string {
@@ -122,7 +123,8 @@ export class MealSelection extends Entity {
   // price:      undefined = don't change, null = clear, number = set
   update(menuItemId?: string | null, quantity?: number | null, price?: number | null) {
     if (menuItemId !== undefined) {
-      this.menuItemId = menuItemId ?? undefined;
+      // Keep null: it records a skip, and the partial update persists it
+      this.menuItemId = menuItemId;
     }
     if (quantity !== undefined) {
       this.quantity = quantity ?? undefined;
