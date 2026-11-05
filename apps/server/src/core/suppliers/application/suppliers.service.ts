@@ -16,6 +16,7 @@ import {
 } from 'src/shared/application/transaction.runner';
 import { EntityInstanceNotFoundException } from 'src/shared/domain/exceptions/entity-instance-not-found.exception';
 import { AccessDeniedException } from 'src/shared/domain/exceptions/access-denied.exception';
+import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
 import { Supplier } from '../domain/supplier.entity';
 import {
   I_SUPPLIERS_REPOSITORY,
@@ -112,6 +113,12 @@ export class SuppliersService {
     const supplier = await this._repository.findOneByCriteriaOrThrow({ id });
 
     if (supplier.type === SupplierType.Standalone) {
+      // Partner suppliers serve several businesses; only managed suppliers' language is editable
+      if (dto.language !== undefined) {
+        throw new InvalidInputDataException(
+          'Language can only be changed for managed suppliers.',
+        );
+      }
       if (supplier.identityId !== identityId) {
         this._logger.warn(
           `Unauthorized supplier update attempt: supplierId=${id} identityId=${identityId}`,
@@ -122,15 +129,6 @@ export class SuppliersService {
         );
       }
       supplier.updateInfo(dto.name, dto.email);
-      if (dto.language !== undefined) {
-        const employee =
-          await this._employeesService.findByIdentity(identityId);
-        await this._businessSuppliersService.updateLanguageForPartner(
-          id,
-          employee.businessId,
-          dto.language,
-        );
-      }
     } else {
       const employee = await this._employeesService.findByIdentity(identityId);
       if (

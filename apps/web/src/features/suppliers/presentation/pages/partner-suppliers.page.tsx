@@ -1,13 +1,6 @@
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { useServices } from '@/shared/infrastructure/di/service.context';
 import { Language } from '@food-up/shared';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
 const QUERY_KEY = ['suppliers', 'partners'];
@@ -24,17 +17,10 @@ function languageLabel(lang: Language): string {
 export default function PartnerSuppliersPage() {
   const { t } = useTranslation('suppliers');
   const { supplierService } = useServices();
-  const queryClient = useQueryClient();
 
   const { data: suppliers = [], isLoading } = useQuery({
     queryKey: QUERY_KEY,
     queryFn: () => supplierService.getPartnersByBusiness(),
-  });
-
-  const updateLanguage = useMutation({
-    mutationFn: ({ id, language }: { id: string; language: Language }) =>
-      supplierService.update(id, { language }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: QUERY_KEY }),
   });
 
   return (
@@ -74,29 +60,10 @@ export default function PartnerSuppliersPage() {
             <span className='text-sm text-muted-foreground'>
               {supplier.email ?? '—'}
             </span>
-            <Select
-              value={supplier.language}
-              onValueChange={(v) =>
-                updateLanguage.mutate({ id: supplier.id, language: v as Language })
-              }
-              disabled={
-                updateLanguage.isPending &&
-                updateLanguage.variables?.id === supplier.id
-              }
-            >
-              <SelectTrigger className='h-8 text-sm w-full max-w-36'>
-                <SelectValue>
-                  {(v: string) => languageLabel(v as Language)}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {LANGUAGE_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value} label={opt.label}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {/* Partner suppliers serve several businesses, so their language isn't editable here */}
+            <span className='text-sm text-muted-foreground'>
+              {languageLabel(supplier.language)}
+            </span>
           </div>
         ))}
       </div>
