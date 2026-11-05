@@ -12,13 +12,13 @@ import {
   IConfigService,
 } from '../application/config-service.interface';
 import { I_LOGGER, ILogger } from '../application/logger.interface';
+import { AccessDeniedException } from '../domain/exceptions/access-denied.exception';
 import { AuthenticationException } from '../domain/exceptions/authentication.exception';
 import { DomainException } from '../domain/exceptions/domain.exception';
 import { EntityInstanceAlreadyExistsException } from '../domain/exceptions/entity-instance-already-exists.exception';
 import { EntityInstanceNotFoundException } from '../domain/exceptions/entity-instance-not-found.exception';
 import { InvalidInputDataException } from '../domain/exceptions/invalid-input-data.exception';
 import { InvalidOperationException } from '../domain/exceptions/invalid-operation.exception';
-import { UnauthorizedException } from '../domain/exceptions/unauthorized.exception';
 
 @Catch(DomainException)
 export class DomainExceptionFilter implements ExceptionFilter {
@@ -55,9 +55,9 @@ export class DomainExceptionFilter implements ExceptionFilter {
 
   private getStatus(exception: DomainException): number {
     switch (exception.constructor) {
-      case UnauthorizedException:
-        return HttpStatus.UNAUTHORIZED;
       case AuthenticationException:
+        return HttpStatus.UNAUTHORIZED;
+      case AccessDeniedException:
         return HttpStatus.FORBIDDEN;
       case InvalidInputDataException:
       case InvalidOperationException:

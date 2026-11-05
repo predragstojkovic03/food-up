@@ -1,7 +1,7 @@
 import { ChangeRequestStatus } from '@food-up/shared';
 import { ChangeRequest } from '../domain/change-request.entity';
 import { ChangeRequestsService } from './change-requests.service';
-import { UnauthorizedException } from 'src/shared/domain/exceptions/unauthorized.exception';
+import { AccessDeniedException } from 'src/shared/domain/exceptions/access-denied.exception';
 
 function makePendingCR(employeeId: string): ChangeRequest {
   return ChangeRequest.reconstitute(
@@ -45,10 +45,10 @@ describe('ChangeRequestsService.revoke', () => {
     );
   });
 
-  it('throws UnauthorizedException when employee does not own the change request', async () => {
+  it('throws AccessDeniedException when employee does not own the change request', async () => {
     mockRepository.findOneByCriteriaOrThrow.mockResolvedValue(makePendingCR('other-emp'));
 
-    await expect(service.revoke('cr-1', identityId)).rejects.toThrow(UnauthorizedException);
+    await expect(service.revoke('cr-1', identityId)).rejects.toThrow(AccessDeniedException);
     expect(mockRepository.update).not.toHaveBeenCalled();
   });
 

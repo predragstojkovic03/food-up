@@ -10,7 +10,7 @@ import {
   ITransactionRunner,
 } from 'src/shared/application/transaction.runner';
 import { EntityInstanceNotFoundException } from 'src/shared/domain/exceptions/entity-instance-not-found.exception';
-import { UnauthorizedException } from 'src/shared/domain/exceptions/unauthorized.exception';
+import { AccessDeniedException } from 'src/shared/domain/exceptions/access-denied.exception';
 import { Supplier } from '../domain/supplier.entity';
 import {
   I_SUPPLIERS_REPOSITORY,
@@ -65,7 +65,7 @@ export class SuppliersService {
     const employee = await this._employeesService.findByIdentity(sub);
 
     if (employee.role !== EmployeeRole.Manager) {
-      throw new UnauthorizedException('Only managers can manage suppliers.');
+      throw new AccessDeniedException('Only managers can manage suppliers.');
     }
 
     const supplier = Supplier.createManaged(
@@ -116,7 +116,7 @@ export class SuppliersService {
           `Unauthorized supplier update attempt: supplierId=${id} identityId=${identityId}`,
           SuppliersService.name,
         );
-        throw new UnauthorizedException(
+        throw new AccessDeniedException(
           'Not authorized to update this supplier.',
         );
       }
@@ -139,7 +139,7 @@ export class SuppliersService {
           `Unauthorized supplier update attempt: supplierId=${id} identityId=${identityId}`,
           SuppliersService.name,
         );
-        throw new UnauthorizedException(
+        throw new AccessDeniedException(
           'Not authorized to update this supplier.',
         );
       }

@@ -14,7 +14,7 @@ import {
   ITransactionRunner,
 } from 'src/shared/application/transaction.runner';
 import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
-import { UnauthorizedException } from 'src/shared/domain/exceptions/unauthorized.exception';
+import { AccessDeniedException } from 'src/shared/domain/exceptions/access-denied.exception';
 import { ChangeRequestStatus, EmployeeRole } from '@food-up/shared';
 import { ChangeRequest } from '../domain/change-request.entity';
 import {
@@ -69,7 +69,7 @@ export class ChangeRequestsService {
       );
 
       if (mealSelection.employeeId !== employee.id) {
-        throw new UnauthorizedException(
+        throw new AccessDeniedException(
           'Employee can only create change requests for their own meal selections.',
         );
       }
@@ -197,7 +197,7 @@ export class ChangeRequestsService {
     );
 
     if (performer.role !== EmployeeRole.Manager) {
-      throw new UnauthorizedException(
+      throw new AccessDeniedException(
         'Only managers can change the status of a change request',
       );
     }
@@ -226,7 +226,7 @@ export class ChangeRequestsService {
     );
 
     if (performer.role !== EmployeeRole.Manager) {
-      throw new UnauthorizedException(
+      throw new AccessDeniedException(
         'Only managers can change the status of a change request',
       );
     }
@@ -280,9 +280,9 @@ export class ChangeRequestsService {
 
     const changeRequest = await this._repository.findOneByCriteriaOrThrow({ id });
 
-    // Two-step fetch+check (not folded into repository criteria) to surface UnauthorizedException, not NotFoundException.
+    // Two-step fetch+check (not folded into repository criteria) to surface AccessDeniedException (403), not EntityInstanceNotFoundException (404).
     if (changeRequest.employeeId !== employee.id) {
-      throw new UnauthorizedException(
+      throw new AccessDeniedException(
         'Employee can only revoke their own change requests.',
       );
     }
