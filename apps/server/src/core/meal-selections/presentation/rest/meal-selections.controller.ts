@@ -1,12 +1,5 @@
 import { EmployeeRole, IdentityType } from '@food-up/shared';
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Patch,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -14,8 +7,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
-import { CurrentIdentity } from 'src/core/auth/infrastructure/current-identity.decorator';
-import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
+import { CurrentIdentity } from 'src/core/auth/presentation/rest/current-identity.decorator';
+import { JwtPayload } from 'src/core/auth/application/jwt-payload';
 import { RequiredEmployeeRole } from 'src/core/employees/presentation/rest/employee-role.decorator';
 import { RequiredIdentityType } from 'src/core/identity/presentation/rest/identity-type.decorator';
 import { MealSelectionsService } from '../../application/meal-selections.service';
@@ -41,7 +34,10 @@ export class MealSelectionsController {
     description: 'Meal selection created',
     type: MealSelectionResponseDto,
   })
-  @ApiResponse({ status: 404, description: "Window not found in the caller's business" })
+  @ApiResponse({
+    status: 404,
+    description: "Window not found in the caller's business",
+  })
   @RequiredIdentityType(IdentityType.Employee)
   @ApiBearerAuth()
   @Post()
@@ -61,12 +57,18 @@ export class MealSelectionsController {
     summary: 'Get all meal selections for a window (manager view)',
   })
   @ApiResponse({ status: 200, type: [MealSelectionResponseDto] })
-  @ApiResponse({ status: 404, description: "Window not found in the caller's business" })
+  @ApiResponse({
+    status: 404,
+    description: "Window not found in the caller's business",
+  })
   async findByWindow(
     @Param('windowId') windowId: string,
     @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<MealSelectionResponseDto[]> {
-    const result = await this._mealSelectionsService.findByWindowInMyBusiness(windowId, sub);
+    const result = await this._mealSelectionsService.findByWindowInMyBusiness(
+      windowId,
+      sub,
+    );
     return result.map((e) => this.toResponseDto(e));
   }
 
@@ -75,16 +77,29 @@ export class MealSelectionsController {
   @ApiBearerAuth()
   @Get('window/:windowId/daily-overview')
   @ApiOperation({
-    summary: 'Get per-employee daily order overview for a window (manager view)',
+    summary:
+      'Get per-employee daily order overview for a window (manager view)',
   })
-  @ApiResponse({ status: 200, description: 'List of per-employee per-day overview items', type: [WindowDailyOverviewResponseDto] })
-  @ApiResponse({ status: 404, description: "Window not found in the caller's business" })
+  @ApiResponse({
+    status: 200,
+    description: 'List of per-employee per-day overview items',
+    type: [WindowDailyOverviewResponseDto],
+  })
+  @ApiResponse({
+    status: 404,
+    description: "Window not found in the caller's business",
+  })
   async getDailyOverview(
     @Param('windowId') windowId: string,
     @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<WindowDailyOverviewResponseDto[]> {
-    const items = await this._overviewQueryService.getDailyOverview(windowId, sub);
-    return plainToInstance(WindowDailyOverviewResponseDto, items, { excludeExtraneousValues: true });
+    const items = await this._overviewQueryService.getDailyOverview(
+      windowId,
+      sub,
+    );
+    return plainToInstance(WindowDailyOverviewResponseDto, items, {
+      excludeExtraneousValues: true,
+    });
   }
 
   @ApiOperation({ summary: 'Update a meal selection' })
@@ -117,7 +132,10 @@ export class MealSelectionsController {
   ): Promise<MyMealSelectionResponseDto[]> {
     return plainToInstance(
       MyMealSelectionResponseDto,
-      await this._mealSelectionsService.findMySelectionsForWindow(sub, windowId),
+      await this._mealSelectionsService.findMySelectionsForWindow(
+        sub,
+        windowId,
+      ),
     );
   }
 

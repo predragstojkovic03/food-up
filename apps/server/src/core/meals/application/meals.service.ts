@@ -10,8 +10,7 @@ import {
   I_MEALS_REPOSITORY,
   IMealsRepository,
 } from '../domain/meals.repository.interface';
-import { CreateMealDto } from '../presentation/rest/dto/create-meal.dto';
-import { UpdateMealDto } from '../presentation/rest/dto/update-meal.dto';
+import { CreateMealDto, UpdateMealDto } from './dto/create-meal.dto';
 
 @Injectable()
 export class MealsService {
@@ -24,7 +23,10 @@ export class MealsService {
   ) {}
 
   async create(identityId: string, dto: CreateMealDto): Promise<Meal> {
-    const supplierId = await this._resolveManagedSupplierId(identityId, dto.supplierId);
+    const supplierId = await this._resolveManagedSupplierId(
+      identityId,
+      dto.supplierId,
+    );
 
     const meal = Meal.create(
       dto.name,
@@ -43,7 +45,10 @@ export class MealsService {
     return result;
   }
 
-  async findBySupplier(supplierId: string, identityId: string): Promise<Meal[]> {
+  async findBySupplier(
+    supplierId: string,
+    identityId: string,
+  ): Promise<Meal[]> {
     await this._suppliersService.assertCanView(supplierId, identityId);
     return this._repository.findByCriteria({ supplierId } as any);
   }
@@ -52,18 +57,31 @@ export class MealsService {
     return this._repository.findOneByCriteriaOrThrow({ id });
   }
 
-  async update(id: string, dto: UpdateMealDto, identityId: string): Promise<Meal> {
+  async update(
+    id: string,
+    dto: UpdateMealDto,
+    identityId: string,
+  ): Promise<Meal> {
     const existing = await this._repository.findOneByCriteria({ id });
     if (!existing) throw new EntityInstanceNotFoundException('Meal not found');
-    await this._suppliersService.assertCanManage(existing.supplierId, identityId);
-    const result = await this._repository.update(id, { ...existing, ...dto } as any);
+    await this._suppliersService.assertCanManage(
+      existing.supplierId,
+      identityId,
+    );
+    const result = await this._repository.update(id, {
+      ...existing,
+      ...dto,
+    } as any);
     this._logger.log(`Meal updated: id=${id}`, MealsService.name);
     return result;
   }
 
   async delete(id: string, identityId: string): Promise<void> {
     const existing = await this.findOne(id);
-    await this._suppliersService.assertCanManage(existing.supplierId, identityId);
+    await this._suppliersService.assertCanManage(
+      existing.supplierId,
+      identityId,
+    );
     await this._repository.delete(id);
     this._logger.log(`Meal deleted: id=${id}`, MealsService.name);
   }
@@ -77,7 +95,10 @@ export class MealsService {
     supplierId: string | undefined,
   ): Promise<string> {
     if (supplierId) {
-      const supplier = await this._suppliersService.assertCanManage(supplierId, identityId);
+      const supplier = await this._suppliersService.assertCanManage(
+        supplierId,
+        identityId,
+      );
       return supplier.id;
     }
 

@@ -1,4 +1,9 @@
-import { ForbiddenException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { compare, hash } from 'bcrypt';
 import { randomBytes } from 'crypto';
@@ -17,7 +22,7 @@ import {
   IRefreshTokenRepository,
   RefreshTokenRecord,
 } from '../domain/refresh-token.repository.interface';
-import { JwtPayload } from '../infrastructure/jwt-payload';
+import { JwtPayload } from 'src/core/auth/application/jwt-payload';
 
 export interface IssuedSession {
   accessToken: string;
@@ -44,7 +49,10 @@ export class AuthService {
    * Throws UnauthorizedException for Google-only accounts (passwordHash === null) so that
    * LocalStrategy can surface a meaningful error message rather than a generic 401.
    */
-  async validateLocalCredentials(email: string, password: string): Promise<Identity | null> {
+  async validateLocalCredentials(
+    email: string,
+    password: string,
+  ): Promise<Identity | null> {
     const identity = await this._identityService.findByEmail(email);
     if (!identity) return null;
     if (!identity.passwordHash) {
@@ -79,7 +87,9 @@ export class AuthService {
    * tries to refresh, presenting the already-consumed token again is detectable. We respond
    * by revoking the entire family — the thief's rotated copy is also dead.
    */
-  async refreshSession(rawCookieToken: string): Promise<{ accessToken: string; rawRefreshToken: string }> {
+  async refreshSession(
+    rawCookieToken: string,
+  ): Promise<{ accessToken: string; rawRefreshToken: string }> {
     const { tokenId, secret } = this._parseCookieToken(rawCookieToken);
     const record = await this._rtRepo.findById(tokenId);
 
@@ -109,7 +119,10 @@ export class AuthService {
     const payload = await this._buildJwtPayload(record.identityId);
     const accessToken = await this._signAccessToken(payload);
     // Carry the familyId forward — all rotations belong to the same login session
-    const rawRefreshToken = await this._issueRefreshToken(record.identityId, record.familyId);
+    const rawRefreshToken = await this._issueRefreshToken(
+      record.identityId,
+      record.familyId,
+    );
 
     return { accessToken, rawRefreshToken };
   }
@@ -139,7 +152,8 @@ export class AuthService {
     const identity = await this._identityService.findById(identityId);
     if (!identity) throw new UnauthorizedException('Identity not found');
     // Every session (password, Google, refresh) passes through here, so deactivation ends them all
-    if (!identity.isActive) throw new UnauthorizedException('Account is deactivated');
+    if (!identity.isActive)
+      throw new UnauthorizedException('Account is deactivated');
 
     let role: EmployeeRole | undefined;
     if (identity.type === IdentityType.Employee) {
@@ -164,12 +178,17 @@ export class AuthService {
    * - tokenId  → the DB record PK (ULID) — O(1) lookup, no full-table scan
    * - rawSecret → 32 random bytes hex — bcrypt-hashed so a DB breach yields nothing usable
    */
-  private async _issueRefreshToken(identityId: string, familyId?: string): Promise<string> {
+  private async _issueRefreshToken(
+    identityId: string,
+    familyId?: string,
+  ): Promise<string> {
     const rawSecret = randomBytes(32).toString('hex');
     const secretHash = await hash(rawSecret, 10);
 
     const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + this._config.get('JWT_REFRESH_EXPIRY_DAYS'));
+    expiresAt.setDate(
+      expiresAt.getDate() + this._config.get('JWT_REFRESH_EXPIRY_DAYS'),
+    );
 
     const record: RefreshTokenRecord = {
       id: generateId(),
@@ -194,7 +213,11 @@ export class AuthService {
    * while managers retain their password so they can still log in via email/password if needed.
    * Non-employee identities also keep their password (clearPassword=false).
    */
-  async findOrLinkGoogleIdentity(googleId: string, email: string, pictureUrl: string | null): Promise<Identity> {
+  async findOrLinkGoogleIdentity(
+    googleId: string,
+    email: string,
+    pictureUrl: string | null,
+  ): Promise<Identity> {
     const existing = await this._identityService.findByGoogleId(googleId);
     if (existing) {
       await this._identityService.updatePictureUrl(existing.id, pictureUrl);
@@ -214,11 +237,18 @@ export class AuthService {
       clearPassword = employee?.role !== EmployeeRole.Manager;
     }
 
-    await this._identityService.linkGoogle(identity.id, googleId, clearPassword);
+    await this._identityService.linkGoogle(
+      identity.id,
+      googleId,
+      clearPassword,
+    );
     await this._identityService.updatePictureUrl(identity.id, pictureUrl);
 
     const linked = await this._identityService.findById(identity.id);
-    if (!linked) throw new UnauthorizedException('Identity not found after Google linking');
+    if (!linked)
+      throw new UnauthorizedException(
+        'Identity not found after Google linking',
+      );
     return linked;
   }
 
@@ -226,8 +256,16 @@ export class AuthService {
     return this._identityService.findById(id);
   }
 
-  async changePassword(identityId: string, currentPassword: string, newPassword: string): Promise<void> {
-    await this._identityService.changePassword(identityId, currentPassword, newPassword);
+  async changePassword(
+    identityId: string,
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<void> {
+    await this._identityService.changePassword(
+      identityId,
+      currentPassword,
+      newPassword,
+    );
   }
 
   private _buildCookieToken(tokenId: string, secret: string): string {
@@ -237,7 +275,8 @@ export class AuthService {
   private _parseCookieToken(raw: string): { tokenId: string; secret: string } {
     const decoded = Buffer.from(raw, 'base64url').toString();
     const colonIndex = decoded.indexOf(':');
-    if (colonIndex === -1) throw new UnauthorizedException('Malformed refresh token');
+    if (colonIndex === -1)
+      throw new UnauthorizedException('Malformed refresh token');
     return {
       tokenId: decoded.slice(0, colonIndex),
       secret: decoded.slice(colonIndex + 1),

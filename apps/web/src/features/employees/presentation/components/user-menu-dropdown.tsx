@@ -18,7 +18,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useCurrentEmployee } from '@/features/employees/application/use-current-employee.hook';
-import { useAuthStore } from '@/features/auth/presentation/state/auth.store';
+import { useAuthStore } from '@/features/auth/application/state/auth.store';
 import { useServices } from '@/shared/infrastructure/di/service.context';
 import { LogOut, Settings } from 'lucide-react';
 import { useTranslation } from 'react-i18next';

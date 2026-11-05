@@ -5,7 +5,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
+import { JwtPayload } from 'src/core/auth/application/jwt-payload';
 import { IDENTITY_TYPE_KEY } from './identity-type.decorator';
 
 @Injectable()
@@ -14,10 +14,10 @@ export class IdentityTypeGuard implements CanActivate {
 
   canActivate(context: ExecutionContext): boolean {
     // Method-level metadata overrides class-level metadata
-    const requiredTypes = this.reflector.getAllAndOverride<string[]>(IDENTITY_TYPE_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
+    const requiredTypes = this.reflector.getAllAndOverride<string[]>(
+      IDENTITY_TYPE_KEY,
+      [context.getHandler(), context.getClass()],
+    );
     if (!requiredTypes) return true;
 
     const request = context.switchToHttp().getRequest();

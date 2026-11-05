@@ -9,7 +9,7 @@ import {
   IConfigService,
 } from 'src/shared/application/config-service.interface';
 import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
-import { JwtPayload } from './jwt-payload';
+import { JwtPayload } from 'src/core/auth/application/jwt-payload';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {

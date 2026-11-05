@@ -2,7 +2,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { Test } from '@nestjs/testing';
 import { AppModule } from 'src/app.module';
 import { configureApp } from 'src/app.setup';
-import { I_MAIL_SERVICE } from 'src/shared/infrastructure/notifications/mail/mail.service.interface';
+import { I_MAIL_SERVICE } from 'src/shared/application/mail/mail.service.interface';
 import * as request from 'supertest';
 import { DataSource } from 'typeorm';
 import { FakeMailService } from './fake-mail.service';
@@ -28,7 +28,9 @@ export async function createTestApp(): Promise<TestApp> {
     .useValue(mail)
     .compile();
 
-  const app = moduleRef.createNestApplication<NestExpressApplication>({ logger: false });
+  const app = moduleRef.createNestApplication<NestExpressApplication>({
+    logger: false,
+  });
   configureApp(app);
   await app.init();
 
@@ -37,7 +39,10 @@ export async function createTestApp(): Promise<TestApp> {
 
   return {
     app,
-    http: () => request(app.getHttpServer()) as unknown as request.SuperTest<request.Test>,
+    http: () =>
+      request(
+        app.getHttpServer(),
+      ) as unknown as request.SuperTest<request.Test>,
     dataSource,
     data,
     mail,

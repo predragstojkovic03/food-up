@@ -1,5 +1,5 @@
 import { tokenStore } from '@/shared/infrastructure/auth/token-store';
-import { useAuthStore } from '@/features/auth/presentation/state/auth.store';
+import { useAuthStore } from '@/features/auth/application/state/auth.store';
 import { useServices } from '@/shared/infrastructure/di/service.context';
 import { useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';

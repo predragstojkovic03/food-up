@@ -14,8 +14,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
-import { CurrentIdentity } from 'src/core/auth/infrastructure/current-identity.decorator';
-import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
+import { CurrentIdentity } from 'src/core/auth/presentation/rest/current-identity.decorator';
+import { JwtPayload } from 'src/core/auth/application/jwt-payload';
 import { MenuItemsService } from '../../application/menu-items.service';
 import { MenuItem } from '../../domain/menu-item.entity';
 import { CreateMenuItemDto } from './dto/create-menu-item.dto';
@@ -30,7 +30,10 @@ export class MenuItemsController {
   @Post()
   @ApiOperation({ summary: 'Create a new menu item' })
   @ApiResponse({ status: 201, type: MenuItemResponseDto })
-  @ApiResponse({ status: 404, description: 'Not found, or the supplier is not available to the caller' })
+  @ApiResponse({
+    status: 404,
+    description: 'Not found, or the supplier is not available to the caller',
+  })
   @ApiBearerAuth()
   async create(
     @Body() dto: CreateMenuItemDto,
@@ -43,20 +46,29 @@ export class MenuItemsController {
   @Get('menu-period/:menuPeriodId')
   @ApiOperation({ summary: 'Get all menu items for a menu period' })
   @ApiResponse({ status: 200, type: [MenuItemResponseDto] })
-  @ApiResponse({ status: 404, description: 'Not found, or the supplier is not available to the caller' })
+  @ApiResponse({
+    status: 404,
+    description: 'Not found, or the supplier is not available to the caller',
+  })
   @ApiBearerAuth()
   async findByMenuPeriod(
     @Param('menuPeriodId') menuPeriodId: string,
     @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<MenuItemResponseDto[]> {
-    const items = await this._menuItemsService.findByMenuPeriod(menuPeriodId, sub);
+    const items = await this._menuItemsService.findByMenuPeriod(
+      menuPeriodId,
+      sub,
+    );
     return items.map((item) => this.domainToDto(item));
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update a menu item by ID' })
   @ApiResponse({ status: 200, type: MenuItemResponseDto })
-  @ApiResponse({ status: 404, description: 'Not found, or the supplier is not available to the caller' })
+  @ApiResponse({
+    status: 404,
+    description: 'Not found, or the supplier is not available to the caller',
+  })
   @ApiBearerAuth()
   async update(
     @Param('id') id: string,
@@ -70,7 +82,10 @@ export class MenuItemsController {
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a menu item by ID' })
   @ApiResponse({ status: 204, description: 'Menu item deleted' })
-  @ApiResponse({ status: 404, description: 'Not found, or the supplier is not available to the caller' })
+  @ApiResponse({
+    status: 404,
+    description: 'Not found, or the supplier is not available to the caller',
+  })
   @ApiBearerAuth()
   async delete(
     @Param('id') id: string,

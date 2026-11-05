@@ -1,5 +1,4 @@
 import { Entity } from './entity';
-import { EntityInstanceNotFoundException } from './exceptions/entity-instance-not-found.exception';
 import { Id } from './id.type';
 
 export interface IRepository<T extends Entity<Id>> {

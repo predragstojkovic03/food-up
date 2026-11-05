@@ -10,7 +10,9 @@ let _logoBuffer: Buffer | null = null;
 
 function getLogoBuffer(): Buffer {
   if (!_logoBuffer) {
-    _logoBuffer = fs.readFileSync(path.join(__dirname, 'assets', 'foodup-logo.png'));
+    _logoBuffer = fs.readFileSync(
+      path.join(__dirname, 'assets', 'foodup-logo.png'),
+    );
   }
   return _logoBuffer;
 }
@@ -31,7 +33,7 @@ export function getLogoAttachment(): LogoAttachment {
   };
 }
 
-export function emailLayout(content: string, webAppUrl: string): string {
+export function emailLayout(content: string, _webAppUrl: string): string {
   const year = new Date().getFullYear();
 
   return `<!DOCTYPE html>

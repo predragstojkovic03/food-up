@@ -14,8 +14,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
-import { CurrentIdentity } from 'src/core/auth/infrastructure/current-identity.decorator';
-import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
+import { CurrentIdentity } from 'src/core/auth/presentation/rest/current-identity.decorator';
+import { JwtPayload } from 'src/core/auth/application/jwt-payload';
 import { RequiredEmployeeRole } from 'src/core/employees/presentation/rest/employee-role.decorator';
 import { EmployeeRole, IdentityType } from '@food-up/shared';
 import { RequiredIdentityType } from 'src/core/identity/presentation/rest/identity-type.decorator';
@@ -62,7 +62,9 @@ export class MealSelectionWindowsController {
   @RequiredEmployeeRole(EmployeeRole.Manager)
   @ApiBearerAuth()
   @Get('business')
-  @ApiOperation({ summary: 'Get all meal selection windows for the manager\'s business' })
+  @ApiOperation({
+    summary: "Get all meal selection windows for the manager's business",
+  })
   @ApiResponse({
     status: 200,
     description: 'List of meal selection windows for this business',
@@ -88,7 +90,10 @@ export class MealSelectionWindowsController {
   @RequiredIdentityType(IdentityType.Employee)
   @ApiBearerAuth()
   @Get('my-relevant')
-  @ApiOperation({ summary: 'Get the latest published window for the employee (active or past deadline)' })
+  @ApiOperation({
+    summary:
+      'Get the latest published window for the employee (active or past deadline)',
+  })
   @ApiResponse({ status: 200, type: RelevantMealSelectionWindowResponseDto })
   async getMyRelevant(
     @CurrentIdentity() { sub }: JwtPayload,
@@ -101,14 +106,20 @@ export class MealSelectionWindowsController {
   @RequiredIdentityType(IdentityType.Employee)
   @ApiBearerAuth()
   @Get(':id/menu-items')
-  @ApiOperation({ summary: 'Get enriched menu items for a meal selection window' })
+  @ApiOperation({
+    summary: 'Get enriched menu items for a meal selection window',
+  })
   @ApiResponse({ status: 200, type: [WindowMenuItemResponseDto] })
-  @ApiResponse({ status: 404, description: "Window not found in the employee's business" })
+  @ApiResponse({
+    status: 404,
+    description: "Window not found in the employee's business",
+  })
   async getMenuItems(
     @Param('id') id: string,
     @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<WindowMenuItemResponseDto[]> {
-    const menuItems = await this._mealSelectionWindowService.findMenuItemsForWindow(id, sub);
+    const menuItems =
+      await this._mealSelectionWindowService.findMenuItemsForWindow(id, sub);
     return plainToInstance(WindowMenuItemResponseDto, menuItems);
   }
 
@@ -119,7 +130,10 @@ export class MealSelectionWindowsController {
     description: 'Meal selection window updated',
     type: MealSelectionWindowResponseDto,
   })
-  @ApiResponse({ status: 404, description: "Window not found in the manager's business" })
+  @ApiResponse({
+    status: 404,
+    description: "Window not found in the manager's business",
+  })
   @RequiredIdentityType(IdentityType.Employee)
   @RequiredEmployeeRole(EmployeeRole.Manager)
   @ApiBearerAuth()
@@ -134,7 +148,10 @@ export class MealSelectionWindowsController {
 
   @ApiOperation({ summary: 'Delete a meal selection window' })
   @ApiResponse({ status: 200, description: 'Meal selection window deleted' })
-  @ApiResponse({ status: 404, description: "Window not found in the manager's business" })
+  @ApiResponse({
+    status: 404,
+    description: "Window not found in the manager's business",
+  })
   @RequiredIdentityType(IdentityType.Employee)
   @RequiredEmployeeRole(EmployeeRole.Manager)
   @ApiBearerAuth()

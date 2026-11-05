@@ -1,6 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { useAuthStore } from '@/features/auth/presentation/state/auth.store';
+import { useAuthStore } from '@/features/auth/application/state/auth.store';
 import { useCurrentEmployee } from '@/features/employees/application/use-current-employee.hook';
 import { UserMenuDropdown } from '@/features/employees/presentation/components/user-menu-dropdown';
 import { EmployeeRole, IdentityType } from '@food-up/shared';

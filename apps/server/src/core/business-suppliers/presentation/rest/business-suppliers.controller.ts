@@ -13,7 +13,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { Disabled } from 'src/shared/infrastructure/decorators/disabled.decorator';
+import { Disabled } from 'src/shared/presentation/disabled.decorator';
 import { BusinessSuppliersService } from '../../application/business-suppliers.service';
 
 @ApiTags('BusinessSuppliers')

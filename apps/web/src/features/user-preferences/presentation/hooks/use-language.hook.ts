@@ -1,9 +1,9 @@
 import { Language } from '@food-up/shared';
 import { useEffect } from 'react';
 import i18n from '@/i18n/i18n';
-import { useAuthStore } from '@/features/auth/presentation/state/auth.store';
+import { useAuthStore } from '@/features/auth/application/state/auth.store';
 import { useServices } from '@/shared/infrastructure/di/service.context';
-import { usePreferencesStore } from '../state/preferences.store';
+import { usePreferencesStore } from '@/features/user-preferences/application/state/preferences.store';
 
 const SEED_KEY = 'lang_seeded';
 

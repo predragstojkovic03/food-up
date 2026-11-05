@@ -14,8 +14,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { plainToClass } from 'class-transformer';
-import { CurrentIdentity } from 'src/core/auth/infrastructure/current-identity.decorator';
-import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
+import { CurrentIdentity } from 'src/core/auth/presentation/rest/current-identity.decorator';
+import { JwtPayload } from 'src/core/auth/application/jwt-payload';
 import { MealsService } from '../../application/meals.service';
 import { Meal } from '../../domain/meal.entity';
 import { CreateMealDto } from './dto/create-meal.dto';
@@ -43,7 +43,10 @@ export class MealsController {
   @Get('supplier/:supplierId')
   @ApiOperation({ summary: 'Get all meals for a supplier' })
   @ApiResponse({ status: 200, type: [MealResponseDto] })
-  @ApiResponse({ status: 404, description: 'Meal or supplier not found, or not available to the caller' })
+  @ApiResponse({
+    status: 404,
+    description: 'Meal or supplier not found, or not available to the caller',
+  })
   @ApiBearerAuth()
   async findBySupplier(
     @Param('supplierId') supplierId: string,
@@ -56,7 +59,10 @@ export class MealsController {
   @Patch(':id')
   @ApiOperation({ summary: 'Update a meal by ID' })
   @ApiResponse({ status: 200, type: MealResponseDto })
-  @ApiResponse({ status: 404, description: 'Meal or supplier not found, or not available to the caller' })
+  @ApiResponse({
+    status: 404,
+    description: 'Meal or supplier not found, or not available to the caller',
+  })
   @ApiBearerAuth()
   async update(
     @Param('id') id: string,
@@ -70,7 +76,10 @@ export class MealsController {
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a meal by ID' })
   @ApiResponse({ status: 204, description: 'Meal deleted' })
-  @ApiResponse({ status: 404, description: 'Meal or supplier not found, or not available to the caller' })
+  @ApiResponse({
+    status: 404,
+    description: 'Meal or supplier not found, or not available to the caller',
+  })
   @ApiBearerAuth()
   async delete(
     @Param('id') id: string,

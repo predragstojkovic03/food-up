@@ -1,6 +1,6 @@
 import { Toaster as Sonner, type ToasterProps } from 'sonner';
 import { CircleCheckIcon, InfoIcon, TriangleAlertIcon, OctagonXIcon, Loader2Icon } from 'lucide-react';
-import { usePreferencesStore } from '@/features/user-preferences/presentation/state/preferences.store';
+import { usePreferencesStore } from '@/features/user-preferences/application/state/preferences.store';
 import { ThemePreference } from '@food-up/shared';
 
 function useSonnerTheme(): ToasterProps['theme'] {

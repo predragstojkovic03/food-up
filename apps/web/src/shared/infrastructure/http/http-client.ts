@@ -81,7 +81,7 @@ export class HttpClient {
       ...(this._tokenStore.get() ? { Authorization: `Bearer ${this._tokenStore.get()}` } : {}),
     });
 
-    let res = await fetch(url, { ...init, headers: buildHeaders() });
+    const res = await fetch(url, { ...init, headers: buildHeaders() });
 
     if (res.status !== 401) return res;
 

@@ -1,6 +1,6 @@
 import { ThemePreference } from '@food-up/shared';
 import { useEffect } from 'react';
-import { usePreferencesStore } from '../state/preferences.store';
+import { usePreferencesStore } from '@/features/user-preferences/application/state/preferences.store';
 
 function resolveEffective(theme: ThemePreference): 'dark' | 'light' {
   if (theme === ThemePreference.System) {

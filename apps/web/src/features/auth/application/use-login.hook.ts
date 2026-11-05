@@ -1,6 +1,6 @@
 import { useServices } from '@/shared/infrastructure/di/service.context';
 import { useMutation } from '@tanstack/react-query';
-import { useAuthStore } from '../presentation/state/auth.store';
+import { useAuthStore } from '@/features/auth/application/state/auth.store';
 
 export function useLogin() {
   const { authService } = useServices();

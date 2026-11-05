@@ -5,7 +5,10 @@ import {
   I_CONFIG_SERVICE,
   IConfigService,
 } from 'src/shared/application/config-service.interface';
-import { IMailService, MailOptions } from './mail.service.interface';
+import {
+  IMailService,
+  MailOptions,
+} from 'src/shared/application/mail/mail.service.interface';
 
 @Injectable()
 export class ResendMailService implements IMailService {

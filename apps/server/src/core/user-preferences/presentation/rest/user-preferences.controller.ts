@@ -1,8 +1,13 @@
 import { Body, Controller, Get, Patch } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
-import { CurrentIdentity } from 'src/core/auth/infrastructure/current-identity.decorator';
-import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
+import { CurrentIdentity } from 'src/core/auth/presentation/rest/current-identity.decorator';
+import { JwtPayload } from 'src/core/auth/application/jwt-payload';
 import { UserPreferencesService } from '../../application/user-preferences.service';
 import { UpdateUserPreferencesRequestDto } from './dto/update-user-preferences-request.dto';
 import { UserPreferencesResponseDto } from './dto/user-preferences-response.dto';

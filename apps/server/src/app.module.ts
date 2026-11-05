@@ -12,8 +12,8 @@ import { join } from 'path';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ApiKeyGuard } from './core/auth/infrastructure/api-key.guard';
-import { JwtAuthGuard } from './core/auth/infrastructure/jwt-auth.guard';
+import { ApiKeyGuard } from 'src/core/auth/presentation/rest/api-key.guard';
+import { JwtAuthGuard } from 'src/core/auth/presentation/rest/jwt-auth.guard';
 import { CoreModule } from './core/core.module';
 import { HealthModule } from './health/health.module';
 import { EmployeeRoleGuard } from './core/employees/presentation/rest/employee-role.guard';
@@ -26,7 +26,7 @@ import {
 import { DomainEventsModule } from './shared/application/domain-events/domain-events.module';
 import { ConfigModule } from './shared/infrastructure/config/config.module';
 import { DomainExceptionFilter } from './shared/infrastructure/domain-exception-filter';
-import { DisabledEndpointGuard } from './shared/infrastructure/guards/disabled-endpoint.guard';
+import { DisabledEndpointGuard } from 'src/shared/presentation/disabled-endpoint.guard';
 import { LoggerModule } from './shared/infrastructure/logger/logger.module';
 import { NotificationsModule } from './shared/infrastructure/notifications/notifications.module';
 import { TransactionModule } from './shared/infrastructure/transaction/transaction.module';
@@ -79,7 +79,9 @@ import { TransactionModule } from './shared/infrastructure/transaction/transacti
     }),
     ServeStaticModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: IConfigService<EnvironmentVariables, true>) =>
+      useFactory: (
+        configService: IConfigService<EnvironmentVariables, true>,
+      ) =>
         configService.get('NODE_ENV') === NodeEnv.Production
           ? [
               {
@@ -99,9 +101,7 @@ import { TransactionModule } from './shared/infrastructure/transaction/transacti
       inject: [I_CONFIG_SERVICE],
     }),
     EventEmitterModule.forRoot({ wildcard: true }),
-    ThrottlerModule.forRoot([
-      { name: 'default', ttl: 60_000, limit: 120 },
-    ]),
+    ThrottlerModule.forRoot([{ name: 'default', ttl: 60_000, limit: 120 }]),
     BullModule.forRootAsync({
       useFactory: (
         configService: IConfigService<EnvironmentVariables, true>,

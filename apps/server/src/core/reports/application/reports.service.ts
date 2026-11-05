@@ -1,4 +1,9 @@
-import { IOrderSummarySend, ISendReportItem, IWindowCostSummary, Language } from '@food-up/shared';
+import {
+  IOrderSummarySend,
+  ISendReportItem,
+  IWindowCostSummary,
+  Language,
+} from '@food-up/shared';
 import { Inject, Injectable } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
 import { BusinessesService } from 'src/core/businesses/application/businesses.service';
@@ -14,20 +19,29 @@ import { DomainEvents } from 'src/shared/application/domain-events/domain-events
 import { EntityInstanceNotFoundException } from 'src/shared/domain/exceptions/entity-instance-not-found.exception';
 import { InvalidInputDataException } from 'src/shared/domain/exceptions/invalid-input-data.exception';
 import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
-import { I_CONFIG_SERVICE, IConfigService } from 'src/shared/application/config-service.interface';
+import {
+  I_CONFIG_SERVICE,
+  IConfigService,
+} from 'src/shared/application/config-service.interface';
 import { EnvironmentVariables } from 'src/env.validation';
 import { t } from 'src/shared/i18n/i18n.helper';
-import { emailLayout, getLogoAttachment } from 'src/shared/infrastructure/notifications/mail/email-layout';
+import {
+  emailLayout,
+  getLogoAttachment,
+} from 'src/shared/application/mail/email-layout';
 import {
   I_MAIL_SERVICE,
   IMailService,
-} from 'src/shared/infrastructure/notifications/mail/mail.service.interface';
+} from 'src/shared/application/mail/mail.service.interface';
 import { OrderSummarySend } from '../domain/order-summary-send.entity';
 import {
   I_ORDER_SUMMARY_SENDS_REPOSITORY,
   IOrderSummarySendsRepository,
 } from '../domain/order-summary-sends.repository.interface';
-import { EmployeeDaySelectionRow, OrderSummaryRow } from './queries/dto/order-summary-row.dto';
+import {
+  EmployeeDaySelectionRow,
+  OrderSummaryRow,
+} from './queries/dto/order-summary-row.dto';
 import {
   I_ORDER_SUMMARY_QUERY_REPOSITORY,
   IOrderSummaryQueryRepository,
@@ -42,7 +56,13 @@ export type SupplierSendStatus = {
   canSend: boolean;
 };
 
-type DayPivot = { soup: string; meal: string; salad: string; bread: string; dessert: string };
+type DayPivot = {
+  soup: string;
+  meal: string;
+  salad: string;
+  bread: string;
+  dessert: string;
+};
 
 const FUN_WORDS = [
   'mango',
@@ -93,7 +113,8 @@ export class ReportsService {
     private readonly _businessSuppliersService: BusinessSuppliersService,
     private readonly _windowsService: MealSelectionWindowsService,
     private readonly _businessesService: BusinessesService,
-    @Inject(I_CONFIG_SERVICE) private readonly _configService: IConfigService<EnvironmentVariables, true>,
+    @Inject(I_CONFIG_SERVICE)
+    private readonly _configService: IConfigService<EnvironmentVariables, true>,
     @Inject(I_LOGGER) private readonly _logger: ILogger,
   ) {}
 
@@ -105,21 +126,25 @@ export class ReportsService {
     windowId: string,
     managerIdentityId: string,
   ): Promise<{ buffer: Buffer; filename: string }> {
-    const { window } = await this._getManagedWindow(windowId, managerIdentityId);
+    const { window } = await this._getManagedWindow(
+      windowId,
+      managerIdentityId,
+    );
     const business = await this._businessesService.findOne(window.businessId);
     const language = business.language;
 
     const includeAllEmployees = business.reportIncludeEmployeesWithoutSelection;
-    const [rows, employeeRows, employeesWithoutSelection, skippedEmployees] = await Promise.all([
-      this._queryRepository.getByWindow(windowId),
-      this._queryRepository.getEmployeeSelections(windowId),
-      includeAllEmployees
-        ? this._queryRepository.getEmployeesWithoutSelection(windowId)
-        : Promise.resolve([]),
-      includeAllEmployees
-        ? this._queryRepository.getSkippedEmployees(windowId)
-        : Promise.resolve([]),
-    ]);
+    const [rows, employeeRows, employeesWithoutSelection, skippedEmployees] =
+      await Promise.all([
+        this._queryRepository.getByWindow(windowId),
+        this._queryRepository.getEmployeeSelections(windowId),
+        includeAllEmployees
+          ? this._queryRepository.getEmployeesWithoutSelection(windowId)
+          : Promise.resolve([]),
+        includeAllEmployees
+          ? this._queryRepository.getSkippedEmployees(windowId)
+          : Promise.resolve([]),
+      ]);
 
     const workbook = new ExcelJS.Workbook();
     const supplierGroups = this._groupBySupplier(rows);
@@ -129,7 +154,12 @@ export class ReportsService {
       sheet.addRow(['No meal selections found for this window.']);
     } else {
       for (const [supplierName, supplierRows] of supplierGroups) {
-        this._buildSupplierSheet(workbook, supplierName, supplierRows, language);
+        this._buildSupplierSheet(
+          workbook,
+          supplierName,
+          supplierRows,
+          language,
+        );
       }
     }
 
@@ -137,7 +167,11 @@ export class ReportsService {
     const missingByDate = this._groupEmployeesByDate(employeesWithoutSelection);
     const skippedByDate = this._groupEmployeesByDate(skippedEmployees);
     const sheetDates = [
-      ...new Set([...dateGroups.keys(), ...missingByDate.keys(), ...skippedByDate.keys()]),
+      ...new Set([
+        ...dateGroups.keys(),
+        ...missingByDate.keys(),
+        ...skippedByDate.keys(),
+      ]),
     ].sort();
     for (const date of sheetDates) {
       this._buildDaySheet(
@@ -161,7 +195,10 @@ export class ReportsService {
     return { buffer, filename };
   }
 
-  async getSendStatus(windowId: string, managerIdentityId: string): Promise<SupplierSendStatus[]> {
+  async getSendStatus(
+    windowId: string,
+    managerIdentityId: string,
+  ): Promise<SupplierSendStatus[]> {
     await this._getManagedWindow(windowId, managerIdentityId);
     const rows = await this._queryRepository.getByWindow(windowId);
     const uniqueSupplierIds = [...new Set(rows.map((r) => r.supplierId))];
@@ -207,7 +244,10 @@ export class ReportsService {
     supplierId: string,
     managerIdentityId: string,
   ): Promise<{ subject: string; introText: string; html: string }> {
-    const { window, managerEmployee } = await this._getManagedWindow(windowId, managerIdentityId);
+    const { window, managerEmployee } = await this._getManagedWindow(
+      windowId,
+      managerIdentityId,
+    );
     await this._assertSuppliersInWindow(windowId, [supplierId]);
     const supplier = await this._suppliersService.findOne(supplierId);
 
@@ -218,7 +258,10 @@ export class ReportsService {
     if (supplier.isManaged()) {
       lang = supplier.language;
     } else {
-      const bs = await this._businessSuppliersService.findBySupplierAndBusiness(supplierId, businessId);
+      const bs = await this._businessSuppliersService.findBySupplierAndBusiness(
+        supplierId,
+        businessId,
+      );
       lang = bs?.language ?? Language.En;
     }
 
@@ -240,7 +283,13 @@ export class ReportsService {
       : t((k) => k.mail.orderSummary.introAdjusted, lang);
 
     const webAppUrl = this._configService.get('WEB_APP_URL');
-    const html = this._renderHtmlTable(supplier.name, rows, introText, lang, webAppUrl);
+    const html = this._renderHtmlTable(
+      supplier.name,
+      rows,
+      introText,
+      lang,
+      webAppUrl,
+    );
 
     return { subject, introText, html };
   }
@@ -251,7 +300,10 @@ export class ReportsService {
     suppliers: ISendReportItem[],
     managerIdentityId: string,
   ): Promise<void> {
-    const { managerEmployee } = await this._getManagedWindow(windowId, managerIdentityId);
+    const { managerEmployee } = await this._getManagedWindow(
+      windowId,
+      managerIdentityId,
+    );
     await this._assertSuppliersInWindow(
       windowId,
       suppliers.map((s) => s.supplierId),
@@ -275,20 +327,39 @@ export class ReportsService {
       if (supplier.isManaged()) {
         lang = supplier.language;
       } else {
-        const bs = await this._businessSuppliersService.findBySupplierAndBusiness(supplierId, businessId);
+        const bs =
+          await this._businessSuppliersService.findBySupplierAndBusiness(
+            supplierId,
+            businessId,
+          );
         lang = bs?.language ?? Language.En;
       }
 
-      const rows = await this._queryRepository.getByWindowAndSupplier(windowId, supplierId);
+      const rows = await this._queryRepository.getByWindowAndSupplier(
+        windowId,
+        supplierId,
+      );
       const webAppUrl = this._configService.get('WEB_APP_URL');
-      const html = this._renderHtmlTable(supplier.name, rows, introText, lang, webAppUrl);
+      const html = this._renderHtmlTable(
+        supplier.name,
+        rows,
+        introText,
+        lang,
+        webAppUrl,
+      );
 
       await this._mailService.send(supplier.email, subject, html, {
         cc: managerEmail ?? undefined,
         attachments: [getLogoAttachment()],
       });
 
-      const send = OrderSummarySend.create(windowId, supplierId, managerEmployee.id, subject, html);
+      const send = OrderSummarySend.create(
+        windowId,
+        supplierId,
+        managerEmployee.id,
+        subject,
+        html,
+      );
       await this._sendsRepository.insert(send);
 
       this._logger.log(
@@ -298,12 +369,18 @@ export class ReportsService {
     }
   }
 
-  async getCostSummary(windowId: string, managerIdentityId: string): Promise<IWindowCostSummary[]> {
+  async getCostSummary(
+    windowId: string,
+    managerIdentityId: string,
+  ): Promise<IWindowCostSummary[]> {
     await this._getManagedWindow(windowId, managerIdentityId);
     return this._queryRepository.getCostByWindow(windowId);
   }
 
-  async getAllSends(windowId: string, managerIdentityId: string): Promise<IOrderSummarySend[]> {
+  async getAllSends(
+    windowId: string,
+    managerIdentityId: string,
+  ): Promise<IOrderSummarySend[]> {
     await this._getManagedWindow(windowId, managerIdentityId);
     const sends = await this._sendsRepository.findAllByWindow(windowId);
     return Promise.all(
@@ -339,14 +416,19 @@ export class ReportsService {
         `Cross-business report access denied: windowId=${windowId} identityId=${managerIdentityId}`,
         ReportsService.name,
       );
-      throw new EntityInstanceNotFoundException(`Meal selection window ${windowId} not found`);
+      throw new EntityInstanceNotFoundException(
+        `Meal selection window ${windowId} not found`,
+      );
     }
 
     return { window, managerEmployee };
   }
 
   /** Only suppliers with orders in the window can be previewed or emailed. */
-  private async _assertSuppliersInWindow(windowId: string, supplierIds: string[]): Promise<void> {
+  private async _assertSuppliersInWindow(
+    windowId: string,
+    supplierIds: string[],
+  ): Promise<void> {
     const rows = await this._queryRepository.getByWindow(windowId);
     const windowSupplierIds = new Set(rows.map((r) => r.supplierId));
     const unknown = supplierIds.filter((id) => !windowSupplierIds.has(id));
@@ -367,7 +449,9 @@ export class ReportsService {
     const intro = `<p style="margin:0 0 20px;font-size:15px;color:#4a4a4a;line-height:1.6;">${introText}</p>`;
 
     if (rows.length === 0) {
-      const content = intro + `<p style="font-size:15px;color:#888;">${t((k) => k.mail.orderSummary.noOrders, lang)}</p>`;
+      const content =
+        intro +
+        `<p style="font-size:15px;color:#888;">${t((k) => k.mail.orderSummary.noOrders, lang)}</p>`;
       return emailLayout(content, webAppUrl);
     }
 
@@ -433,26 +517,55 @@ export class ReportsService {
       sheet.mergeCells(dayRow.number, 1, dayRow.number, 2);
       dayRow.height = 24;
       const dayCell = dayRow.getCell(1);
-      dayCell.font = { name: 'Calibri', bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
-      dayCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2D6A4F' } };
+      dayCell.font = {
+        name: 'Calibri',
+        bold: true,
+        size: 12,
+        color: { argb: 'FFFFFFFF' },
+      };
+      dayCell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FF2D6A4F' },
+      };
       dayCell.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
 
       for (const [mealType, meals] of typeGroups) {
-        const typeRow = sheet.addRow([this._formatMealTypeLabel(mealType, lang), '']);
+        const typeRow = sheet.addRow([
+          this._formatMealTypeLabel(mealType, lang),
+          '',
+        ]);
         sheet.mergeCells(typeRow.number, 1, typeRow.number, 2);
         const typeCell = typeRow.getCell(1);
-        typeCell.font = { name: 'Calibri', bold: true, italic: true, color: { argb: 'FF2D6A4F' } };
-        typeCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEDF7F2' } };
+        typeCell.font = {
+          name: 'Calibri',
+          bold: true,
+          italic: true,
+          color: { argb: 'FF2D6A4F' },
+        };
+        typeCell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFEDF7F2' },
+        };
         typeCell.alignment = { indent: 1 };
 
         for (const meal of meals) {
-          const mealRow = sheet.addRow({ meal: meal.mealName, qty: meal.totalQuantity });
+          const mealRow = sheet.addRow({
+            meal: meal.mealName,
+            qty: meal.totalQuantity,
+          });
           mealRow.getCell(1).font = { name: 'Calibri' };
           mealRow.getCell(1).alignment = { indent: 2 };
           mealRow.getCell(2).font = { name: 'Calibri', bold: true };
-          mealRow.getCell(2).alignment = { horizontal: 'center', vertical: 'middle' };
+          mealRow.getCell(2).alignment = {
+            horizontal: 'center',
+            vertical: 'middle',
+          };
           mealRow.eachCell({ includeEmpty: true }, (cell) => {
-            cell.border = { bottom: { style: 'thin', color: { argb: 'FFD4E8DC' } } };
+            cell.border = {
+              bottom: { style: 'thin', color: { argb: 'FFD4E8DC' } },
+            };
           });
         }
       }
@@ -483,13 +596,20 @@ export class ReportsService {
     const byEmployee = new Map<string, DayPivot>();
     for (const row of rows) {
       if (!byEmployee.has(row.employeeName)) {
-        byEmployee.set(row.employeeName, { soup: NONE, meal: NONE, salad: NONE, bread: NO, dessert: NONE });
+        byEmployee.set(row.employeeName, {
+          soup: NONE,
+          meal: NONE,
+          salad: NONE,
+          bread: NO,
+          dessert: NONE,
+        });
       }
       const pivot = byEmployee.get(row.employeeName)!;
       if (row.mealType === 'soup') {
         pivot.soup = row.mealName;
       } else if (MAIN_TYPES.has(row.mealType)) {
-        pivot.meal = pivot.meal === NONE ? row.mealName : `${pivot.meal}, ${row.mealName}`;
+        pivot.meal =
+          pivot.meal === NONE ? row.mealName : `${pivot.meal}, ${row.mealName}`;
       } else if (row.mealType === 'salad') {
         pivot.salad = row.mealName;
       } else if (row.mealType === 'bread') {
@@ -500,29 +620,65 @@ export class ReportsService {
     }
 
     sheet.columns = [
-      { header: t((k) => k.excel.columns.employeeName, lang), key: 'employee', width: 28 },
-      { header: t((k) => k.excel.columns.soup, lang),         key: 'soup',     width: 28 },
-      { header: t((k) => k.excel.columns.meal, lang),         key: 'meal',     width: 32 },
-      { header: t((k) => k.excel.columns.salad, lang),        key: 'salad',    width: 28 },
-      { header: t((k) => k.excel.columns.bread, lang),        key: 'bread',    width: 12 },
-      { header: t((k) => k.excel.columns.dessert, lang),      key: 'dessert',  width: 24 },
+      {
+        header: t((k) => k.excel.columns.employeeName, lang),
+        key: 'employee',
+        width: 28,
+      },
+      { header: t((k) => k.excel.columns.soup, lang), key: 'soup', width: 28 },
+      { header: t((k) => k.excel.columns.meal, lang), key: 'meal', width: 32 },
+      {
+        header: t((k) => k.excel.columns.salad, lang),
+        key: 'salad',
+        width: 28,
+      },
+      {
+        header: t((k) => k.excel.columns.bread, lang),
+        key: 'bread',
+        width: 12,
+      },
+      {
+        header: t((k) => k.excel.columns.dessert, lang),
+        key: 'dessert',
+        width: 24,
+      },
     ];
 
     const headerRow = sheet.getRow(1);
     headerRow.height = 24;
     for (let i = 1; i <= 6; i++) {
       const cell = headerRow.getCell(i);
-      cell.font = { name: 'Calibri', bold: true, size: 11, color: { argb: 'FFFFFFFF' } };
-      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2D6A4F' } };
+      cell.font = {
+        name: 'Calibri',
+        bold: true,
+        size: 11,
+        color: { argb: 'FFFFFFFF' },
+      };
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FF2D6A4F' },
+      };
       cell.alignment = { vertical: 'middle' };
-      cell.border = { bottom: { style: 'medium', color: { argb: 'FF1E4E38' } } };
+      cell.border = {
+        bottom: { style: 'medium', color: { argb: 'FF1E4E38' } },
+      };
     }
 
     // Skipped employees get a grey row; employees with no selection at all get an empty, pastel-red row.
     // Anyone who still has a meal for the day (e.g. via an approved change request) keeps their normal row.
-    const EMPTY_PIVOT: DayPivot = { soup: '', meal: '', salad: '', bread: '', dessert: '' };
+    const EMPTY_PIVOT: DayPivot = {
+      soup: '',
+      meal: '',
+      salad: '',
+      bread: '',
+      dessert: '',
+    };
     const entries: { employeeName: string; pivot: DayPivot; bg?: string }[] = [
-      ...[...byEmployee.entries()].map(([employeeName, pivot]) => ({ employeeName, pivot })),
+      ...[...byEmployee.entries()].map(([employeeName, pivot]) => ({
+        employeeName,
+        pivot,
+      })),
       ...[...new Set(skippedEmployees)]
         .filter((employeeName) => !byEmployee.has(employeeName))
         .map((employeeName) => ({
@@ -550,8 +706,14 @@ export class ReportsService {
       for (let i = 1; i <= 6; i++) {
         const cell = dataRow.getCell(i);
         cell.font = { name: 'Calibri' };
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: stripeBg } };
-        cell.border = { bottom: { style: 'thin', color: { argb: 'FFD4E8DC' } } };
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: stripeBg },
+        };
+        cell.border = {
+          bottom: { style: 'thin', color: { argb: 'FFD4E8DC' } },
+        };
       }
       dataRow.getCell(5).alignment = { horizontal: 'center' };
     });
@@ -589,7 +751,9 @@ export class ReportsService {
     return byDate;
   }
 
-  private _groupEmployeesByDate<T extends { date: string }>(rows: T[]): Map<string, T[]> {
+  private _groupEmployeesByDate<T extends { date: string }>(
+    rows: T[],
+  ): Map<string, T[]> {
     const map = new Map<string, T[]>();
     for (const row of rows) {
       const existing = map.get(row.date);
@@ -605,7 +769,10 @@ export class ReportsService {
   private _formatDayLabel(date: string, lang: Language): string {
     const locale = lang === Language.Sr ? 'sr-Latn-RS' : 'en-US';
     const d = new Date(date + 'T00:00:00Z');
-    const dayName = d.toLocaleDateString(locale, { weekday: 'long', timeZone: 'UTC' });
+    const dayName = d.toLocaleDateString(locale, {
+      weekday: 'long',
+      timeZone: 'UTC',
+    });
     const dateStr = d.toLocaleDateString(locale, {
       day: '2-digit',
       month: 'short',
@@ -618,7 +785,10 @@ export class ReportsService {
   private _formatShortDayLabel(date: string, lang: Language): string {
     const locale = lang === Language.Sr ? 'sr-Latn-RS' : 'en-US';
     const d = new Date(date + 'T00:00:00Z');
-    const dayShort = d.toLocaleDateString(locale, { weekday: 'short', timeZone: 'UTC' });
+    const dayShort = d.toLocaleDateString(locale, {
+      weekday: 'short',
+      timeZone: 'UTC',
+    });
     const day = String(d.getUTCDate()).padStart(2, '0');
     const month = String(d.getUTCMonth() + 1).padStart(2, '0');
     return `${dayShort} ${day}-${month}`;
@@ -626,14 +796,22 @@ export class ReportsService {
 
   private _formatMealTypeLabel(mealType: string, lang: Language): string {
     switch (mealType) {
-      case 'breakfast': return t((k) => k.excel.mealTypes.breakfast, lang);
-      case 'lunch':     return t((k) => k.excel.mealTypes.lunch, lang);
-      case 'dinner':    return t((k) => k.excel.mealTypes.dinner, lang);
-      case 'bread':     return t((k) => k.excel.mealTypes.bread, lang);
-      case 'soup':      return t((k) => k.excel.mealTypes.soup, lang);
-      case 'salad':     return t((k) => k.excel.mealTypes.salad, lang);
-      case 'dessert':   return t((k) => k.excel.mealTypes.dessert, lang);
-      default:          return mealType.charAt(0).toUpperCase() + mealType.slice(1) + 's';
+      case 'breakfast':
+        return t((k) => k.excel.mealTypes.breakfast, lang);
+      case 'lunch':
+        return t((k) => k.excel.mealTypes.lunch, lang);
+      case 'dinner':
+        return t((k) => k.excel.mealTypes.dinner, lang);
+      case 'bread':
+        return t((k) => k.excel.mealTypes.bread, lang);
+      case 'soup':
+        return t((k) => k.excel.mealTypes.soup, lang);
+      case 'salad':
+        return t((k) => k.excel.mealTypes.salad, lang);
+      case 'dessert':
+        return t((k) => k.excel.mealTypes.dessert, lang);
+      default:
+        return mealType.charAt(0).toUpperCase() + mealType.slice(1) + 's';
     }
   }
 
@@ -642,13 +820,23 @@ export class ReportsService {
     return `${day}.${month}.${year}`;
   }
 
-  private _buildSubject(businessName: string, from: string, to: string, lang: Language): string {
+  private _buildSubject(
+    businessName: string,
+    from: string,
+    to: string,
+    lang: Language,
+  ): string {
     return lang === Language.Sr
       ? `${businessName} - Narudžbine za period ${from} - ${to}`
       : `${businessName} - Orders for the period ${from} - ${to}`;
   }
 
-  private _buildSubjectAdjusted(businessName: string, from: string, to: string, lang: Language): string {
+  private _buildSubjectAdjusted(
+    businessName: string,
+    from: string,
+    to: string,
+    lang: Language,
+  ): string {
     return lang === Language.Sr
       ? `${businessName} - Ažurirane narudžbine za period ${from} - ${to}`
       : `${businessName} - Updated orders for the period ${from} - ${to}`;

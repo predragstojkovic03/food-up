@@ -29,11 +29,11 @@ import {
 } from 'src/shared/application/config-service.interface';
 import { IdentityType } from '@food-up/shared';
 import { AuthService } from '../../application/auth.service';
-import { CurrentIdentity } from '../../infrastructure/current-identity.decorator';
-import { GoogleAuthGuard } from '../../infrastructure/google-auth.guard';
-import { JwtPayload } from '../../infrastructure/jwt-payload';
-import { LocalAuthGuard } from '../../infrastructure/local-auth.guard';
-import { Public } from '../../infrastructure/public.decorator';
+import { CurrentIdentity } from 'src/core/auth/presentation/rest/current-identity.decorator';
+import { GoogleAuthGuard } from 'src/core/auth/presentation/rest/google-auth.guard';
+import { JwtPayload } from 'src/core/auth/application/jwt-payload';
+import { LocalAuthGuard } from 'src/core/auth/presentation/rest/local-auth.guard';
+import { Public } from 'src/core/auth/presentation/rest/public.decorator';
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { ChangePasswordRequestDto } from './dto/change-password.dto';
 import { MeResponseDto } from './dto/me-response.dto';
@@ -46,10 +46,10 @@ const REFRESH_COOKIE_NAME = 'refresh_token';
  */
 function refreshCookieOptions(isProduction: boolean): CookieOptions {
   return {
-    httpOnly: true,      // JS cannot read this cookie — XSS can't steal the refresh token
+    httpOnly: true, // JS cannot read this cookie — XSS can't steal the refresh token
     secure: isProduction, // Only sent over HTTPS in production
-    sameSite: 'strict',  // Never sent by cross-site requests — CSRF protection
-    path: '/api/auth',   // Browser only attaches the cookie on /api/auth/* requests
+    sameSite: 'strict', // Never sent by cross-site requests — CSRF protection
+    path: '/api/auth', // Browser only attaches the cookie on /api/auth/* requests
     maxAge: 7 * 24 * 60 * 60 * 1000,
   };
 }
@@ -80,7 +80,11 @@ export class AuthController {
    * All strategies resolve to an Identity, then issueSessionForIdentity() handles the rest.
    */
   @ApiOperation({ summary: 'Login with email and password' })
-  @ApiResponse({ status: 200, description: 'Access token returned, refresh token set as httpOnly cookie', type: AuthResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Access token returned, refresh token set as httpOnly cookie',
+    type: AuthResponseDto,
+  })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   @Throttle({ default: { ttl: 60_000, limit: 5 } })
   @Public
@@ -92,9 +96,14 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<AuthResponseDto> {
     const identity = req.user as { id: string };
-    const { accessToken, rawRefreshToken } = await this._authService.issueSessionForIdentity(identity.id);
+    const { accessToken, rawRefreshToken } =
+      await this._authService.issueSessionForIdentity(identity.id);
 
-    res.cookie(REFRESH_COOKIE_NAME, rawRefreshToken, refreshCookieOptions(this._isProduction));
+    res.cookie(
+      REFRESH_COOKIE_NAME,
+      rawRefreshToken,
+      refreshCookieOptions(this._isProduction),
+    );
 
     return plainToInstance(AuthResponseDto, { access_token: accessToken });
   }
@@ -108,8 +117,15 @@ export class AuthController {
    */
   @ApiOperation({ summary: 'Rotate refresh token and get a new access token' })
   @ApiCookieAuth(REFRESH_COOKIE_NAME)
-  @ApiResponse({ status: 200, description: 'New access token returned, new refresh cookie set', type: AuthResponseDto })
-  @ApiResponse({ status: 401, description: 'Refresh token invalid, expired, or revoked' })
+  @ApiResponse({
+    status: 200,
+    description: 'New access token returned, new refresh cookie set',
+    type: AuthResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Refresh token invalid, expired, or revoked',
+  })
   @Throttle({ default: { ttl: 60_000, limit: 20 } })
   @Public
   @Post('refresh')
@@ -120,9 +136,14 @@ export class AuthController {
   ): Promise<AuthResponseDto> {
     const rawToken: string | undefined = req.cookies?.[REFRESH_COOKIE_NAME];
     if (!rawToken) throw new UnauthorizedException('No refresh token');
-    const { accessToken, rawRefreshToken } = await this._authService.refreshSession(rawToken);
+    const { accessToken, rawRefreshToken } =
+      await this._authService.refreshSession(rawToken);
 
-    res.cookie(REFRESH_COOKIE_NAME, rawRefreshToken, refreshCookieOptions(this._isProduction));
+    res.cookie(
+      REFRESH_COOKIE_NAME,
+      rawRefreshToken,
+      refreshCookieOptions(this._isProduction),
+    );
 
     return plainToInstance(AuthResponseDto, { access_token: accessToken });
   }
@@ -145,10 +166,16 @@ export class AuthController {
     await this._authService.revokeSession(rawToken);
 
     // Clear the cookie by setting maxAge=0 (expires immediately)
-    res.cookie(REFRESH_COOKIE_NAME, '', { ...refreshCookieOptions(this._isProduction), maxAge: 0 });
+    res.cookie(REFRESH_COOKIE_NAME, '', {
+      ...refreshCookieOptions(this._isProduction),
+      maxAge: 0,
+    });
   }
 
-  @ApiOperation({ summary: 'Initiate Google OAuth login or registration — redirects to Google' })
+  @ApiOperation({
+    summary:
+      'Initiate Google OAuth login or registration — redirects to Google',
+  })
   @ApiResponse({ status: 302, description: 'Redirects to Google login page' })
   @Public
   @UseGuards(GoogleAuthGuard)
@@ -157,8 +184,13 @@ export class AuthController {
     // GoogleAuthGuard handles the redirect; this handler body never executes
   }
 
-  @ApiOperation({ summary: 'Google OAuth callback — sets session and redirects to frontend' })
-  @ApiResponse({ status: 302, description: 'Redirects to frontend /auth/callback with token' })
+  @ApiOperation({
+    summary: 'Google OAuth callback — sets session and redirects to frontend',
+  })
+  @ApiResponse({
+    status: 302,
+    description: 'Redirects to frontend /auth/callback with token',
+  })
   @Public
   @UseGuards(GoogleAuthGuard)
   @Get('google/callback')
@@ -178,26 +210,47 @@ export class AuthController {
       let identityId: string;
       if (inviteToken) {
         const employee = await this._employeesService.registerWithGoogle(
-          googleId, email, displayName, pictureUrl, inviteToken,
+          googleId,
+          email,
+          displayName,
+          pictureUrl,
+          inviteToken,
         );
         identityId = employee.identityId;
       } else {
-        const identity = await this._authService.findOrLinkGoogleIdentity(googleId, email, pictureUrl);
+        const identity = await this._authService.findOrLinkGoogleIdentity(
+          googleId,
+          email,
+          pictureUrl,
+        );
         identityId = identity.id;
       }
 
-      const { accessToken, rawRefreshToken } = await this._authService.issueSessionForIdentity(identityId);
-      res.cookie(REFRESH_COOKIE_NAME, rawRefreshToken, refreshCookieOptions(this._isProduction));
-      res.redirect(`${this._webAppUrl}/auth/callback?token=${encodeURIComponent(accessToken)}`);
+      const { accessToken, rawRefreshToken } =
+        await this._authService.issueSessionForIdentity(identityId);
+      res.cookie(
+        REFRESH_COOKIE_NAME,
+        rawRefreshToken,
+        refreshCookieOptions(this._isProduction),
+      );
+      res.redirect(
+        `${this._webAppUrl}/auth/callback?token=${encodeURIComponent(accessToken)}`,
+      );
     } catch (err) {
       if (inviteToken) {
         if ((err as Error).message === 'GOOGLE_EMAIL_MISMATCH') {
-          res.redirect(`${this._webAppUrl}/register?invite=${encodeURIComponent(inviteToken)}&googleError=email_mismatch`);
+          res.redirect(
+            `${this._webAppUrl}/register?invite=${encodeURIComponent(inviteToken)}&googleError=email_mismatch`,
+          );
         } else {
-          res.redirect(`${this._webAppUrl}/register?googleError=invalid_invite`);
+          res.redirect(
+            `${this._webAppUrl}/register?googleError=invalid_invite`,
+          );
         }
       } else {
-        res.redirect(`${this._webAppUrl}/auth/callback?error=google_auth_failed`);
+        res.redirect(
+          `${this._webAppUrl}/auth/callback?error=google_auth_failed`,
+        );
       }
     }
   }
@@ -213,13 +266,21 @@ export class AuthController {
     @CurrentIdentity() user: JwtPayload,
     @Body() dto: ChangePasswordRequestDto,
   ): Promise<void> {
-    await this._authService.changePassword(user.sub, dto.currentPassword, dto.newPassword);
+    await this._authService.changePassword(
+      user.sub,
+      dto.currentPassword,
+      dto.newPassword,
+    );
   }
 
   @Get('me')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current user information' })
-  @ApiResponse({ status: 200, description: 'Current user information', type: MeResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Current user information',
+    type: MeResponseDto,
+  })
   async getMe(@CurrentIdentity() user: JwtPayload): Promise<MeResponseDto> {
     let businessId: string | undefined;
 

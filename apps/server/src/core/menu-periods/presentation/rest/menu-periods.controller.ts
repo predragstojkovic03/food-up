@@ -14,8 +14,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
-import { CurrentIdentity } from 'src/core/auth/infrastructure/current-identity.decorator';
-import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
+import { CurrentIdentity } from 'src/core/auth/presentation/rest/current-identity.decorator';
+import { JwtPayload } from 'src/core/auth/application/jwt-payload';
 import { IdentityType } from '@food-up/shared';
 import { RequiredIdentityType } from 'src/core/identity/presentation/rest/identity-type.decorator';
 import { MenuPeriodsService } from '../../application/menu-periods.service';
@@ -45,14 +45,20 @@ export class MenuPeriodsController {
 
   @ApiOperation({ summary: 'Get all menu periods for a supplier' })
   @ApiResponse({ status: 200, type: [MenuPeriodResponseDto] })
-  @ApiResponse({ status: 404, description: 'Supplier not found or not available to the caller' })
+  @ApiResponse({
+    status: 404,
+    description: 'Supplier not found or not available to the caller',
+  })
   @ApiBearerAuth()
   @Get('supplier/:supplierId')
   async findBySupplier(
     @Param('supplierId') supplierId: string,
     @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<MenuPeriodResponseDto[]> {
-    const periods = await this._menuPeriodsService.findBySupplier(supplierId, sub);
+    const periods = await this._menuPeriodsService.findBySupplier(
+      supplierId,
+      sub,
+    );
     return periods.map((p) => this.domainToDto(p));
   }
 

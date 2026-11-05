@@ -1,11 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Patch,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -14,10 +7,13 @@ import {
 } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 
-import { CurrentIdentity } from 'src/core/auth/infrastructure/current-identity.decorator';
-import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
+import { CurrentIdentity } from 'src/core/auth/presentation/rest/current-identity.decorator';
+import { JwtPayload } from 'src/core/auth/application/jwt-payload';
 import { RequiredEmployeeRole } from 'src/core/employees/presentation/rest/employee-role.decorator';
-import { EmployeeRole, IdentityType as IdentityTypeEnum } from '@food-up/shared';
+import {
+  EmployeeRole,
+  IdentityType as IdentityTypeEnum,
+} from '@food-up/shared';
 import { RequiredIdentityType } from 'src/core/identity/presentation/rest/identity-type.decorator';
 import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { ChangeRequestsQueryService } from '../../application/queries/change-requests-query.service';
@@ -40,7 +36,10 @@ export class ChangeRequestsController {
   ) {}
 
   @ApiOperation({ summary: 'Create a new change request' })
-  @ApiResponse({ status: 404, description: "Window or change request not found in the caller's business" })
+  @ApiResponse({
+    status: 404,
+    description: "Window or change request not found in the caller's business",
+  })
   @ApiResponse({ status: 201, type: ChangeRequestResponseDto })
   @RequiredIdentityType(IdentityTypeEnum.Employee)
   @ApiBearerAuth()
@@ -58,7 +57,10 @@ export class ChangeRequestsController {
   @RequiredEmployeeRole(EmployeeRole.Manager)
   @RequiredIdentityType(IdentityTypeEnum.Employee)
   @ApiBearerAuth()
-  @ApiResponse({ status: 404, description: "Window or change request not found in the caller's business" })
+  @ApiResponse({
+    status: 404,
+    description: "Window or change request not found in the caller's business",
+  })
   @Patch('bulk-status')
   async bulkUpdateStatus(
     @Body() dto: BulkUpdateChangeRequestStatusDto,
@@ -67,18 +69,27 @@ export class ChangeRequestsController {
     await this._changeRequestsService.bulkUpdateStatus(dto, user.sub);
   }
 
-  @ApiOperation({ summary: 'Get all change requests for a window (manager view)' })
+  @ApiOperation({
+    summary: 'Get all change requests for a window (manager view)',
+  })
   @ApiResponse({ status: 200, type: [RichChangeRequestResponseDto] })
   @RequiredEmployeeRole(EmployeeRole.Manager)
   @RequiredIdentityType(IdentityTypeEnum.Employee)
   @ApiBearerAuth()
-  @ApiResponse({ status: 404, description: "Window or change request not found in the caller's business" })
+  @ApiResponse({
+    status: 404,
+    description: "Window or change request not found in the caller's business",
+  })
   @Get('window/:windowId')
   async findByWindow(
     @Param('windowId') windowId: string,
     @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<RichChangeRequestResponseDto[]> {
-    const results = await this._changeRequestsQueryService.findRichByWindowInMyBusiness(windowId, sub);
+    const results =
+      await this._changeRequestsQueryService.findRichByWindowInMyBusiness(
+        windowId,
+        sub,
+      );
     return plainToInstance(RichChangeRequestResponseDto, results);
   }
 
@@ -87,13 +98,20 @@ export class ChangeRequestsController {
   @RequiredEmployeeRole(EmployeeRole.Manager)
   @RequiredIdentityType(IdentityTypeEnum.Employee)
   @ApiBearerAuth()
-  @ApiResponse({ status: 404, description: "Window or change request not found in the caller's business" })
+  @ApiResponse({
+    status: 404,
+    description: "Window or change request not found in the caller's business",
+  })
   @Get('window/:windowId/pending-count')
   async getPendingCount(
     @Param('windowId') windowId: string,
     @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<PendingCountResponseDto> {
-    const count = await this._changeRequestsQueryService.findPendingCountByWindowInMyBusiness(windowId, sub);
+    const count =
+      await this._changeRequestsQueryService.findPendingCountByWindowInMyBusiness(
+        windowId,
+        sub,
+      );
     return plainToInstance(PendingCountResponseDto, { count });
   }
 
@@ -106,7 +124,9 @@ export class ChangeRequestsController {
     @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<RichChangeRequestResponseDto[]> {
     const employee = await this._employeesService.findByIdentity(sub);
-    const results = await this._changeRequestsQueryService.findRichByEmployee(employee.id);
+    const results = await this._changeRequestsQueryService.findRichByEmployee(
+      employee.id,
+    );
     return plainToInstance(RichChangeRequestResponseDto, results);
   }
 
@@ -129,7 +149,10 @@ export class ChangeRequestsController {
   @RequiredEmployeeRole(EmployeeRole.Manager)
   @RequiredIdentityType(IdentityTypeEnum.Employee)
   @ApiBearerAuth()
-  @ApiResponse({ status: 404, description: "Window or change request not found in the caller's business" })
+  @ApiResponse({
+    status: 404,
+    description: "Window or change request not found in the caller's business",
+  })
   @Patch(':id/status')
   async updateStatus(
     @Param('id') id: string,
@@ -150,5 +173,4 @@ export class ChangeRequestsController {
   ): Promise<void> {
     await this._changeRequestsService.revoke(id, user.sub);
   }
-
 }

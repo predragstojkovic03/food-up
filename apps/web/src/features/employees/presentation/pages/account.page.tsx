@@ -19,8 +19,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { useAuthStore } from '@/features/auth/presentation/state/auth.store';
-import { usePreferencesStore } from '@/features/user-preferences/presentation/state/preferences.store';
+import { useAuthStore } from '@/features/auth/application/state/auth.store';
+import { usePreferencesStore } from '@/features/user-preferences/application/state/preferences.store';
 import { useServices } from '@/shared/infrastructure/di/service.context';
 import {
   IUserPreferencesResponse,

@@ -5,7 +5,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
+import { JwtPayload } from 'src/core/auth/application/jwt-payload';
 import { EmployeeRole } from '@food-up/shared';
 import { EMPLOYEE_ROLE_KEY } from './employee-role.decorator';
 
@@ -15,10 +15,10 @@ export class EmployeeRoleGuard implements CanActivate {
 
   canActivate(context: ExecutionContext): boolean {
     // Method-level metadata overrides class-level metadata
-    const requiredRoles = this.reflector.getAllAndOverride<EmployeeRole[]>(EMPLOYEE_ROLE_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
+    const requiredRoles = this.reflector.getAllAndOverride<EmployeeRole[]>(
+      EMPLOYEE_ROLE_KEY,
+      [context.getHandler(), context.getClass()],
+    );
     if (!requiredRoles) return true;
 
     const request = context.switchToHttp().getRequest();

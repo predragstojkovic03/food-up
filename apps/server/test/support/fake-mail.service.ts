@@ -1,7 +1,7 @@
 import {
   IMailService,
   MailOptions,
-} from 'src/shared/infrastructure/notifications/mail/mail.service.interface';
+} from 'src/shared/application/mail/mail.service.interface';
 
 export interface SentMail {
   to: string;
@@ -14,7 +14,12 @@ export interface SentMail {
 export class FakeMailService implements IMailService {
   readonly sent: SentMail[] = [];
 
-  async send(to: string, subject: string, html: string, options?: MailOptions): Promise<void> {
+  async send(
+    to: string,
+    subject: string,
+    html: string,
+    options?: MailOptions,
+  ): Promise<void> {
     this.sent.push({ to, subject, html, options });
   }
 

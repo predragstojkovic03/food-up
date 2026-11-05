@@ -1,7 +1,7 @@
 import { EmployeeRole, IdentityType } from '@food-up/shared';
 import { ReactNode } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../../state/auth.store';
+import { useAuthStore } from '@/features/auth/application/state/auth.store';
 
 type Props = {
   types: IdentityType[];

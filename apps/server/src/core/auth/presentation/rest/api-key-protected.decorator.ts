@@ -1,6 +1,6 @@
 import { applyDecorators, SetMetadata } from '@nestjs/common';
 import { ApiSecurity } from '@nestjs/swagger';
-import { Public } from './public.decorator';
+import { Public } from 'src/core/auth/presentation/rest/public.decorator';
 
 export const API_KEY_PROTECTED_KEY = Symbol('API_KEY_PROTECTED_KEY');
 export const API_KEY_HEADER = 'x-api-key';

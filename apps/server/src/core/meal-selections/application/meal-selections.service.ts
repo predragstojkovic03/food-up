@@ -10,8 +10,10 @@ import {
   IMealSelectionsRepository,
   RichMealSelection,
 } from '../domain/meal-selections.repository.interface';
-import { CreateMealSelectionDto } from '../presentation/rest/dto/create-meal-selection.dto';
-import { UpdateMealSelectionDto } from '../presentation/rest/dto/update-meal-selection.dto';
+import {
+  CreateMealSelectionDto,
+  UpdateMealSelectionDto,
+} from './dto/meal-selection-input.dto';
 
 @Injectable()
 export class MealSelectionsService {
@@ -30,10 +32,11 @@ export class MealSelectionsService {
   ): Promise<MealSelection> {
     const employee = await this._employeesService.findByIdentity(identityId);
 
-    const mealSelectionWindow = await this._mealSelectionWindowsService.findOneInMyBusiness(
-      dto.mealSelectionWindowId,
-      identityId,
-    );
+    const mealSelectionWindow =
+      await this._mealSelectionWindowsService.findOneInMyBusiness(
+        dto.mealSelectionWindowId,
+        identityId,
+      );
 
     if (!mealSelectionWindow.isActive) {
       throw new InvalidInputDataException(
@@ -82,8 +85,14 @@ export class MealSelectionsService {
     return this._repository.findOneByCriteriaOrThrow({ id });
   }
 
-  async findByWindowInMyBusiness(windowId: string, identityId: string): Promise<MealSelection[]> {
-    await this._mealSelectionWindowsService.findOneInMyBusiness(windowId, identityId);
+  async findByWindowInMyBusiness(
+    windowId: string,
+    identityId: string,
+  ): Promise<MealSelection[]> {
+    await this._mealSelectionWindowsService.findOneInMyBusiness(
+      windowId,
+      identityId,
+    );
     return this._repository.findByWindow(windowId);
   }
 
@@ -146,7 +155,10 @@ export class MealSelectionsService {
     mealSelection.update(dto.menuItemId, dto.quantity, menuItemPrice);
 
     await this._repository.update(id, mealSelection);
-    this._logger.log(`Meal selection updated: id=${id}`, MealSelectionsService.name);
+    this._logger.log(
+      `Meal selection updated: id=${id}`,
+      MealSelectionsService.name,
+    );
 
     return mealSelection;
   }

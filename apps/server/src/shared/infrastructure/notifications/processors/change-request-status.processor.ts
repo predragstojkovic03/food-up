@@ -6,12 +6,24 @@ import { ChangeRequestStatusNotificationJobData } from 'src/core/change-requests
 import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { UserPreferencesService } from 'src/core/user-preferences/application/user-preferences.service';
 import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
-import { I_CONFIG_SERVICE, IConfigService } from 'src/shared/application/config-service.interface';
+import {
+  I_CONFIG_SERVICE,
+  IConfigService,
+} from 'src/shared/application/config-service.interface';
 import { EnvironmentVariables } from 'src/env.validation';
 import { t } from 'src/shared/i18n/i18n.helper';
 import { bullmqTelemetry } from '../bullmq-telemetry';
-import { emailBody, emailHeading, emailLayout, emailStatusBadge, getLogoAttachment } from '../mail/email-layout';
-import { I_MAIL_SERVICE, IMailService } from '../mail/mail.service.interface';
+import {
+  emailBody,
+  emailHeading,
+  emailLayout,
+  emailStatusBadge,
+  getLogoAttachment,
+} from 'src/shared/application/mail/email-layout';
+import {
+  I_MAIL_SERVICE,
+  IMailService,
+} from 'src/shared/application/mail/mail.service.interface';
 import { CHANGE_REQUEST_QUEUE } from '../queue-names';
 
 @Processor(CHANGE_REQUEST_QUEUE, { telemetry: bullmqTelemetry })
@@ -20,13 +32,16 @@ export class ChangeRequestStatusProcessor extends WorkerHost {
     private readonly _employeesService: EmployeesService,
     private readonly _preferencesService: UserPreferencesService,
     @Inject(I_MAIL_SERVICE) private readonly _mailService: IMailService,
-    @Inject(I_CONFIG_SERVICE) private readonly _configService: IConfigService<EnvironmentVariables, true>,
+    @Inject(I_CONFIG_SERVICE)
+    private readonly _configService: IConfigService<EnvironmentVariables, true>,
     @Inject(I_LOGGER) private readonly _logger: ILogger,
   ) {
     super();
   }
 
-  async process(job: Job<ChangeRequestStatusNotificationJobData>): Promise<void> {
+  async process(
+    job: Job<ChangeRequestStatusNotificationJobData>,
+  ): Promise<void> {
     const { employeeId, status } = job.data;
     const start = Date.now();
     this._logger.log(
@@ -37,7 +52,9 @@ export class ChangeRequestStatusProcessor extends WorkerHost {
     const employee = await this._employeesService.findOneEnriched(employeeId);
     if (!employee?.email) return;
 
-    const prefs = await this._preferencesService.getOrCreate(employee.identityId);
+    const prefs = await this._preferencesService.getOrCreate(
+      employee.identityId,
+    );
     const lang = prefs.language;
     const isApproved = status === ChangeRequestStatus.Approved;
     const webAppUrl = this._configService.get('WEB_APP_URL');
@@ -55,7 +72,9 @@ export class ChangeRequestStatusProcessor extends WorkerHost {
       emailBody(body);
     const html = emailLayout(content, webAppUrl);
 
-    await this._mailService.send(employee.email, subject, html, { attachments: [getLogoAttachment()] });
+    await this._mailService.send(employee.email, subject, html, {
+      attachments: [getLogoAttachment()],
+    });
 
     this._logger.log(
       `job:done queue=${job.queueName} jobId=${job.id} attempt=${job.attemptsMade + 1} employeeId=${employeeId} status=${status} durationMs=${Date.now() - start}`,

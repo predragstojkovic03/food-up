@@ -27,13 +27,19 @@ describe('Change requests — manager business scope', () => {
       'cr-foreign': changeRequest('cr-foreign', 'win-foreign'),
     };
     repository = {
-      findOneByCriteriaOrThrow: jest.fn(({ id }: { id: string }) => Promise.resolve(crs[id])),
+      findOneByCriteriaOrThrow: jest.fn(({ id }: { id: string }) =>
+        Promise.resolve(crs[id]),
+      ),
       update: jest.fn().mockResolvedValue(undefined),
     };
     windowsService = {
       findOneInMyBusiness: jest.fn((windowId: string) =>
         windowId === 'win-own'
-          ? Promise.resolve({ id: windowId, isPastDeadline: true, menuPeriodIds: [] })
+          ? Promise.resolve({
+              id: windowId,
+              isPastDeadline: true,
+              menuPeriodIds: [],
+            })
           : Promise.reject(new EntityInstanceNotFoundException()),
       ),
     };
@@ -44,7 +50,12 @@ describe('Change requests — manager business scope', () => {
       {} as any,
       {} as any,
       {} as any,
-      { findByIdentity: jest.fn().mockResolvedValue({ id: 'emp-manager-a', role: EmployeeRole.Manager }) } as any,
+      {
+        findByIdentity: jest.fn().mockResolvedValue({
+          id: 'emp-manager-a',
+          role: EmployeeRole.Manager,
+        }),
+      } as any,
       windowsService,
       { log: jest.fn() } as any,
       { run: jest.fn((fn: () => unknown) => fn()) } as any,
@@ -54,14 +65,22 @@ describe('Change requests — manager business scope', () => {
 
   describe('updateStatus', () => {
     it("approves a change request in the manager's own window", async () => {
-      await service.updateStatus('cr-own', managerIdentityId, ChangeRequestStatus.Approved);
+      await service.updateStatus(
+        'cr-own',
+        managerIdentityId,
+        ChangeRequestStatus.Approved,
+      );
       expect(crs['cr-own'].changeStatus).toHaveBeenCalled();
       expect(repository.update).toHaveBeenCalledWith('cr-own', crs['cr-own']);
     });
 
     it("rejects another business's change request without changing it", async () => {
       await expect(
-        service.updateStatus('cr-foreign', managerIdentityId, ChangeRequestStatus.Approved),
+        service.updateStatus(
+          'cr-foreign',
+          managerIdentityId,
+          ChangeRequestStatus.Approved,
+        ),
       ).rejects.toBeInstanceOf(EntityInstanceNotFoundException);
       expect(crs['cr-foreign'].changeStatus).not.toHaveBeenCalled();
       expect(repository.update).not.toHaveBeenCalled();
@@ -121,20 +140,36 @@ describe('Change requests — manager business scope', () => {
         findRichByWindow: jest.fn().mockResolvedValue([]),
         findPendingCountByWindow: jest.fn().mockResolvedValue(0),
       };
-      queryService = new ChangeRequestsQueryService(queryRepository, windowsService);
+      queryService = new ChangeRequestsQueryService(
+        queryRepository,
+        windowsService,
+      );
     });
 
     it("returns the manager's own window data", async () => {
-      await expect(queryService.findRichByWindowInMyBusiness('win-own', managerIdentityId)).resolves.toEqual([]);
-      await expect(queryService.findPendingCountByWindowInMyBusiness('win-own', managerIdentityId)).resolves.toBe(0);
+      await expect(
+        queryService.findRichByWindowInMyBusiness('win-own', managerIdentityId),
+      ).resolves.toEqual([]);
+      await expect(
+        queryService.findPendingCountByWindowInMyBusiness(
+          'win-own',
+          managerIdentityId,
+        ),
+      ).resolves.toBe(0);
     });
 
     it("rejects another business's window without querying", async () => {
       await expect(
-        queryService.findRichByWindowInMyBusiness('win-foreign', managerIdentityId),
+        queryService.findRichByWindowInMyBusiness(
+          'win-foreign',
+          managerIdentityId,
+        ),
       ).rejects.toBeInstanceOf(EntityInstanceNotFoundException);
       await expect(
-        queryService.findPendingCountByWindowInMyBusiness('win-foreign', managerIdentityId),
+        queryService.findPendingCountByWindowInMyBusiness(
+          'win-foreign',
+          managerIdentityId,
+        ),
       ).rejects.toBeInstanceOf(EntityInstanceNotFoundException);
       expect(queryRepository.findRichByWindow).not.toHaveBeenCalled();
       expect(queryRepository.findPendingCountByWindow).not.toHaveBeenCalled();

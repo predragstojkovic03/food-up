@@ -3,7 +3,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useAuthStore } from '@/features/auth/presentation/state/auth.store';
+import { useAuthStore } from '@/features/auth/application/state/auth.store';
 import { useServices } from '@/shared/infrastructure/di/service.context';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { IBusinessInviteResponse, IEmployeeResponse, EmployeeRole } from '@food-up/shared';

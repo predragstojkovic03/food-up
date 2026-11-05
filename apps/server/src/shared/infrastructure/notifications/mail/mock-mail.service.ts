@@ -1,6 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
-import { IMailService, MailOptions } from './mail.service.interface';
+import {
+  IMailService,
+  MailOptions,
+} from 'src/shared/application/mail/mail.service.interface';
 
 @Injectable()
 export class MockMailService implements IMailService {

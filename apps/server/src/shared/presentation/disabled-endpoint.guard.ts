@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { IS_DISABLED_KEY } from '../decorators/disabled.decorator';
+import { IS_DISABLED_KEY } from 'src/shared/presentation/disabled.decorator';
 
 @Injectable()
 export class DisabledEndpointGuard {

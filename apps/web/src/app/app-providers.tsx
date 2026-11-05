@@ -1,6 +1,6 @@
 import { useRestoreSession } from '@/features/auth/application/use-restore-session.hook';
 import { AuthService } from '@/features/auth/infrastructure/auth.service';
-import { useAuthStore } from '@/features/auth/presentation/state/auth.store';
+import { useAuthStore } from '@/features/auth/application/state/auth.store';
 import { UserPreferencesService } from '@/features/user-preferences/infrastructure/user-preferences.service';
 import { useTheme } from '@/features/user-preferences/presentation/hooks/use-theme.hook';
 import { useLanguage, useLanguageInit } from '@/features/user-preferences/presentation/hooks/use-language.hook';

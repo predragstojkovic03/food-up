@@ -1,13 +1,26 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Language } from '@food-up/shared';
 import { EnvironmentVariables } from 'src/env.validation';
-import { I_CONFIG_SERVICE, IConfigService } from 'src/shared/application/config-service.interface';
+import {
+  I_CONFIG_SERVICE,
+  IConfigService,
+} from 'src/shared/application/config-service.interface';
 import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
 import { EntityInstanceNotFoundException } from 'src/shared/domain/exceptions/entity-instance-not-found.exception';
 import { InvalidOperationException } from 'src/shared/domain/exceptions/invalid-operation.exception';
 import { t } from 'src/shared/i18n/i18n.helper';
-import { emailBody, emailButton, emailHeading, emailLayout, emailNote, getLogoAttachment } from 'src/shared/infrastructure/notifications/mail/email-layout';
-import { I_MAIL_SERVICE, IMailService } from 'src/shared/infrastructure/notifications/mail/mail.service.interface';
+import {
+  emailBody,
+  emailButton,
+  emailHeading,
+  emailLayout,
+  emailNote,
+  getLogoAttachment,
+} from 'src/shared/application/mail/email-layout';
+import {
+  I_MAIL_SERVICE,
+  IMailService,
+} from 'src/shared/application/mail/mail.service.interface';
 import { BusinessInvite } from '../domain/business-invite.entity';
 import {
   I_BUSINESS_INVITES_REPOSITORY,
@@ -27,8 +40,15 @@ export class BusinessInvitesService {
     private readonly _configService: IConfigService<EnvironmentVariables, true>,
   ) {}
 
-  async create(businessId: string, email: string, language: Language): Promise<BusinessInvite> {
-    const existing = await this._repository.findActiveByEmail(businessId, email);
+  async create(
+    businessId: string,
+    email: string,
+    language: Language,
+  ): Promise<BusinessInvite> {
+    const existing = await this._repository.findActiveByEmail(
+      businessId,
+      email,
+    );
     if (existing) {
       await this._repository.delete(existing.id);
       this._logger.log(
@@ -51,8 +71,14 @@ export class BusinessInvitesService {
     return invite;
   }
 
-  async resend(inviteId: string, businessId: string, language: Language): Promise<BusinessInvite> {
-    const invite = await this._repository.findOneByCriteriaOrThrow({ id: inviteId } as Partial<BusinessInvite>);
+  async resend(
+    inviteId: string,
+    businessId: string,
+    language: Language,
+  ): Promise<BusinessInvite> {
+    const invite = await this._repository.findOneByCriteriaOrThrow({
+      id: inviteId,
+    } as Partial<BusinessInvite>);
 
     if (invite.businessId !== businessId) {
       throw new EntityInstanceNotFoundException(`Invite ${inviteId} not found`);
@@ -71,7 +97,9 @@ export class BusinessInvitesService {
   }
 
   async validate(token: string): Promise<string | null> {
-    const invite = await this._repository.findOneByCriteria({ token } as Partial<BusinessInvite>);
+    const invite = await this._repository.findOneByCriteria({
+      token,
+    } as Partial<BusinessInvite>);
     if (!invite || invite.isExpired || invite.isUsed) {
       this._logger.warn(
         `Invite validation failed: expired=${invite?.isExpired ?? 'not found'} used=${invite?.isUsed ?? 'not found'}`,
@@ -83,7 +111,9 @@ export class BusinessInvitesService {
   }
 
   async consume(token: string): Promise<BusinessInvite> {
-    const invite = await this._repository.findOneByCriteria({ token } as Partial<BusinessInvite>);
+    const invite = await this._repository.findOneByCriteria({
+      token,
+    } as Partial<BusinessInvite>);
 
     if (!invite) {
       throw new EntityInstanceNotFoundException('Invite not found or invalid.');
@@ -98,21 +128,30 @@ export class BusinessInvitesService {
     return invite;
   }
 
-  private async _trySendEmail(invite: BusinessInvite, language: Language): Promise<void> {
+  private async _trySendEmail(
+    invite: BusinessInvite,
+    language: Language,
+  ): Promise<void> {
     const webAppUrl = this._configService.getOrThrow('WEB_APP_URL');
     const registrationUrl = `${webAppUrl}/register?invite=${invite.token}`;
 
-    const subject = t(tr => tr.mail.invite.subject, language);
-    const heading = t(tr => tr.mail.invite.heading, language);
-    const body = t(tr => tr.mail.invite.body, language);
-    const button = t(tr => tr.mail.invite.button, language);
-    const footer = t(tr => tr.mail.invite.footer, language);
+    const subject = t((tr) => tr.mail.invite.subject, language);
+    const heading = t((tr) => tr.mail.invite.heading, language);
+    const body = t((tr) => tr.mail.invite.body, language);
+    const button = t((tr) => tr.mail.invite.button, language);
+    const footer = t((tr) => tr.mail.invite.footer, language);
 
-    const content = emailHeading(heading) + emailBody(body) + emailButton(registrationUrl, button) + emailNote(footer);
+    const content =
+      emailHeading(heading) +
+      emailBody(body) +
+      emailButton(registrationUrl, button) +
+      emailNote(footer);
     const html = emailLayout(content, webAppUrl);
 
     try {
-      await this._mailService.send(invite.email, subject, html, { attachments: [getLogoAttachment()] });
+      await this._mailService.send(invite.email, subject, html, {
+        attachments: [getLogoAttachment()],
+      });
       invite.markEmailSent();
       await this._repository.update(invite.id, invite);
       this._logger.log(

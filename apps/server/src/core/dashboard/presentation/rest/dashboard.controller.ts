@@ -2,16 +2,24 @@ import { EmployeeRole, IdentityType } from '@food-up/shared';
 import { CacheTTL } from '@nestjs/cache-manager';
 import { Controller, Get, Query, UseInterceptors } from '@nestjs/common';
 import { CacheInterceptor } from '@nestjs/cache-manager';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
-import { CurrentIdentity } from 'src/core/auth/infrastructure/current-identity.decorator';
-import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
+import { CurrentIdentity } from 'src/core/auth/presentation/rest/current-identity.decorator';
+import { JwtPayload } from 'src/core/auth/application/jwt-payload';
 import { BusinessesService } from 'src/core/businesses/application/businesses.service';
 import { RequiredEmployeeRole } from 'src/core/employees/presentation/rest/employee-role.decorator';
 import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { RequiredIdentityType } from 'src/core/identity/presentation/rest/identity-type.decorator';
 import { DashboardQueryService } from '../../application/dashboard-query.service';
-import { DashboardDateRangeQueryDto, DashboardCostTrendQueryDto } from './dto/dashboard-date-range-query.dto';
+import {
+  DashboardDateRangeQueryDto,
+  DashboardCostTrendQueryDto,
+} from './dto/dashboard-date-range-query.dto';
 import { DashboardKpisResponseDto } from './dto/dashboard-kpis-response.dto';
 import { CostTrendItemResponseDto } from './dto/cost-trend-item-response.dto';
 import { SupplierBreakdownItemResponseDto } from './dto/supplier-breakdown-item-response.dto';
@@ -42,7 +50,11 @@ export class DashboardController {
     @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<DashboardKpisResponseDto> {
     const employee = await this._employeesService.findByIdentity(sub);
-    const data = await this._dashboardService.getKpis(from, to, employee.businessId);
+    const data = await this._dashboardService.getKpis(
+      from,
+      to,
+      employee.businessId,
+    );
     return plainToInstance(DashboardKpisResponseDto, data, TO_INSTANCE);
   }
 
@@ -56,7 +68,13 @@ export class DashboardController {
   ): Promise<CostTrendItemResponseDto[]> {
     const employee = await this._employeesService.findByIdentity(sub);
     const business = await this._businessesService.findOne(employee.businessId);
-    const data = await this._dashboardService.getCostTrend(from, to, groupBy ?? 'monthly', employee.businessId, business.language);
+    const data = await this._dashboardService.getCostTrend(
+      from,
+      to,
+      groupBy ?? 'monthly',
+      employee.businessId,
+      business.language,
+    );
     return plainToInstance(CostTrendItemResponseDto, data, TO_INSTANCE);
   }
 
@@ -70,7 +88,12 @@ export class DashboardController {
   ): Promise<SupplierBreakdownItemResponseDto[]> {
     const employee = await this._employeesService.findByIdentity(sub);
     const business = await this._businessesService.findOne(employee.businessId);
-    const data = await this._dashboardService.getSupplierBreakdown(from, to, employee.businessId, business.language);
+    const data = await this._dashboardService.getSupplierBreakdown(
+      from,
+      to,
+      employee.businessId,
+      business.language,
+    );
     return plainToInstance(SupplierBreakdownItemResponseDto, data, TO_INSTANCE);
   }
 
@@ -84,13 +107,24 @@ export class DashboardController {
   ): Promise<ChangeRequestTrendItemResponseDto[]> {
     const employee = await this._employeesService.findByIdentity(sub);
     const business = await this._businessesService.findOne(employee.businessId);
-    const data = await this._dashboardService.getChangeRequestCounts(from, to, employee.businessId, business.language);
-    return plainToInstance(ChangeRequestTrendItemResponseDto, data, TO_INSTANCE);
+    const data = await this._dashboardService.getChangeRequestCounts(
+      from,
+      to,
+      employee.businessId,
+      business.language,
+    );
+    return plainToInstance(
+      ChangeRequestTrendItemResponseDto,
+      data,
+      TO_INSTANCE,
+    );
   }
 
   @Get('window-ranking')
   @CacheTTL(300_000)
-  @ApiOperation({ summary: 'Get meal selection windows ranked by total cost descending' })
+  @ApiOperation({
+    summary: 'Get meal selection windows ranked by total cost descending',
+  })
   @ApiResponse({ status: 200, type: [WindowRankingItemResponseDto] })
   async getWindowRanking(
     @Query() { from, to }: DashboardDateRangeQueryDto,
@@ -98,7 +132,12 @@ export class DashboardController {
   ): Promise<WindowRankingItemResponseDto[]> {
     const employee = await this._employeesService.findByIdentity(sub);
     const business = await this._businessesService.findOne(employee.businessId);
-    const data = await this._dashboardService.getWindowRanking(from, to, employee.businessId, business.language);
+    const data = await this._dashboardService.getWindowRanking(
+      from,
+      to,
+      employee.businessId,
+      business.language,
+    );
     return plainToInstance(WindowRankingItemResponseDto, data, TO_INSTANCE);
   }
 }

@@ -9,7 +9,7 @@ import { configureApp } from './app.setup';
 import {
   API_KEY_HEADER,
   API_KEY_SECURITY_NAME,
-} from './core/auth/infrastructure/api-key-protected.decorator';
+} from 'src/core/auth/presentation/rest/api-key-protected.decorator';
 import { EnvironmentVariables, NodeEnv } from './env.validation';
 import {
   I_CONFIG_SERVICE,

@@ -12,8 +12,17 @@ import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
 import { t } from 'src/shared/i18n/i18n.helper';
 import { MealWindowNotificationJobData } from 'src/core/meal-selection-windows/infrastructure/meal-selection-window-event-handler.service';
 import { bullmqTelemetry } from '../bullmq-telemetry';
-import { emailBody, emailButton, emailHeading, emailLayout, getLogoAttachment } from '../mail/email-layout';
-import { I_MAIL_SERVICE, IMailService } from '../mail/mail.service.interface';
+import {
+  emailBody,
+  emailButton,
+  emailHeading,
+  emailLayout,
+  getLogoAttachment,
+} from 'src/shared/application/mail/email-layout';
+import {
+  I_MAIL_SERVICE,
+  IMailService,
+} from 'src/shared/application/mail/mail.service.interface';
 import { MEAL_WINDOW_QUEUE } from '../queue-names';
 
 @Processor(MEAL_WINDOW_QUEUE, { telemetry: bullmqTelemetry })
@@ -40,7 +49,9 @@ export class MealSelectionWindowOpenedProcessor extends WorkerHost {
     const employee = await this._employeesService.findOneEnriched(employeeId);
     if (!employee?.email) return;
 
-    const prefs = await this._preferencesService.getOrCreate(employee.identityId);
+    const prefs = await this._preferencesService.getOrCreate(
+      employee.identityId,
+    );
     const lang = prefs.language;
     const webAppUrl = this._configService.get('WEB_APP_URL');
 
@@ -51,7 +62,9 @@ export class MealSelectionWindowOpenedProcessor extends WorkerHost {
       emailButton(webAppUrl, lang === 'sr' ? 'Izaberi obroke' : 'Select meals');
     const html = emailLayout(content, webAppUrl);
 
-    await this._mailService.send(employee.email, subject, html, { attachments: [getLogoAttachment()] });
+    await this._mailService.send(employee.email, subject, html, {
+      attachments: [getLogoAttachment()],
+    });
 
     this._logger.log(
       `job:done queue=${job.queueName} jobId=${job.id} attempt=${job.attemptsMade + 1} windowId=${windowId} employeeId=${employeeId} durationMs=${Date.now() - start}`,

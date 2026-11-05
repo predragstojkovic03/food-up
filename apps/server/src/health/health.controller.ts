@@ -6,7 +6,7 @@ import {
   HealthCheckService,
   TypeOrmHealthIndicator,
 } from '@nestjs/terminus';
-import { Public } from 'src/core/auth/infrastructure/public.decorator';
+import { Public } from 'src/core/auth/presentation/rest/public.decorator';
 import { RedisHealthIndicator } from './redis.health-indicator';
 
 @SkipThrottle()

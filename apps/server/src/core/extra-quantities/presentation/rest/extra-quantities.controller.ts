@@ -18,8 +18,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
-import { CurrentIdentity } from 'src/core/auth/infrastructure/current-identity.decorator';
-import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
+import { CurrentIdentity } from 'src/core/auth/presentation/rest/current-identity.decorator';
+import { JwtPayload } from 'src/core/auth/application/jwt-payload';
 import { RequiredEmployeeRole } from 'src/core/employees/presentation/rest/employee-role.decorator';
 import { RequiredIdentityType } from 'src/core/identity/presentation/rest/identity-type.decorator';
 import { ExtraQuantitiesService } from '../../application/extra-quantities.service';
@@ -32,13 +32,21 @@ import { ExtraQuantityResponseDto } from './dto/extra-quantity-response.dto';
 @RequiredIdentityType(IdentityType.Employee)
 @RequiredEmployeeRole(EmployeeRole.Manager)
 export class ExtraQuantitiesController {
-  constructor(private readonly _extraQuantitiesService: ExtraQuantitiesService) {}
+  constructor(
+    private readonly _extraQuantitiesService: ExtraQuantitiesService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Add an extra quantity for a guest' })
   @ApiResponse({ status: 201, type: ExtraQuantityResponseDto })
-  @ApiResponse({ status: 400, description: 'Menu item is not part of the window' })
-  @ApiResponse({ status: 404, description: "Window or extra quantity not found in the manager's business" })
+  @ApiResponse({
+    status: 400,
+    description: 'Menu item is not part of the window',
+  })
+  @ApiResponse({
+    status: 404,
+    description: "Window or extra quantity not found in the manager's business",
+  })
   async add(
     @Body() dto: CreateExtraQuantityDto,
     @CurrentIdentity() { sub }: JwtPayload,
@@ -50,14 +58,19 @@ export class ExtraQuantitiesController {
       dto.guestName ?? null,
       sub,
     );
-    return plainToInstance(ExtraQuantityResponseDto, entity, { strategy: 'excludeAll' });
+    return plainToInstance(ExtraQuantityResponseDto, entity, {
+      strategy: 'excludeAll',
+    });
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Remove an extra quantity row' })
   @ApiResponse({ status: 204 })
-  @ApiResponse({ status: 404, description: "Window or extra quantity not found in the manager's business" })
+  @ApiResponse({
+    status: 404,
+    description: "Window or extra quantity not found in the manager's business",
+  })
   async remove(
     @Param('id') id: string,
     @CurrentIdentity() { sub }: JwtPayload,
@@ -69,12 +82,20 @@ export class ExtraQuantitiesController {
   @ApiOperation({ summary: 'List extra quantities for a window' })
   @ApiQuery({ name: 'windowId', required: true, type: String })
   @ApiResponse({ status: 200, type: [ExtraQuantityResponseDto] })
-  @ApiResponse({ status: 404, description: "Window or extra quantity not found in the manager's business" })
+  @ApiResponse({
+    status: 404,
+    description: "Window or extra quantity not found in the manager's business",
+  })
   async findByWindow(
     @Query('windowId') windowId: string,
     @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<ExtraQuantityResponseDto[]> {
-    const entities = await this._extraQuantitiesService.findByWindow(windowId, sub);
-    return plainToInstance(ExtraQuantityResponseDto, entities, { strategy: 'excludeAll' });
+    const entities = await this._extraQuantitiesService.findByWindow(
+      windowId,
+      sub,
+    );
+    return plainToInstance(ExtraQuantityResponseDto, entities, {
+      strategy: 'excludeAll',
+    });
   }
 }

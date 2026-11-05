@@ -16,9 +16,9 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
-import { Public } from 'src/core/auth/infrastructure/public.decorator';
-import { CurrentIdentity } from 'src/core/auth/infrastructure/current-identity.decorator';
-import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
+import { Public } from 'src/core/auth/presentation/rest/public.decorator';
+import { CurrentIdentity } from 'src/core/auth/presentation/rest/current-identity.decorator';
+import { JwtPayload } from 'src/core/auth/application/jwt-payload';
 import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { RequiredEmployeeRole } from 'src/core/employees/presentation/rest/employee-role.decorator';
 import { RequiredIdentityType } from 'src/core/identity/presentation/rest/identity-type.decorator';
@@ -57,9 +57,14 @@ export class BusinessesController {
   }
 
   @Get(':id/invites')
-  @ApiOperation({ summary: 'List active (unused, non-expired) invites for a business' })
+  @ApiOperation({
+    summary: 'List active (unused, non-expired) invites for a business',
+  })
   @ApiResponse({ status: 200, type: [BusinessInviteResponseDto] })
-  @ApiResponse({ status: 404, description: "Business is not the manager's own business" })
+  @ApiResponse({
+    status: 404,
+    description: "Business is not the manager's own business",
+  })
   @RequiredIdentityType(IdentityType.Employee)
   @RequiredEmployeeRole(EmployeeRole.Manager)
   @ApiBearerAuth()
@@ -68,14 +73,21 @@ export class BusinessesController {
     @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<BusinessInviteResponseDto[]> {
     await this._assertManagesBusiness(businessId, sub);
-    const invites = await this._businessInvitesService.findActiveByBusiness(businessId);
-    return plainToInstance(BusinessInviteResponseDto, invites.map(this._toInviteDto));
+    const invites =
+      await this._businessInvitesService.findActiveByBusiness(businessId);
+    return plainToInstance(
+      BusinessInviteResponseDto,
+      invites.map(this._toInviteDto),
+    );
   }
 
   @Post(':id/invites')
   @ApiOperation({ summary: 'Create an employee invite for a business' })
   @ApiResponse({ status: 201, type: BusinessInviteResponseDto })
-  @ApiResponse({ status: 404, description: "Business is not the manager's own business" })
+  @ApiResponse({
+    status: 404,
+    description: "Business is not the manager's own business",
+  })
   @RequiredIdentityType(IdentityType.Employee)
   @RequiredEmployeeRole(EmployeeRole.Manager)
   @ApiBearerAuth()
@@ -86,14 +98,26 @@ export class BusinessesController {
   ): Promise<BusinessInviteResponseDto> {
     await this._assertManagesBusiness(businessId, sub);
     const business = await this._businessesService.findOne(businessId);
-    const invite = await this._businessInvitesService.create(businessId, body.email, business.language);
-    return plainToInstance(BusinessInviteResponseDto, this._toInviteDto(invite));
+    const invite = await this._businessInvitesService.create(
+      businessId,
+      body.email,
+      business.language,
+    );
+    return plainToInstance(
+      BusinessInviteResponseDto,
+      this._toInviteDto(invite),
+    );
   }
 
   @Post(':id/invites/:inviteId/resend')
-  @ApiOperation({ summary: 'Resend the invite email for an existing active invite' })
+  @ApiOperation({
+    summary: 'Resend the invite email for an existing active invite',
+  })
   @ApiResponse({ status: 200, type: BusinessInviteResponseDto })
-  @ApiResponse({ status: 404, description: "Business is not the manager's own business" })
+  @ApiResponse({
+    status: 404,
+    description: "Business is not the manager's own business",
+  })
   @RequiredIdentityType(IdentityType.Employee)
   @RequiredEmployeeRole(EmployeeRole.Manager)
   @ApiBearerAuth()
@@ -104,8 +128,15 @@ export class BusinessesController {
   ): Promise<BusinessInviteResponseDto> {
     await this._assertManagesBusiness(businessId, sub);
     const business = await this._businessesService.findOne(businessId);
-    const invite = await this._businessInvitesService.resend(inviteId, businessId, business.language);
-    return plainToInstance(BusinessInviteResponseDto, this._toInviteDto(invite));
+    const invite = await this._businessInvitesService.resend(
+      inviteId,
+      businessId,
+      business.language,
+    );
+    return plainToInstance(
+      BusinessInviteResponseDto,
+      this._toInviteDto(invite),
+    );
   }
 
   @Get('my')
@@ -114,10 +145,14 @@ export class BusinessesController {
   @RequiredIdentityType(IdentityType.Employee)
   @RequiredEmployeeRole(EmployeeRole.Manager)
   @ApiBearerAuth()
-  async getMy(@CurrentIdentity() { sub }: JwtPayload): Promise<BusinessResponseDto> {
+  async getMy(
+    @CurrentIdentity() { sub }: JwtPayload,
+  ): Promise<BusinessResponseDto> {
     const employee = await this._employeesService.findByIdentity(sub);
     const business = await this._businessesService.findOne(employee.businessId);
-    return plainToInstance(BusinessResponseDto, business, { excludeExtraneousValues: true });
+    return plainToInstance(BusinessResponseDto, business, {
+      excludeExtraneousValues: true,
+    });
   }
 
   @Patch('my')
@@ -131,15 +166,25 @@ export class BusinessesController {
     @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<BusinessResponseDto> {
     const employee = await this._employeesService.findByIdentity(sub);
-    const business = await this._businessesService.updateSettings(employee.businessId, dto);
-    return plainToInstance(BusinessResponseDto, business, { excludeExtraneousValues: true });
+    const business = await this._businessesService.updateSettings(
+      employee.businessId,
+      dto,
+    );
+    return plainToInstance(BusinessResponseDto, business, {
+      excludeExtraneousValues: true,
+    });
   }
 
   /** Managers may only act on their own business; other businesses respond as not found. */
-  private async _assertManagesBusiness(businessId: string, identityId: string): Promise<void> {
+  private async _assertManagesBusiness(
+    businessId: string,
+    identityId: string,
+  ): Promise<void> {
     const employee = await this._employeesService.findByIdentity(identityId);
     if (employee.businessId !== businessId) {
-      throw new EntityInstanceNotFoundException(`Business ${businessId} not found`);
+      throw new EntityInstanceNotFoundException(
+        `Business ${businessId} not found`,
+      );
     }
   }
 

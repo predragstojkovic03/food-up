@@ -14,9 +14,9 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
-import { CurrentIdentity } from 'src/core/auth/infrastructure/current-identity.decorator';
-import { JwtPayload } from 'src/core/auth/infrastructure/jwt-payload';
-import { Public } from 'src/core/auth/infrastructure/public.decorator';
+import { CurrentIdentity } from 'src/core/auth/presentation/rest/current-identity.decorator';
+import { JwtPayload } from 'src/core/auth/application/jwt-payload';
+import { Public } from 'src/core/auth/presentation/rest/public.decorator';
 import { RequiredEmployeeRole } from 'src/core/employees/presentation/rest/employee-role.decorator';
 import { EmployeeRole, IdentityType } from '@food-up/shared';
 import { RequiredIdentityType } from 'src/core/identity/presentation/rest/identity-type.decorator';
@@ -61,11 +61,18 @@ export class SuppliersController {
     @Body() { email, name, language }: CreateManagedSupplierDto,
     @CurrentIdentity() { sub }: JwtPayload,
   ): Promise<SupplierResponseDto> {
-    const result = await this._suppliersService.createManagedSupplier(sub, { email, name, language });
+    const result = await this._suppliersService.createManagedSupplier(sub, {
+      email,
+      name,
+      language,
+    });
     return this.toResponseDto(result);
   }
 
-  @ApiOperation({ summary: 'Get in-house (managed) suppliers for the current manager\'s business' })
+  @ApiOperation({
+    summary:
+      "Get in-house (managed) suppliers for the current manager's business",
+  })
   @ApiResponse({ status: 200, type: [SupplierResponseDto] })
   @RequiredIdentityType(IdentityType.Employee)
   @RequiredEmployeeRole(EmployeeRole.Manager)
@@ -78,7 +85,10 @@ export class SuppliersController {
     return result.map(this.toResponseDto);
   }
 
-  @ApiOperation({ summary: 'Get partner (standalone) suppliers for the current manager\'s business' })
+  @ApiOperation({
+    summary:
+      "Get partner (standalone) suppliers for the current manager's business",
+  })
   @ApiResponse({ status: 200, type: [SupplierResponseDto] })
   @RequiredIdentityType(IdentityType.Employee)
   @RequiredEmployeeRole(EmployeeRole.Manager)
@@ -112,7 +122,10 @@ export class SuppliersController {
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a supplier' })
   @ApiResponse({ status: 200, description: 'Supplier deleted' })
-  @ApiResponse({ status: 404, description: 'Supplier not found or not managed by the caller' })
+  @ApiResponse({
+    status: 404,
+    description: 'Supplier not found or not managed by the caller',
+  })
   @ApiBearerAuth()
   async delete(
     @Param('id') id: string,
