@@ -2,7 +2,10 @@ import { TypeOrmMapper } from 'src/shared/infrastructure/typeorm.mapper';
 import { Supplier } from '../../domain/supplier.entity';
 import { Supplier as SupplierPersistence } from './supplier.typeorm-entity';
 
-export class SupplierTypeOrmMapper extends TypeOrmMapper<Supplier, SupplierPersistence> {
+export class SupplierTypeOrmMapper extends TypeOrmMapper<
+  Supplier,
+  SupplierPersistence
+> {
   toDomain(persistence: SupplierPersistence): Supplier {
     return Supplier.reconstitute(
       persistence.id,
@@ -28,7 +31,9 @@ export class SupplierTypeOrmMapper extends TypeOrmMapper<Supplier, SupplierPersi
     return persistence;
   }
 
-  toPersistencePartial(domain: Partial<Supplier>): Partial<SupplierPersistence> {
+  toPersistencePartial(
+    domain: Partial<Supplier>,
+  ): Partial<SupplierPersistence> {
     const persistence: Partial<SupplierPersistence> = {};
     if (domain.id !== undefined) persistence.id = domain.id;
     if (domain.name !== undefined) persistence.name = domain.name;

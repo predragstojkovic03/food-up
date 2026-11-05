@@ -31,7 +31,9 @@ export class MenuPeriod extends Entity {
     supplierId: string,
   ) {
     if (endDate < startDate) {
-      throw new InvalidInputDataException('End date must not be before start date');
+      throw new InvalidInputDataException(
+        'End date must not be before start date',
+      );
     }
 
     super();
@@ -72,7 +74,9 @@ export class MenuPeriod extends Entity {
     }
 
     if (this._endDate < this._startDate) {
-      throw new InvalidInputDataException('End date must not be before start date');
+      throw new InvalidInputDataException(
+        'End date must not be before start date',
+      );
     }
 
     this.addDomainEvent(new MenuPeriodDetailsUpdatedEvent(this._id));

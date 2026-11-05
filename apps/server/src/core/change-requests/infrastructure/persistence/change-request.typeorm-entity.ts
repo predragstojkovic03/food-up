@@ -2,7 +2,14 @@ import { Employee } from 'src/core/employees/infrastructure/persistence/employee
 import { MealSelection } from 'src/core/meal-selections/infrastructure/persistence/meal-selection.typeorm-entity';
 import { MealSelectionWindow } from 'src/core/meal-selection-windows/infrastructure/persistence/meal-selection-window.typeorm-entity';
 import { MenuItem } from 'src/core/menu-items/infrastructure/persistence/menu-item.typeorm-entity';
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+} from 'typeorm';
 import { ChangeRequestStatus } from '@food-up/shared';
 
 @Entity()
@@ -25,14 +32,22 @@ export class ChangeRequest {
   @JoinColumn({ name: 'meal_selection_window_id' })
   mealSelectionWindow: MealSelectionWindow;
 
-  @Column('character varying', { length: 26, nullable: true, name: 'meal_selection_id' })
+  @Column('character varying', {
+    length: 26,
+    nullable: true,
+    name: 'meal_selection_id',
+  })
   mealSelectionId: string | null;
 
   @ManyToOne(() => MealSelection, { nullable: true })
   @JoinColumn({ name: 'meal_selection_id' })
   mealSelection: MealSelection | null;
 
-  @Column('character varying', { length: 26, nullable: true, name: 'new_menu_item_id' })
+  @Column('character varying', {
+    length: 26,
+    nullable: true,
+    name: 'new_menu_item_id',
+  })
   newMenuItemId: string | null;
 
   @ManyToOne(() => MenuItem, { nullable: true })
@@ -49,7 +64,11 @@ export class ChangeRequest {
   @Column('enum', { enum: ChangeRequestStatus })
   status: ChangeRequestStatus;
 
-  @Column('character varying', { length: 26, nullable: true, name: 'approved_by' })
+  @Column('character varying', {
+    length: 26,
+    nullable: true,
+    name: 'approved_by',
+  })
   approvedBy: string | null;
 
   @ManyToOne(() => Employee, { nullable: true })

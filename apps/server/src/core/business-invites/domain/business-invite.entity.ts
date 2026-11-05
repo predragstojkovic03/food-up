@@ -3,7 +3,11 @@ import { generateId } from 'src/shared/domain/generate-id';
 import { InvalidOperationException } from 'src/shared/domain/exceptions/invalid-operation.exception';
 
 export class BusinessInvite extends Entity {
-  static create(businessId: string, email: string, expiresAt: Date): BusinessInvite {
+  static create(
+    businessId: string,
+    email: string,
+    expiresAt: Date,
+  ): BusinessInvite {
     return new BusinessInvite(
       generateId(),
       businessId,
@@ -24,7 +28,15 @@ export class BusinessInvite extends Entity {
     usedAt: Date | null,
     emailSentAt: Date | null,
   ): BusinessInvite {
-    return new BusinessInvite(id, businessId, email, token, expiresAt, usedAt, emailSentAt);
+    return new BusinessInvite(
+      id,
+      businessId,
+      email,
+      token,
+      expiresAt,
+      usedAt,
+      emailSentAt,
+    );
   }
 
   private constructor(

@@ -10,7 +10,11 @@ import { BusinessesController } from './presentation/rest/businesses.controller'
 @Module({
   imports: [BusinessInvitesModule, forwardRef(() => EmployeesModule)],
   controllers: [BusinessesController, BusinessOnboardingController],
-  providers: [BusinessesService, BusinessOnboardingService, BusinessRepositoryProvider],
+  providers: [
+    BusinessesService,
+    BusinessOnboardingService,
+    BusinessRepositoryProvider,
+  ],
   exports: [BusinessesService],
 })
 export class BusinessesModule {}

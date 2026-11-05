@@ -5,7 +5,11 @@ describe('TypeOrmTransactionRunner', () => {
   it('opens one transaction and lets nested runs join it', async () => {
     const context = new TransactionContext();
     const manager = { id: 'manager-1' };
-    const dataSource = { transaction: jest.fn((work: (m: unknown) => Promise<unknown>) => work(manager)) };
+    const dataSource = {
+      transaction: jest.fn((work: (m: unknown) => Promise<unknown>) =>
+        work(manager),
+      ),
+    };
     const runner = new TypeOrmTransactionRunner(dataSource as any, context);
 
     const seen = await runner.run(async () => {

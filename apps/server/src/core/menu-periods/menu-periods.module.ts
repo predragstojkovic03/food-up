@@ -8,12 +8,7 @@ import { MenuPeriodsRepositoryProvider } from './infrastructure/menu-periods.pro
 import { MenuPeriodsController } from './presentation/rest/menu-periods.controller';
 
 @Module({
-  imports: [
-    IdentityModule,
-    EmployeesModule,
-    BusinessesModule,
-    SuppliersModule,
-  ],
+  imports: [IdentityModule, EmployeesModule, BusinessesModule, SuppliersModule],
   controllers: [MenuPeriodsController],
   providers: [MenuPeriodsRepositoryProvider, MenuPeriodsService],
   exports: [MenuPeriodsService],

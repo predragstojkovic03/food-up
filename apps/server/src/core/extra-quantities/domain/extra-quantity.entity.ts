@@ -18,7 +18,13 @@ export class ExtraQuantity extends Entity {
     quantity: number,
     guestName: string | null,
   ): ExtraQuantity {
-    return new ExtraQuantity(generateId(), windowId, menuItemId, quantity, guestName);
+    return new ExtraQuantity(
+      generateId(),
+      windowId,
+      menuItemId,
+      quantity,
+      guestName,
+    );
   }
 
   static reconstitute(
@@ -31,9 +37,19 @@ export class ExtraQuantity extends Entity {
     return new ExtraQuantity(id, windowId, menuItemId, quantity, guestName);
   }
 
-  get id(): string { return this._id; }
-  get windowId(): string { return this._windowId; }
-  get menuItemId(): string { return this._menuItemId; }
-  get quantity(): number { return this._quantity; }
-  get guestName(): string | null { return this._guestName; }
+  get id(): string {
+    return this._id;
+  }
+  get windowId(): string {
+    return this._windowId;
+  }
+  get menuItemId(): string {
+    return this._menuItemId;
+  }
+  get quantity(): number {
+    return this._quantity;
+  }
+  get guestName(): string | null {
+    return this._guestName;
+  }
 }

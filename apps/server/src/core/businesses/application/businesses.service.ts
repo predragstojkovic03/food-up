@@ -45,7 +45,9 @@ export class BusinessesService {
     businessId: string,
     settings: IUpdateBusinessSettings,
   ): Promise<Business> {
-    const business = await this._repository.findOneByCriteriaOrThrow({ id: businessId });
+    const business = await this._repository.findOneByCriteriaOrThrow({
+      id: businessId,
+    });
     if (settings.language !== undefined) business.language = settings.language;
     if (settings.reportIncludeEmployeesWithoutSelection !== undefined)
       business.reportIncludeEmployeesWithoutSelection =
@@ -67,7 +69,9 @@ export class BusinessesService {
       this._repository.findOneByCriteria({ contactEmail }),
     ]);
     if (byName) {
-      throw new EntityInstanceAlreadyExistsException(`A business named "${name}" already exists`);
+      throw new EntityInstanceAlreadyExistsException(
+        `A business named "${name}" already exists`,
+      );
     }
     if (byContactEmail) {
       throw new EntityInstanceAlreadyExistsException(

@@ -15,7 +15,10 @@ export class Identity {
   passwordHash: string | null;
 
   // Partial unique index, matching migration 000005
-  @Index('identity_google_id_key', { unique: true, where: '"google_id" IS NOT NULL' })
+  @Index('identity_google_id_key', {
+    unique: true,
+    where: '"google_id" IS NOT NULL',
+  })
   @Column('varchar', { length: 255, nullable: true })
   googleId: string | null;
 

@@ -94,7 +94,9 @@ export class MealSelection extends Entity {
 
   set menuItemId(value: string | null) {
     this._menuItemId = value;
-    this.addDomainEvent(new MealSelectionMenuItemChangedEvent(this.id, value ?? undefined));
+    this.addDomainEvent(
+      new MealSelectionMenuItemChangedEvent(this.id, value ?? undefined),
+    );
   }
 
   get mealSelectionWindowId(): string {
@@ -121,7 +123,11 @@ export class MealSelection extends Entity {
   // menuItemId: undefined = don't change, null = clear selection, string = change to this item
   // quantity:   undefined = don't change, null = clear
   // price:      undefined = don't change, null = clear, number = set
-  update(menuItemId?: string | null, quantity?: number | null, price?: number | null) {
+  update(
+    menuItemId?: string | null,
+    quantity?: number | null,
+    price?: number | null,
+  ) {
     if (menuItemId !== undefined) {
       // Keep null: it records a skip, and the partial update persists it
       this.menuItemId = menuItemId;

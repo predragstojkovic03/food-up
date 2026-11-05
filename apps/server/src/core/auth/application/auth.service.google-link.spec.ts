@@ -11,7 +11,13 @@ const mockIdentityService = {
   updatePictureUrl: jest.fn(),
 };
 const mockEmployeesService = { findByIdentity: jest.fn() };
-const mockRtRepo = { findById: jest.fn(), create: jest.fn(), markUsed: jest.fn(), revoke: jest.fn(), revokeFamily: jest.fn() };
+const mockRtRepo = {
+  findById: jest.fn(),
+  create: jest.fn(),
+  markUsed: jest.fn(),
+  revoke: jest.fn(),
+  revokeFamily: jest.fn(),
+};
 const mockJwtService = { signAsync: jest.fn() };
 const mockConfig = { get: jest.fn() };
 
@@ -29,18 +35,32 @@ describe('AuthService.findOrLinkGoogleIdentity', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('returns existing identity when googleId already linked', async () => {
-    const existing = Identity.createWithGoogle('a@b.com', 'gid', IdentityType.Employee);
+    const existing = Identity.createWithGoogle(
+      'a@b.com',
+      'gid',
+      IdentityType.Employee,
+    );
     mockIdentityService.findByGoogleId.mockResolvedValue(existing);
-    const result = await makeService().findOrLinkGoogleIdentity('gid', 'a@b.com', null);
+    const result = await makeService().findOrLinkGoogleIdentity(
+      'gid',
+      'a@b.com',
+      null,
+    );
     expect(result).toBe(existing);
     expect(mockIdentityService.findByEmail).not.toHaveBeenCalled();
   });
 
   it('links Google and clears password for a regular employee', async () => {
     mockIdentityService.findByGoogleId.mockResolvedValue(null);
-    const employee = Identity.createWithPassword('emp@b.com', 'hash', IdentityType.Employee);
+    const employee = Identity.createWithPassword(
+      'emp@b.com',
+      'hash',
+      IdentityType.Employee,
+    );
     mockIdentityService.findByEmail.mockResolvedValue(employee);
-    mockEmployeesService.findByIdentity.mockResolvedValue({ role: EmployeeRole.Basic });
+    mockEmployeesService.findByIdentity.mockResolvedValue({
+      role: EmployeeRole.Basic,
+    });
     mockIdentityService.linkGoogle.mockResolvedValue(undefined);
     mockIdentityService.findById.mockResolvedValue(employee);
 
@@ -55,9 +75,15 @@ describe('AuthService.findOrLinkGoogleIdentity', () => {
 
   it('links Google and keeps password for a manager employee', async () => {
     mockIdentityService.findByGoogleId.mockResolvedValue(null);
-    const manager = Identity.createWithPassword('mgr@b.com', 'hash', IdentityType.Employee);
+    const manager = Identity.createWithPassword(
+      'mgr@b.com',
+      'hash',
+      IdentityType.Employee,
+    );
     mockIdentityService.findByEmail.mockResolvedValue(manager);
-    mockEmployeesService.findByIdentity.mockResolvedValue({ role: EmployeeRole.Manager });
+    mockEmployeesService.findByIdentity.mockResolvedValue({
+      role: EmployeeRole.Manager,
+    });
     mockIdentityService.linkGoogle.mockResolvedValue(undefined);
     mockIdentityService.findById.mockResolvedValue(manager);
 
@@ -73,7 +99,8 @@ describe('AuthService.findOrLinkGoogleIdentity', () => {
   it('throws UnauthorizedException when email has no account', async () => {
     mockIdentityService.findByGoogleId.mockResolvedValue(null);
     mockIdentityService.findByEmail.mockResolvedValue(null);
-    await expect(makeService().findOrLinkGoogleIdentity('gid', 'unknown@b.com', null))
-      .rejects.toThrow(UnauthorizedException);
+    await expect(
+      makeService().findOrLinkGoogleIdentity('gid', 'unknown@b.com', null),
+    ).rejects.toThrow(UnauthorizedException);
   });
 });

@@ -14,7 +14,10 @@ export class MealSelectionOverviewQueryService {
     private readonly _windowsService: MealSelectionWindowsService,
   ) {}
 
-  async getDailyOverview(windowId: string, identityId: string): Promise<WindowDailyOverviewItemDto[]> {
+  async getDailyOverview(
+    windowId: string,
+    identityId: string,
+  ): Promise<WindowDailyOverviewItemDto[]> {
     await this._windowsService.findOneInMyBusiness(windowId, identityId);
     return this._repository.getDailyOverview(windowId);
   }

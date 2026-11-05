@@ -1,4 +1,9 @@
-import { DietaryTag, IWindowMenuItemMeal, IWindowMenuItemResponse, MealType } from '@food-up/shared';
+import {
+  DietaryTag,
+  IWindowMenuItemMeal,
+  IWindowMenuItemResponse,
+  MealType,
+} from '@food-up/shared';
 import { Expose, Type } from 'class-transformer';
 
 export class WindowMenuItemMealDto implements IWindowMenuItemMeal {

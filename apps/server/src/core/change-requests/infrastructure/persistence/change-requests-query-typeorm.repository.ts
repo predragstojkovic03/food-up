@@ -32,7 +32,9 @@ export class ChangeRequestsQueryTypeOrmRepository
     return rows.map(this._mapRow);
   }
 
-  async findRichByEmployee(employeeId: string): Promise<RichChangeRequestDto[]> {
+  async findRichByEmployee(
+    employeeId: string,
+  ): Promise<RichChangeRequestDto[]> {
     const rows = await this._buildRichQuery()
       .where('cr.employeeId = :employeeId', { employeeId })
       .getRawMany();

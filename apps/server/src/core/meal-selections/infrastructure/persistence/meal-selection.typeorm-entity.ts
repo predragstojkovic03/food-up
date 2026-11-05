@@ -1,7 +1,14 @@
 import { Employee } from 'src/core/employees/infrastructure/persistence/employee.typeorm-entity';
 import { MealSelectionWindow } from 'src/core/meal-selection-windows/infrastructure/persistence/meal-selection-window.typeorm-entity';
 import { MenuItem } from 'src/core/menu-items/infrastructure/persistence/menu-item.typeorm-entity';
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+} from 'typeorm';
 
 @Entity()
 export class MealSelection {
@@ -16,7 +23,11 @@ export class MealSelection {
   @JoinColumn({ name: 'employee_id' })
   employee: Employee;
 
-  @Column('character varying', { length: 26, nullable: true, name: 'menu_item_id' })
+  @Column('character varying', {
+    length: 26,
+    nullable: true,
+    name: 'menu_item_id',
+  })
   menuItemId: string | null;
 
   @ManyToOne(() => MenuItem, (menuItem) => menuItem.mealSelections, {

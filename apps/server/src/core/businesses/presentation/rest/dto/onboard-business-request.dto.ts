@@ -1,6 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsEmail, IsOptional, IsString, MinLength, ValidateNested } from 'class-validator';
+import {
+  IsEmail,
+  IsOptional,
+  IsString,
+  MinLength,
+  ValidateNested,
+} from 'class-validator';
 
 export class OnboardBusinessManagerRequestDto {
   @ApiProperty({ example: 'Jane Doe' })
@@ -33,7 +39,10 @@ export class OnboardBusinessRequestDto {
   @IsString()
   contactPhone?: string;
 
-  @ApiProperty({ type: OnboardBusinessManagerRequestDto, description: 'The first manager of the business' })
+  @ApiProperty({
+    type: OnboardBusinessManagerRequestDto,
+    description: 'The first manager of the business',
+  })
   @ValidateNested()
   @Type(() => OnboardBusinessManagerRequestDto)
   manager: OnboardBusinessManagerRequestDto;

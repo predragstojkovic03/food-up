@@ -9,8 +9,13 @@ describe('MealSelectionOverviewQueryService', () => {
 
   beforeEach(() => {
     mockRepository = { getDailyOverview: jest.fn() };
-    mockWindowsService = { findOneInMyBusiness: jest.fn().mockResolvedValue({ id: 'window-1' }) };
-    service = new MealSelectionOverviewQueryService(mockRepository as any, mockWindowsService as any);
+    mockWindowsService = {
+      findOneInMyBusiness: jest.fn().mockResolvedValue({ id: 'window-1' }),
+    };
+    service = new MealSelectionOverviewQueryService(
+      mockRepository as any,
+      mockWindowsService as any,
+    );
   });
 
   describe('getDailyOverview', () => {
@@ -41,12 +46,17 @@ describe('MealSelectionOverviewQueryService', () => {
     });
 
     it("rejects windows outside the caller's business without querying", async () => {
-      mockWindowsService.findOneInMyBusiness.mockRejectedValue(new EntityInstanceNotFoundException());
-
-      await expect(service.getDailyOverview('window-b', 'identity-1')).rejects.toBeInstanceOf(
-        EntityInstanceNotFoundException,
+      mockWindowsService.findOneInMyBusiness.mockRejectedValue(
+        new EntityInstanceNotFoundException(),
       );
-      expect(mockWindowsService.findOneInMyBusiness).toHaveBeenCalledWith('window-b', 'identity-1');
+
+      await expect(
+        service.getDailyOverview('window-b', 'identity-1'),
+      ).rejects.toBeInstanceOf(EntityInstanceNotFoundException);
+      expect(mockWindowsService.findOneInMyBusiness).toHaveBeenCalledWith(
+        'window-b',
+        'identity-1',
+      );
       expect(mockRepository.getDailyOverview).not.toHaveBeenCalled();
     });
   });

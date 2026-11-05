@@ -22,7 +22,9 @@ export interface IOrderSummaryQueryRepository {
   ): Promise<OrderSummaryRow[]>;
   getEmployeeSelections(windowId: string): Promise<EmployeeDaySelectionRow[]>;
   /** Active employees of the window's business with no selection record (not even a skip) for a target date */
-  getEmployeesWithoutSelection(windowId: string): Promise<EmployeeWithoutSelectionRow[]>;
+  getEmployeesWithoutSelection(
+    windowId: string,
+  ): Promise<EmployeeWithoutSelectionRow[]>;
   /** Employees whose selections for a target date were skipped or cleared by an approved change request */
   getSkippedEmployees(windowId: string): Promise<EmployeeWithoutSelectionRow[]>;
   getCostByWindow(windowId: string): Promise<CostByWindowRow[]>;

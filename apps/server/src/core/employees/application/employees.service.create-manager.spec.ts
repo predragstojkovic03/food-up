@@ -6,7 +6,12 @@ describe('EmployeesService.createManager', () => {
   let identityService: any;
   let service: EmployeesService;
 
-  const dto = { name: 'Jane', email: 'jane@acme.com', password: 'secret123', businessId: 'biz-1' };
+  const dto = {
+    name: 'Jane',
+    email: 'jane@acme.com',
+    password: 'secret123',
+    businessId: 'biz-1',
+  };
 
   beforeEach(() => {
     repository = { insert: jest.fn((e: unknown) => Promise.resolve(e)) };
@@ -25,13 +30,17 @@ describe('EmployeesService.createManager', () => {
 
   it('creates the identity and the manager', async () => {
     await service.createManager(dto);
-    expect(identityService.create).toHaveBeenCalledWith(expect.objectContaining({ email: 'jane@acme.com' }));
+    expect(identityService.create).toHaveBeenCalledWith(
+      expect.objectContaining({ email: 'jane@acme.com' }),
+    );
     expect(repository.insert).toHaveBeenCalledTimes(1);
   });
 
   it('rejects an email that already has an account with 409', async () => {
     identityService.findByEmail.mockResolvedValue({ id: 'existing' });
-    await expect(service.createManager(dto)).rejects.toBeInstanceOf(EntityInstanceAlreadyExistsException);
+    await expect(service.createManager(dto)).rejects.toBeInstanceOf(
+      EntityInstanceAlreadyExistsException,
+    );
     expect(identityService.create).not.toHaveBeenCalled();
     expect(repository.insert).not.toHaveBeenCalled();
   });

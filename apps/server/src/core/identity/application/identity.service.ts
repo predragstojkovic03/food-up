@@ -84,17 +84,29 @@ export class IdentityService {
   }
 
   async updatePictureUrl(id: string, pictureUrl: string | null): Promise<void> {
-    await this._repository.update(id, { pictureUrl } as unknown as Partial<Identity>);
+    await this._repository.update(id, {
+      pictureUrl,
+    } as unknown as Partial<Identity>);
   }
 
-  async linkGoogle(identityId: string, googleId: string, clearPassword: boolean): Promise<void> {
+  async linkGoogle(
+    identityId: string,
+    googleId: string,
+    clearPassword: boolean,
+  ): Promise<void> {
     const identity = await this._repository.findById(identityId);
     if (!identity) throw new Error(`Identity not found: ${identityId}`);
     identity.linkGoogle(googleId, clearPassword);
     const update: Record<string, unknown> = { googleId: identity.googleId };
     if (clearPassword) update.passwordHash = null;
-    await this._repository.update(identityId, update as unknown as Partial<Identity>);
-    this._logger.log(`Google linked for identity: id=${identityId}`, IdentityService.name);
+    await this._repository.update(
+      identityId,
+      update as unknown as Partial<Identity>,
+    );
+    this._logger.log(
+      `Google linked for identity: id=${identityId}`,
+      IdentityService.name,
+    );
   }
 
   async update(id: string, update: Partial<Identity>): Promise<Identity> {
@@ -103,16 +115,26 @@ export class IdentityService {
     return result;
   }
 
-  async changePassword(identityId: string, currentPassword: string, newPassword: string): Promise<void> {
+  async changePassword(
+    identityId: string,
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<void> {
     const identity = await this._repository.findById(identityId);
     if (!identity) throw new UnauthorizedException('Identity not found');
 
     const isValid = await identity.isPasswordValid(currentPassword, compare);
-    if (!isValid) throw new UnauthorizedException('Current password is incorrect');
+    if (!isValid)
+      throw new UnauthorizedException('Current password is incorrect');
 
     const newHash = await hash(newPassword, 10);
-    await this._repository.update(identityId, { passwordHash: newHash } as unknown as Partial<Identity>);
-    this._logger.log(`Password changed for identity: id=${identityId}`, IdentityService.name);
+    await this._repository.update(identityId, {
+      passwordHash: newHash,
+    } as unknown as Partial<Identity>);
+    this._logger.log(
+      `Password changed for identity: id=${identityId}`,
+      IdentityService.name,
+    );
   }
 
   async delete(id: string): Promise<void> {

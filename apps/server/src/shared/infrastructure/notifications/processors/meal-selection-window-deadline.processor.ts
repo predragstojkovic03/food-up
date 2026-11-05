@@ -49,10 +49,11 @@ export class MealSelectionWindowDeadlineProcessor extends WorkerHost {
       return;
     }
 
-    const hasApprovedCrs = await this._crQueryService.hasApprovedCrForWindowAfter(
-      mealSelectionWindowId,
-      new Date(0),
-    );
+    const hasApprovedCrs =
+      await this._crQueryService.hasApprovedCrForWindowAfter(
+        mealSelectionWindowId,
+        new Date(0),
+      );
 
     if (hasApprovedCrs) {
       this._logger.log(
@@ -62,7 +63,9 @@ export class MealSelectionWindowDeadlineProcessor extends WorkerHost {
       return;
     }
 
-    const rows = await this._reportsService.getOrderSummary(mealSelectionWindowId);
+    const rows = await this._reportsService.getOrderSummary(
+      mealSelectionWindowId,
+    );
     if (rows.length === 0) {
       this._logger.log(
         `Deadline auto-send skipped: no order data windowId=${mealSelectionWindowId}`,
@@ -71,8 +74,12 @@ export class MealSelectionWindowDeadlineProcessor extends WorkerHost {
       return;
     }
 
-    const managers = await this._employeesService.findAllByBusinessEnriched(window.businessId);
-    const managerIdentityId = managers.find((e) => e.role === EmployeeRole.Manager)?.identityId;
+    const managers = await this._employeesService.findAllByBusinessEnriched(
+      window.businessId,
+    );
+    const managerIdentityId = managers.find(
+      (e) => e.role === EmployeeRole.Manager,
+    )?.identityId;
 
     if (!managerIdentityId) {
       this._logger.warn(
@@ -86,11 +93,12 @@ export class MealSelectionWindowDeadlineProcessor extends WorkerHost {
 
     const suppliers = await Promise.all(
       uniqueSupplierIds.map(async (supplierId) => {
-        const { subject, introText } = await this._reportsService.generatePreview(
-          mealSelectionWindowId,
-          supplierId,
-          managerIdentityId,
-        );
+        const { subject, introText } =
+          await this._reportsService.generatePreview(
+            mealSelectionWindowId,
+            supplierId,
+            managerIdentityId,
+          );
         return { supplierId, subject, introText };
       }),
     );

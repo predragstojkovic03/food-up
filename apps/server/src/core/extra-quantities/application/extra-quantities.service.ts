@@ -36,12 +36,20 @@ export class ExtraQuantitiesService {
       );
     }
 
-    const entity = ExtraQuantity.create(windowId, menuItemId, quantity, guestName);
+    const entity = ExtraQuantity.create(
+      windowId,
+      menuItemId,
+      quantity,
+      guestName,
+    );
     await this._repository.insert(entity);
     return entity;
   }
 
-  async findByWindow(windowId: string, identityId: string): Promise<ExtraQuantity[]> {
+  async findByWindow(
+    windowId: string,
+    identityId: string,
+  ): Promise<ExtraQuantity[]> {
     await this._windowsService.findOneInMyBusiness(windowId, identityId);
     return this._repository.findByWindow(windowId);
   }
@@ -49,7 +57,9 @@ export class ExtraQuantitiesService {
   async remove(id: string, identityId: string): Promise<void> {
     const entity = await this._repository.findById(id);
     if (!entity) {
-      throw new EntityInstanceNotFoundException(`Extra quantity ${id} not found`);
+      throw new EntityInstanceNotFoundException(
+        `Extra quantity ${id} not found`,
+      );
     }
     await this._windowsService.findOneInMyBusiness(entity.windowId, identityId);
     return this._repository.remove(id);

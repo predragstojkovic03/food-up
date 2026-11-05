@@ -25,7 +25,16 @@ const OrderSummarySendsRepositoryProvider: Provider = {
 };
 
 @Module({
-  imports: [MailModule, SuppliersModule, IdentityModule, ChangeRequestsModule, EmployeesModule, BusinessSuppliersModule, MealSelectionWindowsModule, BusinessesModule],
+  imports: [
+    MailModule,
+    SuppliersModule,
+    IdentityModule,
+    ChangeRequestsModule,
+    EmployeesModule,
+    BusinessSuppliersModule,
+    MealSelectionWindowsModule,
+    BusinessesModule,
+  ],
   controllers: [ReportsController],
   providers: [
     OrderSummaryQueryRepositoryProvider,

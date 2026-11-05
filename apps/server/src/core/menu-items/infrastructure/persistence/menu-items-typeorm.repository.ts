@@ -17,7 +17,12 @@ export class MenuItemsTypeOrmRepository
     @InjectDataSource() dataSource: DataSource,
     transactionContext: TransactionContext,
   ) {
-    super(dataSource, MenuItemPersistence, new MenuItemTypeOrmMapper(), transactionContext);
+    super(
+      dataSource,
+      MenuItemPersistence,
+      new MenuItemTypeOrmMapper(),
+      transactionContext,
+    );
   }
 
   findBulkByMenuPeriodIdsWithMeal(

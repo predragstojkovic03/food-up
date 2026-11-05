@@ -2,7 +2,10 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsDateString, IsOptional, IsString } from 'class-validator';
 
 export class CreateMealSelectionDto {
-  @ApiProperty({ required: false, description: 'Omit to record a skip for this day' })
+  @ApiProperty({
+    required: false,
+    description: 'Omit to record a skip for this day',
+  })
   @IsOptional()
   @IsString()
   menuItemId?: string;
@@ -11,7 +14,9 @@ export class CreateMealSelectionDto {
   @IsString()
   mealSelectionWindowId: string;
 
-  @ApiProperty({ description: 'ISO date string (YYYY-MM-DD) for the target day' })
+  @ApiProperty({
+    description: 'ISO date string (YYYY-MM-DD) for the target day',
+  })
   @IsDateString()
   date: string;
 

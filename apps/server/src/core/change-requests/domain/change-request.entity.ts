@@ -31,7 +31,9 @@ export class ChangeRequest extends Entity {
       null,
       null,
     );
-    changeRequest.addDomainEvent(new ChangeRequestCreatedEvent(changeRequest.id));
+    changeRequest.addDomainEvent(
+      new ChangeRequestCreatedEvent(changeRequest.id),
+    );
     return changeRequest;
   }
 

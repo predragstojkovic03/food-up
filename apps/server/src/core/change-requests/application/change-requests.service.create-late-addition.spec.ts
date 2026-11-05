@@ -19,7 +19,11 @@ describe('ChangeRequestsService.create() — late addition', () => {
     mockEmployeesService = {
       findByIdentity: jest.fn().mockResolvedValue({ id: employeeId }),
     };
-    const window = { id: windowId, isPastDeadline: true, menuPeriodIds: ['period-1'] };
+    const window = {
+      id: windowId,
+      isPastDeadline: true,
+      menuPeriodIds: ['period-1'],
+    };
     mockWindowsService = {
       findOne: jest.fn().mockResolvedValue(window),
       findOneInMyBusiness: jest.fn().mockResolvedValue(window),
@@ -51,7 +55,9 @@ describe('ChangeRequestsService.create() — late addition', () => {
   });
 
   it('throws when employee already has a selection of the same meal type on the same date', async () => {
-    mockMealSelectionsService.existsByEmployeeWindowWithSameMealTypeAndDateAs.mockResolvedValue(true);
+    mockMealSelectionsService.existsByEmployeeWindowWithSameMealTypeAndDateAs.mockResolvedValue(
+      true,
+    );
 
     await expect(
       service.create(identityId, {
@@ -67,7 +73,9 @@ describe('ChangeRequestsService.create() — late addition', () => {
   });
 
   it('allows late addition when no existing selection of the same meal type on the same date', async () => {
-    mockMealSelectionsService.existsByEmployeeWindowWithSameMealTypeAndDateAs.mockResolvedValue(false);
+    mockMealSelectionsService.existsByEmployeeWindowWithSameMealTypeAndDateAs.mockResolvedValue(
+      false,
+    );
     mockRepository.insert = jest.fn().mockResolvedValue(undefined);
 
     await expect(

@@ -3,7 +3,9 @@ import { Expose } from 'class-transformer';
 import { IMealSelectionWindowResponse } from '@food-up/shared';
 
 @Expose()
-export class MealSelectionWindowResponseDto implements IMealSelectionWindowResponse {
+export class MealSelectionWindowResponseDto
+  implements IMealSelectionWindowResponse
+{
   @ApiProperty()
   id: string;
 

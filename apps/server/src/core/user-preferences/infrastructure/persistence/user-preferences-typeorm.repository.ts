@@ -7,7 +7,9 @@ import { IUserPreferencesRepository } from '../../domain/user-preferences.reposi
 import { UserPreferencesTypeOrmEntity } from './user-preferences.typeorm-entity';
 
 @Injectable()
-export class UserPreferencesTypeOrmRepository implements IUserPreferencesRepository {
+export class UserPreferencesTypeOrmRepository
+  implements IUserPreferencesRepository
+{
   constructor(
     @InjectDataSource() private readonly _dataSource: DataSource,
     private readonly _transactionContext: TransactionContext,

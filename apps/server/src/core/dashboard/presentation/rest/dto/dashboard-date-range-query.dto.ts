@@ -3,11 +3,17 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { GroupBy } from '../../../application/queries/dashboard-query-repository.interface';
 
 export class DashboardDateRangeQueryDto {
-  @ApiProperty({ description: 'Start date (ISO date string)', example: '2025-01-01' })
+  @ApiProperty({
+    description: 'Start date (ISO date string)',
+    example: '2025-01-01',
+  })
   @IsDateString()
   from: string;
 
-  @ApiProperty({ description: 'End date (ISO date string)', example: '2025-03-31' })
+  @ApiProperty({
+    description: 'End date (ISO date string)',
+    example: '2025-03-31',
+  })
   @IsDateString()
   to: string;
 }

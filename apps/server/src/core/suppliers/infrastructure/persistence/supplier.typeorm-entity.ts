@@ -68,5 +68,4 @@ export class Supplier {
 
   @OneToMany(() => MenuPeriod, (menuPeriod) => menuPeriod.supplier)
   menuPeriods: MenuPeriod[];
-
 }

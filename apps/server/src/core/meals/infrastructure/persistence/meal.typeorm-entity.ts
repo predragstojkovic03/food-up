@@ -24,7 +24,10 @@ export class Meal {
     precision: 10,
     scale: 2,
     nullable: true,
-    transformer: { from: (v: string | null) => (v != null ? Number(v) : undefined), to: (v) => v },
+    transformer: {
+      from: (v: string | null) => (v != null ? Number(v) : undefined),
+      to: (v) => v,
+    },
   })
   price?: number;
 

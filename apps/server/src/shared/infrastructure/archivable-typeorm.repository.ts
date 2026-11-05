@@ -4,9 +4,9 @@ import { Entity } from '../domain/entity';
 import { TypeOrmRepository } from './typeorm.repository';
 
 export abstract class ArchivableTypeormRepository<
-  TDomain extends Entity,
-  TPersistence extends ObjectLiteral,
->
+    TDomain extends Entity,
+    TPersistence extends ObjectLiteral,
+  >
   extends TypeOrmRepository<TDomain, TPersistence>
   implements IArchivableRepository<TDomain>
 {

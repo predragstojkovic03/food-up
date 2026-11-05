@@ -15,8 +15,16 @@ describe('ReportsService — business ownership', () => {
   const otherSupplierId = 'sup-other';
 
   const windows: Record<string, object> = {
-    [ownWindowId]: { id: ownWindowId, businessId: 'biz-a', targetDates: ['2026-05-25'] },
-    [foreignWindowId]: { id: foreignWindowId, businessId: 'biz-b', targetDates: ['2026-05-25'] },
+    [ownWindowId]: {
+      id: ownWindowId,
+      businessId: 'biz-a',
+      targetDates: ['2026-05-25'],
+    },
+    [foreignWindowId]: {
+      id: foreignWindowId,
+      businessId: 'biz-b',
+      targetDates: ['2026-05-25'],
+    },
   };
 
   const orderRow = {
@@ -47,7 +55,9 @@ describe('ReportsService — business ownership', () => {
     service = new ReportsService(
       queryRepository,
       sendsRepository,
-      { hasApprovedCrForWindowAfter: jest.fn().mockResolvedValue(false) } as any,
+      {
+        hasApprovedCrForWindowAfter: jest.fn().mockResolvedValue(false),
+      } as any,
       mailService,
       {
         findOne: jest.fn((id: string) =>
@@ -60,8 +70,14 @@ describe('ReportsService — business ownership', () => {
           }),
         ),
       } as any,
-      { findById: jest.fn().mockResolvedValue({ email: 'manager@example.com' }) } as any,
-      { findByIdentity: jest.fn().mockResolvedValue({ id: 'emp-manager', businessId: 'biz-a' }) } as any,
+      {
+        findById: jest.fn().mockResolvedValue({ email: 'manager@example.com' }),
+      } as any,
+      {
+        findByIdentity: jest
+          .fn()
+          .mockResolvedValue({ id: 'emp-manager', businessId: 'biz-a' }),
+      } as any,
       { findBySupplierAndBusiness: jest.fn().mockResolvedValue(null) } as any,
       { findOne: jest.fn((id: string) => Promise.resolve(windows[id])) } as any,
       {
@@ -79,9 +95,19 @@ describe('ReportsService — business ownership', () => {
 
   describe('rejects windows of another business as not found', () => {
     const calls: [string, (s: ReportsService) => Promise<unknown>][] = [
-      ['generateXlsx', (s) => s.generateXlsx(foreignWindowId, managerIdentityId)],
-      ['getSendStatus', (s) => s.getSendStatus(foreignWindowId, managerIdentityId)],
-      ['generatePreview', (s) => s.generatePreview(foreignWindowId, ownSupplierId, managerIdentityId)],
+      [
+        'generateXlsx',
+        (s) => s.generateXlsx(foreignWindowId, managerIdentityId),
+      ],
+      [
+        'getSendStatus',
+        (s) => s.getSendStatus(foreignWindowId, managerIdentityId),
+      ],
+      [
+        'generatePreview',
+        (s) =>
+          s.generatePreview(foreignWindowId, ownSupplierId, managerIdentityId),
+      ],
       [
         'sendToSuppliers',
         (s) =>
@@ -91,12 +117,17 @@ describe('ReportsService — business ownership', () => {
             managerIdentityId,
           ),
       ],
-      ['getCostSummary', (s) => s.getCostSummary(foreignWindowId, managerIdentityId)],
+      [
+        'getCostSummary',
+        (s) => s.getCostSummary(foreignWindowId, managerIdentityId),
+      ],
       ['getAllSends', (s) => s.getAllSends(foreignWindowId, managerIdentityId)],
     ];
 
     it.each(calls)('%s', async (_, call) => {
-      await expect(call(service)).rejects.toBeInstanceOf(EntityInstanceNotFoundException);
+      await expect(call(service)).rejects.toBeInstanceOf(
+        EntityInstanceNotFoundException,
+      );
       expect(queryRepository.getByWindow).not.toHaveBeenCalled();
       expect(queryRepository.getEmployeeSelections).not.toHaveBeenCalled();
       expect(queryRepository.getCostByWindow).not.toHaveBeenCalled();
@@ -105,13 +136,15 @@ describe('ReportsService — business ownership', () => {
     });
   });
 
-  it('generates the XLSX for a window of the manager\'s own business', async () => {
+  it("generates the XLSX for a window of the manager's own business", async () => {
     const result = await service.generateXlsx(ownWindowId, managerIdentityId);
     expect(result.buffer.length).toBeGreaterThan(0);
   });
 
-  it('returns the cost summary for a window of the manager\'s own business', async () => {
-    await expect(service.getCostSummary(ownWindowId, managerIdentityId)).resolves.toEqual([]);
+  it("returns the cost summary for a window of the manager's own business", async () => {
+    await expect(
+      service.getCostSummary(ownWindowId, managerIdentityId),
+    ).resolves.toEqual([]);
     expect(queryRepository.getCostByWindow).toHaveBeenCalledWith(ownWindowId);
   });
 

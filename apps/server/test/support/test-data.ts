@@ -1,4 +1,10 @@
-import { EmployeeRole, IdentityType, Language, MealType, SupplierType } from '@food-up/shared';
+import {
+  EmployeeRole,
+  IdentityType,
+  Language,
+  MealType,
+  SupplierType,
+} from '@food-up/shared';
 import { hashSync } from 'bcrypt';
 import { DataSource } from 'typeorm';
 import { ulid } from 'ulid';
@@ -54,11 +60,13 @@ export class TestData {
     return `${prefix} ${this._counter}`;
   }
 
-  async business(opts: {
-    name?: string;
-    language?: Language;
-    reportIncludeEmployeesWithoutSelection?: boolean;
-  } = {}): Promise<TestBusiness> {
+  async business(
+    opts: {
+      name?: string;
+      language?: Language;
+      reportIncludeEmployeesWithoutSelection?: boolean;
+    } = {},
+  ): Promise<TestBusiness> {
     const id = ulid();
     const name = opts.name ?? this._unique('Business');
     await this._ds.query(
@@ -77,7 +85,12 @@ export class TestData {
 
   async employee(
     business: TestBusiness,
-    opts: { name?: string; role?: EmployeeRole; active?: boolean; email?: string } = {},
+    opts: {
+      name?: string;
+      role?: EmployeeRole;
+      active?: boolean;
+      email?: string;
+    } = {},
   ): Promise<TestEmployee> {
     const identityId = ulid();
     const id = ulid();
@@ -86,7 +99,13 @@ export class TestData {
     const role = opts.role ?? EmployeeRole.Basic;
     await this._ds.query(
       `INSERT INTO identity (id, email, password_hash, type, is_active) VALUES ($1, $2, $3, $4, $5)`,
-      [identityId, email, PASSWORD_HASH, IdentityType.Employee, opts.active ?? true],
+      [
+        identityId,
+        email,
+        PASSWORD_HASH,
+        IdentityType.Employee,
+        opts.active ?? true,
+      ],
     );
     await this._ds.query(
       `INSERT INTO employee (id, name, role, business_id, identity_id) VALUES ($1, $2, $3, $4, $5)`,
@@ -95,7 +114,10 @@ export class TestData {
     return { id, identityId, businessId: business.id, name, email, role };
   }
 
-  manager(business: TestBusiness, opts: { name?: string; email?: string } = {}): Promise<TestEmployee> {
+  manager(
+    business: TestBusiness,
+    opts: { name?: string; email?: string } = {},
+  ): Promise<TestEmployee> {
     return this.employee(business, { ...opts, role: EmployeeRole.Manager });
   }
 
@@ -112,7 +134,9 @@ export class TestData {
         id,
         name,
         SupplierType.Managed,
-        opts.email === undefined ? `${id.toLowerCase()}@supplier.test` : opts.email,
+        opts.email === undefined
+          ? `${id.toLowerCase()}@supplier.test`
+          : opts.email,
         business.id,
         opts.language ?? Language.En,
       ],
@@ -130,11 +154,23 @@ export class TestData {
     const name = opts.name ?? this._unique('Partner Supplier');
     await this._ds.query(
       `INSERT INTO identity (id, email, password_hash, type, is_active) VALUES ($1, $2, $3, $4, true)`,
-      [identityId, `${identityId.toLowerCase()}@partner.test`, PASSWORD_HASH, IdentityType.Supplier],
+      [
+        identityId,
+        `${identityId.toLowerCase()}@partner.test`,
+        PASSWORD_HASH,
+        IdentityType.Supplier,
+      ],
     );
     await this._ds.query(
       `INSERT INTO supplier (id, name, type, email, identity_id, language) VALUES ($1, $2, $3, $4, $5, $6)`,
-      [id, name, SupplierType.Standalone, `${id.toLowerCase()}@supplier.test`, identityId, Language.En],
+      [
+        id,
+        name,
+        SupplierType.Standalone,
+        `${id.toLowerCase()}@supplier.test`,
+        identityId,
+        Language.En,
+      ],
     );
     for (const business of partners) {
       await this._ds.query(
@@ -160,7 +196,11 @@ export class TestData {
     return { id, name, type, price };
   }
 
-  async menuPeriod(supplier: TestSupplier, startDate: string, endDate: string): Promise<{ id: string }> {
+  async menuPeriod(
+    supplier: TestSupplier,
+    startDate: string,
+    endDate: string,
+  ): Promise<{ id: string }> {
     const id = ulid();
     await this._ds.query(
       `INSERT INTO menu_period (id, supplier_id, start_date, end_date) VALUES ($1, $2, $3, $4)`,
@@ -227,11 +267,20 @@ export class TestData {
     opts: { quantity?: number | null; price?: number | null } = {},
   ): Promise<{ id: string }> {
     const id = ulid();
-    const price = opts.price === undefined ? (menuItem?.price ?? null) : opts.price;
+    const price =
+      opts.price === undefined ? (menuItem?.price ?? null) : opts.price;
     await this._ds.query(
       `INSERT INTO meal_selection (id, employee_id, quantity, date, menu_item_id, meal_selection_window_id, price)
        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [id, employee.id, opts.quantity === undefined ? 1 : opts.quantity, date, menuItem?.id ?? null, window.id, price],
+      [
+        id,
+        employee.id,
+        opts.quantity === undefined ? 1 : opts.quantity,
+        date,
+        menuItem?.id ?? null,
+        window.id,
+        price,
+      ],
     );
     return { id };
   }
@@ -255,7 +304,9 @@ export class TestData {
     const status = opts.status ?? 'approved';
     const decided = status === 'approved' || status === 'rejected';
     this._counter += 1;
-    const approvedAt = opts.approvedAt ?? new Date(Date.UTC(2026, 0, 1) + this._counter * 60_000);
+    const approvedAt =
+      opts.approvedAt ??
+      new Date(Date.UTC(2026, 0, 1) + this._counter * 60_000);
     await this._ds.query(
       `INSERT INTO change_request (id, employee_id, meal_selection_id, new_quantity, clear_selection, status,
                                    approved_by, approved_at, new_menu_item_id, meal_selection_window_id)
@@ -291,6 +342,9 @@ export class TestData {
   }
 
   async setMenuItemPrice(menuItem: TestMenuItem, price: number): Promise<void> {
-    await this._ds.query(`UPDATE menu_item SET price = $2 WHERE id = $1`, [menuItem.id, price]);
+    await this._ds.query(`UPDATE menu_item SET price = $2 WHERE id = $1`, [
+      menuItem.id,
+      price,
+    ]);
   }
 }

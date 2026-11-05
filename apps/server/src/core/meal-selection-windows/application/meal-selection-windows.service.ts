@@ -103,7 +103,10 @@ export class MealSelectionWindowsService {
    * Loads a window of the requesting employee's business.
    * Windows of other businesses respond as not found so their IDs aren't confirmed to exist.
    */
-  async findOneInMyBusiness(id: string, identityId: string): Promise<MealSelectionWindow> {
+  async findOneInMyBusiness(
+    id: string,
+    identityId: string,
+  ): Promise<MealSelectionWindow> {
     const [employee, window] = await Promise.all([
       this._employeesService.findByIdentity(identityId),
       this._repository.findOneByCriteriaOrThrow({ id }),
@@ -113,7 +116,9 @@ export class MealSelectionWindowsService {
         `Cross-business window access denied: windowId=${id} identityId=${identityId}`,
         MealSelectionWindowsService.name,
       );
-      throw new EntityInstanceNotFoundException(`Meal selection window ${id} not found`);
+      throw new EntityInstanceNotFoundException(
+        `Meal selection window ${id} not found`,
+      );
     }
     return window;
   }
@@ -221,11 +226,13 @@ export class MealSelectionWindowsService {
     targetDates: string[],
     identityId: string,
   ): Promise<void> {
-    const [menuPeriods, managedSuppliers, partnerSuppliers] = await Promise.all([
-      this._menuPeriodsService.findBulkByIds(menuPeriodIds),
-      this._suppliersService.findManagedByBusiness(identityId),
-      this._suppliersService.findPartnersByBusiness(identityId),
-    ]);
+    const [menuPeriods, managedSuppliers, partnerSuppliers] = await Promise.all(
+      [
+        this._menuPeriodsService.findBulkByIds(menuPeriodIds),
+        this._suppliersService.findManagedByBusiness(identityId),
+        this._suppliersService.findPartnersByBusiness(identityId),
+      ],
+    );
 
     // Windows may only use menus of suppliers the business manages or partners with
     const allowedSupplierIds = new Set(

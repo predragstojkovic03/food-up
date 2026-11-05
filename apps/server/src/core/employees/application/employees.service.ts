@@ -37,8 +37,12 @@ export class EmployeesService {
         dto.inviteToken,
       );
 
-      if (invite.email.trim().toLowerCase() !== dto.email.trim().toLowerCase()) {
-        throw new InvalidInputDataException('This invite was sent to a different email address.');
+      if (
+        invite.email.trim().toLowerCase() !== dto.email.trim().toLowerCase()
+      ) {
+        throw new InvalidInputDataException(
+          'This invite was sent to a different email address.',
+        );
       }
 
       const identity = await this._identityService.create({
@@ -71,7 +75,8 @@ export class EmployeesService {
     pictureUrl: string | null,
     inviteToken: string,
   ): Promise<Employee> {
-    const inviteEmail = await this._businessInvitesService.validate(inviteToken);
+    const inviteEmail =
+      await this._businessInvitesService.validate(inviteToken);
     if (!inviteEmail) {
       throw new BadRequestException('GOOGLE_INVALID_INVITE');
     }
@@ -114,7 +119,9 @@ export class EmployeesService {
   }): Promise<Employee> {
     return this._transactionRunner.run(async () => {
       if (await this._identityService.findByEmail(dto.email)) {
-        throw new EntityInstanceAlreadyExistsException(`An account with email ${dto.email} already exists`);
+        throw new EntityInstanceAlreadyExistsException(
+          `An account with email ${dto.email} already exists`,
+        );
       }
 
       const identity = await this._identityService.create({
@@ -215,7 +222,9 @@ export class EmployeesService {
   ): Promise<EmployeeView[]> {
     const manager = await this.findByIdentity(managerIdentityId);
     if (manager.businessId !== businessId) {
-      throw new EntityInstanceNotFoundException(`Business ${businessId} not found`);
+      throw new EntityInstanceNotFoundException(
+        `Business ${businessId} not found`,
+      );
     }
     return this.findAllByBusinessEnriched(businessId);
   }
@@ -229,14 +238,20 @@ export class EmployeesService {
     return this._update(id, dto);
   }
 
-  async deleteInManagerBusiness(id: string, managerIdentityId: string): Promise<void> {
+  async deleteInManagerBusiness(
+    id: string,
+    managerIdentityId: string,
+  ): Promise<void> {
     await this._findInManagerBusiness(id, managerIdentityId);
     await this._repository.delete(id);
     this._logger.log(`Employee deleted: id=${id}`, EmployeesService.name);
   }
 
   /** Loads an employee of the manager's business; employees of other businesses respond as not found. */
-  private async _findInManagerBusiness(id: string, managerIdentityId: string): Promise<Employee> {
+  private async _findInManagerBusiness(
+    id: string,
+    managerIdentityId: string,
+  ): Promise<Employee> {
     const [manager, employee] = await Promise.all([
       this.findByIdentity(managerIdentityId),
       this.findOne(id),
@@ -251,7 +266,10 @@ export class EmployeesService {
     return employee;
   }
 
-  private async _update(id: string, dto: UpdateEmployeeDto): Promise<EmployeeView> {
+  private async _update(
+    id: string,
+    dto: UpdateEmployeeDto,
+  ): Promise<EmployeeView> {
     const employee = await this.findOne(id);
 
     if (dto.name !== undefined) {

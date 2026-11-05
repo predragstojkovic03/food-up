@@ -17,7 +17,12 @@ export class MealsTypeOrmRepository
     @InjectDataSource() dataSource: DataSource,
     transactionContext: TransactionContext,
   ) {
-    super(dataSource, MealPersistence, new MealTypeOrmMapper(), transactionContext);
+    super(
+      dataSource,
+      MealPersistence,
+      new MealTypeOrmMapper(),
+      transactionContext,
+    );
   }
 
   findById(id: string): Promise<Meal | null> {

@@ -2,7 +2,12 @@ import { Inject, Injectable } from '@nestjs/common';
 import { BusinessSuppliersService } from 'src/core/business-suppliers/application/business-suppliers.service';
 import { EmployeesService } from 'src/core/employees/application/employees.service';
 import { IdentityService } from 'src/core/identity/application/identity.service';
-import { EmployeeRole, IdentityType, Language, SupplierType } from '@food-up/shared';
+import {
+  EmployeeRole,
+  IdentityType,
+  Language,
+  SupplierType,
+} from '@food-up/shared';
 import { DomainEvents } from 'src/shared/application/domain-events/domain-events.decorator';
 import { I_LOGGER, ILogger } from 'src/shared/application/logger.interface';
 import {
@@ -42,11 +47,7 @@ export class SuppliersService {
         isActive: false,
       });
 
-      const supplier = Supplier.register(
-        dto.name,
-        dto.email,
-        identity.id,
-      );
+      const supplier = Supplier.register(dto.name, dto.email, identity.id);
 
       await this._repository.insert(supplier);
       this._logger.log(
@@ -122,7 +123,8 @@ export class SuppliersService {
       }
       supplier.updateInfo(dto.name, dto.email);
       if (dto.language !== undefined) {
-        const employee = await this._employeesService.findByIdentity(identityId);
+        const employee =
+          await this._employeesService.findByIdentity(identityId);
         await this._businessSuppliersService.updateLanguageForPartner(
           id,
           employee.businessId,
@@ -163,29 +165,45 @@ export class SuppliersService {
    * A supplier's catalog and menus can be changed by the standalone supplier itself,
    * or by a manager of the business that manages it. Anyone else gets "not found".
    */
-  async assertCanManage(supplierId: string, identityId: string): Promise<Supplier> {
-    const supplier = await this._repository.findOneByCriteriaOrThrow({ id: supplierId });
-    if (await this._isOwnerOrManagingManager(supplier, identityId)) return supplier;
+  async assertCanManage(
+    supplierId: string,
+    identityId: string,
+  ): Promise<Supplier> {
+    const supplier = await this._repository.findOneByCriteriaOrThrow({
+      id: supplierId,
+    });
+    if (await this._isOwnerOrManagingManager(supplier, identityId))
+      return supplier;
     throw this._accessDenied(supplierId, identityId);
   }
 
   /** Viewing additionally allows managers of businesses that partner with the supplier. */
-  async assertCanView(supplierId: string, identityId: string): Promise<Supplier> {
-    const supplier = await this._repository.findOneByCriteriaOrThrow({ id: supplierId });
-    if (await this._isOwnerOrManagingManager(supplier, identityId)) return supplier;
+  async assertCanView(
+    supplierId: string,
+    identityId: string,
+  ): Promise<Supplier> {
+    const supplier = await this._repository.findOneByCriteriaOrThrow({
+      id: supplierId,
+    });
+    if (await this._isOwnerOrManagingManager(supplier, identityId))
+      return supplier;
 
     const manager = await this._findManager(identityId);
     if (manager) {
-      const link = await this._businessSuppliersService.findBySupplierAndBusiness(
-        supplierId,
-        manager.businessId,
-      );
+      const link =
+        await this._businessSuppliersService.findBySupplierAndBusiness(
+          supplierId,
+          manager.businessId,
+        );
       if (link) return supplier;
     }
     throw this._accessDenied(supplierId, identityId);
   }
 
-  private async _isOwnerOrManagingManager(supplier: Supplier, identityId: string): Promise<boolean> {
+  private async _isOwnerOrManagingManager(
+    supplier: Supplier,
+    identityId: string,
+  ): Promise<boolean> {
     if (supplier.identityId && supplier.identityId === identityId) return true;
     const manager = await this._findManager(identityId);
     return !!manager && supplier.managingBusinessId === manager.businessId;
@@ -199,11 +217,16 @@ export class SuppliersService {
     return employee.role === EmployeeRole.Manager ? employee : null;
   }
 
-  private _accessDenied(supplierId: string, identityId: string): EntityInstanceNotFoundException {
+  private _accessDenied(
+    supplierId: string,
+    identityId: string,
+  ): EntityInstanceNotFoundException {
     this._logger.warn(
       `Supplier access denied: supplierId=${supplierId} identityId=${identityId}`,
       SuppliersService.name,
     );
-    return new EntityInstanceNotFoundException(`Supplier ${supplierId} not found`);
+    return new EntityInstanceNotFoundException(
+      `Supplier ${supplierId} not found`,
+    );
   }
 }

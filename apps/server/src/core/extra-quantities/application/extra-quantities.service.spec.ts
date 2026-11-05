@@ -11,8 +11,20 @@ describe('ExtraQuantitiesService — manager business scope', () => {
 
   beforeEach(() => {
     const rows: Record<string, ExtraQuantity> = {
-      'eq-own': ExtraQuantity.reconstitute('eq-own', 'win-own', 'mi-own', 1, 'Guest'),
-      'eq-foreign': ExtraQuantity.reconstitute('eq-foreign', 'win-foreign', 'mi-foreign', 1, null),
+      'eq-own': ExtraQuantity.reconstitute(
+        'eq-own',
+        'win-own',
+        'mi-own',
+        1,
+        'Guest',
+      ),
+      'eq-foreign': ExtraQuantity.reconstitute(
+        'eq-foreign',
+        'win-foreign',
+        'mi-foreign',
+        1,
+        null,
+      ),
     };
     repository = {
       insert: jest.fn().mockResolvedValue(undefined),
@@ -31,7 +43,10 @@ describe('ExtraQuantitiesService — manager business scope', () => {
       } as any,
       {
         findOne: jest.fn((id: string) =>
-          Promise.resolve({ id, menuPeriodId: id === 'mi-own' ? 'period-own' : 'period-other' }),
+          Promise.resolve({
+            id,
+            menuPeriodId: id === 'mi-own' ? 'period-own' : 'period-other',
+          }),
         ),
       } as any,
     );
@@ -43,24 +58,26 @@ describe('ExtraQuantitiesService — manager business scope', () => {
   });
 
   it("rejects adding to another business's window", async () => {
-    await expect(service.add('win-foreign', 'mi-own', 2, null, managerIdentityId)).rejects.toBeInstanceOf(
-      EntityInstanceNotFoundException,
-    );
+    await expect(
+      service.add('win-foreign', 'mi-own', 2, null, managerIdentityId),
+    ).rejects.toBeInstanceOf(EntityInstanceNotFoundException);
     expect(repository.insert).not.toHaveBeenCalled();
   });
 
   it('rejects a menu item that is not part of the window', async () => {
-    await expect(service.add('win-own', 'mi-other', 2, null, managerIdentityId)).rejects.toBeInstanceOf(
-      InvalidInputDataException,
-    );
+    await expect(
+      service.add('win-own', 'mi-other', 2, null, managerIdentityId),
+    ).rejects.toBeInstanceOf(InvalidInputDataException);
     expect(repository.insert).not.toHaveBeenCalled();
   });
 
   it("lists only the manager's own window", async () => {
-    await expect(service.findByWindow('win-own', managerIdentityId)).resolves.toEqual([]);
-    await expect(service.findByWindow('win-foreign', managerIdentityId)).rejects.toBeInstanceOf(
-      EntityInstanceNotFoundException,
-    );
+    await expect(
+      service.findByWindow('win-own', managerIdentityId),
+    ).resolves.toEqual([]);
+    await expect(
+      service.findByWindow('win-foreign', managerIdentityId),
+    ).rejects.toBeInstanceOf(EntityInstanceNotFoundException);
     expect(repository.findByWindow).toHaveBeenCalledTimes(1);
   });
 
@@ -68,12 +85,12 @@ describe('ExtraQuantitiesService — manager business scope', () => {
     await service.remove('eq-own', managerIdentityId);
     expect(repository.remove).toHaveBeenCalledWith('eq-own');
 
-    await expect(service.remove('eq-foreign', managerIdentityId)).rejects.toBeInstanceOf(
-      EntityInstanceNotFoundException,
-    );
-    await expect(service.remove('eq-missing', managerIdentityId)).rejects.toBeInstanceOf(
-      EntityInstanceNotFoundException,
-    );
+    await expect(
+      service.remove('eq-foreign', managerIdentityId),
+    ).rejects.toBeInstanceOf(EntityInstanceNotFoundException);
+    await expect(
+      service.remove('eq-missing', managerIdentityId),
+    ).rejects.toBeInstanceOf(EntityInstanceNotFoundException);
     expect(repository.remove).toHaveBeenCalledTimes(1);
   });
 });

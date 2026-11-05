@@ -6,7 +6,9 @@ import { IdentityType } from '@food-up/shared';
 const mockRepository = { insert: jest.fn() };
 const mockIdentityService = { createWithGoogle: jest.fn() };
 const mockBusinessInvitesService = { validate: jest.fn(), consume: jest.fn() };
-const mockTransactionRunner = { run: jest.fn().mockImplementation(async (cb: () => Promise<unknown>) => cb()) };
+const mockTransactionRunner = {
+  run: jest.fn().mockImplementation(async (cb: () => Promise<unknown>) => cb()),
+};
 const mockLogger = { log: jest.fn(), warn: jest.fn(), debug: jest.fn() };
 
 function makeService(): EmployeesService {
@@ -26,27 +28,49 @@ describe('EmployeesService.registerWithGoogle', () => {
     mockBusinessInvitesService.validate.mockResolvedValue(null);
 
     await expect(
-      makeService().registerWithGoogle('gid', 'emp@example.com', 'Jane', null, 'bad-token'),
+      makeService().registerWithGoogle(
+        'gid',
+        'emp@example.com',
+        'Jane',
+        null,
+        'bad-token',
+      ),
     ).rejects.toThrow(BadRequestException);
 
     expect(mockBusinessInvitesService.consume).not.toHaveBeenCalled();
   });
 
   it('throws BadRequestException when Google email does not match invite email', async () => {
-    mockBusinessInvitesService.validate.mockResolvedValue('invited@company.com');
+    mockBusinessInvitesService.validate.mockResolvedValue(
+      'invited@company.com',
+    );
 
     await expect(
-      makeService().registerWithGoogle('gid', 'different@gmail.com', 'Jane', null, 'token'),
+      makeService().registerWithGoogle(
+        'gid',
+        'different@gmail.com',
+        'Jane',
+        null,
+        'token',
+      ),
     ).rejects.toThrow(BadRequestException);
 
     expect(mockBusinessInvitesService.consume).not.toHaveBeenCalled();
   });
 
   it('throws BadRequestException with GOOGLE_EMAIL_MISMATCH code for email mismatch', async () => {
-    mockBusinessInvitesService.validate.mockResolvedValue('invited@company.com');
+    mockBusinessInvitesService.validate.mockResolvedValue(
+      'invited@company.com',
+    );
 
     try {
-      await makeService().registerWithGoogle('gid', 'different@gmail.com', 'Jane', null, 'token');
+      await makeService().registerWithGoogle(
+        'gid',
+        'different@gmail.com',
+        'Jane',
+        null,
+        'token',
+      );
       fail('should have thrown');
     } catch (err) {
       expect((err as Error).message).toBe('GOOGLE_EMAIL_MISMATCH');
@@ -59,18 +83,35 @@ describe('EmployeesService.registerWithGoogle', () => {
     const pictureUrl = 'https://pic.example.com/photo.jpg';
 
     mockBusinessInvitesService.validate.mockResolvedValue(inviteEmail);
-    mockBusinessInvitesService.consume.mockResolvedValue({ businessId: 'biz-1', email: inviteEmail });
+    mockBusinessInvitesService.consume.mockResolvedValue({
+      businessId: 'biz-1',
+      email: inviteEmail,
+    });
 
-    const fakeIdentity = Identity.createWithGoogle(inviteEmail, googleId, IdentityType.Employee);
+    const fakeIdentity = Identity.createWithGoogle(
+      inviteEmail,
+      googleId,
+      IdentityType.Employee,
+    );
     mockIdentityService.createWithGoogle.mockResolvedValue(fakeIdentity);
 
     const fakeEmployee = { id: 'emp-1', identityId: fakeIdentity.id };
     mockRepository.insert.mockResolvedValue(fakeEmployee);
 
-    const result = await makeService().registerWithGoogle(googleId, inviteEmail, 'Jane Doe', pictureUrl, 'valid-token');
+    const result = await makeService().registerWithGoogle(
+      googleId,
+      inviteEmail,
+      'Jane Doe',
+      pictureUrl,
+      'valid-token',
+    );
 
-    expect(mockBusinessInvitesService.validate).toHaveBeenCalledWith('valid-token');
-    expect(mockBusinessInvitesService.consume).toHaveBeenCalledWith('valid-token');
+    expect(mockBusinessInvitesService.validate).toHaveBeenCalledWith(
+      'valid-token',
+    );
+    expect(mockBusinessInvitesService.consume).toHaveBeenCalledWith(
+      'valid-token',
+    );
     expect(mockIdentityService.createWithGoogle).toHaveBeenCalledWith({
       email: inviteEmail,
       googleId,
@@ -83,14 +124,30 @@ describe('EmployeesService.registerWithGoogle', () => {
 
   it('email comparison is case-insensitive', async () => {
     mockBusinessInvitesService.validate.mockResolvedValue('Emp@Company.com');
-    mockBusinessInvitesService.consume.mockResolvedValue({ businessId: 'biz-1', email: 'emp@company.com' });
+    mockBusinessInvitesService.consume.mockResolvedValue({
+      businessId: 'biz-1',
+      email: 'emp@company.com',
+    });
 
-    const fakeIdentity = Identity.createWithGoogle('emp@company.com', 'gid', IdentityType.Employee);
+    const fakeIdentity = Identity.createWithGoogle(
+      'emp@company.com',
+      'gid',
+      IdentityType.Employee,
+    );
     mockIdentityService.createWithGoogle.mockResolvedValue(fakeIdentity);
-    mockRepository.insert.mockResolvedValue({ id: 'emp-1', identityId: fakeIdentity.id });
+    mockRepository.insert.mockResolvedValue({
+      id: 'emp-1',
+      identityId: fakeIdentity.id,
+    });
 
     await expect(
-      makeService().registerWithGoogle('gid', 'emp@company.com', 'Jane', null, 'token'),
+      makeService().registerWithGoogle(
+        'gid',
+        'emp@company.com',
+        'Jane',
+        null,
+        'token',
+      ),
     ).resolves.toBeDefined();
   });
 });

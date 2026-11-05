@@ -11,7 +11,12 @@ import { MenuItemsQueryTypeOrmRepository } from './infrastructure/persistence/me
 import { MenuItemsController } from './presentation/rest/menu-items.controller';
 
 @Module({
-  imports: [MealsModule, MenuPeriodsModule, SuppliersModule, forwardRef(() => MealSelectionWindowsModule)],
+  imports: [
+    MealsModule,
+    MenuPeriodsModule,
+    SuppliersModule,
+    forwardRef(() => MealSelectionWindowsModule),
+  ],
   controllers: [MenuItemsController],
   providers: [
     MenuItemsRepositoryProvide,

@@ -35,7 +35,8 @@ const sr: StringValues<typeof en> = {
       heading: 'Pozvani ste!',
       body: 'Pozvani ste da se pridružite svom timu. Kliknite na dugme ispod da podesite nalog.',
       button: 'Prihvati poziv',
-      footer: 'Ovaj link ističe za 7 dana. Ako niste očekivali ovaj poziv, možete ga ignorisati.',
+      footer:
+        'Ovaj link ističe za 7 dana. Ako niste očekivali ovaj poziv, možete ga ignorisati.',
     },
     orderSummary: {
       subject: 'Pregled narudžbine za vaše obroke',

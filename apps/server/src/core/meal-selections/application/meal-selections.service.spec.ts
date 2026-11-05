@@ -14,7 +14,11 @@ describe('MealSelectionsService', () => {
   const identityId = 'identity-1';
 
   beforeEach(() => {
-    mockRepository = { insert: jest.fn(), findOneByCriteriaOrThrow: jest.fn(), update: jest.fn() };
+    mockRepository = {
+      insert: jest.fn(),
+      findOneByCriteriaOrThrow: jest.fn(),
+      update: jest.fn(),
+    };
     mockEmployeesService = {
       findByIdentity: jest.fn().mockResolvedValue({ id: employeeId }),
     };
@@ -32,7 +36,7 @@ describe('MealSelectionsService', () => {
       findOne: jest.fn().mockResolvedValue({
         id: menuItemId,
         menuPeriodId: 'period-1',
-        price: 12.50,
+        price: 12.5,
       }),
     };
 
@@ -47,12 +51,21 @@ describe('MealSelectionsService', () => {
 
   describe('create()', () => {
     it("rejects a window outside the employee's business without inserting", async () => {
-      mockWindowsService.findOneInMyBusiness.mockRejectedValue(new EntityInstanceNotFoundException());
+      mockWindowsService.findOneInMyBusiness.mockRejectedValue(
+        new EntityInstanceNotFoundException(),
+      );
 
       await expect(
-        service.create(identityId, { mealSelectionWindowId: 'win-other', date: '2026-01-01', menuItemId }),
+        service.create(identityId, {
+          mealSelectionWindowId: 'win-other',
+          date: '2026-01-01',
+          menuItemId,
+        }),
       ).rejects.toBeInstanceOf(EntityInstanceNotFoundException);
-      expect(mockWindowsService.findOneInMyBusiness).toHaveBeenCalledWith('win-other', identityId);
+      expect(mockWindowsService.findOneInMyBusiness).toHaveBeenCalledWith(
+        'win-other',
+        identityId,
+      );
       expect(mockRepository.insert).not.toHaveBeenCalled();
     });
 
@@ -63,7 +76,7 @@ describe('MealSelectionsService', () => {
         menuItemId,
       });
 
-      expect(result.price).toBe(12.50);
+      expect(result.price).toBe(12.5);
       expect(mockRepository.insert).toHaveBeenCalledTimes(1);
     });
 
@@ -108,12 +121,16 @@ describe('MealSelectionsService', () => {
       mockMenuItemsService.findOne.mockResolvedValue({
         id: 'mi-2',
         menuPeriodId: 'period-1',
-        price: 12.50,
+        price: 12.5,
       });
 
       await service.update('sel-1', identityId, { menuItemId: 'mi-2' });
 
-      expect(mockSelection.update).toHaveBeenCalledWith('mi-2', undefined, 12.50);
+      expect(mockSelection.update).toHaveBeenCalledWith(
+        'mi-2',
+        undefined,
+        12.5,
+      );
       expect(mockRepository.update).toHaveBeenCalledTimes(1);
     });
 
@@ -145,7 +162,11 @@ describe('MealSelectionsService', () => {
 
       await service.update('sel-1', identityId, { quantity: 3 });
 
-      expect(mockSelection.update).toHaveBeenCalledWith(undefined, 3, undefined);
+      expect(mockSelection.update).toHaveBeenCalledWith(
+        undefined,
+        3,
+        undefined,
+      );
       expect(mockRepository.update).toHaveBeenCalledTimes(1);
     });
   });

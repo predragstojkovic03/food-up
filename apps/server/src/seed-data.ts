@@ -42,39 +42,99 @@ const NEXT_WEEK = {
 const TARGET_DATES = Object.values(NEXT_WEEK);
 
 const EMPLOYEE_NAMES = [
-  { name: 'Marko Petrović',      email: 'marko.petrovic@demo.com' },
-  { name: 'Ana Jovanović',        email: 'ana.jovanovic@demo.com' },
-  { name: 'Stefan Nikolić',       email: 'stefan.nikolic@demo.com' },
-  { name: 'Milica Đorđević',      email: 'milica.djordjevic@demo.com' },
-  { name: 'Nikola Popović',       email: 'nikola.popovic@demo.com' },
-  { name: 'Jelena Stojanović',    email: 'jelena.stojanovic@demo.com' },
-  { name: 'Aleksandar Ilić',      email: 'aleksandar.ilic@demo.com' },
-  { name: 'Ivana Stanković',      email: 'ivana.stankovic@demo.com' },
-  { name: 'Miloš Vasić',          email: 'milos.vasic@demo.com' },
-  { name: 'Tijana Marković',      email: 'tijana.markovic@demo.com' },
+  { name: 'Marko Petrović', email: 'marko.petrovic@demo.com' },
+  { name: 'Ana Jovanović', email: 'ana.jovanovic@demo.com' },
+  { name: 'Stefan Nikolić', email: 'stefan.nikolic@demo.com' },
+  { name: 'Milica Đorđević', email: 'milica.djordjevic@demo.com' },
+  { name: 'Nikola Popović', email: 'nikola.popovic@demo.com' },
+  { name: 'Jelena Stojanović', email: 'jelena.stojanovic@demo.com' },
+  { name: 'Aleksandar Ilić', email: 'aleksandar.ilic@demo.com' },
+  { name: 'Ivana Stanković', email: 'ivana.stankovic@demo.com' },
+  { name: 'Miloš Vasić', email: 'milos.vasic@demo.com' },
+  { name: 'Tijana Marković', email: 'tijana.markovic@demo.com' },
 ];
 
-const SERBIAN_MEALS: { name: string; description: string; type: MealType; price?: number }[] = [
-  { name: 'Pasulj',           description: 'Domaći pasulj sa dimljenom kobasicom',        type: MealType.Soup,      price: 200 },
-  { name: 'Prebranac',        description: 'Zapečeni prebranac sa pečenim lukom',          type: MealType.Soup,      price: 180 },
-  { name: 'Sarma',            description: 'Sarma u pavlaci sa kiselim kupusom',           type: MealType.Lunch,     price: 450 },
-  { name: 'Ćevapi',           description: 'Ćevapi od mešanog mesa sa kajmakom i lukom',  type: MealType.Lunch,     price: 500 },
-  { name: 'Pljeskavica',      description: 'Domaća pljeskavica sa lepinjom i ajvarom',    type: MealType.Lunch,     price: 520 },
-  { name: 'Pileći paprikaš',  description: 'Pileći paprikaš sa domaćim rezancima',        type: MealType.Lunch,     price: 430 },
-  { name: 'Šopska salata',    description: 'Svež paradajz, krastavac i sirenje',           type: MealType.Salad,     price: 150 },
-  { name: 'Ajvar',            description: 'Domaći ljuti ajvar od pečene paprike',         type: MealType.Salad,     price: 100 },
-  { name: 'Kifle',            description: 'Tople domaće kifle od integralnog brašna',     type: MealType.Bread,     price: 80  },
-  { name: 'Burek sa mesom',   description: 'Hrskavi burek sa mlevenim mesom iz rerne',     type: MealType.Breakfast, price: 250 },
-  { name: 'Urma',             description: 'Domaće urme sa orasima i medom',               type: MealType.Dessert,   price: 120 },
+const SERBIAN_MEALS: {
+  name: string;
+  description: string;
+  type: MealType;
+  price?: number;
+}[] = [
+  {
+    name: 'Pasulj',
+    description: 'Domaći pasulj sa dimljenom kobasicom',
+    type: MealType.Soup,
+    price: 200,
+  },
+  {
+    name: 'Prebranac',
+    description: 'Zapečeni prebranac sa pečenim lukom',
+    type: MealType.Soup,
+    price: 180,
+  },
+  {
+    name: 'Sarma',
+    description: 'Sarma u pavlaci sa kiselim kupusom',
+    type: MealType.Lunch,
+    price: 450,
+  },
+  {
+    name: 'Ćevapi',
+    description: 'Ćevapi od mešanog mesa sa kajmakom i lukom',
+    type: MealType.Lunch,
+    price: 500,
+  },
+  {
+    name: 'Pljeskavica',
+    description: 'Domaća pljeskavica sa lepinjom i ajvarom',
+    type: MealType.Lunch,
+    price: 520,
+  },
+  {
+    name: 'Pileći paprikaš',
+    description: 'Pileći paprikaš sa domaćim rezancima',
+    type: MealType.Lunch,
+    price: 430,
+  },
+  {
+    name: 'Šopska salata',
+    description: 'Svež paradajz, krastavac i sirenje',
+    type: MealType.Salad,
+    price: 150,
+  },
+  {
+    name: 'Ajvar',
+    description: 'Domaći ljuti ajvar od pečene paprike',
+    type: MealType.Salad,
+    price: 100,
+  },
+  {
+    name: 'Kifle',
+    description: 'Tople domaće kifle od integralnog brašna',
+    type: MealType.Bread,
+    price: 80,
+  },
+  {
+    name: 'Burek sa mesom',
+    description: 'Hrskavi burek sa mlevenim mesom iz rerne',
+    type: MealType.Breakfast,
+    price: 250,
+  },
+  {
+    name: 'Urma',
+    description: 'Domaće urme sa orasima i medom',
+    type: MealType.Dessert,
+    price: 120,
+  },
 ];
 
 // Which meal names go on which day (will be resolved against all known meals)
 const DAILY_MEAL_NAMES: Record<string, string[]> = {
-  [NEXT_WEEK.mon]: ['Pasulj',          'Ćevapi',          'Šopska salata', 'Kifle'],
-  [NEXT_WEEK.tue]: ['Prebranac',       'Pljeskavica',     'Ajvar',         'Burek sa mesom'],
-  [NEXT_WEEK.wed]: ['Sarma',           'Pileći paprikaš', 'Šopska salata', 'Urma'],
-  [NEXT_WEEK.thu]: ['Pasulj',          'Ćevapi',          'Kifle',         'Urma'],
-  [NEXT_WEEK.fri]: ['Prebranac',       'Pljeskavica',     'Ajvar',         'Burek sa mesom'],
+  [NEXT_WEEK.mon]: ['Pasulj', 'Ćevapi', 'Šopska salata', 'Kifle'],
+  [NEXT_WEEK.tue]: ['Prebranac', 'Pljeskavica', 'Ajvar', 'Burek sa mesom'],
+  [NEXT_WEEK.wed]: ['Sarma', 'Pileći paprikaš', 'Šopska salata', 'Urma'],
+  [NEXT_WEEK.thu]: ['Pasulj', 'Ćevapi', 'Kifle', 'Urma'],
+  [NEXT_WEEK.fri]: ['Prebranac', 'Pljeskavica', 'Ajvar', 'Burek sa mesom'],
 };
 
 async function seedData() {
@@ -83,13 +143,16 @@ async function seedData() {
   });
 
   const managerEmail = requireArg('manager-email', 'SEED_MANAGER_EMAIL');
-  const employeePassword = arg('employee-password', 'SEED_EMPLOYEE_PASSWORD') ?? 'password123';
+  const employeePassword =
+    arg('employee-password', 'SEED_EMPLOYEE_PASSWORD') ?? 'password123';
 
   const ds = app.get(DataSource);
   const em = ds.manager;
 
   // ── 1. Find existing business via manager ──────────────────────────────
-  const managerIdentity = await em.findOne(Identity, { where: { email: managerEmail } });
+  const managerIdentity = await em.findOne(Identity, {
+    where: { email: managerEmail },
+  });
   if (!managerIdentity) {
     console.error(`No identity found for manager email: ${managerEmail}`);
     process.exit(1);
@@ -125,7 +188,9 @@ async function seedData() {
   const createdEmployees: Employee[] = [];
 
   for (const data of EMPLOYEE_NAMES) {
-    const existing = await em.findOne(Identity, { where: { email: data.email } });
+    const existing = await em.findOne(Identity, {
+      where: { email: data.email },
+    });
     if (existing) {
       console.log(`  [skip] ${data.name} (${data.email}) — already exists`);
       continue;
@@ -188,7 +253,9 @@ async function seedData() {
     supplier,
   });
   await em.save(MenuPeriod, menuPeriod);
-  console.log(`\nMenu period: ${NEXT_WEEK.mon} – ${NEXT_WEEK.fri} (id: ${menuPeriod.id})`);
+  console.log(
+    `\nMenu period: ${NEXT_WEEK.mon} – ${NEXT_WEEK.fri} (id: ${menuPeriod.id})`,
+  );
 
   // ── 6. Create menu items per day ───────────────────────────────────────
   const menuItemsByDay: Record<string, MenuItem[]> = {};
@@ -236,24 +303,28 @@ async function seedData() {
 
   // ── 7. Create meal selection window (deadline already passed) ──────────
   const selectionWindow = em.create(MealSelectionWindow, {
-  id: ulid(),
-  startTime: new Date('2026-05-18T07:00:00Z'), // opened last Monday
-  endTime: new Date('2026-05-21T17:00:00Z'),   // deadline last Thursday — already passed
-  business,
-  targetDates: TARGET_DATES,
-  menuPeriods: [menuPeriod],
-  isLocked: false,
-  notifyOnDeadline: false,
-});
+    id: ulid(),
+    startTime: new Date('2026-05-18T07:00:00Z'), // opened last Monday
+    endTime: new Date('2026-05-21T17:00:00Z'), // deadline last Thursday — already passed
+    business,
+    targetDates: TARGET_DATES,
+    menuPeriods: [menuPeriod],
+    isLocked: false,
+    notifyOnDeadline: false,
+  });
   await em.save(MealSelectionWindow, selectionWindow);
-  console.log(`\nMeal selection window: deadline ${selectionWindow.endTime.toISOString()} (already passed)`);
+  console.log(
+    `\nMeal selection window: deadline ${selectionWindow.endTime.toISOString()} (already passed)`,
+  );
 
   // ── 8. Create meal selections for all basic employees ─────────────────
   const allBasicEmployees = await em.find(Employee, {
     where: { business: { id: business.id }, role: EmployeeRole.Basic },
     relations: ['business'],
   });
-  console.log(`\nCreating selections for ${allBasicEmployees.length} basic employees...`);
+  console.log(
+    `\nCreating selections for ${allBasicEmployees.length} basic employees...`,
+  );
 
   let selectionCount = 0;
   for (const [empIdx, employee] of allBasicEmployees.entries()) {
@@ -283,8 +354,12 @@ async function seedData() {
 
   console.log('\n──────────────────────────────────────────');
   console.log('Seed data complete!');
-  console.log(`  Employees created : ${createdEmployees.length} (password: ${employeePassword})`);
-  console.log(`  Serbian meals added: ${allMeals.length - existingMeals.length}`);
+  console.log(
+    `  Employees created : ${createdEmployees.length} (password: ${employeePassword})`,
+  );
+  console.log(
+    `  Serbian meals added: ${allMeals.length - existingMeals.length}`,
+  );
   console.log(`  Menu period        : ${NEXT_WEEK.mon} – ${NEXT_WEEK.fri}`);
   console.log(`  Meal window ID     : ${selectionWindow.id}`);
   console.log(`  Selections created : ${selectionCount}`);

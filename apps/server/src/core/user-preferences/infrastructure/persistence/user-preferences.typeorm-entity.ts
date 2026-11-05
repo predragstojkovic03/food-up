@@ -7,7 +7,11 @@ export class UserPreferencesTypeOrmEntity {
   @PrimaryColumn('character varying', { length: 26 })
   id: string;
 
-  @Column('character varying', { length: 26, unique: true, name: 'identity_id' })
+  @Column('character varying', {
+    length: 26,
+    unique: true,
+    name: 'identity_id',
+  })
   identityId: string;
 
   @OneToOne(() => Identity, { nullable: false })

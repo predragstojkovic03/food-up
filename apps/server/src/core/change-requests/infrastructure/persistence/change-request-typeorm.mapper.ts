@@ -35,17 +35,26 @@ export class ChangeRequestTypeOrmMapper extends TypeOrmMapper<
     return persistence;
   }
 
-  toPersistencePartial(domain: Partial<ChangeRequest>): Partial<ChangeRequestPersistence> {
+  toPersistencePartial(
+    domain: Partial<ChangeRequest>,
+  ): Partial<ChangeRequestPersistence> {
     const persistence: Partial<ChangeRequestPersistence> = {};
     if (domain.id !== undefined) persistence.id = domain.id;
-    if (domain.employeeId !== undefined) persistence.employeeId = domain.employeeId;
-    if (domain.mealSelectionWindowId !== undefined) persistence.mealSelectionWindowId = domain.mealSelectionWindowId;
-    if ('mealSelectionId' in domain) persistence.mealSelectionId = domain.mealSelectionId ?? null;
-    if (domain.newMenuItemId !== undefined) persistence.newMenuItemId = domain.newMenuItemId;
-    if (domain.newQuantity !== undefined) persistence.newQuantity = domain.newQuantity;
+    if (domain.employeeId !== undefined)
+      persistence.employeeId = domain.employeeId;
+    if (domain.mealSelectionWindowId !== undefined)
+      persistence.mealSelectionWindowId = domain.mealSelectionWindowId;
+    if ('mealSelectionId' in domain)
+      persistence.mealSelectionId = domain.mealSelectionId ?? null;
+    if (domain.newMenuItemId !== undefined)
+      persistence.newMenuItemId = domain.newMenuItemId;
+    if (domain.newQuantity !== undefined)
+      persistence.newQuantity = domain.newQuantity;
     if (domain.status !== undefined) persistence.status = domain.status;
-    if (domain.approvedBy !== undefined) persistence.approvedBy = domain.approvedBy;
-    if (domain.approvedAt !== undefined) persistence.approvedAt = domain.approvedAt;
+    if (domain.approvedBy !== undefined)
+      persistence.approvedBy = domain.approvedBy;
+    if (domain.approvedAt !== undefined)
+      persistence.approvedAt = domain.approvedAt;
     return persistence;
   }
 }

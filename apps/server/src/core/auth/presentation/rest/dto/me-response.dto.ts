@@ -32,7 +32,11 @@ export class MeResponseDto {
   @Expose()
   businessId?: string;
 
-  @ApiProperty({ description: 'Google profile picture URL', nullable: true, required: false })
+  @ApiProperty({
+    description: 'Google profile picture URL',
+    nullable: true,
+    required: false,
+  })
   @Expose()
   pictureUrl: string | null;
 

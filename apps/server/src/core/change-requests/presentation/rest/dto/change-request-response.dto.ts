@@ -25,7 +25,8 @@ export class ChangeRequestResponseDto {
   mealSelectionWindowId: string;
 
   @ApiProperty({
-    description: 'Unique identifier for the meal selection. Null for late selection requests.',
+    description:
+      'Unique identifier for the meal selection. Null for late selection requests.',
     example: ulid(),
     nullable: true,
   })

@@ -1,5 +1,13 @@
 import { Identity } from 'src/core/identity/infrastructure/persistence/identity.typeorm-entity';
-import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+} from 'typeorm';
 
 @Entity({ name: 'refresh_tokens' })
 export class RefreshTokenTypeOrmEntity {

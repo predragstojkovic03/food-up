@@ -28,12 +28,36 @@ describe('DomainExceptionFilter', () => {
   }
 
   it.each([
-    ['AuthenticationException', new AuthenticationException(), HttpStatus.UNAUTHORIZED],
-    ['AccessDeniedException', new AccessDeniedException(), HttpStatus.FORBIDDEN],
-    ['InvalidInputDataException', new InvalidInputDataException('x'), HttpStatus.BAD_REQUEST],
-    ['InvalidOperationException', new InvalidOperationException('x'), HttpStatus.BAD_REQUEST],
-    ['EntityInstanceNotFoundException', new EntityInstanceNotFoundException(), HttpStatus.NOT_FOUND],
-    ['EntityInstanceAlreadyExistsException', new EntityInstanceAlreadyExistsException(), HttpStatus.CONFLICT],
+    [
+      'AuthenticationException',
+      new AuthenticationException(),
+      HttpStatus.UNAUTHORIZED,
+    ],
+    [
+      'AccessDeniedException',
+      new AccessDeniedException(),
+      HttpStatus.FORBIDDEN,
+    ],
+    [
+      'InvalidInputDataException',
+      new InvalidInputDataException('x'),
+      HttpStatus.BAD_REQUEST,
+    ],
+    [
+      'InvalidOperationException',
+      new InvalidOperationException('x'),
+      HttpStatus.BAD_REQUEST,
+    ],
+    [
+      'EntityInstanceNotFoundException',
+      new EntityInstanceNotFoundException(),
+      HttpStatus.NOT_FOUND,
+    ],
+    [
+      'EntityInstanceAlreadyExistsException',
+      new EntityInstanceAlreadyExistsException(),
+      HttpStatus.CONFLICT,
+    ],
   ])('maps %s to %i', (_, exception, expected) => {
     expect(statusFor(exception)).toBe(expected);
   });

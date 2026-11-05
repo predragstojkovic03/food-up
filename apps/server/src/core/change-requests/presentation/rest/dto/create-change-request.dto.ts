@@ -11,7 +11,8 @@ export class CreateChangeRequestDto {
 
   @ApiProperty({
     example: 'meal-selection-uuid',
-    description: 'Meal selection ID. Omit if no prior selection was made (late selection request).',
+    description:
+      'Meal selection ID. Omit if no prior selection was made (late selection request).',
     required: false,
   })
   @IsOptional()

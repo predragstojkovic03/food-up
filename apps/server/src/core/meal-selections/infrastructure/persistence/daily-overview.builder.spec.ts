@@ -7,7 +7,9 @@ import {
 
 const DATE = '2026-10-28';
 
-function selection(overrides: Partial<DailyOverviewSelectionRow> = {}): DailyOverviewSelectionRow {
+function selection(
+  overrides: Partial<DailyOverviewSelectionRow> = {},
+): DailyOverviewSelectionRow {
   return {
     employeeId: 'e-1',
     employeeName: 'Alice',
@@ -21,7 +23,9 @@ function selection(overrides: Partial<DailyOverviewSelectionRow> = {}): DailyOve
   };
 }
 
-function change(overrides: Partial<DailyOverviewApprovedChangeRow> = {}): DailyOverviewApprovedChangeRow {
+function change(
+  overrides: Partial<DailyOverviewApprovedChangeRow> = {},
+): DailyOverviewApprovedChangeRow {
   return {
     employeeId: 'e-1',
     mealSelectionId: 'ms-1',
@@ -41,13 +45,28 @@ describe('buildDailyOverview', () => {
     const [item] = buildDailyOverview([selection()], []);
 
     expect(item.status).toBe('ordered');
-    expect(item.meals).toEqual([{ menuItemId: 'mi-chicken', name: 'Chicken', type: MealType.Lunch, quantity: 1 }]);
+    expect(item.meals).toEqual([
+      {
+        menuItemId: 'mi-chicken',
+        name: 'Chicken',
+        type: MealType.Lunch,
+        quantity: 1,
+      },
+    ]);
     expect(item.changes).toEqual([]);
   });
 
   it('marks employees without any selection as no_record', () => {
     const [item] = buildDailyOverview(
-      [selection({ mealSelectionId: null, menuItemId: null, mealName: null, mealType: null, quantity: null })],
+      [
+        selection({
+          mealSelectionId: null,
+          menuItemId: null,
+          mealName: null,
+          mealType: null,
+          quantity: null,
+        }),
+      ],
       [],
     );
 
@@ -58,9 +77,22 @@ describe('buildDailyOverview', () => {
   it('applies an approved swap and records it in history', () => {
     const [item] = buildDailyOverview([selection()], [change()]);
 
-    expect(item.meals).toEqual([{ menuItemId: 'mi-fish', name: 'Fish', type: MealType.Lunch, quantity: 1 }]);
+    expect(item.meals).toEqual([
+      {
+        menuItemId: 'mi-fish',
+        name: 'Fish',
+        type: MealType.Lunch,
+        quantity: 1,
+      },
+    ]);
     expect(item.changes).toEqual([
-      { type: MealType.Lunch, kind: 'swap', from: 'Chicken', to: 'Fish', approvedAt: '2026-10-27T10:00:00.000Z' },
+      {
+        type: MealType.Lunch,
+        kind: 'swap',
+        from: 'Chicken',
+        to: 'Fish',
+        approvedAt: '2026-10-27T10:00:00.000Z',
+      },
     ]);
   });
 
@@ -69,7 +101,11 @@ describe('buildDailyOverview', () => {
       [selection()],
       [
         change(),
-        change({ newMenuItemId: 'mi-pasta', newMealName: 'Pasta', approvedAt: new Date('2026-10-27T12:00:00Z') }),
+        change({
+          newMenuItemId: 'mi-pasta',
+          newMealName: 'Pasta',
+          approvedAt: new Date('2026-10-27T12:00:00Z'),
+        }),
       ],
     );
 
@@ -83,37 +119,98 @@ describe('buildDailyOverview', () => {
   it('drops a removed meal and marks the day skipped when nothing is left', () => {
     const [item] = buildDailyOverview(
       [selection()],
-      [change({ clearSelection: true, newMenuItemId: null, newMealName: null, newMealType: null, newQuantity: null })],
+      [
+        change({
+          clearSelection: true,
+          newMenuItemId: null,
+          newMealName: null,
+          newMealType: null,
+          newQuantity: null,
+        }),
+      ],
     );
 
     expect(item.status).toBe('skipped');
     expect(item.meals).toEqual([]);
     expect(item.changes).toEqual([
-      { type: MealType.Lunch, kind: 'removal', from: 'Chicken', to: null, approvedAt: '2026-10-27T10:00:00.000Z' },
+      {
+        type: MealType.Lunch,
+        kind: 'removal',
+        from: 'Chicken',
+        to: null,
+        approvedAt: '2026-10-27T10:00:00.000Z',
+      },
     ]);
   });
 
   it('adds late additions to the matching employee and day', () => {
     const [item] = buildDailyOverview(
-      [selection({ mealSelectionId: null, menuItemId: null, mealName: null, mealType: null, quantity: null })],
-      [change({ mealSelectionId: null, newMenuItemId: 'mi-cake', newMealName: 'Cake', newMealType: MealType.Dessert, newQuantity: 2 })],
+      [
+        selection({
+          mealSelectionId: null,
+          menuItemId: null,
+          mealName: null,
+          mealType: null,
+          quantity: null,
+        }),
+      ],
+      [
+        change({
+          mealSelectionId: null,
+          newMenuItemId: 'mi-cake',
+          newMealName: 'Cake',
+          newMealType: MealType.Dessert,
+          newQuantity: 2,
+        }),
+      ],
     );
 
     expect(item.status).toBe('ordered');
-    expect(item.meals).toEqual([{ menuItemId: 'mi-cake', name: 'Cake', type: MealType.Dessert, quantity: 2 }]);
-    expect(item.changes[0]).toMatchObject({ kind: 'addition', from: null, to: 'Cake' });
+    expect(item.meals).toEqual([
+      {
+        menuItemId: 'mi-cake',
+        name: 'Cake',
+        type: MealType.Dessert,
+        quantity: 2,
+      },
+    ]);
+    expect(item.changes[0]).toMatchObject({
+      kind: 'addition',
+      from: null,
+      to: 'Cake',
+    });
   });
 
   it('updates quantity only when the change keeps the menu item', () => {
-    const [item] = buildDailyOverview([selection()], [change({ newMenuItemId: null, newMealName: null, newMealType: null, newQuantity: 3 })]);
+    const [item] = buildDailyOverview(
+      [selection()],
+      [
+        change({
+          newMenuItemId: null,
+          newMealName: null,
+          newMealType: null,
+          newQuantity: 3,
+        }),
+      ],
+    );
 
-    expect(item.meals).toEqual([{ menuItemId: 'mi-chicken', name: 'Chicken', type: MealType.Lunch, quantity: 3 }]);
+    expect(item.meals).toEqual([
+      {
+        menuItemId: 'mi-chicken',
+        name: 'Chicken',
+        type: MealType.Lunch,
+        quantity: 3,
+      },
+    ]);
   });
 
   it('ignores changes for other days or unknown selections', () => {
     const [item] = buildDailyOverview(
       [selection()],
-      [change({ mealSelectionId: 'ms-other' }), change({ mealSelectionId: null, newMenuItemDay: '2026-10-29' })],
+      [
+        change({ mealSelectionId: 'ms-other' }),
+        change({ mealSelectionId: null, newMenuItemDay: '2026-10-29' }),
+      ],
     );
 
     expect(item.meals.map((m) => m.name)).toEqual(['Chicken']);

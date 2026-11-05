@@ -8,12 +8,20 @@ import { EmployeeTypeOrmMapper } from './employee-typeorm.mapper';
 import { Employee as EmployeePersistence } from './employee.typeorm-entity';
 
 @Injectable()
-export class EmployeesTypeOrmRepository extends TypeOrmRepository<Employee, EmployeePersistence> {
+export class EmployeesTypeOrmRepository extends TypeOrmRepository<
+  Employee,
+  EmployeePersistence
+> {
   constructor(
     @InjectDataSource() dataSource: DataSource,
     transactionContext: TransactionContext,
   ) {
-    super(dataSource, EmployeePersistence, new EmployeeTypeOrmMapper(), transactionContext);
+    super(
+      dataSource,
+      EmployeePersistence,
+      new EmployeeTypeOrmMapper(),
+      transactionContext,
+    );
   }
 
   override async findByCriteria(
@@ -35,9 +43,7 @@ export class EmployeesTypeOrmRepository extends TypeOrmRepository<Employee, Empl
       .findOne({
         where,
       })
-      .then((entity) =>
-        entity ? this._mapper.toDomain(entity) : null,
-      );
+      .then((entity) => (entity ? this._mapper.toDomain(entity) : null));
   }
 
   private getWhereClause(criteria: Partial<Employee>) {

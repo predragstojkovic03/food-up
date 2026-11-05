@@ -43,7 +43,8 @@ export class MealSelectionWindowTypeOrmMapper extends TypeOrmMapper<
     if (domain.businessId !== undefined)
       persistence.business = { id: domain.businessId } as any;
     if (domain.isLocked !== undefined) persistence.isLocked = domain.isLocked;
-    if (domain.notifyOnDeadline !== undefined) persistence.notifyOnDeadline = domain.notifyOnDeadline;
+    if (domain.notifyOnDeadline !== undefined)
+      persistence.notifyOnDeadline = domain.notifyOnDeadline;
     return persistence;
   }
 }

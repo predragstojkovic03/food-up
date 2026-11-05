@@ -1,4 +1,9 @@
-import { DietaryTag, ICurrentWindowMenuItem, IGetCurrentMealSelectionWindowResponse, MealType } from '@food-up/shared';
+import {
+  DietaryTag,
+  ICurrentWindowMenuItem,
+  IGetCurrentMealSelectionWindowResponse,
+  MealType,
+} from '@food-up/shared';
 import { Expose, Type } from 'class-transformer';
 
 export class MealDto {
@@ -20,7 +25,9 @@ export class MenuItem implements ICurrentWindowMenuItem {
   meal: MealDto;
 }
 
-export class GetCurrentMealSelectionWindowResponseDto implements IGetCurrentMealSelectionWindowResponse {
+export class GetCurrentMealSelectionWindowResponseDto
+  implements IGetCurrentMealSelectionWindowResponse
+{
   @Expose()
   id: string;
 

@@ -31,7 +31,9 @@ export class UpdateMenuItemDto implements IUpdateMenuItem {
   })
   @IsOptional()
   @IsDateString()
-  @Transform(({ value }) => (typeof value === 'string' ? value.split('T')[0] : value))
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.split('T')[0] : value,
+  )
   day?: string;
 
   @ApiProperty({

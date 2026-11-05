@@ -38,7 +38,10 @@ export class MenuItemsService {
     const meal = await this._mealsService.findOne(dto.mealId);
 
     const menuPeriod = await this._menuPeriodsService.findOne(dto.menuPeriodId);
-    await this._suppliersService.assertCanManage(menuPeriod.supplierId, identityId);
+    await this._suppliersService.assertCanManage(
+      menuPeriod.supplierId,
+      identityId,
+    );
 
     if (menuPeriod.supplierId !== meal.supplierId) {
       throw new InvalidInputDataException(
@@ -70,9 +73,15 @@ export class MenuItemsService {
     return menuItem;
   }
 
-  async findByMenuPeriod(menuPeriodId: string, identityId: string): Promise<MenuItem[]> {
+  async findByMenuPeriod(
+    menuPeriodId: string,
+    identityId: string,
+  ): Promise<MenuItem[]> {
     const menuPeriod = await this._menuPeriodsService.findOne(menuPeriodId);
-    await this._suppliersService.assertCanView(menuPeriod.supplierId, identityId);
+    await this._suppliersService.assertCanView(
+      menuPeriod.supplierId,
+      identityId,
+    );
     return this._repository.findByCriteria({ menuPeriodId } as any);
   }
 
@@ -89,9 +98,10 @@ export class MenuItemsService {
     await this._assertCanManageMenuPeriod(menuItem.menuPeriodId, identityId);
 
     if (dto.price !== undefined) {
-      const locked = await this._mealSelectionWindowsService.existsActiveByMenuPeriodId(
-        menuItem.menuPeriodId,
-      );
+      const locked =
+        await this._mealSelectionWindowsService.existsActiveByMenuPeriodId(
+          menuItem.menuPeriodId,
+        );
       if (locked) {
         throw new InvalidOperationException(
           'Cannot change price while a meal selection window referencing this menu period is active.',
@@ -127,8 +137,14 @@ export class MenuItemsService {
     return this._repository.delete(id);
   }
 
-  private async _assertCanManageMenuPeriod(menuPeriodId: string, identityId: string): Promise<void> {
+  private async _assertCanManageMenuPeriod(
+    menuPeriodId: string,
+    identityId: string,
+  ): Promise<void> {
     const menuPeriod = await this._menuPeriodsService.findOne(menuPeriodId);
-    await this._suppliersService.assertCanManage(menuPeriod.supplierId, identityId);
+    await this._suppliersService.assertCanManage(
+      menuPeriod.supplierId,
+      identityId,
+    );
   }
 }

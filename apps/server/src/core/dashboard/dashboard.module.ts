@@ -13,7 +13,11 @@ const DashboardQueryRepositoryProvider: Provider = {
 };
 
 @Module({
-  imports: [CacheModule.register({ ttl: 300_000 }), EmployeesModule, BusinessesModule],
+  imports: [
+    CacheModule.register({ ttl: 300_000 }),
+    EmployeesModule,
+    BusinessesModule,
+  ],
   controllers: [DashboardController],
   providers: [DashboardQueryRepositoryProvider, DashboardQueryService],
 })

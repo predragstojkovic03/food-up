@@ -39,7 +39,10 @@ export class MealSelectionWindowEventHandler {
       for (const employee of employees.filter((e) => e.email)) {
         await this._mealWindowQueue.add(
           'notify',
-          { windowId: event.payload.mealSelectionWindowId, employeeId: employee.id },
+          {
+            windowId: event.payload.mealSelectionWindowId,
+            employeeId: employee.id,
+          },
           { jobId: `${event.payload.mealSelectionWindowId}_${employee.id}` },
         );
       }

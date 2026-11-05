@@ -11,7 +11,13 @@ export class MenuItem extends Entity {
     day: string,
     mealId: string,
   ): MenuItem {
-    const menuItem = new MenuItem(generateId(), price, menuPeriodId, day, mealId);
+    const menuItem = new MenuItem(
+      generateId(),
+      price,
+      menuPeriodId,
+      day,
+      mealId,
+    );
     menuItem.addDomainEvent(new MenuItemCreatedEvent(menuItem.id));
 
     return menuItem;

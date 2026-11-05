@@ -45,7 +45,10 @@ export default async function globalSetup(): Promise<void> {
     ADMIN_API_KEY: TEST_ADMIN_API_KEY,
   });
 
-  (globalThis as Record<string, unknown>).__TEST_CONTAINERS__ = [postgres, redis];
+  (globalThis as Record<string, unknown>).__TEST_CONTAINERS__ = [
+    postgres,
+    redis,
+  ];
 }
 
 async function applyMigrations(connectionUri: string): Promise<void> {

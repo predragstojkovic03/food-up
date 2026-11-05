@@ -24,23 +24,35 @@ async function seed() {
 
   const onboardingService = app.get(BusinessOnboardingService);
 
-  const businessName = arg('business-name', 'SEED_BUSINESS_NAME') ?? 'My Business';
-  const contactEmail = arg('contact-email', 'SEED_CONTACT_EMAIL') ?? requireArg('manager-email', 'SEED_MANAGER_EMAIL');
+  const businessName =
+    arg('business-name', 'SEED_BUSINESS_NAME') ?? 'My Business';
+  const contactEmail =
+    arg('contact-email', 'SEED_CONTACT_EMAIL') ??
+    requireArg('manager-email', 'SEED_MANAGER_EMAIL');
   const managerName = arg('manager-name', 'SEED_MANAGER_NAME') ?? 'Admin';
   const managerEmail = requireArg('manager-email', 'SEED_MANAGER_EMAIL');
-  const managerPassword = requireArg('manager-password', 'SEED_MANAGER_PASSWORD');
+  const managerPassword = requireArg(
+    'manager-password',
+    'SEED_MANAGER_PASSWORD',
+  );
 
   const { business, manager } = await onboardingService.onboard({
     name: businessName,
     contactEmail,
-    manager: { name: managerName, email: managerEmail, password: managerPassword },
+    manager: {
+      name: managerName,
+      email: managerEmail,
+      password: managerPassword,
+    },
   });
 
   console.log(`Business created: ${business.name} (${business.id})`);
   console.log(`Manager created:  ${manager.name} (${manager.id})`);
   console.log(`  Email:    ${managerEmail}`);
   console.log(`  Password: ${managerPassword}`);
-  console.log(`\nYou can now log in and generate invite links at POST /businesses/${business.id}/invites`);
+  console.log(
+    `\nYou can now log in and generate invite links at POST /businesses/${business.id}/invites`,
+  );
 
   await app.close();
 }

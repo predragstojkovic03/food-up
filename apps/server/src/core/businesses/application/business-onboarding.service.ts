@@ -22,7 +22,9 @@ export class BusinessOnboardingService {
     @Inject(I_LOGGER) private readonly _logger: ILogger,
   ) {}
 
-  onboard(dto: OnboardBusinessDto): Promise<{ business: Business; manager: Employee }> {
+  onboard(
+    dto: OnboardBusinessDto,
+  ): Promise<{ business: Business; manager: Employee }> {
     // One transaction: a failed manager creation must not leave a business without a manager
     return this._transactionRunner.run(async () => {
       const business = await this._businessesService.create({

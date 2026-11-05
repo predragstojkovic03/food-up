@@ -7,7 +7,9 @@ import { IExtraQuantitiesRepository } from '../../domain/extra-quantities.reposi
 import { ExtraQuantity as ExtraQuantityPersistence } from './extra-quantity.typeorm-entity';
 
 @Injectable()
-export class ExtraQuantitiesTypeOrmRepository implements IExtraQuantitiesRepository {
+export class ExtraQuantitiesTypeOrmRepository
+  implements IExtraQuantitiesRepository
+{
   constructor(
     @InjectDataSource() private readonly _dataSource: DataSource,
     private readonly _transactionContext: TransactionContext,
@@ -33,14 +35,26 @@ export class ExtraQuantitiesTypeOrmRepository implements IExtraQuantitiesReposit
   async findById(id: string): Promise<ExtraQuantityDomain | null> {
     const r = await this._repository.findOne({ where: { id } });
     return r
-      ? ExtraQuantityDomain.reconstitute(r.id, r.windowId, r.menuItemId, r.quantity, r.guestName)
+      ? ExtraQuantityDomain.reconstitute(
+          r.id,
+          r.windowId,
+          r.menuItemId,
+          r.quantity,
+          r.guestName,
+        )
       : null;
   }
 
   async findByWindow(windowId: string): Promise<ExtraQuantityDomain[]> {
     const records = await this._repository.find({ where: { windowId } });
     return records.map((r) =>
-      ExtraQuantityDomain.reconstitute(r.id, r.windowId, r.menuItemId, r.quantity, r.guestName),
+      ExtraQuantityDomain.reconstitute(
+        r.id,
+        r.windowId,
+        r.menuItemId,
+        r.quantity,
+        r.guestName,
+      ),
     );
   }
 

@@ -11,7 +11,15 @@ export class Meal extends Entity {
     price?: number,
     dietaryTags: DietaryTag[] = [],
   ): Meal {
-    return new Meal(generateId(), name, description, type, supplierId, price, dietaryTags);
+    return new Meal(
+      generateId(),
+      name,
+      description,
+      type,
+      supplierId,
+      price,
+      dietaryTags,
+    );
   }
 
   static reconstitute(
@@ -23,7 +31,15 @@ export class Meal extends Entity {
     price?: number,
     dietaryTags: DietaryTag[] = [],
   ): Meal {
-    return new Meal(id, name, description ?? undefined, type, supplierId, price, dietaryTags);
+    return new Meal(
+      id,
+      name,
+      description ?? undefined,
+      type,
+      supplierId,
+      price,
+      dietaryTags,
+    );
   }
 
   private constructor(

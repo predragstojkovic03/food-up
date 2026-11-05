@@ -16,7 +16,9 @@ export class MealSelectionOverviewQueryTypeOrmRepository
 {
   constructor(@InjectDataSource() private readonly _dataSource: DataSource) {}
 
-  async getDailyOverview(windowId: string): Promise<WindowDailyOverviewItemDto[]> {
+  async getDailyOverview(
+    windowId: string,
+  ): Promise<WindowDailyOverviewItemDto[]> {
     const [selectionRows, approvedChanges] = await Promise.all([
       this._querySelections(windowId),
       this._queryApprovedChanges(windowId),
@@ -25,7 +27,9 @@ export class MealSelectionOverviewQueryTypeOrmRepository
     return buildDailyOverview(selectionRows, approvedChanges);
   }
 
-  private _querySelections(windowId: string): Promise<DailyOverviewSelectionRow[]> {
+  private _querySelections(
+    windowId: string,
+  ): Promise<DailyOverviewSelectionRow[]> {
     return this._dataSource.query(
       `
       SELECT
@@ -59,7 +63,9 @@ export class MealSelectionOverviewQueryTypeOrmRepository
   }
 
   /** Approved change requests in approval order (ULID id as tiebreaker) */
-  private _queryApprovedChanges(windowId: string): Promise<DailyOverviewApprovedChangeRow[]> {
+  private _queryApprovedChanges(
+    windowId: string,
+  ): Promise<DailyOverviewApprovedChangeRow[]> {
     return this._dataSource.query(
       `
       SELECT

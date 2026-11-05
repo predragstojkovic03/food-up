@@ -8,11 +8,19 @@ import { BusinessTypeOrmMapper } from './business-typeorm.mapper';
 import { Business as BusinessTypeormEntity } from './business.typeorm-entity';
 
 @Injectable()
-export class BusinessTypeormRepository extends TypeOrmRepository<Business, BusinessTypeormEntity> {
+export class BusinessTypeormRepository extends TypeOrmRepository<
+  Business,
+  BusinessTypeormEntity
+> {
   constructor(
     @InjectDataSource() dataSource: DataSource,
     transactionContext: TransactionContext,
   ) {
-    super(dataSource, BusinessTypeormEntity, new BusinessTypeOrmMapper(), transactionContext);
+    super(
+      dataSource,
+      BusinessTypeormEntity,
+      new BusinessTypeOrmMapper(),
+      transactionContext,
+    );
   }
 }

@@ -29,13 +29,15 @@ export default {
       heading: "You've been invited!",
       body: "You've been invited to join your team. Click the button below to set up your account.",
       button: 'Accept Invitation',
-      footer: 'This link expires in 7 days. If you did not expect this invitation, you can safely ignore this email.',
+      footer:
+        'This link expires in 7 days. If you did not expect this invitation, you can safely ignore this email.',
     },
     orderSummary: {
       subject: 'Order summary for your meals',
       subjectAdjusted: 'Adjusted order summary for your meals',
       intro: 'Dear Sir/Madam, please find the order summary below.',
-      introAdjusted: 'This is an adjusted version of a previously sent order summary. The quantities below reflect the latest approved change requests.',
+      introAdjusted:
+        'This is an adjusted version of a previously sent order summary. The quantities below reflect the latest approved change requests.',
       noOrders: 'No orders for this window.',
       table: {
         date: 'Date',

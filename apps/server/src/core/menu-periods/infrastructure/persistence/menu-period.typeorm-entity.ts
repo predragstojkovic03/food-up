@@ -1,7 +1,15 @@
 import { MealSelectionWindow } from 'src/core/meal-selection-windows/infrastructure/persistence/meal-selection-window.typeorm-entity';
 import { MenuItem } from 'src/core/menu-items/infrastructure/persistence/menu-item.typeorm-entity';
 import { Supplier } from 'src/core/suppliers/infrastructure/persistence/supplier.typeorm-entity';
-import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToMany,
+  ManyToOne,
+  OneToMany,
+  PrimaryColumn,
+} from 'typeorm';
 
 @Entity()
 export class MenuPeriod {

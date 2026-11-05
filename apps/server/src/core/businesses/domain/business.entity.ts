@@ -32,7 +32,8 @@ export class Business extends Entity {
       managedSupplierIds,
     );
     b.language = language;
-    b.reportIncludeEmployeesWithoutSelection = reportIncludeEmployeesWithoutSelection;
+    b.reportIncludeEmployeesWithoutSelection =
+      reportIncludeEmployeesWithoutSelection;
     return b;
   }
 

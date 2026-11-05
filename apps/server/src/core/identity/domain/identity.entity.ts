@@ -10,7 +10,14 @@ export class Identity extends Entity {
     type: IdentityType,
     isActive: boolean = true,
   ): Identity {
-    return new Identity(generateId(), email, passwordHash, type, isActive, null);
+    return new Identity(
+      generateId(),
+      email,
+      passwordHash,
+      type,
+      isActive,
+      null,
+    );
   }
 
   static createWithGoogle(
@@ -30,7 +37,15 @@ export class Identity extends Entity {
     googleId: string | null = null,
     pictureUrl: string | null = null,
   ): Identity {
-    return new Identity(id, email, passwordHash, type, isActive, googleId, pictureUrl);
+    return new Identity(
+      id,
+      email,
+      passwordHash,
+      type,
+      isActive,
+      googleId,
+      pictureUrl,
+    );
   }
 
   private constructor(

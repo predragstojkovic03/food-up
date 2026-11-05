@@ -1,7 +1,15 @@
 import { MealSelection } from 'src/core/meal-selections/infrastructure/persistence/meal-selection.typeorm-entity';
 import { Meal } from 'src/core/meals/infrastructure/persistence/meal.typeorm-entity';
 import { MenuPeriod } from 'src/core/menu-periods/infrastructure/persistence/menu-period.typeorm-entity';
-import { Column, Entity, Index, ManyToOne, OneToMany, PrimaryColumn, Unique } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  ManyToOne,
+  OneToMany,
+  PrimaryColumn,
+  Unique,
+} from 'typeorm';
 
 @Entity()
 @Unique('UQ_menu_item_period_meal_day', ['menuPeriod', 'meal', 'day'])
@@ -11,7 +19,10 @@ export class MenuItem {
 
   @Column('decimal', {
     nullable: true,
-    transformer: { from: (v: string | null) => (v != null ? Number(v) : null), to: (v) => v },
+    transformer: {
+      from: (v: string | null) => (v != null ? Number(v) : null),
+      to: (v) => v,
+    },
   })
   price: number | null;
 

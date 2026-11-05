@@ -34,7 +34,15 @@ export class OrderSummarySend extends Entity {
     subject: string,
     htmlContent: string,
   ): OrderSummarySend {
-    return new OrderSummarySend(id, windowId, supplierId, sentAt, sentByEmployeeId, subject, htmlContent);
+    return new OrderSummarySend(
+      id,
+      windowId,
+      supplierId,
+      sentAt,
+      sentByEmployeeId,
+      subject,
+      htmlContent,
+    );
   }
 
   private constructor(

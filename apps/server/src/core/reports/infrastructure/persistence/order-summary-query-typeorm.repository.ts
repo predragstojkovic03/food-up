@@ -45,13 +45,24 @@ export class OrderSummaryQueryTypeOrmRepository
     return this._summary(windowId);
   }
 
-  getByWindowAndSupplier(windowId: string, supplierId: string): Promise<OrderSummaryRow[]> {
+  getByWindowAndSupplier(
+    windowId: string,
+    supplierId: string,
+  ): Promise<OrderSummaryRow[]> {
     return this._summary(windowId, supplierId);
   }
 
-  async getEmployeeSelections(windowId: string): Promise<EmployeeDaySelectionRow[]> {
+  async getEmployeeSelections(
+    windowId: string,
+  ): Promise<EmployeeDaySelectionRow[]> {
     const rows = await this._query<
-      { date: string; employeeName: string; mealName: string; mealType: string; quantity: number }[]
+      {
+        date: string;
+        employeeName: string;
+        mealName: string;
+        mealType: string;
+        quantity: number;
+      }[]
     >(
       `
       SELECT eol.date::text AS "date",
@@ -76,7 +87,9 @@ export class OrderSummaryQueryTypeOrmRepository
     });
   }
 
-  getEmployeesWithoutSelection(windowId: string): Promise<EmployeeWithoutSelectionRow[]> {
+  getEmployeesWithoutSelection(
+    windowId: string,
+  ): Promise<EmployeeWithoutSelectionRow[]> {
     return this._query<EmployeeWithoutSelectionRow[]>(
       `
       SELECT to_char(td.date, 'YYYY-MM-DD') AS "date", e.name AS "employeeName"
@@ -107,7 +120,9 @@ export class OrderSummaryQueryTypeOrmRepository
   }
 
   /** Employees with a selection for the day that orders nothing (skipped, or removed by a change request). */
-  getSkippedEmployees(windowId: string): Promise<EmployeeWithoutSelectionRow[]> {
+  getSkippedEmployees(
+    windowId: string,
+  ): Promise<EmployeeWithoutSelectionRow[]> {
     return this._query<EmployeeWithoutSelectionRow[]>(
       `
       SELECT DISTINCT eol.date::text AS "date", e.name AS "employeeName"
@@ -123,7 +138,9 @@ export class OrderSummaryQueryTypeOrmRepository
   }
 
   async getCostByWindow(windowId: string): Promise<CostByWindowRow[]> {
-    const rows = await this._query<{ supplierId: string; supplierName: string; totalCost: string }[]>(
+    const rows = await this._query<
+      { supplierId: string; supplierName: string; totalCost: string }[]
+    >(
       `
       SELECT s.id AS "supplierId", s.name AS "supplierName",
              SUM(COALESCE(eol.unit_price, 0) * eol.quantity) AS "totalCost"
@@ -143,7 +160,10 @@ export class OrderSummaryQueryTypeOrmRepository
     }));
   }
 
-  private async _summary(windowId: string, supplierId?: string): Promise<OrderSummaryRow[]> {
+  private async _summary(
+    windowId: string,
+    supplierId?: string,
+  ): Promise<OrderSummaryRow[]> {
     const rows = await this._query<OrderSummaryRow[]>(
       `
       SELECT s.id AS "supplierId", s.name AS "supplierName", eol.date::text AS "date",
@@ -160,7 +180,8 @@ export class OrderSummaryQueryTypeOrmRepository
     );
 
     return rows.sort((a, b) => {
-      if (a.supplierName !== b.supplierName) return a.supplierName.localeCompare(b.supplierName);
+      if (a.supplierName !== b.supplierName)
+        return a.supplierName.localeCompare(b.supplierName);
       if (a.date !== b.date) return a.date.localeCompare(b.date);
       const typeOrderA = MEAL_TYPE_ORDER[a.mealType] ?? 99;
       const typeOrderB = MEAL_TYPE_ORDER[b.mealType] ?? 99;

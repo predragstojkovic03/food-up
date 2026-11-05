@@ -48,10 +48,11 @@ export class ChangeRequestsService {
   ): Promise<ChangeRequest> {
     const employee = await this._employeesService.findByIdentity(identityId);
 
-    const mealSelectionWindow = await this._mealSelectionWindowsService.findOneInMyBusiness(
-      dto.mealSelectionWindowId,
-      identityId,
-    );
+    const mealSelectionWindow =
+      await this._mealSelectionWindowsService.findOneInMyBusiness(
+        dto.mealSelectionWindowId,
+        identityId,
+      );
 
     if (!mealSelectionWindow.isPastDeadline) {
       throw new InvalidInputDataException(
@@ -113,7 +114,9 @@ export class ChangeRequestsService {
     }
 
     if (newMenuItem) {
-      if (!mealSelectionWindow.menuPeriodIds.includes(newMenuItem.menuPeriodId)) {
+      if (
+        !mealSelectionWindow.menuPeriodIds.includes(newMenuItem.menuPeriodId)
+      ) {
         throw new InvalidInputDataException(
           `New menu item with ID ${dto.newMenuItemId} does not belong to any of the menu periods associated with meal selection window ${mealSelectionWindow.id}`,
         );
@@ -152,12 +155,17 @@ export class ChangeRequestsService {
     });
 
     if (dto.newMenuItemId) {
-      const mealSelectionWindow = await this._mealSelectionWindowsService.findOne(
-        changeRequest.mealSelectionWindowId,
+      const mealSelectionWindow =
+        await this._mealSelectionWindowsService.findOne(
+          changeRequest.mealSelectionWindowId,
+        );
+      const newMenuItem = await this._menuItemsService.findOne(
+        dto.newMenuItemId,
       );
-      const newMenuItem = await this._menuItemsService.findOne(dto.newMenuItemId);
 
-      if (!mealSelectionWindow.menuPeriodIds.includes(newMenuItem.menuPeriodId)) {
+      if (
+        !mealSelectionWindow.menuPeriodIds.includes(newMenuItem.menuPeriodId)
+      ) {
         throw new InvalidInputDataException(
           `New menu item with ID ${dto.newMenuItemId} does not belong to any of the menu periods associated with meal selection window ${changeRequest.mealSelectionWindowId}`,
         );
@@ -178,7 +186,10 @@ export class ChangeRequestsService {
     );
 
     await this._repository.update(id, changeRequest);
-    this._logger.log(`Change request updated: id=${id}`, ChangeRequestsService.name);
+    this._logger.log(
+      `Change request updated: id=${id}`,
+      ChangeRequestsService.name,
+    );
 
     return changeRequest;
   }
@@ -278,7 +289,9 @@ export class ChangeRequestsService {
   async revoke(id: string, identityId: string): Promise<void> {
     const employee = await this._employeesService.findByIdentity(identityId);
 
-    const changeRequest = await this._repository.findOneByCriteriaOrThrow({ id });
+    const changeRequest = await this._repository.findOneByCriteriaOrThrow({
+      id,
+    });
 
     // Two-step fetch+check (not folded into repository criteria) to surface AccessDeniedException (403), not EntityInstanceNotFoundException (404).
     if (changeRequest.employeeId !== employee.id) {
@@ -287,9 +300,16 @@ export class ChangeRequestsService {
       );
     }
 
-    changeRequest.changeStatus(ChangeRequestStatus.Revoked, employee.id, new Date());
+    changeRequest.changeStatus(
+      ChangeRequestStatus.Revoked,
+      employee.id,
+      new Date(),
+    );
     await this._repository.update(id, changeRequest);
-    this._logger.log(`Change request revoked: id=${id} employeeId=${employee.id}`, ChangeRequestsService.name);
+    this._logger.log(
+      `Change request revoked: id=${id} employeeId=${employee.id}`,
+      ChangeRequestsService.name,
+    );
   }
 
   /** Change requests of other businesses' windows respond as not found. */
@@ -297,10 +317,15 @@ export class ChangeRequestsService {
     changeRequests: ChangeRequest[],
     identityId: string,
   ): Promise<void> {
-    const windowIds = [...new Set(changeRequests.map((cr) => cr.mealSelectionWindowId))];
+    const windowIds = [
+      ...new Set(changeRequests.map((cr) => cr.mealSelectionWindowId)),
+    ];
     await Promise.all(
       windowIds.map((windowId) =>
-        this._mealSelectionWindowsService.findOneInMyBusiness(windowId, identityId),
+        this._mealSelectionWindowsService.findOneInMyBusiness(
+          windowId,
+          identityId,
+        ),
       ),
     );
   }

@@ -5,10 +5,7 @@ import { BusinessSuppliersService } from './application/business-suppliers.servi
 import { BusinessSuppliersRepositoryProvider } from './infrastructure/business-suppliers.providers';
 
 @Module({
-  imports: [
-    forwardRef(() => SuppliersModule),
-    BusinessesModule,
-  ],
+  imports: [forwardRef(() => SuppliersModule), BusinessesModule],
   providers: [BusinessSuppliersRepositoryProvider, BusinessSuppliersService],
   exports: [BusinessSuppliersService],
 })

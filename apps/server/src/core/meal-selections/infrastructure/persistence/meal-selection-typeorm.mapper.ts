@@ -26,7 +26,9 @@ export class MealSelectionTypeOrmMapper extends TypeOrmMapper<
     persistence.menuItem = domain.menuItemId
       ? ({ id: domain.menuItemId } as any as MenuItem)
       : null;
-    persistence.mealSelectionWindow = { id: domain.mealSelectionWindowId } as any;
+    persistence.mealSelectionWindow = {
+      id: domain.mealSelectionWindowId,
+    } as any;
     persistence.date = domain.date;
     persistence.quantity = domain.quantity ?? null;
     persistence.price = domain.price;
@@ -38,15 +40,19 @@ export class MealSelectionTypeOrmMapper extends TypeOrmMapper<
   ): Partial<MealSelectionPersistence> {
     const persistence: Partial<MealSelectionPersistence> = {};
     if (domain.id !== undefined) persistence.id = domain.id;
-    if (domain.employeeId !== undefined) persistence.employeeId = domain.employeeId;
+    if (domain.employeeId !== undefined)
+      persistence.employeeId = domain.employeeId;
     if (domain.date !== undefined) persistence.date = domain.date;
-    if (domain.quantity !== undefined) persistence.quantity = domain.quantity ?? null;
+    if (domain.quantity !== undefined)
+      persistence.quantity = domain.quantity ?? null;
     if (domain.menuItemId !== undefined)
       persistence.menuItem = domain.menuItemId
         ? ({ id: domain.menuItemId } as any)
         : null;
     if (domain.mealSelectionWindowId !== undefined)
-      persistence.mealSelectionWindow = { id: domain.mealSelectionWindowId } as any;
+      persistence.mealSelectionWindow = {
+        id: domain.mealSelectionWindowId,
+      } as any;
     if (domain.price !== undefined) persistence.price = domain.price ?? null;
     return persistence;
   }

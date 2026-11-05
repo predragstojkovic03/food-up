@@ -12,7 +12,13 @@ export class Employee extends Entity {
     businessId: string,
     identityId: Identity['id'],
   ): Employee {
-    const employee = new Employee(generateId(), name, role, businessId, identityId);
+    const employee = new Employee(
+      generateId(),
+      name,
+      role,
+      businessId,
+      identityId,
+    );
 
     employee.addDomainEvent(
       new EmployeeCreatedEvent(

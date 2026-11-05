@@ -8,11 +8,19 @@ import { ChangeRequestTypeOrmMapper } from './change-request-typeorm.mapper';
 import { ChangeRequest as ChangeRequestPersistence } from './change-request.typeorm-entity';
 
 @Injectable()
-export class ChangeRequestsTypeOrmRepository extends TypeOrmRepository<ChangeRequest, ChangeRequestPersistence> {
+export class ChangeRequestsTypeOrmRepository extends TypeOrmRepository<
+  ChangeRequest,
+  ChangeRequestPersistence
+> {
   constructor(
     @InjectDataSource() dataSource: DataSource,
     transactionContext: TransactionContext,
   ) {
-    super(dataSource, ChangeRequestPersistence, new ChangeRequestTypeOrmMapper(), transactionContext);
+    super(
+      dataSource,
+      ChangeRequestPersistence,
+      new ChangeRequestTypeOrmMapper(),
+      transactionContext,
+    );
   }
 }

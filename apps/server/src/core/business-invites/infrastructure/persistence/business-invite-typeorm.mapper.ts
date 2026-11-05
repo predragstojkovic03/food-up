@@ -40,7 +40,8 @@ export class BusinessInviteTypeOrmMapper extends TypeOrmMapper<
     if (domain.token !== undefined) entity.token = domain.token;
     if (domain.expiresAt !== undefined) entity.expiresAt = domain.expiresAt;
     if (domain.usedAt !== undefined) entity.usedAt = domain.usedAt;
-    if (domain.emailSentAt !== undefined) entity.emailSentAt = domain.emailSentAt;
+    if (domain.emailSentAt !== undefined)
+      entity.emailSentAt = domain.emailSentAt;
     return entity;
   }
 }

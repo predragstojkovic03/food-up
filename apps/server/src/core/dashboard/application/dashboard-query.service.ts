@@ -18,7 +18,11 @@ export class DashboardQueryService {
     private readonly _repository: IDashboardQueryRepository,
   ) {}
 
-  getKpis(from: string, to: string, businessId: string): Promise<DashboardKpisDto> {
+  getKpis(
+    from: string,
+    to: string,
+    businessId: string,
+  ): Promise<DashboardKpisDto> {
     return this._repository.getKpis(from, to, businessId);
   }
 
@@ -29,7 +33,13 @@ export class DashboardQueryService {
     businessId: string,
     language: Language,
   ): Promise<CostTrendItemDto[]> {
-    return this._repository.getCostTrend(from, to, groupBy, businessId, language);
+    return this._repository.getCostTrend(
+      from,
+      to,
+      groupBy,
+      businessId,
+      language,
+    );
   }
 
   getSupplierBreakdown(
@@ -38,7 +48,12 @@ export class DashboardQueryService {
     businessId: string,
     language: Language,
   ): Promise<SupplierBreakdownItemDto[]> {
-    return this._repository.getSupplierBreakdown(from, to, businessId, language);
+    return this._repository.getSupplierBreakdown(
+      from,
+      to,
+      businessId,
+      language,
+    );
   }
 
   getChangeRequestCounts(
@@ -47,7 +62,12 @@ export class DashboardQueryService {
     businessId: string,
     language: Language,
   ): Promise<ChangeRequestTrendItemDto[]> {
-    return this._repository.getChangeRequestCounts(from, to, businessId, language);
+    return this._repository.getChangeRequestCounts(
+      from,
+      to,
+      businessId,
+      language,
+    );
   }
 
   getWindowRanking(

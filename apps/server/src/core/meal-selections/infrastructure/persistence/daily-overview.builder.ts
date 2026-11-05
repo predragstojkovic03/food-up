@@ -51,12 +51,19 @@ function toMeal(
   quantity: number | string | null,
 ): WindowDailyOverviewMealDto | null {
   if (!menuItemId || name === null || type === null) return null;
-  return { menuItemId, name, type: type as MealType, quantity: quantity === null ? 1 : Number(quantity) };
+  return {
+    menuItemId,
+    name,
+    type: type as MealType,
+    quantity: quantity === null ? 1 : Number(quantity),
+  };
 }
 
 function toIso(value: Date | string | null): string | null {
   if (value === null) return null;
-  return value instanceof Date ? value.toISOString() : new Date(value).toISOString();
+  return value instanceof Date
+    ? value.toISOString()
+    : new Date(value).toISOString();
 }
 
 /**
@@ -69,7 +76,10 @@ export function buildDailyOverview(
   approvedChanges: DailyOverviewApprovedChangeRow[],
 ): WindowDailyOverviewItemDto[] {
   const items = new Map<string, ItemState>();
-  const selectionsById = new Map<string, { item: ItemState; selection: SelectionState }>();
+  const selectionsById = new Map<
+    string,
+    { item: ItemState; selection: SelectionState }
+  >();
 
   for (const row of selectionRows) {
     const key = `${row.employeeId}::${row.date}`;
@@ -100,7 +110,12 @@ export function buildDailyOverview(
   for (const change of approvedChanges) {
     const requested = change.clearSelection
       ? null
-      : toMeal(change.newMenuItemId, change.newMealName, change.newMealType, change.newQuantity);
+      : toMeal(
+          change.newMenuItemId,
+          change.newMealName,
+          change.newMealType,
+          change.newQuantity,
+        );
     const approvedAt = toIso(change.approvedAt);
 
     if (change.mealSelectionId !== null) {
@@ -110,10 +125,14 @@ export function buildDailyOverview(
       const previous = target.selection.current;
       const next =
         !change.clearSelection && !change.newMenuItemId && previous
-          ? { ...previous, quantity: Number(change.newQuantity ?? previous.quantity) }
+          ? {
+              ...previous,
+              quantity: Number(change.newQuantity ?? previous.quantity),
+            }
           : requested;
       // Swaps keep the meal type (enforced when the change request is created)
-      const type = previous?.type ?? target.selection.originalType ?? next?.type;
+      const type =
+        previous?.type ?? target.selection.originalType ?? next?.type;
       if (!type) continue;
 
       target.selection.current = next;
@@ -132,13 +151,22 @@ export function buildDailyOverview(
     if (!item) continue;
 
     item.selections.push({ originalType: requested.type, current: requested });
-    item.changes.push({ type: requested.type, kind: 'addition', from: null, to: requested.name, approvedAt });
+    item.changes.push({
+      type: requested.type,
+      kind: 'addition',
+      from: null,
+      to: requested.name,
+      approvedAt,
+    });
   }
 
   return [...items.values()].map((item) => {
     const meals = item.selections
       .map((s) => s.current)
-      .filter((meal): meal is WindowDailyOverviewMealDto => meal !== null && meal.quantity > 0);
+      .filter(
+        (meal): meal is WindowDailyOverviewMealDto =>
+          meal !== null && meal.quantity > 0,
+      );
     const hasAddition = item.changes.some((c) => c.kind === 'addition');
 
     let status: WindowDailyOverviewItemDto['status'];

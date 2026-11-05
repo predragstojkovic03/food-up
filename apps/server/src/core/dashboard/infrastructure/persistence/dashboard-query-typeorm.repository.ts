@@ -18,7 +18,12 @@ function buildWindowLabel(targetDates: string[], language: Language): string {
   const locale = language === Language.Sr ? 'sr-Latn-RS' : 'en-GB';
   const first = new Date(targetDates[0]);
   const last = new Date(targetDates[targetDates.length - 1]);
-  const fmtDay = (d: Date) => d.toLocaleDateString(locale, { day: 'numeric', month: 'short', timeZone: 'UTC' });
+  const fmtDay = (d: Date) =>
+    d.toLocaleDateString(locale, {
+      day: 'numeric',
+      month: 'short',
+      timeZone: 'UTC',
+    });
   return first.getUTCMonth() === last.getUTCMonth()
     ? `${first.getUTCDate()}–${last.getUTCDate()} ${first.toLocaleDateString(locale, { month: 'short', timeZone: 'UTC' })}`
     : `${fmtDay(first)} – ${fmtDay(last)}`;
@@ -33,47 +38,74 @@ function pctChange(current: number, previous: number): number | null {
 }
 
 @Injectable()
-export class DashboardQueryTypeOrmRepository implements IDashboardQueryRepository {
+export class DashboardQueryTypeOrmRepository
+  implements IDashboardQueryRepository
+{
   constructor(@InjectDataSource() private readonly _dataSource: DataSource) {}
 
-  async getKpis(from: string, to: string, businessId: string): Promise<DashboardKpisDto> {
+  async getKpis(
+    from: string,
+    to: string,
+    businessId: string,
+  ): Promise<DashboardKpisDto> {
     const fromDate = new Date(from);
     const toDate = new Date(to);
     const diffMs = toDate.getTime() - fromDate.getTime();
-    const prevTo = new Date(fromDate.getTime() - 86_400_000).toISOString().slice(0, 10);
-    const prevFrom = new Date(fromDate.getTime() - diffMs - 86_400_000).toISOString().slice(0, 10);
+    const prevTo = new Date(fromDate.getTime() - 86_400_000)
+      .toISOString()
+      .slice(0, 10);
+    const prevFrom = new Date(fromDate.getTime() - diffMs - 86_400_000)
+      .toISOString()
+      .slice(0, 10);
 
-    const [currentCosts, prevCosts, currentCrCount, prevCrCount] = await Promise.all([
-      this._getTotalCostBySupplier(from, to, businessId),
-      this._getTotalCostBySupplier(prevFrom, prevTo, businessId),
-      this._getChangeRequestCount(from, to, businessId),
-      this._getChangeRequestCount(prevFrom, prevTo, businessId),
-    ]);
+    const [currentCosts, prevCosts, currentCrCount, prevCrCount] =
+      await Promise.all([
+        this._getTotalCostBySupplier(from, to, businessId),
+        this._getTotalCostBySupplier(prevFrom, prevTo, businessId),
+        this._getChangeRequestCount(from, to, businessId),
+        this._getChangeRequestCount(prevFrom, prevTo, businessId),
+      ]);
 
     const totalSpend = currentCosts.reduce((s, r) => s + r.totalCost, 0);
     const prevTotalSpend = prevCosts.reduce((s, r) => s + r.totalCost, 0);
 
     const windowCount = await this._getWindowCount(from, to, businessId);
-    const prevWindowCount = await this._getWindowCount(prevFrom, prevTo, businessId);
+    const prevWindowCount = await this._getWindowCount(
+      prevFrom,
+      prevTo,
+      businessId,
+    );
     const avgCostPerWindow = windowCount > 0 ? totalSpend / windowCount : 0;
-    const prevAvgCost = prevWindowCount > 0 ? prevTotalSpend / prevWindowCount : 0;
+    const prevAvgCost =
+      prevWindowCount > 0 ? prevTotalSpend / prevWindowCount : 0;
 
-    const topSupplier = currentCosts.sort((a, b) => b.totalCost - a.totalCost)[0] ?? null;
+    const topSupplier =
+      currentCosts.sort((a, b) => b.totalCost - a.totalCost)[0] ?? null;
 
     return {
       totalSpend,
       totalSpendChange: pctChange(totalSpend, prevTotalSpend),
       avgCostPerWindow,
       avgCostPerWindowChange: pctChange(avgCostPerWindow, prevAvgCost),
-      topSupplier: topSupplier ? { name: topSupplier.supplierName, totalCost: topSupplier.totalCost } : null,
+      topSupplier: topSupplier
+        ? { name: topSupplier.supplierName, totalCost: topSupplier.totalCost }
+        : null,
       totalChangeRequests: currentCrCount,
       totalChangeRequestsChange: pctChange(currentCrCount, prevCrCount),
     };
   }
 
-  async getCostTrend(from: string, to: string, groupBy: GroupBy, businessId: string, language: Language): Promise<CostTrendItemDto[]> {
+  async getCostTrend(
+    from: string,
+    to: string,
+    groupBy: GroupBy,
+    businessId: string,
+    language: Language,
+  ): Promise<CostTrendItemDto[]> {
     const granularity = groupBy === 'weekly' ? 'week' : 'month';
-    const rows = await this._dataSource.query<{ period: string; total_cost: string }[]>(
+    const rows = await this._dataSource.query<
+      { period: string; total_cost: string }[]
+    >(
       `
       SELECT DATE_TRUNC($3, eol.date)::date::text AS period,
              SUM(COALESCE(eol.unit_price, 0) * eol.quantity) AS total_cost
@@ -94,14 +126,21 @@ export class DashboardQueryTypeOrmRepository implements IDashboardQueryRepositor
     }));
   }
 
-  async getSupplierBreakdown(from: string, to: string, businessId: string, language: Language): Promise<SupplierBreakdownItemDto[]> {
-    const rows = await this._dataSource.query<{
-      window_id: string;
-      target_dates: string[];
-      supplier_id: string;
-      supplier_name: string;
-      total_cost: string;
-    }[]>(
+  async getSupplierBreakdown(
+    from: string,
+    to: string,
+    businessId: string,
+    language: Language,
+  ): Promise<SupplierBreakdownItemDto[]> {
+    const rows = await this._dataSource.query<
+      {
+        window_id: string;
+        target_dates: string[];
+        supplier_id: string;
+        supplier_name: string;
+        total_cost: string;
+      }[]
+    >(
       `
       SELECT msw.id AS window_id, msw.target_dates, s.id AS supplier_id, s.name AS supplier_name,
              SUM(COALESCE(eol.unit_price, 0) * eol.quantity) AS total_cost
@@ -119,7 +158,9 @@ export class DashboardQueryTypeOrmRepository implements IDashboardQueryRepositor
 
     const windowMap = new Map<string, SupplierBreakdownItemDto>();
     for (const r of rows) {
-      const dates = Array.isArray(r.target_dates) ? r.target_dates : [r.target_dates];
+      const dates = Array.isArray(r.target_dates)
+        ? r.target_dates
+        : [r.target_dates];
       if (!windowMap.has(r.window_id)) {
         windowMap.set(r.window_id, {
           windowId: r.window_id,
@@ -137,12 +178,19 @@ export class DashboardQueryTypeOrmRepository implements IDashboardQueryRepositor
     return [...windowMap.values()];
   }
 
-  async getChangeRequestCounts(from: string, to: string, businessId: string, language: Language): Promise<ChangeRequestTrendItemDto[]> {
-    const rows = await this._dataSource.query<{
-      window_id: string;
-      target_dates: string[];
-      count: string;
-    }[]>(
+  async getChangeRequestCounts(
+    from: string,
+    to: string,
+    businessId: string,
+    language: Language,
+  ): Promise<ChangeRequestTrendItemDto[]> {
+    const rows = await this._dataSource.query<
+      {
+        window_id: string;
+        target_dates: string[];
+        count: string;
+      }[]
+    >(
       `
       SELECT cr.meal_selection_window_id AS window_id, msw.target_dates, COUNT(*) AS count
       FROM change_request cr
@@ -159,7 +207,9 @@ export class DashboardQueryTypeOrmRepository implements IDashboardQueryRepositor
     );
 
     return rows.map((r) => {
-      const dates = Array.isArray(r.target_dates) ? r.target_dates : [r.target_dates];
+      const dates = Array.isArray(r.target_dates)
+        ? r.target_dates
+        : [r.target_dates];
       return {
         windowId: r.window_id,
         windowLabel: buildWindowLabel(dates, language),
@@ -169,13 +219,20 @@ export class DashboardQueryTypeOrmRepository implements IDashboardQueryRepositor
     });
   }
 
-  async getWindowRanking(from: string, to: string, businessId: string, language: Language): Promise<WindowRankingItemDto[]> {
-    const costRows = await this._dataSource.query<{
-      window_id: string;
-      target_dates: string[];
-      supplier_names: string;
-      total_cost: string;
-    }[]>(
+  async getWindowRanking(
+    from: string,
+    to: string,
+    businessId: string,
+    language: Language,
+  ): Promise<WindowRankingItemDto[]> {
+    const costRows = await this._dataSource.query<
+      {
+        window_id: string;
+        target_dates: string[];
+        supplier_names: string;
+        total_cost: string;
+      }[]
+    >(
       `
       SELECT eol.window_id, msw.target_dates,
              STRING_AGG(DISTINCT s.name, ', ' ORDER BY s.name) AS supplier_names,
@@ -193,7 +250,9 @@ export class DashboardQueryTypeOrmRepository implements IDashboardQueryRepositor
     );
 
     return costRows.map((r) => {
-      const dates = Array.isArray(r.target_dates) ? r.target_dates : [r.target_dates];
+      const dates = Array.isArray(r.target_dates)
+        ? r.target_dates
+        : [r.target_dates];
       return {
         windowId: r.window_id,
         windowLabel: buildWindowLabel(dates, language),
@@ -209,8 +268,12 @@ export class DashboardQueryTypeOrmRepository implements IDashboardQueryRepositor
     from: string,
     to: string,
     businessId: string,
-  ): Promise<{ supplierId: string; supplierName: string; totalCost: number }[]> {
-    const rows = await this._dataSource.query<{ supplier_id: string; supplier_name: string; total_cost: string }[]>(
+  ): Promise<
+    { supplierId: string; supplierName: string; totalCost: number }[]
+  > {
+    const rows = await this._dataSource.query<
+      { supplier_id: string; supplier_name: string; total_cost: string }[]
+    >(
       `
       SELECT s.id AS supplier_id, s.name AS supplier_name,
              SUM(COALESCE(eol.unit_price, 0) * eol.quantity) AS total_cost
@@ -230,7 +293,11 @@ export class DashboardQueryTypeOrmRepository implements IDashboardQueryRepositor
     }));
   }
 
-  private async _getChangeRequestCount(from: string, to: string, businessId: string): Promise<number> {
+  private async _getChangeRequestCount(
+    from: string,
+    to: string,
+    businessId: string,
+  ): Promise<number> {
     const [row] = await this._dataSource.query<{ count: string }[]>(
       `
       SELECT COUNT(*) AS count
@@ -247,7 +314,11 @@ export class DashboardQueryTypeOrmRepository implements IDashboardQueryRepositor
     return Number(row?.count ?? 0);
   }
 
-  private async _getWindowCount(from: string, to: string, businessId: string): Promise<number> {
+  private async _getWindowCount(
+    from: string,
+    to: string,
+    businessId: string,
+  ): Promise<number> {
     const [row] = await this._dataSource.query<{ count: string }[]>(
       `
       SELECT COUNT(*) AS count
@@ -263,11 +334,19 @@ export class DashboardQueryTypeOrmRepository implements IDashboardQueryRepositor
     return Number(row?.count ?? 0);
   }
 
-  private _formatPeriodLabel(period: string, groupBy: GroupBy, language: Language): string {
+  private _formatPeriodLabel(
+    period: string,
+    groupBy: GroupBy,
+    language: Language,
+  ): string {
     const locale = language === Language.Sr ? 'sr-Latn-RS' : 'en-GB';
     const date = new Date(period);
     if (groupBy === 'monthly') {
-      return date.toLocaleDateString(locale, { month: 'short', year: 'numeric', timeZone: 'UTC' });
+      return date.toLocaleDateString(locale, {
+        month: 'short',
+        year: 'numeric',
+        timeZone: 'UTC',
+      });
     }
     const end = new Date(date.getTime() + 6 * 86_400_000);
     return `${date.toLocaleDateString(locale, { day: 'numeric', month: 'short', timeZone: 'UTC' })} – ${end.toLocaleDateString(locale, { day: 'numeric', month: 'short', timeZone: 'UTC' })}`;

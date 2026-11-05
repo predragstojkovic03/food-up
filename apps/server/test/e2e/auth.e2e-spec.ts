@@ -1,5 +1,9 @@
 import { bearer } from '../support/auth';
-import { TEST_PASSWORD, TestBusiness, TestEmployee } from '../support/test-data';
+import {
+  TEST_PASSWORD,
+  TestBusiness,
+  TestEmployee,
+} from '../support/test-data';
 import { createTestApp, TestApp } from '../support/test-app';
 
 function refreshCookie(res: { headers: Record<string, unknown> }): string {
@@ -31,7 +35,9 @@ describe('Authentication (e2e)', () => {
 
   /** Login succeeded (any 2xx with a token); the exact status code has its own test. */
   const loggedIn = (res: { status: number; body: { access_token?: string } }) =>
-    res.status >= 200 && res.status < 300 && typeof res.body.access_token === 'string';
+    res.status >= 200 &&
+    res.status < 300 &&
+    typeof res.body.access_token === 'string';
 
   describe('login', () => {
     it('returns an access token and sets an httpOnly refresh cookie (200, as documented)', async () => {
@@ -39,13 +45,17 @@ describe('Authentication (e2e)', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.access_token).toEqual(expect.any(String));
-      const raw = (res.headers['set-cookie'] as unknown as string[]).find((c) => c.startsWith('refresh_token='));
+      const raw = (res.headers['set-cookie'] as unknown as string[]).find((c) =>
+        c.startsWith('refresh_token='),
+      );
       expect(raw).toMatch(/HttpOnly/i);
     });
 
     it('rejects a wrong password or unknown email with 401', async () => {
       expect((await login(employee.email, 'wrong-password')).status).toBe(401);
-      expect((await login('nobody@example.test', TEST_PASSWORD)).status).toBe(401);
+      expect((await login('nobody@example.test', TEST_PASSWORD)).status).toBe(
+        401,
+      );
     });
 
     it('does not let a deactivated employee log in', async () => {
@@ -57,23 +67,42 @@ describe('Authentication (e2e)', () => {
 
     it('ends the session of an employee who is deactivated after logging in', async () => {
       const cookie = refreshCookie(await login(employee.email, TEST_PASSWORD));
-      await t.dataSource.query(`UPDATE identity SET is_active = false WHERE id = $1`, [employee.identityId]);
+      await t.dataSource.query(
+        `UPDATE identity SET is_active = false WHERE id = $1`,
+        [employee.identityId],
+      );
 
-      const res = await t.http().post('/api/auth/refresh').set('Cookie', cookie);
+      const res = await t
+        .http()
+        .post('/api/auth/refresh')
+        .set('Cookie', cookie);
       expect([401, 403]).toContain(res.status);
     });
   });
 
   describe('session', () => {
     it('identifies the caller on /auth/me', async () => {
-      const res = await t.http().get('/api/auth/me').set('Authorization', bearer(employee));
+      const res = await t
+        .http()
+        .get('/api/auth/me')
+        .set('Authorization', bearer(employee));
       expect(res.status).toBe(200);
-      expect(res.body).toMatchObject({ id: employee.identityId, businessId: business.id });
+      expect(res.body).toMatchObject({
+        id: employee.identityId,
+        businessId: business.id,
+      });
     });
 
     it('rejects requests without a valid access token with 401', async () => {
       expect((await t.http().get('/api/auth/me')).status).toBe(401);
-      expect((await t.http().get('/api/auth/me').set('Authorization', 'Bearer not-a-jwt')).status).toBe(401);
+      expect(
+        (
+          await t
+            .http()
+            .get('/api/auth/me')
+            .set('Authorization', 'Bearer not-a-jwt')
+        ).status,
+      ).toBe(401);
     });
 
     it('rotates the refresh token on refresh', async () => {
@@ -87,18 +116,28 @@ describe('Authentication (e2e)', () => {
 
     it('revokes the whole session when a used refresh token is presented again', async () => {
       const first = refreshCookie(await login(employee.email, TEST_PASSWORD));
-      const second = refreshCookie(await t.http().post('/api/auth/refresh').set('Cookie', first));
+      const second = refreshCookie(
+        await t.http().post('/api/auth/refresh').set('Cookie', first),
+      );
 
-      expect((await t.http().post('/api/auth/refresh').set('Cookie', first)).status).toBe(401);
+      expect(
+        (await t.http().post('/api/auth/refresh').set('Cookie', first)).status,
+      ).toBe(401);
       // The legitimate successor is revoked too, since the token family was compromised
-      expect((await t.http().post('/api/auth/refresh').set('Cookie', second)).status).toBe(401);
+      expect(
+        (await t.http().post('/api/auth/refresh').set('Cookie', second)).status,
+      ).toBe(401);
     });
 
     it('ends the session on logout', async () => {
       const cookie = refreshCookie(await login(employee.email, TEST_PASSWORD));
 
-      expect((await t.http().post('/api/auth/logout').set('Cookie', cookie)).status).toBe(204);
-      expect((await t.http().post('/api/auth/refresh').set('Cookie', cookie)).status).toBe(401);
+      expect(
+        (await t.http().post('/api/auth/logout').set('Cookie', cookie)).status,
+      ).toBe(204);
+      expect(
+        (await t.http().post('/api/auth/refresh').set('Cookie', cookie)).status,
+      ).toBe(401);
     });
   });
 
@@ -111,13 +150,19 @@ describe('Authentication (e2e)', () => {
         .send({ currentPassword, newPassword });
 
     it('rejects an incorrect current password (401, as documented)', async () => {
-      expect((await changePassword('wrong-password', 'new-password-1')).status).toBe(401);
+      expect(
+        (await changePassword('wrong-password', 'new-password-1')).status,
+      ).toBe(401);
       expect(loggedIn(await login(employee.email, TEST_PASSWORD))).toBe(true);
     });
 
     it('changes the password so only the new one works', async () => {
-      expect((await changePassword(TEST_PASSWORD, 'new-password-1')).status).toBe(204);
-      expect(loggedIn(await login(employee.email, 'new-password-1'))).toBe(true);
+      expect(
+        (await changePassword(TEST_PASSWORD, 'new-password-1')).status,
+      ).toBe(204);
+      expect(loggedIn(await login(employee.email, 'new-password-1'))).toBe(
+        true,
+      );
       expect((await login(employee.email, TEST_PASSWORD)).status).toBe(401);
     });
   });

@@ -20,7 +20,10 @@ describe('ChangeRequestsService.revoke', () => {
   const employeeId = 'emp-1';
 
   let service: ChangeRequestsService;
-  let mockRepository: { findOneByCriteriaOrThrow: jest.Mock; update: jest.Mock };
+  let mockRepository: {
+    findOneByCriteriaOrThrow: jest.Mock;
+    update: jest.Mock;
+  };
   let mockEmployeesService: { findByIdentity: jest.Mock };
 
   beforeEach(() => {
@@ -46,9 +49,13 @@ describe('ChangeRequestsService.revoke', () => {
   });
 
   it('throws AccessDeniedException when employee does not own the change request', async () => {
-    mockRepository.findOneByCriteriaOrThrow.mockResolvedValue(makePendingCR('other-emp'));
+    mockRepository.findOneByCriteriaOrThrow.mockResolvedValue(
+      makePendingCR('other-emp'),
+    );
 
-    await expect(service.revoke('cr-1', identityId)).rejects.toThrow(AccessDeniedException);
+    await expect(service.revoke('cr-1', identityId)).rejects.toThrow(
+      AccessDeniedException,
+    );
     expect(mockRepository.update).not.toHaveBeenCalled();
   });
 

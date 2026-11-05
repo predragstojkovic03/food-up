@@ -15,7 +15,11 @@ import { SuppliersController } from './presentation/rest/suppliers.controller';
     EmployeesModule,
     forwardRef(() => BusinessSuppliersModule),
   ],
-  providers: [SuppliersRepositoryProvider, SuppliersService, SuppliersDomainService],
+  providers: [
+    SuppliersRepositoryProvider,
+    SuppliersService,
+    SuppliersDomainService,
+  ],
   exports: [SuppliersService, SuppliersDomainService],
   controllers: [SuppliersController],
 })

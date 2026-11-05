@@ -38,10 +38,22 @@ export class UserPreferences extends Entity {
   private _theme: ThemePreference;
   private _language: Language;
 
-  get id(): string { return this._id; }
-  get identityId(): string { return this._identityId; }
-  get theme(): ThemePreference { return this._theme; }
-  set theme(theme: ThemePreference) { this._theme = theme; }
-  get language(): Language { return this._language; }
-  set language(language: Language) { this._language = language; }
+  get id(): string {
+    return this._id;
+  }
+  get identityId(): string {
+    return this._identityId;
+  }
+  get theme(): ThemePreference {
+    return this._theme;
+  }
+  set theme(theme: ThemePreference) {
+    this._theme = theme;
+  }
+  get language(): Language {
+    return this._language;
+  }
+  set language(language: Language) {
+    this._language = language;
+  }
 }

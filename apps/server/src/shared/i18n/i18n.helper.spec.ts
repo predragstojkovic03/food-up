@@ -15,10 +15,14 @@ describe('t()', () => {
   });
 
   it('returns English excel column for Language.En', () => {
-    expect(t((k) => k.excel.columns.employeeName, Language.En)).toBe('Employee');
+    expect(t((k) => k.excel.columns.employeeName, Language.En)).toBe(
+      'Employee',
+    );
   });
 
   it('returns Serbian excel column for Language.Sr', () => {
-    expect(t((k) => k.excel.columns.employeeName, Language.Sr)).toBe('Zaposleni');
+    expect(t((k) => k.excel.columns.employeeName, Language.Sr)).toBe(
+      'Zaposleni',
+    );
   });
 });

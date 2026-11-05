@@ -57,12 +57,18 @@ export class ChangeRequestEventHandler {
 
     for (const item of event.payload.items) {
       const existing = byEmployee.get(item.employeeId) ?? [];
-      existing.push({ changeRequestId: item.changeRequestId, status: item.status });
+      existing.push({
+        changeRequestId: item.changeRequestId,
+        status: item.status,
+      });
       byEmployee.set(item.employeeId, existing);
     }
 
     for (const [employeeId, items] of byEmployee) {
-      const jobData: BulkChangeRequestNotificationJobData = { employeeId, items };
+      const jobData: BulkChangeRequestNotificationJobData = {
+        employeeId,
+        items,
+      };
       await this._bulkChangeRequestQueue.add('notify', jobData);
     }
   }

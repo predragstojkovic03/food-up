@@ -22,7 +22,12 @@ export class MealSelectionsTypeOrmRepository
     @InjectDataSource() dataSource: DataSource,
     transactionContext: TransactionContext,
   ) {
-    super(dataSource, MealSelectionPersistence, new MealSelectionTypeOrmMapper(), transactionContext);
+    super(
+      dataSource,
+      MealSelectionPersistence,
+      new MealSelectionTypeOrmMapper(),
+      transactionContext,
+    );
   }
 
   async findByWindow(windowId: string): Promise<MealSelection[]> {
@@ -78,7 +83,9 @@ export class MealSelectionsTypeOrmRepository
       .createQueryBuilder('ms')
       .innerJoin('ms.menuItem', 'existingMi')
       .innerJoin('existingMi.meal', 'existingMeal')
-      .innerJoin(MenuItem, 'newMi', 'newMi.id = :newMenuItemId', { newMenuItemId })
+      .innerJoin(MenuItem, 'newMi', 'newMi.id = :newMenuItemId', {
+        newMenuItemId,
+      })
       // meal_id is the FK TypeORM derives from the `meal` relation via SnakeNamingStrategy
       .innerJoin(Meal, 'newMeal', 'newMeal.id = newMi.meal_id')
       .where('ms.employeeId = :employeeId', { employeeId })

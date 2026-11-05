@@ -29,7 +29,10 @@ export class MenuPeriodsService {
       supplierId?: string;
     },
   ): Promise<MenuPeriod> {
-    const supplier = await this._resolveManagedSupplier(identityId, dto.supplierId);
+    const supplier = await this._resolveManagedSupplier(
+      identityId,
+      dto.supplierId,
+    );
 
     const entity = MenuPeriod.create(dto.startDate, dto.endDate, supplier.id);
 
@@ -37,7 +40,10 @@ export class MenuPeriodsService {
     return entity;
   }
 
-  async findBySupplier(supplierId: string, identityId: string): Promise<MenuPeriod[]> {
+  async findBySupplier(
+    supplierId: string,
+    identityId: string,
+  ): Promise<MenuPeriod[]> {
     await this._suppliersService.assertCanView(supplierId, identityId);
     return this._repository.findByCriteria({ supplierId } as any);
   }
@@ -58,7 +64,10 @@ export class MenuPeriodsService {
   ): Promise<MenuPeriod> {
     const menuPeriod = await this._repository.findOneByCriteriaOrThrow({ id });
 
-    await this._suppliersService.assertCanManage(menuPeriod.supplierId, identityId);
+    await this._suppliersService.assertCanManage(
+      menuPeriod.supplierId,
+      identityId,
+    );
 
     menuPeriod.updateDetails(dto.startDate, dto.endDate);
 
@@ -69,7 +78,10 @@ export class MenuPeriodsService {
   async delete(id: string, identityId: string): Promise<void> {
     const existing = await this._repository.findOneByCriteriaOrThrow({ id });
 
-    await this._suppliersService.assertCanManage(existing.supplierId, identityId);
+    await this._suppliersService.assertCanManage(
+      existing.supplierId,
+      identityId,
+    );
 
     return this._repository.delete(id);
   }
