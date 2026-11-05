@@ -1,101 +1,64 @@
 const { defineConfig, globalIgnores } = require('eslint/config');
-
-const tsParser = require('@typescript-eslint/parser');
-const typescriptEslintEslintPlugin = require('@typescript-eslint/eslint-plugin');
+const js = require('@eslint/js');
+const tseslint = require('typescript-eslint');
+const prettierRecommended = require('eslint-plugin-prettier/recommended');
 const boundaries = require('eslint-plugin-boundaries');
 const globals = require('globals');
-const js = require('@eslint/js');
 
-const { FlatCompat } = require('@eslint/eslintrc');
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all,
-});
+/**
+ * DDD layers (see CLAUDE.md): domain ← application ← infrastructure / presentation.
+ * Each layer may import itself and the layers further in, never further out.
+ */
+const LAYER_RULES = [
+  { from: 'domain', allow: ['domain'] },
+  { from: 'application', allow: ['application', 'domain'] },
+  { from: 'infrastructure', allow: ['infrastructure', 'application', 'domain'] },
+  { from: 'presentation', allow: ['presentation', 'application', 'domain'] },
+];
 
 module.exports = defineConfig([
+  globalIgnores(['dist', 'coverage', 'eslint.config.js']),
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
+  prettierRecommended,
   {
     languageOptions: {
-      parser: tsParser,
       sourceType: 'module',
-
       parserOptions: {
         project: 'tsconfig.json',
         tsconfigRootDir: __dirname,
       },
-
       globals: {
         ...globals.node,
         ...globals.jest,
       },
     },
-
-    plugins: {
-      '@typescript-eslint': typescriptEslintEslintPlugin,
-      boundaries,
-    },
-
-    extends: compat.extends(
-      'plugin:@typescript-eslint/recommended',
-      'plugin:prettier/recommended',
-    ),
-
     rules: {
-      '@typescript-eslint/interface-name-prefix': 'off',
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
-
-      'boundaries/element-types': [
-        2,
-        {
-          default: 'disallow',
-
-          rules: [
-            {
-              from: 'domain',
-              allow: [],
-            },
-            {
-              from: 'application',
-              allow: ['domain'],
-            },
-            {
-              from: 'infrastructure',
-              allow: ['application', 'domain'],
-            },
-            {
-              from: 'presentation',
-              allow: ['application'],
-            },
-          ],
-        },
-      ],
-    },
-
-    settings: {
-      boundaries: {
-        elements: [
-          {
-            type: 'domain',
-            pattern: 'src/**/domain/*',
-          },
-          {
-            type: 'application',
-            pattern: 'src/**/application/*',
-          },
-          {
-            type: 'infrastructure',
-            pattern: 'src/**/infrastructure/*',
-          },
-          {
-            type: 'presentation',
-            pattern: 'src/**/presentation/*',
-          },
-        ],
-      },
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+      // Repository interfaces deliberately extend IRepository<T> without adding members
+      '@typescript-eslint/no-empty-object-type': ['error', { allowInterfaces: 'with-single-extends' }],
     },
   },
-  globalIgnores(['**/.eslintrc.js']),
+  {
+    files: ['src/**/*.ts'],
+    plugins: { boundaries },
+    settings: {
+      // Resolve `src/...` path aliases so layer rules can see where imports point
+      'import/resolver': {
+        typescript: { project: `${__dirname}/tsconfig.json` },
+      },
+      'boundaries/elements': [
+        { type: 'domain', pattern: '**/domain', mode: 'folder' },
+        { type: 'application', pattern: '**/application', mode: 'folder' },
+        { type: 'infrastructure', pattern: '**/infrastructure', mode: 'folder' },
+        { type: 'presentation', pattern: '**/presentation', mode: 'folder' },
+      ],
+    },
+    rules: {
+      'boundaries/element-types': ['error', { default: 'disallow', rules: LAYER_RULES }],
+    },
+  },
 ]);

@@ -48,6 +48,8 @@ npm run watch:shared     # Shared lib in watch mode
 
 npm run build            # Build all
 npm run test             # Unit tests (server Jest + web Vitest)
+npm run lint             # ESLint for server + web (layer rules, TypeScript, server Prettier)
+npm run lint:fix --workspace=apps/server   # Auto-fix server lint/format issues
 npm run test:e2e         # Integration + end-to-end tests against real Postgres/Redis (needs Docker)
                          # Runs in Europe/Belgrade time on purpose; override with TEST_TZ=UTC
 
@@ -86,8 +88,10 @@ Each feature module under `apps/server/src/core/[feature]/` follows strict layer
         └── dto/                          # Request/response DTOs (class-validator)
 ```
 
-**Layer dependency rules (enforced by ESLint):**
+**Layer dependency rules (enforced by ESLint via `eslint-plugin-boundaries`, in server and web):**
 - `domain` ← `application` ← `infrastructure` / `presentation`
+- Each layer may import itself and layers further in, never further out
+- HTTP concerns (guards, `@Public`, `@CurrentIdentity`, `@ApiKeyProtected`, `@Disabled`) live in `presentation`; `JwtPayload` lives in `core/auth/application`; mail contracts and layout in `shared/application/mail`
 - Domain layer has zero framework dependencies
 
 **Query Repository Pattern:**

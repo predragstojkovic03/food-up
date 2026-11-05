@@ -14,7 +14,8 @@
     "build": "npm run build:shared && npm run build:web && npm run build:server",
     "start:prod": "npm run start:prod --workspace=apps/server",
     "seed:data": "npm run seed:data --workspace=apps/server --",
-    "test:e2e": "npm run test:e2e --workspace=apps/server"
+    "test:e2e": "npm run test:e2e --workspace=apps/server",
+    "lint": "npm run lint --workspace=apps/server && npm run lint --workspace=apps/web"
   },
   "workspaces": [
     "apps/*",
