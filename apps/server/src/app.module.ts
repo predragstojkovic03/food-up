@@ -1,3 +1,5 @@
+// Must run before any database connection is created
+import './shared/infrastructure/persistence/pg-date-parsers';
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
