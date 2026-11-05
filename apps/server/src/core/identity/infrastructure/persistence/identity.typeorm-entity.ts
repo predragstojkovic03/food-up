@@ -1,6 +1,6 @@
 import { Employee } from 'src/core/employees/infrastructure/persistence/employee.typeorm-entity';
 import { Supplier } from 'src/core/suppliers/infrastructure/persistence/supplier.typeorm-entity';
-import { Column, Entity, OneToOne, PrimaryColumn } from 'typeorm';
+import { Column, Entity, Index, OneToOne, PrimaryColumn } from 'typeorm';
 import { IdentityType } from '@food-up/shared';
 
 @Entity()
@@ -14,7 +14,9 @@ export class Identity {
   @Column('varchar', { length: 255, nullable: true })
   passwordHash: string | null;
 
-  @Column('varchar', { length: 255, nullable: true, unique: true })
+  // Partial unique index, matching migration 000005
+  @Index('identity_google_id_key', { unique: true, where: '"google_id" IS NOT NULL' })
+  @Column('varchar', { length: 255, nullable: true })
   googleId: string | null;
 
   @Column('varchar', { length: 2048, nullable: true })
